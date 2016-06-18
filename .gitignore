@@ -1,3 +1,7 @@
+# Runtime directories
+public
+lib
+
 # Logs
 logs
 *.log

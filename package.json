@@ -1,0 +1,28 @@
+{
+  "name": "webgl",
+  "version": "1.0.0",
+  "description": "",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:server": "babel server -d lib",
+    "build:client": "cp client/html/* public && webpack",
+    "build:client:watch": "cp client/html/* public && webpack --watch",
+    "start": "npm run build:client & npm run build:server && node lib/index",
+    "start:dev": "npm run build:client:watch & npm run build:server && node lib/index"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.10.1",
+    "babel-core": "^6.9.1",
+    "babel-loader": "^6.2.4",
+    "babel-preset-es2015": "^6.9.0",
+    "webpack": "^1.13.1"
+  },
+  "dependencies": {
+    "bunyan": "^1.8.1",
+    "express": "^4.14.0",
+    "wagner-core": "^0.2.0"
+  }
+}

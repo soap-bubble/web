@@ -1,11 +1,7 @@
 const webpack = require('webpack');
 
 module.exports = {
-  entry: './client/js/index.js',
-  output: {
-      path: './public/js',
-      filename: 'app.bundle.js',
-  },
+  target: "web",
   module: {
     loaders: [
       {

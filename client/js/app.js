@@ -1,4 +1,6 @@
-import glInit from './gl/init';
+import './utils';
+import './gl/init';
+import wagner from 'wagner-core';
 
 const fragment = `
 precision mediump float;
@@ -29,5 +31,9 @@ void main(void) {
 `;
 
 window.onload = function onAppInit() {
-  glInit(document.getElementById('morpheus'), fragment, vertex);
+  wagner.invoke(function (logger, glInit) {
+    const log = logger('app');
+    glInit(document.getElementById('morpheus'), fragment, vertex);
+    log.info('app:init');
+  })
 };

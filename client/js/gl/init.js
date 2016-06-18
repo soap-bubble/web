@@ -12,7 +12,7 @@ function warn (str) {
     !!console.warn ? console.warn(str) : console.log(str)
 }
 
-wagner.factory(function GlInit())
+wagner.constant('glInit', getGLprog);
 
 /**
  * compileShader

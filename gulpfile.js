@@ -1,5 +1,7 @@
 var gulp = require('gulp');
 var webpack = require('gulp-webpack');
+var babel = require('gulp-babel');
+var nodemon = require('gulp-nodemon');
 var webpackConfig = require('./webpack.config');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
@@ -46,16 +48,27 @@ gulp.task('copy:html:watch', ['copy:html'], function () {
   })
 });
 
+gulp.task('build:server', () => {
+	return gulp.src('server/**/*.js')
+		.pipe(babel())
+		.pipe(gulp.dest('lib'));
+});
+
+gulp.task('build:server:watch', () => {
+	return gulp.watch('server/**/*.js')
+		.pipe(babel())
+		.pipe(gulp.dest('lib'));
+});
+
 // Launch a lightweight HTTP Server
 gulp.task('serve',
+['build:server'],
 function () {
-  return browserSync({
-    port: 8050,
-    notify: true,
-    server: {
-      baseDir: ['public']
-    }
-  });
+  return nodemon({
+    script: 'lib/index.js', // run ES5 code
+    watch: 'server', // watch ES2015 code
+    tasks: ['build:server'] // compile synchronously onChange
+  })
 });
 
 gulp.task('build:client',['copy:html', 'webpack:client']);

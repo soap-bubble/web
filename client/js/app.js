@@ -1,5 +1,7 @@
 import './utils';
 import './gl/init';
+import './models/morpheus';
+
 import wagner from 'wagner-core';
 
 const fragment = `
@@ -35,5 +37,12 @@ window.onload = function onAppInit() {
     const log = logger('app');
     glInit(document.getElementById('morpheus'), fragment, vertex);
     log.info('app:init');
-  })
+  });
+
+  wagner.invoke((logger, scene) => {
+    const log = logger('app');
+    scene.bySceneId(1010).then(response => {
+
+    });
+  });
 };

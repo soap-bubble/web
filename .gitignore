@@ -2,6 +2,9 @@
 public
 lib
 
+# configuration
+config/local.js
+
 # Logs
 logs
 *.log

@@ -45,3 +45,6 @@ jspm_packages
 
 # profile files
 .vscode
+
+# data files
+morpheus.map.json

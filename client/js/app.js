@@ -1,6 +1,6 @@
 import './utils';
-import './gl/init';
 import './models/morpheus';
+import './gl';
 
 import wagner from 'wagner-core';
 
@@ -35,14 +35,13 @@ void main(void) {
 window.onload = function onAppInit() {
   wagner.invoke(function (logger, glInit) {
     const log = logger('app');
-    glInit(document.getElementById('morpheus'), fragment, vertex);
-    log.info('app:init');
-  });
-
-  wagner.invoke((logger, scene) => {
-    const log = logger('app');
-    scene.bySceneId(1010).then(response => {
-
+    const gl = glInit(document.getElementById('morpheus'), fragment, vertex);
+    wagner.invoke((scene, pano) => {
+      scene.bySceneId(1010)
+        .then(response => response.data)
+        .then(pano.withContext(gl).forScene)
+        .then(panoView => panoView.glDraw());
     });
+    log.info('app:init');
   });
 };

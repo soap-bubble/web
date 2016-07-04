@@ -37,8 +37,10 @@
     "bunyan": "^1.8.1",
     "config": "^1.21.0",
     "express": "^4.14.0",
+    "gl-matrix": "^2.3.2",
     "lodash": "^4.13.1",
     "mongoose": "^4.5.0",
+    "raf": "^3.2.0",
     "wagner-core": "^0.2.0"
   }
 }

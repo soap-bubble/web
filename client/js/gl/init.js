@@ -4,12 +4,11 @@ import wagner from 'wagner-core';
  * Adapted from https://github.com/olivierrr/get-gl-context
  */
 
-
 /**
  * log util
  */
 function warn (str) {
-    !!console.warn ? console.warn(str) : console.log(str)
+  !!console.warn ? console.warn(str) : console.log(str)
 }
 
 wagner.constant('glInit', getGLprog);
@@ -24,16 +23,16 @@ wagner.constant('glInit', getGLprog);
  * @protected
  */
 function compileShader(gl, type, source) {
-    var shader = gl.createShader(type === 'vertex' ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER)
-    gl.shaderSource(shader, source)
-    gl.compileShader(shader)
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-        warn("could not compile " + type + " shader:\n\n" + gl.getShaderInfoLog(shader))
-        gl.deleteShader(shader)
-        return null
-    } else {
-        return shader
-    }
+  var shader = gl.createShader(type === 'vertex' ? gl.VERTEX_SHADER : gl.FRAGMENT_SHADER)
+  gl.shaderSource(shader, source)
+  gl.compileShader(shader)
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    warn("could not compile " + type + " shader:\n\n" + gl.getShaderInfoLog(shader));
+    gl.deleteShader(shader);
+    return null
+  } else {
+    return shader
+  }
 }
 
 /**
@@ -44,37 +43,44 @@ function compileShader(gl, type, source) {
  * @param {String} vertexShader - shader source
  * @return {gl-context} - returns context with program attached to it (gl.program)
  */
-export default function getGLprog(canvas, fs, vs) {
+export function getGLprog(canvas, fs, vs) {
 
-    var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') || null
-    if (!gl) warn('webGL is not supported in this device')
+  var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl') || null;
+  gl.viewportWidth = canvas.width;
+  gl.viewportHeight = canvas.height;
+  if (!gl) warn('webGL is not supported in this device');
 
-    else if (!canvas) warn('canvas was not defined')
-    else if (typeof fs !== 'string') warn('fragmentShader was not defined or isn\'t a string')
-    else if (typeof vs !== 'string') warn('vertexShader was not defined or isn\'t a string')
+  else if (!canvas) warn('canvas was not defined')
+  else if (typeof fs !== 'string') warn('fragmentShader was not defined or isn\'t a string')
+  else if (typeof vs !== 'string') warn('vertexShader was not defined or isn\'t a string')
 
-    else {
+  else {
+    var compiled_vs = compileShader(gl, 'vertex', vs)
+    var compiled_fs = compileShader(gl, 'fragment', fs)
 
-        var compiled_vs = compileShader(gl, 'vertex', vs)
-        var compiled_fs = compileShader(gl, 'fragment', fs)
+    if(!compiled_fs || !compiled_vs) return null
 
-        if(!compiled_fs || !compiled_vs) return null
+    gl.program = gl.createProgram()
+    gl.attachShader(gl.program, compiled_vs)
+    gl.attachShader(gl.program, compiled_fs)
+    gl.linkProgram(gl.program)
 
-        gl.program = gl.createProgram()
-        gl.attachShader(gl.program, compiled_vs)
-        gl.attachShader(gl.program, compiled_fs)
-        gl.linkProgram(gl.program)
+    if (!gl.getProgramParameter(gl.program, gl.LINK_STATUS)) {
+      warn('could not link the shader program!')
+      gl.deleteProgram(gl.program)
+      gl.deleteProgram(compiled_vs)
+      gl.deleteProgram(compiled_fs)
+      return null
+    } else {
+      gl.useProgram(gl.program);
 
-        if (!gl.getProgramParameter(gl.program, gl.LINK_STATUS)) {
-            warn('could not link the shader program!')
-            gl.deleteProgram(gl.program)
-            gl.deleteProgram(compiled_vs)
-            gl.deleteProgram(compiled_fs)
-            return null
-        } else {
-            gl.useProgram(gl.program)
-            return gl
-        }
+      gl.program.vertexPositionAttribute = gl.getAttribLocation(gl.program, "aVertexPosition");
+      gl.enableVertexAttribArray(gl.program.vertexPositionAttribute);
+
+      gl.program.textureCoordAttribute = gl.getAttribLocation(gl.program, "aTextureCoord");
+      gl.enableVertexAttribArray(gl.program.textureCoordAttribute);
+      return gl
     }
-    return null
+  }
+  return null
 }

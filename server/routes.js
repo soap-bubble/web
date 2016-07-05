@@ -18,7 +18,7 @@ router
     const sceneId = Number(req.params.sceneId);
     logger.info({ req: `/scene/${sceneId}` });
     morpheus.get('Scene').findOne({ sceneId }).exec().then(scene => {
-      debug.info({ req: `/scene/${sceneId}`, scene })
+      logger.info({ req: `/scene/${sceneId}`, scene })
       const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
       logger.info({ req: `/scene/${sceneId}`, castsToLoad });
       if (castsToLoad.length) {

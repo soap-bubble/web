@@ -26,7 +26,6 @@ function loadMorpheus(callback) {
       throw new Error("I don't parse single objects for some reason");
     }
 
-
     if (!items || items && !items.length) {
       logger.warn('No objects to process');
     }

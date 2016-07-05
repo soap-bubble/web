@@ -25,6 +25,7 @@ export const texture = {
               gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
               gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
               gl.bindTexture(gl.TEXTURE_2D, null);
+              texture.img = img;
               return texture;
             });
       },

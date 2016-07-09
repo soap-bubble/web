@@ -14,10 +14,10 @@ window.onload = function onAppInit() {
     // });
 
     wagner.invoke((scene, pano) => {
-      scene.bySceneId(1010)
+      scene.bySceneId(1050)
         .then(response => response.data)
-        .then(pano.withCanvas(document.getElementById('morpheus')).forScene)
-        .then(panoView => panoView.initBuffers().drawScene());
+        .then(pano.withCanvas(document.getElementById('morpheus-3d')).forScene)
+        .then(panoView => panoView.initBuffers().animate());
     });
     log.info('app:init');
   });

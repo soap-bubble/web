@@ -39,10 +39,10 @@ function panoView(gl, textures, log) {
       gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
       vertices = [
         // Front face
-        -1.0, -1.0,  1.0,
-        1.0, -1.0,  1.0,
-        1.0,  1.0,  1.0,
-        -1.0,  1.0,  1.0
+        -0.1325, -0.5,  1.0,
+        0.1325, -0.5,  1.0,
+        0.1325,  0.5,  1.0,
+        -0.1325,  0.5,  1.0
       ];
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
       cubeVertexPositionBuffer.itemSize = 3;
@@ -52,10 +52,10 @@ function panoView(gl, textures, log) {
       gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
       var textureCoords = [
         // Front face
-        0.0, 0.0,
         1.0, 0.0,
-        1.0, 1.0,
-        0.0, 1.0
+        0.0, 0.0,
+        0.0, 1.0,
+        1.0, 1.0
       ];
       gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
       cubeVertexTextureCoordBuffer.itemSize = 2;
@@ -71,6 +71,22 @@ function panoView(gl, textures, log) {
       cubeVertexIndexBuffer.numItems = 6;
       return dsl;
     },
+    animate() {
+      let lastTime = 0;
+      function tick() {
+        raf(tick);
+
+        const timeNow = new Date().getTime();
+        if (lastTime != 0) {
+            const elapsed = timeNow - lastTime;
+            xRot += (90 * elapsed) / 5000.0;
+        }
+        lastTime = timeNow;
+
+        dsl.drawScene();
+      }
+      tick();
+    },
     drawScene() {
       gl.clearColor(0.0, 0.0, 0.0, 1.0);
       gl.enable(gl.DEPTH_TEST);
@@ -82,7 +98,8 @@ function panoView(gl, textures, log) {
 
       mat4.identity(mvMatrix);
 
-      mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0, 0, -0.25));
+      mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0, 0.125, 0));
+      mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), vec3.fromValues(0, 1, 0));
 
       gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
       gl.vertexAttribPointer(vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);

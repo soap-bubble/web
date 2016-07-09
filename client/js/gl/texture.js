@@ -33,7 +33,7 @@ export const texture = {
       fromPanoCast({ fileName }) {
         return cache[fileName]
           || (cache[fileName] = Promise
-            .all(_.range(1, 24)
+            .all(_.range(1, 25)
             .map(digit => textureGl.fromUrl(`${fileName}.${pad(digit, 2)}.PNG`))));
       }
     };

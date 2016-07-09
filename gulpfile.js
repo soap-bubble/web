@@ -35,14 +35,29 @@ gulp.task('webpack:client:watch', function() {
 
 gulp.task('copy:html', function () {
   src.html = './client/html/**/*.html';
-  return gulp.src(src.html, { base: './client/html/'})
+  return gulp.src(src.html, { base: './client/html/' })
     .pipe(gulp.dest('./public'))
-})
+});
+
+gulp.task('copy:css', function () {
+  src.css = './client/css/**/*.css';
+  return gulp.src(src.html, { base: './client/css/' })
+    .pipe(gulp.dest('./public'))
+});
 
 gulp.task('copy:html:watch', ['copy:html'], function () {
   return gulp.watch(src.html, function(obj){
     if( obj.type === 'changed') {
       gulp.src( obj.path, { "base": "./client/html/"})
+        .pipe(gulp.dest('./public'));
+    }
+  })
+});
+
+gulp.task('copy:css:watch', ['copy:css'], function () {
+  return gulp.watch(src.css, function(obj){
+    if( obj.type === 'changed') {
+      gulp.src( obj.path, { "base": "./client/css/"})
         .pipe(gulp.dest('./public'));
     }
   })
@@ -71,6 +86,6 @@ function () {
   })
 });
 
-gulp.task('build:client',['copy:html', 'webpack:client']);
-gulp.task('build:client:watch', ['copy:html:watch', 'webpack:client:watch']);
-gulp.task('serve:dev', ['copy:html:watch', 'webpack:client:watch', 'serve']);
+gulp.task('build:client',['copy:html', 'copy:css', 'webpack:client']);
+gulp.task('build:client:watch', ['copy:html:watch', 'copy:css:watch', 'webpack:client:watch']);
+gulp.task('serve:dev', ['copy:html:watch', 'copy:css:watch', 'webpack:client:watch', 'serve']);

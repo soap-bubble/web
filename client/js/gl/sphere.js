@@ -2,11 +2,14 @@ import wagner from 'wagner-core';
 import { vec3, mat4 } from 'gl-matrix';
 import _ from 'lodash';
 import raf from 'raf';
+import { tessellation } from '../canvas/triangles';
 
 function panoView(gl, textures, log) {
-  let cubeVertexIndexBuffer;
-  let cubeVertexPositionBuffer;
-  let cubeVertexTextureCoordBuffer;
+  let sphereVertexIndexBuffer;
+  let sphereVertexPositionBuffer;
+  let sphereVertexTextureCoordBuffer;
+  let coordSphere;
+  let texSphere;
   let lastTime = 0;
   let xRot = 0;
   let yRot = 0;
@@ -19,8 +22,8 @@ function panoView(gl, textures, log) {
   const pMatrixUniform = gl.getUniformLocation(gl.program, "uPMatrix");
   const mvMatrixUniform = gl.getUniformLocation(gl.program, "uMVMatrix");
   const samplerUniform = gl.getUniformLocation(gl.program, "uSampler");
-  const vertexPositionAttribute = gl.getAttribLocation(gl.program, "aVertexPosition");
-  const textureCoordAttribute = gl.getAttribLocation(gl.program, "aTextureCoord");
+  const vertexPositionAttribute = gl.getAttribLocation(gl.program, "aPlanePosition");
+  const textureCoordAttribute = gl.getAttribLocation(gl.program, "aPlaneTextureCoord");
 
   gl.enableVertexAttribArray(vertexPositionAttribute);
   gl.enableVertexAttribArray(textureCoordAttribute);
@@ -36,42 +39,21 @@ function panoView(gl, textures, log) {
 
   const selfie = {
     initBuffers() {
-      let vertices = [];
+      coordSphere = tessellation([Math.PI / 12, Math.PI / 2], [10, 5], [-Math.PI / 24, -Math.PI / 4]);
+      texSphere = tessellation([1, 1], [10, 5], [-Math.PI, -Math.PI / 2]);
 
-      cubeVertexPositionBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-      vertices = [
-        // Front face
-        -0.1325, -0.5,  1.0,
-        0.1325, -0.5,  1.0,
-        0.1325,  0.5,  1.0,
-        -0.1325,  0.5,  1.0
-      ];
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-      cubeVertexPositionBuffer.itemSize = 3;
-      cubeVertexPositionBuffer.numItems = 4;
+      sphereVertexPositionBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(coordSphere.vertexCoords), gl.STATIC_DRAW);
 
-      cubeVertexTextureCoordBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-      var textureCoords = [
-        // Front face
-        1.0, 0.0,
-        0.0, 0.0,
-        0.0, 1.0,
-        1.0, 1.0
-      ];
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(textureCoords), gl.STATIC_DRAW);
-      cubeVertexTextureCoordBuffer.itemSize = 2;
-      cubeVertexTextureCoordBuffer.numItems = 4;
+      sphereVertexTextureCoordBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexTextureCoordBuffer);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(texSphere.vertexCoords), gl.STATIC_DRAW);
 
-      cubeVertexIndexBuffer = gl.createBuffer();
-      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
-      var cubeVertexIndices = [
-        0, 1, 2,      0, 2, 3,    // Front face
-      ];
-      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(cubeVertexIndices), gl.STATIC_DRAW);
-      cubeVertexIndexBuffer.itemSize = 1;
-      cubeVertexIndexBuffer.numItems = 6;
+      sphereVertexIndexBuffer = gl.createBuffer();
+      gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
+      gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint16Array(coordSphere.vertexIndex), gl.STATIC_DRAW);
+
       return selfie;
     },
     animate() {
@@ -101,14 +83,14 @@ function panoView(gl, textures, log) {
 
       mat4.identity(mvMatrix);
 
-      mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0, 0, 0.15));
+      mat4.translate(mvMatrix, mvMatrix, vec3.fromValues(0, 0, 0));
       mat4.rotate(mvMatrix, mvMatrix, degToRad(xRot), vec3.fromValues(0, 1, 0));
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexPositionBuffer);
-      gl.vertexAttribPointer(vertexPositionAttribute, cubeVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexPositionBuffer);
+      gl.vertexAttribPointer(vertexPositionAttribute, coordSphere.vertexCoordSize, gl.FLOAT, false, 0, 0);
 
-      gl.bindBuffer(gl.ARRAY_BUFFER, cubeVertexTextureCoordBuffer);
-      gl.vertexAttribPointer(textureCoordAttribute, cubeVertexTextureCoordBuffer.itemSize, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, sphereVertexTextureCoordBuffer);
+      gl.vertexAttribPointer(textureCoordAttribute, coordSphere.vertexCoordSize, gl.FLOAT, false, 0, 0);
 
       textures.forEach((texture, index) => {
         mat4.rotate(mvMatrix, mvMatrix, degToRad(-15), vec3.fromValues(0, 1, 0));
@@ -118,20 +100,20 @@ function panoView(gl, textures, log) {
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.uniform1i(samplerUniform, 0);
 
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, cubeVertexIndexBuffer);
+        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, sphereVertexIndexBuffer);
         setMatrixUniforms();
-        gl.drawElements(gl.TRIANGLES, cubeVertexIndexBuffer.numItems, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, coordSphere.vertexIndexSize, gl.UNSIGNED_SHORT, 0);
       });
     }
   };
   return selfie;
 }
 
-export const pano = {
+export const sphere = {
   withCanvas(canvas) {
     return wagner.invoke((glInit, shaders) => {
-      const gl = glInit(canvas, shaders.passThrough.fragment, shaders.passThrough.vertex);
-      return pano.withContext(gl);
+      const gl = glInit(canvas, shaders.spherical.fragment, shaders.spherical.vertex);
+      return sphere.withContext(gl);
     });
   },
   withContext(gl) {
@@ -175,6 +157,6 @@ export const pano = {
   }
 };
 
-wagner.constant('panoView', panoView);
-wagner.constant('pano', pano);
+wagner.constant('sphereView', panoView);
+wagner.constant('sphere', sphere);
 

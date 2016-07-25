@@ -7,6 +7,7 @@ var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var named = require('vinyl-named');
 var _ = require('lodash');
+var Server = require('karma').Server;
 
 var watch = false;
 var src = {};
@@ -84,6 +85,22 @@ function () {
     watch: 'server', // watch ES2015 code
     tasks: ['build:server'] // compile synchronously onChange
   })
+});
+
+/**
+ * Run test once and exit
+ */
+gulp.task('test:client', function (done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js',
+    singleRun: true
+  }, done).start();
+});
+
+gulp.task('test:client:watch', function (done) {
+  new Server({
+    configFile: __dirname + '/karma.conf.js'
+  }, done).start();
 });
 
 gulp.task('build:client',['copy:html', 'copy:css', 'webpack:client']);

@@ -73,12 +73,6 @@ export function getGLprog(canvas, fs, vs) {
       return null
     } else {
       gl.useProgram(gl.program);
-
-      gl.program.vertexPositionAttribute = gl.getAttribLocation(gl.program, "aVertexPosition");
-      gl.enableVertexAttribArray(gl.program.vertexPositionAttribute);
-
-      gl.program.textureCoordAttribute = gl.getAttribLocation(gl.program, "aTextureCoord");
-      gl.enableVertexAttribArray(gl.program.textureCoordAttribute);
       return gl
     }
   }

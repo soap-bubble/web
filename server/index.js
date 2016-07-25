@@ -22,5 +22,5 @@ app.db = mongoose.connect(config.mongodb.uri, {server:{auto_reconnect:true}});
 morpheus.install(app.db);
 
 app.listen(8050, () => {
-  logger.info('server up and running');
+  logger.info('server up and running on 8050');
 });

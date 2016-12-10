@@ -1,3 +1,4 @@
+import path from 'path';
 import express from 'express';
 import bunyan from 'bunyan';
 import config from 'config';
@@ -15,6 +16,9 @@ if (app.get('env') !== 'production') {
   app.use(require('connect-browser-sync')(bs));
 }
 
+const gameDbPath = path.resolve(config.gameDbPath);
+logger.info('static game dir', { gameDbPath });
+app.use('/GameDB', express.static(gameDbPath));
 app.use(express.static('public'));
 app.use('/api', routes);
 

@@ -34,9 +34,9 @@ function hotspotView(gl, texture, hotspots, log) {
     return degrees * Math.PI / 180;
   }
 
-  const HOTSPOT_X_COORD_FACTOR = 0.00174532925199;
-  const HOTSPOT_Y_COORD_FACTOR = 0.001;
-  const SIZE = 0.99;
+  const HOTSPOT_X_COORD_FACTOR = Math.PI / 1800;
+  const HOTSPOT_Y_COORD_FACTOR = 0.0015;
+  const SIZE = 0.50;
 
   function scaleFromHotspotToRad(h) {
     return {
@@ -49,7 +49,7 @@ function hotspotView(gl, texture, hotspots, log) {
 
   function cylinderMap(x, y) {
     return {
-      x: SIZE * ath.sin(y) * Math.cos(x),
+      x: SIZE * Math.sin(y) * Math.cos(x),
       y: SIZE * Math.sin(y) * Math.sin(x),
       z: SIZE * Math.cos(y)
     };
@@ -70,6 +70,11 @@ function hotspotView(gl, texture, hotspots, log) {
         const bottomLeft = cylinderMap(rect.bottom, rect.left);
         const topRight = cylinderMap(rect.top, rect.right);
         const bottomRight = cylinderMap(rect.bottom, rect.right);
+
+        log.info({ hotspot, hotspotRadRect: rect, cylinderMap: {
+          topLeft, bottomLeft, topRight, bottomRight
+        }}, 'hotspot');
+
         vertices = vertices.concat([
           bottomLeft.x, bottomLeft.y, bottomLeft.z,
           bottomRight.x, bottomRight.y, bottomRight.z,
@@ -178,4 +183,3 @@ export const hotspot = {
 
 wagner.constant('hotspotView', hotspotView);
 wagner.constant('hotspot', hotspot);
-

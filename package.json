@@ -8,6 +8,7 @@
     "build:server": "babel server -d lib",
     "build:client": "gulp build:client",
     "build:client:watch": "gulp build:client:watch",
+    "prime": "node primeDb.js",
     "start": "npm run build:client & npm run build:server && node lib/index",
     "start:dev": "gulp serve:dev | bunyan",
     "test:client": "gulp test:client",

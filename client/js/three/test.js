@@ -16,15 +16,16 @@ function pad(value, length) {
 
 const SCALE_FACTOR = 1.0;
 
-const HOTSPOT_X_COORD_FACTOR = Math.PI / 1800;
+const HOTSPOT_X_OFFSET = Math.PI/3;
+const HOTSPOT_X_COORD_FACTOR = Math.PI / -1800;
 const HOTSPOT_Y_COORD_FACTOR = 0.004 * SCALE_FACTOR;
 const SIZE = 0.99 * SCALE_FACTOR;
 
 function scaleFromHotspotToRad(h) {
   const v = Math.asin(HOTSPOT_Y_COORD_FACTOR / SIZE);
   return {
-    left: HOTSPOT_X_COORD_FACTOR * h.rectLeft,
-    right: HOTSPOT_X_COORD_FACTOR * h.rectRight,
+    left: HOTSPOT_X_COORD_FACTOR * h.rectLeft + HOTSPOT_X_OFFSET,
+    right: HOTSPOT_X_COORD_FACTOR * h.rectRight + HOTSPOT_X_OFFSET,
     top: HOTSPOT_Y_COORD_FACTOR * h.rectTop,
     bottom: HOTSPOT_Y_COORD_FACTOR * h.rectBottom
   };
@@ -101,7 +102,7 @@ export function generateHotspots(hotspots) {
 
 const twentyFourthRad = 15 / 180 * Math.PI;
 const sliceWidth = 0.1325 * SCALE_FACTOR;
-const sliceHeight = 0.5 * SCALE_FACTOR;
+const sliceHeight = 0.55 * SCALE_FACTOR;
 const sliceDepth = 1.0 * SCALE_FACTOR;
 
 export function generatePano({ casts }) {
@@ -136,7 +137,7 @@ export function generatePano({ casts }) {
       geometry.addAttribute('position', positions);
       var material = new THREE.MeshBasicMaterial( { side: THREE.BackSide, map: THREE.ImageUtils.loadTexture(f) } );
       var mesh = new THREE.Mesh( geometry, material );
-      mesh.rotation.y = (index + 1) * twentyFourthRad;
+      mesh.rotation.y = (index - 0.5) * twentyFourthRad;
       group.add(mesh);
     });
     return group;
@@ -145,7 +146,7 @@ export function generatePano({ casts }) {
 export default function (canvas, sceneData) {
   const { width, height } = canvas;
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera( 75, width / height, 0.01, 1000 );
+  const camera = new THREE.PerspectiveCamera( 55, width / height, 0.01, 1000 );
 
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true });
   renderer.setSize(width, height);
@@ -186,14 +187,14 @@ export default function (canvas, sceneData) {
   //   scene.add(mesh);
   // }())
 
-  camera.position.z = -0.30;
+  camera.position.z = -0.20;
 
   const selfie = {
     animate() {
       function render() {
       	raf( render );
-        hotspots.rotation.y += 0.0125;
-        pano.rotation.y += 0.0125;
+        hotspots.rotation.y += 0.005;
+        pano.rotation.y += 0.005;
       	renderer.render( scene, camera );
       }
       render();

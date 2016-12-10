@@ -62,6 +62,7 @@
     "gl-texture2d": "^2.0.10",
     "lodash": "^4.13.1",
     "mongoose": "^4.5.0",
+    "query-string": "^4.2.3",
     "raf": "^3.2.0",
     "three": "^0.79.0",
     "wagner-core": "^0.2.0"

@@ -5,10 +5,10 @@ import THREE, {
 } from 'three';
 import wagner from 'wagner-core';
 import raf from 'raf';
-import logger from '../utils/logging';
+import logger from '../utils/logger';
 import { range } from 'lodash';
 
-const log = logger('hotpost');
+const log = logger('hotspot');
 
 function pad(value, length) {
     return (value.toString().length < length) ? pad("0"+value, length):value;
@@ -93,11 +93,13 @@ export function generateHotspots(hotspots) {
       indexMap.bottomLeft, indexMap.topRight, indexMap.topLeft
     );
   });
-  return {
-    positions,
-    uvs,
-    indices: new Uint16Attribute(indices, 1)
-  };
+  var geometry = new THREE.BufferGeometry();;
+  geometry.setIndex(new Uint16Attribute(indices, 1));
+  geometry.addAttribute('position', positions);
+  // geometry.addAttribute('uvs', uvs);
+
+  var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0.3, color: 0x00ff00, side: THREE.DoubleSide } );
+  return new THREE.Mesh(geometry, material);
 }
 
 const twentyFourthRad = 15 / 180 * Math.PI;
@@ -152,15 +154,7 @@ export default function (canvas, sceneData) {
   renderer.setSize(width, height);
   renderer.setClearColor( 0x000000, 0 );
 
-  const { positions, uvs, indices} = generateHotspots(findHotspots(sceneData));
-
-  var geometry = new THREE.BufferGeometry();;
-  geometry.setIndex(indices);
-  geometry.addAttribute('position', positions);
-  // geometry.addAttribute('uvs', uvs);
-
-  var material = new THREE.MeshBasicMaterial( { transparent: true, opacity: 0.3, color: 0x00ff00, side: THREE.DoubleSide } );
-  const hotspots = new THREE.Mesh(geometry, material);
+  const hotspots = generateHotspots(findHotspots(sceneData));
   scene.add( hotspots );
 
   const pano = generatePano(sceneData);

@@ -8,7 +8,6 @@ const HOTSPOT_Y_COORD_FACTOR = 0.004 * SCALE_FACTOR;
 const SIZE = 0.99 * SCALE_FACTOR;
 
 function scaleFromHotspotToRad(rect) {
-  const v = Math.asin(HOTSPOT_Y_COORD_FACTOR / SIZE);
   return {
     left: HOTSPOT_X_COORD_FACTOR * rect.left + HOTSPOT_X_OFFSET,
     right: HOTSPOT_X_COORD_FACTOR * rect.right + HOTSPOT_X_OFFSET,
@@ -41,10 +40,10 @@ export default function createHotspot(hotspotData) {
     rectLeft: left
   } = hotspotData;
   const cylinderVector3DsFactory = singleton(() => [
-    cylinderMap(self.rad.top, self.rad.left),
-    cylinderMap(self.rad.bottom, self.rad.left),
-    cylinderMap(self.rad.top, self.rad.right),
-    cylinderMap(self.rad.bottom, self.rad.right)
+    cylinderMap(selfie.rad.bottom, selfie.rad.left),
+    cylinderMap(selfie.rad.bottom, selfie.rad.right),
+    cylinderMap(selfie.rad.top, selfie.rad.right),
+    cylinderMap(selfie.rad.top, selfie.rad.left)
   ]);
   const radFactory = singleton(() => scaleFromHotspotToRad(selfie.rect));
 

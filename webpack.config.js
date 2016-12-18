@@ -1,7 +1,16 @@
 const webpack = require('webpack');
+const path = require('path');
 
 module.exports = {
   target: "web",
+  entry: {
+    app: './client/js/app',
+    vendor: ['lodash', 'three']
+  },
+  output: {
+    path: path.join(__dirname, 'public/js'),
+    filename: '[name].bundle.js'
+  },
   module: {
     loaders: [
       {
@@ -16,5 +25,8 @@ module.exports = {
         loader: 'json'
       }
     ]
-  }
+  },
+  plugins: [
+    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js')
+  ]
 }

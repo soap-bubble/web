@@ -18,8 +18,10 @@ export default function createPanoCast(panoCastData) {
     },
     get fileName() {
       return selfie.data.fileName;
+    },
+    get theta() {
+      return 0;
     }
-
   };
   return selfie;
 }

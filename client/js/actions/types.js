@@ -1,0 +1,1 @@
+export const CREATE_CANVAS = 'CREATE_CANVAS';

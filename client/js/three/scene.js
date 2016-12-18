@@ -43,6 +43,7 @@ export default function createScene({ canvas, data }) {
   const rendererFactory = singleton(() => createRenderer(selfie));
   const cameraFactory = singleton(() => createCamera(selfie));
   let scene3D;
+  let rotation = { x: 0, y: 0 };
 
   const selfie = {
     get data() { return data; },
@@ -63,7 +64,20 @@ export default function createScene({ canvas, data }) {
     get scene3D() { return scene3D; },
     get canvas() { return canvas; },
     get width() { return selfie.canvas.width; },
-    get height() { return selfie.canvas.height; }
+    get height() { return selfie.canvas.height; },
+    get rotation() { return rotation; },
+    set rotation({ x, y }) {
+      rotation = { x, y };
+      hotspots.object3D.rotation.y = y;
+      pano.object3D.rotation.y = y;
+    },
+    rotateBy({ x: deltaX, y: deltaY }) {
+      selfie.rotation = {
+        x: selfie.rotation.x + deltaX,
+        y: selfie.rotation.y + deltaY
+      };
+      return selfie;
+    }
   };
 
   scene3D = createScene3D(selfie);

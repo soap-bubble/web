@@ -1,11 +1,9 @@
 var gulp = require('gulp');
-var webpack = require('gulp-webpack');
 var babel = require('gulp-babel');
 var nodemon = require('gulp-nodemon');
 var webpackConfig = require('./webpack.config');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
-var named = require('vinyl-named');
 var _ = require('lodash');
 var spawn = require('child_process').spawn;
 var Server = require('karma').Server;
@@ -76,7 +74,7 @@ gulp.task('copy:html', function () {
 
 gulp.task('copy:css', function () {
   src.css = './client/css/**/*.css';
-  return gulp.src(src.html, { base: './client/css/' })
+  return gulp.src(src.css, { base: './client/css/' })
     .pipe(gulp.dest('./public'))
 });
 

@@ -4,17 +4,20 @@ const path = require('path');
 module.exports = {
   target: 'web',
   entry: {
-    app: './client/js/app',
+    app: './client/js/app.jsx',
     vendor: ['lodash', 'three'],
   },
   output: {
     path: path.join(__dirname, 'public/js'),
     filename: '[name].bundle.js',
   },
+  resolve: {
+    extensions: ['', '.js', '.jsx'],
+  },
   module: {
     loaders: [
       {
-        test: /\.js$/,
+        test: /\.jsx?$/,
         exclude: /(node_modules|bower_components)/,
         loader: 'babel-loader',
       }, {

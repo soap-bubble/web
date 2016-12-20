@@ -1,4 +1,15 @@
-import { createStore } from 'redux'
-import morphReducer from '../reducers'
+import thunkMiddleware from 'redux-thunk';
+import promiseMiddleware from 'redux-promise';
+import createLogger from 'redux-logger';
+import { createStore, applyMiddleware } from 'redux';
 
-let store = createStore(morphReducer);
+import morphReducer from '../reducers';
+
+const loggingMiddleware = createLogger();
+
+const store = createStore(
+  morphReducer,
+  applyMiddleware(thunkMiddleware, promiseMiddleware, loggingMiddleware),
+);
+
+export default store;

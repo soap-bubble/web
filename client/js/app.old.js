@@ -6,6 +6,7 @@ import logger from './utils/logger';
 import renderer from './three/render';
 
 import test from './three/test';
+import store from './store';
 
 const log = logger('app');
 const qp = qs.parse(location.search);

@@ -3,7 +3,6 @@ import {
   SCENE_CANVAS_CREATED,
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
-  SCENE_CREATE_3D,
 } from './types';
 
 export function canvasCreated(canvas) {
@@ -24,12 +23,6 @@ export function sceneLoad(id) {
   return {
     type: SCENE_LOAD_START,
     payload: id,
-  };
-}
-
-export function sceneCreate() {
-  return {
-    type: SCENE_CREATE_3D,
   };
 }
 

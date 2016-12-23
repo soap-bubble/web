@@ -1,14 +1,16 @@
 import { connect } from 'react-redux';
-import { fetchScene, canvasCreated, sceneCreate } from '../../actions/scene';
+import { fetchScene, canvasCreated } from '../../actions/scene';
+import { sceneCreate } from '../../actions/three';
 import Canvas from '../presentations/Canvas';
 
-function mapStateToProps({ scene }) {
+function mapStateToProps({ scene, dimensions }) {
   const { current: id, data } = scene || {};
+  const { width, height } = dimensions;
   return {
     id,
     data,
-    width: 800,
-    height: 480,
+    width,
+    height,
   };
 }
 

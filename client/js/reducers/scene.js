@@ -47,29 +47,6 @@ const reducer = createReducer({
       data,
     };
   },
-  [SCENE_CREATE_3D](scene) {
-    const { canvas, data } = scene;
-    let three = scene.three;
-    if (!three && canvas && data) {
-      three = createScene({
-        canvas,
-        data,
-      });
-
-      const { camera, hotspots, pano } = three;
-
-      camera.position.z = -0.20;
-      renderer(() => {
-        hotspots.object3D.rotation.y += 0.005;
-        pano.object3D.rotation.y += 0.005;
-        three.render();
-      });
-    }
-    return {
-      ...scene,
-      three,
-    };
-  },
 });
 
 export default reducer;

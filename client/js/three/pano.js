@@ -7,16 +7,14 @@ import {
   Uint16Attribute,
   MeshBasicMaterial,
   Mesh,
-  Scene,
 } from 'three';
 
-import { get } from 'lodash';
 import loggerFactory from '../utils/logger';
 import { singleton } from '../utils/object';
 
 const log = loggerFactory('THREE:pano');
 
-const twentyFourthRad = 15 / 180 * Math.PI;
+const twentyFourthRad = (15 / 180) * Math.PI;
 const sliceWidth = 0.1325;
 const sliceHeight = 0.55;
 const sliceDepth = 1.0;

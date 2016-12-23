@@ -70,7 +70,7 @@ export function createMaterial() {
     transparent: true,
     opacity: 0.3,
     color: 0x00ff00,
-    side: THREE.DoubleSide
+    side: THREE.DoubleSide,
   });
 }
 

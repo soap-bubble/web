@@ -135,7 +135,7 @@ export function createHotspots() {
     dispatch(createUvs(hotspotsData.length));
     dispatch(createIndex(hotspotsData.length));
     dispatch(createMaterial());
-    dispatch(createGeometry(getState()));
-    dispatch(createObject3D(getState()));
+    dispatch(createGeometry(getState().hotspots));
+    dispatch(createObject3D(getState().hotspots));
   }
 }

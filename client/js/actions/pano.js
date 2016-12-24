@@ -11,7 +11,7 @@ import {
 import { range } from 'lodash';
 
 import {
-  PANO_GEOMETRY_CREATE,
+  PANO_GEOMETRIES_CREATE,
   PANO_OBJECT_CREATE,
   PANO_MATERIALS_CREATE,
 } from './types';
@@ -21,35 +21,39 @@ const sliceWidth = 0.1325;
 const sliceHeight = 0.55;
 const sliceDepth = 1.0;
 
-export function createGeometries() {
-  const geometry = new BufferGeometry();
+export function createGeometries(fileNames) {
+  const geometries = fileNames.map(() => {
+    const geometry = new BufferGeometry();
 
-  const positions = new BufferAttribute(new Float32Array([
-    -sliceWidth, -sliceHeight, sliceDepth,
-    sliceWidth, -sliceHeight, sliceDepth,
-    sliceWidth, sliceHeight, sliceDepth,
-    -sliceWidth, sliceHeight, sliceDepth,
-  ]), 3);
-  const uvs = new BufferAttribute(new Float32Array([
-    0.0, 0.0,
-    1.0, 0.0,
-    1.0, 1.0,
-    0.0, 1.0,
-  ]), 2);
+    const positions = new BufferAttribute(new Float32Array([
+      -sliceWidth, -sliceHeight, sliceDepth,
+      sliceWidth, -sliceHeight, sliceDepth,
+      sliceWidth, sliceHeight, sliceDepth,
+      -sliceWidth, sliceHeight, sliceDepth,
+    ]), 3);
+    const uvs = new BufferAttribute(new Float32Array([
+      0.0, 0.0,
+      1.0, 0.0,
+      1.0, 1.0,
+      0.0, 1.0,
+    ]), 2);
 
-  const indices = new Uint16Attribute([
-    0, 1, 2,
-    0, 2, 3,
-  ], 1);
+    const indices = new Uint16Attribute([
+      0, 1, 2,
+      0, 2, 3,
+    ], 1);
 
-  // itemSize = 3 because there are 3 values (components) per vertex
-  geometry.setIndex(indices);
-  geometry.addAttribute('uv', uvs);
-  geometry.addAttribute('position', positions);
+    // itemSize = 3 because there are 3 values (components) per vertex
+    geometry.setIndex(indices);
+    geometry.addAttribute('uv', uvs);
+    geometry.addAttribute('position', positions);
+
+    return geometry;
+  });
 
   return {
-    type: PANO_GEOMETRY_CREATE,
-    payload: geometry,
+    type: PANO_GEOMETRIES_CREATE,
+    payload: geometries,
   };
 }
 
@@ -99,8 +103,8 @@ export function createPano() {
     const { fileName } = panoCastData;
     const fileNames = generateFileNames(fileName);
 
-    dispatch(createGeometries());
+    dispatch(createGeometries(fileNames));
     dispatch(createMaterials(fileNames));
-    dispatch(createObject3D(getState()));
+    dispatch(createObject3D(getState().pano));
   };
 }

@@ -1,12 +1,12 @@
 import {
-  PANO_GEOMETRY_CREATE,
+  PANO_GEOMETRIES_CREATE,
   PANO_OBJECT_CREATE,
   PANO_MATERIALS_CREATE,
 } from '../actions/types';
 import createReducer from './createReducer';
 
 const reducer = createReducer({}, {
-  [PANO_GEOMETRY_CREATE](pano, { payload: geometries }) {
+  [PANO_GEOMETRIES_CREATE](pano, { payload: geometries }) {
     return {
       ...pano,
       geometries,

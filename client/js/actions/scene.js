@@ -90,8 +90,13 @@ export function rotate({ x, y }) {
   return (dispatch, getState) => {
     const { hotspots, pano } = getState();
 
-    Object.assign(hotspots.object3D.rotation({ x, y }));
-    Object.assign(pano.object3D.rotation({ x, y }));
+    const radRot = {
+      x: (Math.PI * x) / 180,
+      y: (Math.PI * y) / 180,
+    };
+
+    Object.assign(hotspots.object3D.rotation, radRot);
+    Object.assign(pano.object3D.rotation, radRot);
 
     dispatch({
       type: SCENE_ROTATION,
@@ -104,44 +109,6 @@ export function updateMomentumInterval(momentumIntervalId) {
   return {
     type: SCENE_UPDATE_MOMENTUM_INTERVAL_ID,
     payload: momentumIntervalId
-  };
-}
-
-export function updateMomentum() {
-  return (dispatch, getState) => {
-    const { scene } = getState();
-    const { rotation, momentumIntervalId } = scene;
-    let { interactionMomemtum } = scene;
-    let yFine = false;
-
-    interactionMomemtum = Object.assign({}, interactionMomemtum);
-    if (interactionMomemtum.y > MAX_MOMENTUM) {
-      interactionMomemtum.y -= MAX_MOMENTUM;
-    } else if (mCurrentMomentumPerTimeoutY < -MAX_MOMENTUM) {
-      interactionMomemtum.y += MAX_MOMENTUM;
-    } else {
-      yFine = true;
-    }
-
-    if (interactionMomemtum.x > MAX_MOMENTUM ) {
-      interactionMomemtum.x -= MAX_MOMENTUM;
-    } else if (interactionMomemtum.x < -MAX_MOMENTUM) {
-      interactionMomemtum.x += MAX_MOMENTUM;
-    } else if (yFine){
-      interactionMomemtum.x = 0;
-      clearInterval(momentumIntervalId);
-      dispatch(updateMomentumInterval(null));
-    }
-
-    dispatch({
-      type: SCENE_UPDATE_MOMENTUM,
-      payload: interactionMomemtum,
-    });
-
-    dispatch(rotate({
-      x: rotation.x - interactionMomemtum.x,
-      y: rotation.y - interactionMomemtum.y,
-    }));
   };
 }
 

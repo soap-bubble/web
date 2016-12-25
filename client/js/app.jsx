@@ -5,8 +5,9 @@ import { Provider } from 'react-redux';
 import { Vector3 } from 'three';
 
 import store from './store';
-import Scene from './react/containers/Scene';
+import World from './react/presentations/World';
 import { fetchScene, buildScene, buildRig, startRenderLoop } from './actions/scene';
+import { positionCamera }  from './actions/three';
 import { resize } from './actions/dimensions';
 
 function resizeToWindow() {
@@ -19,7 +20,7 @@ function resizeToWindow() {
 window.onload = () => {
   render(
     <Provider store={store}>
-      <Scene />
+      <World />
     </Provider>,
     document.getElementById('root'),
   );
@@ -29,6 +30,7 @@ window.onload = () => {
       store.dispatch(buildScene());
       store.dispatch(buildRig());
       resizeToWindow();
+      store.dispatch(positionCamera({ z: -0.4 }));
       store.dispatch(startRenderLoop());
     });
 

@@ -18,7 +18,10 @@ module.exports = {
     loaders: [
       {
         test: /\.jsx?$/,
-        exclude: /(node_modules|bower_components)/,
+        include: [
+          path.resolve(__dirname, 'client', 'js'),
+          path.resolve(__dirname, 'node_modules', 'dis-gui'),
+        ],
         loader: 'babel-loader',
       }, {
         test: /\.json$/,

@@ -4,12 +4,8 @@ import {
   SCENE_CANVAS_CREATED,
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
-  SCENE_ON_MOUSE_UP,
-  SCENE_ON_MOUSE_MOVE,
-  SCENE_ON_MOUSE_DOWN,
   SCENE_ROTATION,
-  SCENE_UPDATE_MOMENTUM,
-  SCENE_UPDATE_MOMENTUM_INTERVAL_ID,
+  SCENE_SET_SENSITIVITY,
 } from './types';
 import { createPano } from './pano';
 import { createHotspots } from './hotspots';
@@ -86,6 +82,33 @@ export function startRenderLoop() {
   }
 }
 
+
+export function rotateBy({ x: deltaX, y: deltaY }) {
+  const UP_DOWN_LIMIT = 8.5;
+  return (dispatch, getState) => {
+    let {
+      x,
+      y,
+    } = getState().scene.rotation;
+
+    x += deltaX;
+    if (x > UP_DOWN_LIMIT) {
+      x = UP_DOWN_LIMIT;
+    }
+    if (x < -UP_DOWN_LIMIT) {
+      x = -UP_DOWN_LIMIT;
+    }
+    y += deltaY;
+    if (y >= 360) {
+      y -= 360;
+    } else if (y < 0) {
+      y += 360
+    }
+    dispatch(rotate({ x, y }));
+  }
+
+}
+
 export function rotate({ x, y }) {
   return (dispatch, getState) => {
     const { hotspots, pano } = getState();
@@ -105,30 +128,9 @@ export function rotate({ x, y }) {
   }
 }
 
-export function updateMomentumInterval(momentumIntervalId) {
+export function setSensitivity(sensitivity) {
   return {
-    type: SCENE_UPDATE_MOMENTUM_INTERVAL_ID,
-    payload: momentumIntervalId
-  };
-}
-
-export function onMouseDown({ top, left }) {
-  return {
-    type: SCENE_ON_MOUSE_DOWN,
-    payload: { top, left },
-  };
-}
-
-export function onMouseMove({ top, left }) {
-  return {
-    type: SCENE_ON_MOUSE_MOVE,
-    payload: { top, left },
-  };
-}
-
-export function onMouseUp({ top, left}) {
-  return {
-    type: SCENE_ON_MOUSE_UP,
-    payload: { top, left },
+    type: SCENE_SET_SENSITIVITY,
+    payload: sensitivity,
   };
 }

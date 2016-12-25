@@ -3,7 +3,7 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
 } from 'three';
-
+import store from '../store';
 import {
   THREE_SCENE_CREATE,
   THREE_CAMERA_CREATE,
@@ -27,7 +27,13 @@ export function createCamera({ width, height }) {
   };
 }
 
-export function translateCamera(vector3) {
+export function positionCamera(vector3) {
+  const { camera } = store.getState().three;
+  ['x', 'y', 'z'].forEach(axis => {
+    if (vector3[axis]) {
+      camera.position[axis] = vector3[axis];
+    }
+  });
   return {
     type: THREE_CAMERA_TRANSLATE,
     payload: vector3,

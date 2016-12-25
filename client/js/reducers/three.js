@@ -7,6 +7,7 @@ import {
 } from '../actions/types';
 
 const reducer = createReducer({
+  cameraPosition: { x: 0, y: 0, z: 0 },
 }, {
   [THREE_SCENE_CREATE](three, { payload: scene }) {
     return {
@@ -20,8 +21,15 @@ const reducer = createReducer({
       camera,
     };
   },
-  [THREE_CAMERA_TRANSLATE](three, { payload: camera }) {
-
+  [THREE_CAMERA_TRANSLATE](three, { payload: vector3 }) {
+    const { cameraPosition } = three;
+    return {
+      ...three,
+      cameraPosition: {
+        ...cameraPosition,
+        vector3,
+      },
+    };
   },
   [THREE_RENDERER_CREATE](three, { payload: renderer }) {
     return {

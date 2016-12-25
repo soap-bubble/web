@@ -7,7 +7,7 @@ import {
   onMouseDown,
   updateMomentum,
   updateMomentumInterval,
-  rotate,
+  rotateBy,
 } from '../../actions/scene';
 import { sceneCreate } from '../../actions/three';
 import Canvas from '../presentations/Canvas';
@@ -49,12 +49,10 @@ function mapDisptachToProps(dispatch) {
   };
 
   const SWING_DELTA = 0.25;
-  const UP_DOWN_LIMIT = 8.5;
   const MAX_MOMENTUM = 0.5;
 
   function convertFromHorizontalSpeed(delta, sensitivity) {
     const speed =  delta / (10.0 * ((19 - sensitivity) / 18.0 ));
-    console.log(speed);
     return speed;
   }
 
@@ -85,10 +83,7 @@ function mapDisptachToProps(dispatch) {
       clearInterval(momentum.intervalId);
     }
 
-    dispatch(rotate({
-      x: rotation.x + momentum.speed.x,
-      y: rotation.y + momentum.speed.y,
-    }));
+    dispatch(rotateBy(momentum.speed));
   }
 
   return {
@@ -118,10 +113,6 @@ function mapDisptachToProps(dispatch) {
           itermnteractionLastPos,
           sensitivity
         } = scene;
-        let {
-          x: rotationX,
-          y: rotationY,
-        } = scene.rotation;
         const speed = {
           horizontal: left - interaction.lastPos.left,
           vertical: top - interaction.lastPos.top,
@@ -130,31 +121,11 @@ function mapDisptachToProps(dispatch) {
           horizontal: convertFromHorizontalSpeed(speed.horizontal, sensitivity),
           vertical: convertFromVerticalSpeed(speed.vertical, sensitivity),
         };
+        interaction.lastPos = { top, left };
 
-        let x, y;
-
-        if (controlType === 'touch') {
-          y = delta.horizontal;
-          x = delta.vertical;
-        }
-
-        rotationX += x;
-        if (rotationX > UP_DOWN_LIMIT) {
-          rotationX = UP_DOWN_LIMIT;
-        }
-        if (rotationX < -UP_DOWN_LIMIT) {
-          rotationX = -UP_DOWN_LIMIT;
-        }
-        rotationY += y;
-        if (rotationY >= 360) {
-          rotationY -= 360;
-        } else if (y < 0) {
-          y += 360
-        }
-
-        dispatch(rotate({
-          x: rotationX,
-          y: rotationY,
+        dispatch(rotateBy({
+          x: delta.vertical,
+          y: delta.horizontal,
         }));
       }
     },
@@ -176,12 +147,13 @@ function mapDisptachToProps(dispatch) {
           y: elaspedInteractionTime ? (left - interaction.startPos.left) / elaspedInteractionTime : 0,
           x: elaspedInteractionTime ? (top - interaction.startPos.top) / elaspedInteractionTime : 0
         };
-        averageSpeed.x *= 500;
-        averageSpeed.y *= 500;
+        averageSpeed.x *= 100;
+        averageSpeed.y *= 100;
         momentum.speed = {
           x: convertFromHorizontalSpeed(averageSpeed.x, sensitivity),
           y: convertFromVerticalSpeed(averageSpeed.y, sensitivity),
         };
+        clearInterval(momentum.intervalId);
         momentum.intervalId = setInterval(updateMomentum, 50);
       }
       interaction.active = false;

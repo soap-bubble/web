@@ -5,6 +5,7 @@ import {
   SCENE_LOAD_COMPLETE,
   SCENE_CREATE_3D,
   SCENE_ROTATION,
+  SCENE_SET_SENSITIVITY,
 } from '../actions/types';
 
 const reducer = createReducer({
@@ -14,7 +15,7 @@ const reducer = createReducer({
   loaded: {},
   data: null,
   three: null,
-  sensitivity: 200,
+  sensitivity: 100,
   controlType: 'touch',
   rotation: {
     x: 0,
@@ -57,6 +58,12 @@ const reducer = createReducer({
     return {
       ...scene,
       rotation,
+    };
+  },
+  [SCENE_SET_SENSITIVITY](scene, { payload: sensitivity }) {
+    return {
+      ...scene,
+      sense
     };
   },
 });

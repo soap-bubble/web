@@ -8,8 +8,8 @@ import {
   updateMomentum,
   updateMomentumInterval,
   rotateBy,
+  sceneCreate
 } from '../../actions/scene';
-import { sceneCreate } from '../../actions/three';
 import Canvas from '../presentations/Canvas';
 import store from '../../store';
 
@@ -49,15 +49,16 @@ function mapDisptachToProps(dispatch) {
   };
 
   const SWING_DELTA = 0.25;
-  const MAX_MOMENTUM = 0.5;
+  const DEG_TO_RAD = Math.PI / 180;
+  const MAX_MOMENTUM = 0.5 * DEG_TO_RAD;
 
   function convertFromHorizontalSpeed(delta, sensitivity) {
-    const speed =  delta / (10.0 * ((19 - sensitivity) / 18.0 ));
+    const speed =  (delta * DEG_TO_RAD) / (10.0 * ((19 - sensitivity) / 18.0 ));
     return speed;
   }
 
   function convertFromVerticalSpeed(delta, sensitivity) {
-    return delta / (7.0 * ((19 - sensitivity) / 18.0 ));
+    return (delta * DEG_TO_RAD) / (7.0 * ((19 - sensitivity) / 18.0 ));
   }
 
 

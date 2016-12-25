@@ -1,3 +1,8 @@
+import {
+  Scene,
+  PerspectiveCamera,
+  WebGLRenderer,
+} from 'three';
 import raf from 'raf';
 import { bySceneId } from '../service/scene';
 import {
@@ -6,14 +11,13 @@ import {
   SCENE_LOAD_COMPLETE,
   SCENE_ROTATION,
   SCENE_SET_SENSITIVITY,
+  SCENE_SCENE_CREATE,
+  SCENE_CAMERA_CREATE,
+  SCENE_CAMERA_TRANSLATE,
+  SCENE_RENDERER_CREATE,
 } from './types';
 import { createPano } from './pano';
 import { createHotspots } from './hotspots';
-import {
-  createScene,
-  createCamera,
-  createRenderer,
-} from './three';
 
 export function canvasCreated(canvas) {
   return {
@@ -68,64 +72,120 @@ export function buildRig() {
   };
 }
 
+export function createScene(objects) {
+  const scene = new Scene();
+  objects.forEach(o => scene.add(o));
+  return {
+    type: SCENE_SCENE_CREATE,
+    payload: scene,
+  };
+}
+
+export function createCamera({ width, height }) {
+  return {
+    type: SCENE_CAMERA_CREATE,
+    payload: new PerspectiveCamera(55, width / height, 0.01, 1000),
+  };
+}
+
+export function positionCamera(vector3) {
+  return (dispatch, getState) => {
+    const { camera } = getState().scene;
+    ['x', 'y', 'z'].forEach(axis => {
+      if (vector3[axis]) {
+        camera.position[axis] = vector3[axis];
+      }
+    });
+    return {
+      type: SCENE_CAMERA_TRANSLATE,
+      payload: vector3,
+    };
+  };
+}
+
+export function createRenderer({ canvas, width, height }) {
+  const renderer = new WebGLRenderer({ canvas, alpha: true });
+  renderer.setSize(width, height);
+  renderer.setClearColor(0x000000, 0);
+  return {
+    type: SCENE_RENDERER_CREATE,
+    payload: renderer,
+  };
+}
+
 export function startRenderLoop() {
   return (dispatch, getState) => {
-    const { hotspots, pano, three } = getState();
-    const { scene, camera, renderer } = three;
+    const { hotspots, pano, scene } = getState();
+    const { scene3D, camera, renderer } = scene;
     function render() {
       raf(render);
       // hotspots.object3D.rotation.y += 0.01;
       // pano.object3D.rotation.y += 0.01;
-      renderer.render(scene, camera);
+      renderer.render(scene3D, camera);
     }
     raf(render);
   }
 }
 
+const UP_DOWN_LIMIT = 8.5 / Math.PI / 180;
+
+function clamp({ x, y }) {
+  if (x > UP_DOWN_LIMIT) {
+    x = UP_DOWN_LIMIT;
+  }
+  if (x < -UP_DOWN_LIMIT) {
+    x = -UP_DOWN_LIMIT;
+  }
+  return { x, y };
+}
 
 export function rotateBy({ x: deltaX, y: deltaY }) {
-  const UP_DOWN_LIMIT = 8.5;
-  return (dispatch, getState) => {
-    let {
-      x,
-      y,
-    } = getState().scene.rotation;
 
-    x += deltaX;
-    if (x > UP_DOWN_LIMIT) {
-      x = UP_DOWN_LIMIT;
-    }
-    if (x < -UP_DOWN_LIMIT) {
-      x = -UP_DOWN_LIMIT;
-    }
-    y += deltaY;
-    if (y >= 360) {
-      y -= 360;
-    } else if (y < 0) {
-      y += 360
-    }
-    dispatch(rotate({ x, y }));
+  return (dispatch, getState) => {
+    const { hotspots, pano } = getState();
+    let {
+      sceneX,
+      sceneY,
+    } = getState().scene.rotation;
+    let {
+      x: panoX,
+      y: panoY,
+    } = pano.object3D.rotation;
+    let {
+      x: hotspotsX,
+      y: hotspotsY,
+    } = hotspots.object3D.rotation;
+
+    sceneX += deltaX;
+    sceneY += deltaY;
+    panoX += deltaX;
+    panoY += deltaY;
+    hotspotsX += deltaX;
+    hotspotsY += deltaY;
+
+    const panoRot = clamp({
+      x: panoX,
+      y: panoY,
+    });
+
+    const hotspotsRot = clamp({
+      x: hotspotsX,
+      y: hotspotsY,
+    });
+
+    Object.assign(hotspots.object3D.rotation, hotspotsRot);
+    Object.assign(pano.object3D.rotation, panoRot);
+
+    dispatch(rotate({ x: sceneX, y: sceneY }));
   }
 
 }
 
 export function rotate({ x, y }) {
-  return (dispatch, getState) => {
-    const { hotspots, pano } = getState();
-
-    const radRot = {
-      x: (Math.PI * x) / 180,
-      y: (Math.PI * y) / 180,
-    };
-
-    Object.assign(hotspots.object3D.rotation, radRot);
-    Object.assign(pano.object3D.rotation, radRot);
-
-    dispatch({
-      type: SCENE_ROTATION,
-      payload: { x, y },
-    });
-  }
+  return {
+    type: SCENE_ROTATION,
+    payload: { x, y },
+  };
 }
 
 export function setSensitivity(sensitivity) {

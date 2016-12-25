@@ -6,6 +6,10 @@ import {
   SCENE_CREATE_3D,
   SCENE_ROTATION,
   SCENE_SET_SENSITIVITY,
+  SCENE_SCENE_CREATE,
+  SCENE_CAMERA_CREATE,
+  SCENE_RENDERER_CREATE,
+  SCENE_CAMERA_TRANSLATE,
 } from '../actions/types';
 
 const reducer = createReducer({
@@ -14,7 +18,6 @@ const reducer = createReducer({
   loading: {},
   loaded: {},
   data: null,
-  three: null,
   sensitivity: 100,
   controlType: 'touch',
   rotation: {
@@ -64,6 +67,34 @@ const reducer = createReducer({
     return {
       ...scene,
       sense
+    };
+  },
+  [SCENE_SCENE_CREATE](scene, { payload: scene3D }) {
+    return {
+      ...scene,
+      scene3D,
+    };
+  },
+  [SCENE_CAMERA_CREATE](scene, { payload: camera }) {
+    return {
+      ...scene,
+      camera,
+    };
+  },
+  [SCENE_CAMERA_TRANSLATE](scene, { payload: vector3 }) {
+    const { cameraPosition } = scene;
+    return {
+      ...scene,
+      cameraPosition: {
+        ...cameraPosition,
+        vector3,
+      },
+    };
+  },
+  [SCENE_RENDERER_CREATE](scene, { payload: renderer }) {
+    return {
+      ...scene,
+      renderer,
     };
   },
 });

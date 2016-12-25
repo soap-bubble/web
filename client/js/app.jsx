@@ -3,12 +3,13 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { Vector3 } from 'three';
+import qs from 'query-string';
 
 import store from './store';
 import World from './react/presentations/World';
-import { fetchScene, buildScene, buildRig, startRenderLoop } from './actions/scene';
-import { positionCamera }  from './actions/three';
+import { fetchScene, buildScene, buildRig, startRenderLoop, positionCamera } from './actions/scene';
 import { resize } from './actions/dimensions';
+const qp = qs.parse(location.search);
 
 function resizeToWindow() {
   store.dispatch(resize({
@@ -25,7 +26,7 @@ window.onload = () => {
     document.getElementById('root'),
   );
 
-  store.dispatch(fetchScene(1050))
+  store.dispatch(fetchScene(qp.scene || 1050))
     .then(() => {
       store.dispatch(buildScene());
       store.dispatch(buildRig());

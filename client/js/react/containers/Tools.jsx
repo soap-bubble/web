@@ -1,30 +1,37 @@
 import { connect } from 'react-redux';
-import { setSensitivity } from '../../actions/scene';
-import { positionCamera } from '../../actions/three';
+import { setSensitivity, positionCamera } from '../../actions/scene';
+import { setHotspotsTheta } from '../../actions/hotspots';
 import Tools from '../presentations/Tools';
 import store from '../../store';
 
-function mapStateToProps({ three, scene }) {
+function mapStateToProps({ scene, hotspots }) {
   const {
-    camera
-  } = three || {};
-
-  const {
+    camera,
     sensitivity,
   } = scene;
+
+  const {
+    theta: hotspotsTheta,
+  } = hotspots;
 
   return {
     camera,
     sensitivity,
+    hotspotsTheta,
   };
 }
 
 function mapDisptachToProps(dispatch) {
   return {
     setCameraPositionZ(z) {
-      positionCamera({ z });
+      dispatch(positionCamera({ z }));
     },
-    setSensitivity,
+    setSensitivity(sensitivity) {
+      dispatch(setSensitivity(sensitivity));
+    },
+    setHotspotsTheta(theta) {
+      dispatch(setHotspotsTheta(theta));
+    },
   };
 }
 

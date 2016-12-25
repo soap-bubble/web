@@ -5,10 +5,13 @@ import {
   HOTSPOTS_GEOMETRY_CREATE,
   HOTSPOTS_MATERIAL_CREATE,
   HOTSPOTS_OBJECT_CREATE,
+  HOTSPOTS_THETA,
 } from '../actions/types';
 import createReducer from './createReducer';
 
-const reducer = createReducer({}, {
+const reducer = createReducer({
+  theta: -Math.PI / 2,
+}, {
   [HOTSPOTS_POSITIONS_CREATE](hotspots, { payload: positions }) {
     return {
       ...hotspots,
@@ -45,6 +48,12 @@ const reducer = createReducer({}, {
       object3D,
     };
   },
+  [HOTSPOTS_THETA](hotspots, { payload: theta }) {
+    return {
+      ...hotspots,
+      theta,
+    }
+  }
 });
 
 export default reducer;

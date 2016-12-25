@@ -9,7 +9,7 @@ export function resize({ width, height }) {
         height,
       },
     });
-    const { camera, renderer } = getState().three;
+    const { camera, renderer } = getState().scene;
     renderer.setSize(width, height);
 		camera.aspect	= width / height;
 		camera.updateProjectionMatrix();

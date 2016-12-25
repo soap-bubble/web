@@ -13,6 +13,7 @@ import {
   HOTSPOTS_GEOMETRY_CREATE,
   HOTSPOTS_MATERIAL_CREATE,
   HOTSPOTS_OBJECT_CREATE,
+  HOTSPOTS_THETA,
 } from './types';
 
 const HOTSPOT_VERTEX_SIZE = 4;
@@ -25,7 +26,7 @@ const SIZE = 0.99 * SCALE_FACTOR;
 function cylinderMap(y, x) {
   return {
     x: SIZE * Math.sin(x),
-    y,
+    y: -y,
     z: SIZE * Math.cos(x),
   };
 }
@@ -121,11 +122,31 @@ export function createMaterial() {
 }
 
 export function createObject3D({ geometry, material }) {
-  return {
-    type: HOTSPOTS_OBJECT_CREATE,
-    payload: new Mesh(geometry, material),
+  return (dispatch, getState) => {
+    const { theta } = getState().hotspots;
+
+    const mesh = new Mesh(geometry, material);
+    mesh.rotation.y += theta;
+    dispatch({
+      type: HOTSPOTS_OBJECT_CREATE,
+      payload: mesh,
+    });
   };
 }
+
+export function setHotspotsTheta(theta) {
+  return (dispatch, getState) => {
+    const { object3D, theta: oldTheta } = getState().hotspots;
+
+    object3D.rotation.y = object3D.rotation.y + theta - oldTheta;
+
+    dispatch({
+      type: HOTSPOTS_THETA,
+      payload: theta,
+    });
+  };
+}
+
 export function createHotspots() {
   return (dispatch, getState) => {
     const { casts } = getState().scene.data;

@@ -9,8 +9,6 @@ import {
   SCENE_CANVAS_CREATED,
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
-  SCENE_ROTATION,
-  SCENE_SET_SENSITIVITY,
   SCENE_SCENE_CREATE,
   SCENE_CAMERA_CREATE,
   SCENE_CAMERA_TRANSLATE,
@@ -125,72 +123,4 @@ export function startRenderLoop() {
     }
     raf(render);
   }
-}
-
-const UP_DOWN_LIMIT = 8.5 / Math.PI / 180;
-
-function clamp({ x, y }) {
-  if (x > UP_DOWN_LIMIT) {
-    x = UP_DOWN_LIMIT;
-  }
-  if (x < -UP_DOWN_LIMIT) {
-    x = -UP_DOWN_LIMIT;
-  }
-  return { x, y };
-}
-
-export function rotateBy({ x: deltaX, y: deltaY }) {
-
-  return (dispatch, getState) => {
-    const { hotspots, pano } = getState();
-    let {
-      sceneX,
-      sceneY,
-    } = getState().scene.rotation;
-    let {
-      x: panoX,
-      y: panoY,
-    } = pano.object3D.rotation;
-    let {
-      x: hotspotsX,
-      y: hotspotsY,
-    } = hotspots.object3D.rotation;
-
-    sceneX += deltaX;
-    sceneY += deltaY;
-    panoX += deltaX;
-    panoY += deltaY;
-    hotspotsX += deltaX;
-    hotspotsY += deltaY;
-
-    const panoRot = clamp({
-      x: panoX,
-      y: panoY,
-    });
-
-    const hotspotsRot = clamp({
-      x: hotspotsX,
-      y: hotspotsY,
-    });
-
-    Object.assign(hotspots.object3D.rotation, hotspotsRot);
-    Object.assign(pano.object3D.rotation, panoRot);
-
-    dispatch(rotate({ x: sceneX, y: sceneY }));
-  }
-
-}
-
-export function rotate({ x, y }) {
-  return {
-    type: SCENE_ROTATION,
-    payload: { x, y },
-  };
-}
-
-export function setSensitivity(sensitivity) {
-  return {
-    type: SCENE_SET_SENSITIVITY,
-    payload: sensitivity,
-  };
 }

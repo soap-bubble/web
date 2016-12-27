@@ -2,14 +2,11 @@ import { connect } from 'react-redux';
 import {
   fetchScene,
   canvasCreated,
-  onMouseUp,
-  onMouseMove,
-  onMouseDown,
-  updateMomentum,
-  updateMomentumInterval,
-  rotateBy,
-  sceneCreate
 } from '../../actions/scene';
+import {
+  rotateBy,
+  sceneCreate,
+} from '../../actions/pano';
 import Canvas from '../presentations/Canvas';
 import store from '../../store';
 
@@ -63,8 +60,11 @@ function mapDisptachToProps(dispatch) {
 
 
   function updateMomentum() {
-    const { scene } = store.getState();
-    const { rotation } = scene;
+    const { pano } = store.getState();
+    const {
+      sensitivity,
+      rotation,
+    } = pano;
     let yFine = false;
 
     if (momentum.speed.y > MAX_MOMENTUM) {
@@ -108,12 +108,11 @@ function mapDisptachToProps(dispatch) {
     onMouseMove(mouseEvent) {
       if (interaction.active) {
         const { clientX: left, clientY: top } = mouseEvent;
-        const { scene } = store.getState();
+        const { pano } = store.getState();
         const {
           controlType,
-          itermnteractionLastPos,
-          sensitivity
-        } = scene;
+          sensitivity,
+        } = pano;
         const speed = {
           horizontal: left - interaction.lastPos.left,
           vertical: top - interaction.lastPos.top,
@@ -135,7 +134,7 @@ function mapDisptachToProps(dispatch) {
       const {
         interactionDebounce,
         sensitivity,
-      } = store.getState().scene;
+      } = store.getState().pano;
 
       let interactionMomemtum = { x: 0, y: 0 };
       const interactionDistance = Math.sqrt(

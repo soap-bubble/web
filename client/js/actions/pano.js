@@ -14,6 +14,8 @@ import {
   PANO_GEOMETRIES_CREATE,
   PANO_OBJECT_CREATE,
   PANO_MATERIALS_CREATE,
+  PANO_ROTATION,
+  PANO_SET_SENSITIVITY,
 } from './types';
 
 const twentyFourthRad = (15 / 180) * Math.PI;
@@ -106,5 +108,74 @@ export function createPano() {
     dispatch(createGeometries(fileNames));
     dispatch(createMaterials(fileNames));
     dispatch(createObject3D(getState().pano));
+  };
+}
+
+
+const UP_DOWN_LIMIT = 8.5 * Math.PI / 180;
+
+function clamp({ x, y }) {
+  if (x > UP_DOWN_LIMIT) {
+    x = UP_DOWN_LIMIT;
+  }
+  if (x < -UP_DOWN_LIMIT) {
+    x = -UP_DOWN_LIMIT;
+  }
+  return { x, y };
+}
+
+export function rotateBy({ x: deltaX, y: deltaY }) {
+
+  return (dispatch, getState) => {
+    const { hotspots, pano } = getState();
+    let {
+      sceneX,
+      sceneY,
+    } = getState().pano.rotation;
+    let {
+      x: panoX,
+      y: panoY,
+    } = pano.object3D.rotation;
+    let {
+      x: hotspotsX,
+      y: hotspotsY,
+    } = hotspots.object3D.rotation;
+
+    sceneX += deltaX;
+    sceneY += deltaY;
+    panoX += deltaX;
+    panoY += deltaY;
+    hotspotsX += deltaX;
+    hotspotsY += deltaY;
+
+    const panoRot = clamp({
+      x: panoX,
+      y: panoY,
+    });
+
+    const hotspotsRot = clamp({
+      x: hotspotsX,
+      y: hotspotsY,
+    });
+
+    Object.assign(hotspots.object3D.rotation, hotspotsRot);
+    Object.assign(pano.object3D.rotation, panoRot);
+
+    dispatch(rotate({ x: sceneX, y: sceneY }));
+  }
+
+}
+
+export function rotate({ x, y }) {
+  return {
+    type: PANO_ROTATION,
+    payload: { x, y },
+  };
+}
+
+export function setSensitivity(sensitivity) {
+  return {
+    type: PANO_SET_SENSITIVITY,
+    payload: sensitivity,
   };
 }

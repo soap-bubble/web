@@ -1,14 +1,18 @@
 import { connect } from 'react-redux';
-import { setSensitivity, positionCamera } from '../../actions/scene';
+import { positionCamera } from '../../actions/scene';
+import { setSensitivity } from '../../actions/pano';
 import { setHotspotsTheta } from '../../actions/hotspots';
 import Tools from '../presentations/Tools';
 import store from '../../store';
 
-function mapStateToProps({ scene, hotspots }) {
+function mapStateToProps({ scene, pano, hotspots }) {
   const {
     camera,
-    sensitivity,
   } = scene;
+
+  const {
+    sensitivity,
+  } = pano;
 
   const {
     theta: hotspotsTheta,

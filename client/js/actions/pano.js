@@ -129,10 +129,6 @@ export function rotateBy({ x: deltaX, y: deltaY }) {
   return (dispatch, getState) => {
     const { hotspots, pano } = getState();
     let {
-      sceneX,
-      sceneY,
-    } = getState().pano.rotation;
-    let {
       x: panoX,
       y: panoY,
     } = pano.object3D.rotation;
@@ -141,8 +137,6 @@ export function rotateBy({ x: deltaX, y: deltaY }) {
       y: hotspotsY,
     } = hotspots.object3D.rotation;
 
-    sceneX += deltaX;
-    sceneY += deltaY;
     panoX += deltaX;
     panoY += deltaY;
     hotspotsX += deltaX;
@@ -161,7 +155,7 @@ export function rotateBy({ x: deltaX, y: deltaY }) {
     Object.assign(hotspots.object3D.rotation, hotspotsRot);
     Object.assign(pano.object3D.rotation, panoRot);
 
-    dispatch(rotate({ x: sceneX, y: sceneY }));
+    dispatch(rotate(pano.object3D.rotation));
   }
 
 }

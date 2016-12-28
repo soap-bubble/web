@@ -1,3 +1,4 @@
+import { last } from 'lodash';
 import {
   rotateBy,
 } from '../actions/pano';
@@ -10,8 +11,8 @@ export default function (dispatch) {
     active: false,
     // The timestamp of the start of the last user interaction with scene
     startTime: -1,
-    // The previous move event position
-    lastPos: {},
+    // All positions for this interaction event
+    positions: [],
     // The start of an interaction position
     startPos: {},
   };
@@ -49,6 +50,7 @@ export default function (dispatch) {
     } else if (momentum.speed.y < -MAX_MOMENTUM) {
       momentum.speed.y += MAX_MOMENTUM;
     } else {
+      momentum.speed.y = 0;
       yFine = true;
     }
 
@@ -64,13 +66,13 @@ export default function (dispatch) {
     dispatch(rotateBy(momentum.speed));
   }
 
-  return {
+  const selfie = {
     onMouseDown(mouseEvent) {
       const { clientX: left, clientY: top } = mouseEvent;
       interaction.startTime = Date.now();
-      interaction.startPos = { top, left };
-      interaction.lastPos = { top, left };
       interaction.active = true;
+      interaction.positions = [{ top, left, time: interaction.startTime }];
+      interaction.startPos = interaction.positions[0];
       clearInterval(interaction.intervalId);
     },
     onMouseMove(mouseEvent) {
@@ -81,15 +83,19 @@ export default function (dispatch) {
           controlType,
           sensitivity,
         } = pano;
+        const interactionLastPos = last(interaction.positions);
         const speed = {
-          horizontal: left - interaction.lastPos.left,
-          vertical: top - interaction.lastPos.top,
+          horizontal: left - interactionLastPos.left,
+          vertical: top - interactionLastPos.top,
         };
         const delta = {
           horizontal: convertFromHorizontalSpeed(speed.horizontal, sensitivity),
           vertical: convertFromVerticalSpeed(speed.vertical, sensitivity),
         };
-        interaction.lastPos = { top, left };
+        interaction.positions.push({ top, left, time: Date.now() });
+        if (interaction.positions.length > 5) {
+          interaction.positions.shift();
+        }
 
         dispatch(rotateBy({
           x: delta.vertical,
@@ -103,28 +109,43 @@ export default function (dispatch) {
         interactionDebounce,
         sensitivity,
       } = store.getState().pano;
-
       let interactionMomemtum = { x: 0, y: 0 };
       const interactionDistance = Math.sqrt(
         Math.pow(interaction.startPos.left - left, 2)
          + Math.pow(interaction.startPos.top - top, 2)
       );
       if (interactionDistance > interactionDebounce) {
-        const elaspedInteractionTime = Date.now() - interaction.startTime;
-        const averageSpeed = {
-          y: elaspedInteractionTime ? (left - interaction.startPos.left) / elaspedInteractionTime : 0,
-          x: elaspedInteractionTime ? (top - interaction.startPos.top) / elaspedInteractionTime : 0
-        };
-        averageSpeed.x *= 100;
-        averageSpeed.y *= 100;
+        const averageSpeed = interaction.positions.reduce((memo, speed, index) => {
+          if (index === 0) {
+            return memo;
+          }
+          const previous = interaction.positions[index - 1];
+          const deltaTime = speed.time - previous.time;
+          const deltaX = speed.left - previous.left;
+          const deltaY = speed.top - previous.top;
+          const speedX = deltaX / deltaTime;
+          const speedY = deltaY / deltaTime;
+          return {
+            left: (memo.left + speedX) / 2,
+            top: (memo.top + speedY) / 2,
+          };
+        }, {
+          top: 0,
+          left: 0,
+        });
+
+        averageSpeed.left *= 50;
+        averageSpeed.top *= 10;
         momentum.speed = {
-          x: convertFromHorizontalSpeed(averageSpeed.x, sensitivity),
-          y: convertFromVerticalSpeed(averageSpeed.y, sensitivity),
+          x: convertFromHorizontalSpeed(averageSpeed.top, sensitivity),
+          y: convertFromVerticalSpeed(averageSpeed.left, sensitivity),
         };
+        console.log('momentum speed', momentum.speed);
         clearInterval(momentum.intervalId);
         momentum.intervalId = setInterval(updateMomentum, 50);
       }
       interaction.active = false;
     }
   };
+  return selfie;
 }

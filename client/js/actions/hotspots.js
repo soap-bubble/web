@@ -11,9 +11,16 @@ import {
   HOTSPOTS_POSITIONS_CREATE,
   HOTSPOTS_UVS_CREATE,
   HOTSPOTS_GEOMETRY_CREATE,
-  HOTSPOTS_MATERIAL_CREATE,
-  HOTSPOTS_OBJECT_CREATE,
+  HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+  HOTSPOTS_HIT_MATERIAL_CREATE,
+  HOTSPOTS_HIT_OBJECT_CREATE,
+  HOTSPOTS_VISIBLE_OBJECT_CREATE,
   HOTSPOTS_THETA,
+  HOTSPOT_SCENE_CREATE,
+  HOTSPOT_CAMERA_CREATE,
+  HOTSPOT_CAMERA_TRANSLATE,
+  HOTSPOT_RENDERER_CREATE,
+  HOTSPOT_RENDER_LOOP,
 } from './types';
 
 const HOTSPOT_VERTEX_SIZE = 4;
@@ -109,9 +116,9 @@ export function createGeometry({ index, uvs, positions }) {
   };
 }
 
-export function createMaterial() {
+export function createHitMaterial() {
   return {
-    type: HOTSPOTS_MATERIAL_CREATE,
+    type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
     payload: new MeshBasicMaterial({
       transparent: true,
       opacity: 0.3,
@@ -121,14 +128,26 @@ export function createMaterial() {
   };
 }
 
-export function createObject3D({ geometry, material }) {
+export function createVisibleMaterial() {
+  return {
+    type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+    payload: new MeshBasicMaterial({
+      transparent: true,
+      opacity: 0.3,
+      color: 0x00ff00,
+      side: THREE.DoubleSide,
+    }),
+  };
+}
+
+export function createObject3D({ type, geometry, material }) {
   return (dispatch, getState) => {
     const { theta } = getState().hotspots;
 
     const mesh = new Mesh(geometry, material);
     mesh.rotation.y += theta;
     dispatch({
-      type: HOTSPOTS_OBJECT_CREATE,
+      type,
       payload: mesh,
     });
   };
@@ -155,8 +174,85 @@ export function createHotspots() {
     dispatch(createPositions(hotspotsData));
     dispatch(createUvs(hotspotsData.length));
     dispatch(createIndex(hotspotsData.length));
-    dispatch(createMaterial());
+    dispatch(createVisibleMaterial());
+    dispatch(createHitMaterial());
     dispatch(createGeometry(getState().hotspots));
-    dispatch(createObject3D(getState().hotspots));
+    dispatch(createObject3D({
+      type: HOTSPOTS_VISIBLE_OBJECT_CREATE,
+      geometry: getState().hotspots.geometry,
+      material: getState().hotspots.visibleMaterial,
+    }));
+    dispatch(createObject3D({
+      type: HOTSPOTS_HIT_OBJECT_CREATE,
+      geometry: getState().hotspots.geometry,
+      material: getState().hotspots.hitMaterial,
+    }));
   }
+}
+
+export function buildScene() {
+  return (dispatch, getState) => {
+    dispatch(createHotspots());
+    const objects = [];
+    objects.push(getState().hotspots.hitObject3D);
+    dispatch(createScene(objects));
+  }
+}
+
+export function buildRig() {
+  return (dispatch, getState) => {
+    const { width, height } = getState().dimensions;
+    const { canvas } = getState().scene;
+    dispatch(createCamera({ width, height }));
+    dispatch(createRenderer({ canvas, width, height }));
+  };
+}
+
+export function createScene(objects) {
+  const scene = new Scene();
+  objects.forEach(o => scene.add(o));
+  return {
+    type: HOTSPOT_SCENE_CREATE,
+    payload: scene,
+  };
+}
+
+export function createCamera({ width, height }) {
+  return createCameraForType({
+    type: HOTSPOT_CAMERA_CREATE,
+    width,
+    height,
+  });
+}
+
+export function positionCamera(vector3) {
+  return (dispatch, getState) => {
+    const { camera } = getState().hotspots;
+    dispatch(positionCameraForType({
+      type: HOTSPOT_CAMERA_TRANSLATE,
+      vector3,
+      camera,
+    }));
+  }
+
+}
+
+export function createRenderer({ canvas, width, height }) {
+  return createRendererForType({
+    type: HOTSPOT_RENDERER_CREATE,
+    canvas,
+    width,
+    height,
+  });
+}
+
+export function startRenderLoop() {
+  return (dispatch, getState) => {
+    const { hotspots, pano, scene } = getState();
+    const { scene3D, camera, renderer } = scene;
+    dispatch({
+      type: HOTSPOT_RENDER_LOOP,
+      payload: addToRenderLoop(() => renderer.render(scene3D, camera)),
+    });
+  };
 }

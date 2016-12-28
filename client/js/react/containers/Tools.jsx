@@ -6,8 +6,7 @@ import {
   Number as DGNumber,
 } from 'dis-gui';
 
-import { positionCamera } from '../../actions/scene';
-import { setSensitivity } from '../../actions/pano';
+import { setSensitivity, positionCamera } from '../../actions/pano';
 import { setHotspotsTheta } from '../../actions/hotspots';
 import store from '../../store';
 

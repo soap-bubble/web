@@ -7,7 +7,8 @@ import qs from 'query-string';
 
 import store from './store';
 import World from './react/presentations/World';
-import { fetchScene, buildScene, buildRig, startRenderLoop, positionCamera } from './actions/scene';
+import { fetchScene } from './actions/scene';
+import { buildScene, buildRig, startRenderLoop, positionCamera } from './actions/pano';
 import { resize } from './actions/dimensions';
 const qp = qs.parse(location.search);
 

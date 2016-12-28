@@ -1,13 +1,8 @@
 import createReducer from './createReducer';
 import {
-  SCENE_CANVAS_CREATED,
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
   SCENE_CREATE_3D,
-  SCENE_SCENE_CREATE,
-  SCENE_CAMERA_CREATE,
-  SCENE_RENDERER_CREATE,
-  SCENE_CAMERA_TRANSLATE,
 } from '../actions/types';
 
 const reducer = createReducer({
@@ -17,12 +12,6 @@ const reducer = createReducer({
   loaded: {},
   data: null,
 }, {
-  [SCENE_CANVAS_CREATED](scene, { payload: canvas }) {
-    return {
-      ...scene,
-      canvas,
-    };
-  },
   [SCENE_LOAD_START](scene, { payload: id }) {
     const { loading } = scene;
 
@@ -46,34 +35,6 @@ const reducer = createReducer({
       loading,
       loaded,
       data,
-    };
-  },
-  [SCENE_SCENE_CREATE](scene, { payload: scene3D }) {
-    return {
-      ...scene,
-      scene3D,
-    };
-  },
-  [SCENE_CAMERA_CREATE](scene, { payload: camera }) {
-    return {
-      ...scene,
-      camera,
-    };
-  },
-  [SCENE_CAMERA_TRANSLATE](scene, { payload: vector3 }) {
-    const { cameraPosition } = scene;
-    return {
-      ...scene,
-      cameraPosition: {
-        ...cameraPosition,
-        vector3,
-      },
-    };
-  },
-  [SCENE_RENDERER_CREATE](scene, { payload: renderer }) {
-    return {
-      ...scene,
-      renderer,
     };
   },
 });

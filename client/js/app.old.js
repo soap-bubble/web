@@ -32,7 +32,7 @@ bySceneId(qp.scene || 1050)
 
     camera.position.z = -0.20;
     renderer(() => {
-      hotspots.object3D.rotation.y += 0.005;
+      hotspots.visibleObject3D.rotation.y += 0.005;
       pano.object3D.rotation.y += 0.005;
       scene.render();
     });

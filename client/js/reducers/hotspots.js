@@ -3,8 +3,10 @@ import {
   HOTSPOTS_UVS_CREATE,
   HOTSPOTS_INDEX_CREATE,
   HOTSPOTS_GEOMETRY_CREATE,
-  HOTSPOTS_MATERIAL_CREATE,
-  HOTSPOTS_OBJECT_CREATE,
+  HOTSPOTS_HIT_MATERIAL_CREATE,
+  HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+  HOTSPOTS_HIT_OBJECT_CREATE,
+  HOTSPOTS_VISIBLE_OBJECT_CREATE,
   HOTSPOTS_THETA,
 } from '../actions/types';
 import createReducer from './createReducer';
@@ -36,16 +38,28 @@ const reducer = createReducer({
       index,
     };
   },
-  [HOTSPOTS_MATERIAL_CREATE](hotspots, { payload: material }) {
+  [HOTSPOTS_HIT_MATERIAL_CREATE](hotspots, { payload: hitMaterial }) {
     return {
       ...hotspots,
-      material,
+      hitMaterial,
     };
   },
-  [HOTSPOTS_OBJECT_CREATE](hotspots, { payload: object3D }) {
+  [HOTSPOTS_VISIBLE_MATERIAL_CREATE](hotspots, { payload: visibleMaterial }) {
     return {
       ...hotspots,
-      object3D,
+      visibleMaterial,
+    };
+  },
+  [HOTSPOTS_VISIBLE_OBJECT_CREATE](hotspots, { payload: visibleObject3D }) {
+    return {
+      ...hotspots,
+      visibleObject3D,
+    };
+  },
+  [HOTSPOTS_HIT_OBJECT_CREATE](hotspots, { payload: hitObject3D }) {
+    return {
+      ...hotspots,
+      hitObject3D,
     };
   },
   [HOTSPOTS_THETA](hotspots, { payload: theta }) {

@@ -1,11 +1,12 @@
 import { connect } from 'react-redux';
 import {
   fetchScene,
-  canvasCreated,
 } from '../../actions/scene';
 import {
+  canvasCreated,
   sceneCreate,
 } from '../../actions/pano';
+
 import Canvas from '../presentations/Canvas';
 import momentum from '../../morpheus/momentum';
 

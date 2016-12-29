@@ -24,7 +24,9 @@ function mapStateToProps({ scene, dimensions }) {
 }
 
 function mapDisptachToProps(dispatch) {
-  return Object.assign({
+  momentum(dispatch);
+
+  return {
     fetchScene(id) {
       dispatch(fetchScene(id))
         .then(() => {
@@ -34,7 +36,7 @@ function mapDisptachToProps(dispatch) {
     createAction(canvas) {
       dispatch(canvasCreated(canvas));
     }
-  }, momentum(dispatch));
+  };
 }
 
 const Scene = connect(

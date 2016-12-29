@@ -5,3 +5,7 @@ body {
 canvas {
   position: absolute;
 }
+
+div#mouse {
+  position: absolute;;
+}

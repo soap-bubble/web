@@ -88,6 +88,7 @@ export function createPositions(hotspotsData) {
       ];
     }).forEach(([bottomLeft, bottomRight, topRight, topLeft], index) => {
       const offset = index * HOTSPOT_VERTEX_SIZE;
+
       visiblePositions.setXYZ(offset, bottomLeft.x, bottomLeft.y, bottomLeft.z);
       visiblePositions.setXYZ(offset + 1, bottomRight.x, bottomRight.y, bottomRight.z);
       visiblePositions.setXYZ(offset + 2, topRight.x, topRight.y, topRight.z);
@@ -188,38 +189,56 @@ export function createGeometry({
   }
 }
 
-export function createHitMaterial() {
-  return {
-    type: HOTSPOTS_HIT_MATERIAL_CREATE,
-    payload: new MeshBasicMaterial({
-      color: 0x0000ff,
-      side: THREE.DoubleSide,
-    }),
-  };
-}
-
-export function createVisibleMaterial() {
-  return {
-    type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
-    payload: new MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.3,
-      color: 0x00ff00,
-      side: THREE.DoubleSide,
-    }),
-  };
-}
-
-export function createObject3D({ type, geometry, material }) {
-  return (dispatch, getState) => {
-    const { theta } = getState().hotspots;
-
-    const mesh = new Mesh(geometry, material);
-    mesh.rotation.y += theta;
+export function createMaterials() {
+  return (dispatch) => {
     dispatch({
-      type,
-      payload: mesh,
+      type: HOTSPOTS_HIT_MATERIAL_CREATE,
+      payload: new MeshBasicMaterial({
+        color: 0x0000ff,
+        side: THREE.DoubleSide,
+      }),
     });
+    dispatch({
+      type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+      payload: new MeshBasicMaterial({
+        transparent: true,
+        opacity: 0.3,
+        color: 0x00ff00,
+        side: THREE.DoubleSide,
+      }),
+    });
+  };
+}
+
+export function createObjects3D() {
+  return (dispatch, getState) => {
+    const {
+      theta,
+      visibleGeometry,
+      visibleMaterial,
+      hitGeometry,
+      hitMaterial,
+    } = getState().hotspots;
+
+    function createObject3D({ type, geometry, material }) {
+      const mesh = new Mesh(geometry, material);
+      mesh.rotation.y += theta;
+      return {
+        type,
+        payload: mesh,
+      };
+    }
+
+    dispatch(createObject3D({
+      type: HOTSPOTS_VISIBLE_OBJECT_CREATE,
+      geometry: getState().hotspots.visibleGeometry,
+      material: getState().hotspots.visibleMaterial,
+    }));
+    dispatch(createObject3D({
+      type: HOTSPOTS_HIT_OBJECT_CREATE,
+      geometry: getState().hotspots.hitGeometry,
+      material: getState().hotspots.hitMaterial,
+    }));
   };
 }
 
@@ -252,18 +271,10 @@ export function createHotspots() {
     dispatch(createUvs(hotspotsData.length));
     dispatch(createIndex(hotspotsData.length));
     dispatch(createGeometry(getState().hotspots));
-    dispatch(createVisibleMaterial());
-    dispatch(createHitMaterial());
-    dispatch(createObject3D({
-      type: HOTSPOTS_VISIBLE_OBJECT_CREATE,
-      geometry: getState().hotspots.visibleGeometry,
-      material: getState().hotspots.visibleMaterial,
-    }));
-    dispatch(createObject3D({
-      type: HOTSPOTS_HIT_OBJECT_CREATE,
-      geometry: getState().hotspots.hitGeometry,
-      material: getState().hotspots.hitMaterial,
-    }));
+    dispatch(createMaterials());
+    dispatch(createObjects3D());
+    dispatch(buildScene());
+    dispatch(buildRig());
   }
 }
 

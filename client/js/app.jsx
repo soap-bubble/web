@@ -9,16 +9,10 @@ import store from './store';
 import World from './react/presentations/World';
 import { fetchScene } from './actions/scene';
 import {
-  buildScene as buildPanoScene,
-  buildRig as buildPanoRig,
+  createPano,
   startRenderLoop as startPanoRenderLoop,
   positionCamera,
  } from './actions/pano';
-import {
-  buildScene as buildHotspotsScene,
-  buildRig as buildHotspotsRig,
-  startRenderLoop as startHotspotsRenderLoop,
-} from './actions/hotspots';
 import { resize } from './actions/dimensions';
 const qp = qs.parse(location.search);
 
@@ -39,14 +33,10 @@ window.onload = () => {
 
   store.dispatch(fetchScene(qp.scene || 1050))
     .then(() => {
-      store.dispatch(buildPanoScene());
-      store.dispatch(buildPanoRig());
-      store.dispatch(buildHotspotsScene());
-      store.dispatch(buildHotspotsRig());
+      store.dispatch(createPano());
       resizeToWindow();
       store.dispatch(positionCamera({ z: -0.4 }));
       store.dispatch(startPanoRenderLoop());
-      store.dispatch(startHotspotsRenderLoop());
     });
 
   window.addEventListener('resize', () => {

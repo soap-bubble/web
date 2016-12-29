@@ -13,6 +13,7 @@ import { range } from 'lodash';
 import {
   createHotspots,
   positionCamera as positionHotspotCamera,
+  startRenderLoop as startPanoRenderLoop,
  } from './hotspots';
 import {
   createCameraForType,
@@ -131,6 +132,9 @@ export function createPano() {
     dispatch(createGeometries(fileNames));
     dispatch(createMaterials(fileNames));
     dispatch(createObject3D(getState().pano));
+    dispatch(createHotspots());
+    dispatch(buildScene());
+    dispatch(buildRig());
   };
 }
 
@@ -200,7 +204,6 @@ export function setSensitivity(sensitivity) {
 
 export function buildScene() {
   return (dispatch, getState) => {
-    dispatch(createPano());
     dispatch(createHotspots());
     const objects = [];
     objects.push(getState().pano.object3D);
@@ -264,5 +267,6 @@ export function startRenderLoop() {
       type: PANO_RENDER_LOOP,
       payload: addToRenderLoop(() => renderer.render(scene3D, camera)),
     });
+    dispatch(startPanoRenderLoop());
   };
 }

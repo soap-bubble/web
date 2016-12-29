@@ -47,9 +47,9 @@ const MousePresentation = ({
 )
 
 MousePresentation.propTypes = {
-  onMouseUp: PropTypes.array.isRequired,
-  onMouseMove: PropTypes.array.isRequired,
-  onMouseDown: PropTypes.array.isRequired,
+  onMouseUp: PropTypes.func.isRequired,
+  onMouseMove: PropTypes.func.isRequired,
+  onMouseDown: PropTypes.func.isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
 };

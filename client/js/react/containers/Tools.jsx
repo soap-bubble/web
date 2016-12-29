@@ -4,10 +4,11 @@ import {
   GUI,
   Folder,
   Number as DGNumber,
+  Checkbox,
 } from 'dis-gui';
 
 import { setSensitivity, positionCamera } from '../../actions/pano';
-import { setHotspotsTheta } from '../../actions/hotspots';
+import { setHotspotsTheta, setHotspotsVisibility } from '../../actions/hotspots';
 import store from '../../store';
 
 function mapStateToProps({ scene, pano, hotspots }) {
@@ -21,12 +22,14 @@ function mapStateToProps({ scene, pano, hotspots }) {
 
   const {
     theta: hotspotsTheta,
+    visible: hotspotsVisible,
   } = hotspots;
 
   return {
     camera,
     sensitivity,
     hotspotsTheta,
+    hotspotsVisible,
   };
 }
 
@@ -41,6 +44,9 @@ function mapDisptachToProps(dispatch) {
     setHotspotsTheta(theta) {
       dispatch(setHotspotsTheta(theta));
     },
+    setHotspotsVisibility(value) {
+      dispatch(setHotspotsVisibility(value));
+    }
   };
 }
 
@@ -48,9 +54,11 @@ const Tools = ({
   camera,
   sensitivity,
   hotspotsTheta,
+  hotspotsVisible,
   setHotspotsTheta,
   setCameraPositionZ,
-  setSensitivity
+  setSensitivity,
+  setHotspotsVisibility,
 }) => {
   const cameraTools = [];
   if (camera) {
@@ -62,10 +70,11 @@ const Tools = ({
         {cameraTools}
       </Folder>
       <Folder label='Scene'>
-        <DGNumber label="Sensitivity" key="scene:sensitivity" value={sensitivity} min={20} max={200} step={1} onChange={setSensitivity}/>
+        <DGNumber label='Sensitivity' value={sensitivity} min={20} max={200} step={1} onChange={setSensitivity}/>
       </Folder>
       <Folder label='Hotspots'>
-        <DGNumber label="Theta" key="hotspots:theta" value={hotspotsTheta} min={-Math.PI} max={Math.PI} step={0.0001} onChange={setHotspotsTheta}/>
+        <DGNumber label='Theta' value={hotspotsTheta} min={-Math.PI} max={Math.PI} step={0.0001} onChange={setHotspotsTheta}/>
+        <Checkbox label='Visible' checked={hotspotsVisible} onChange={setHotspotsVisibility}/>
       </Folder>
     </GUI>
   );

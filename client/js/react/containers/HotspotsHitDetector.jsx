@@ -5,6 +5,7 @@ import {
   canvasCreated,
   sceneCreate,
 } from '../../actions/hotspots';
+import hotspots from '../../morpheus/hotspots';
 
 function mapStateToProps({ dimensions }) {
   const { width, height } = dimensions;
@@ -16,26 +17,11 @@ function mapStateToProps({ dimensions }) {
 }
 
 function mapDisptachToProps(dispatch) {
-  let canvas;
-  const pixel = new Uint8Array(4);
-
   return {
-    createAction(_canvas) {
-      canvas = _canvas;
-      dispatch(canvasCreated(_canvas));
+    createAction(canvas) {
+      dispatch(canvasCreated(canvas));
+      hotspots({ dispatch, canvas });
     },
-    onMouseDown(mouseEvent) {
-
-    },
-    onMouseUp(mouseEvent) {
-
-    },
-    onMouseMove(mouseEvent) {
-      // const { clientX: left, clientY: top } = mouseEvent;
-      // const gl = canvas.getContext('webgl');
-      // gl.readPixels(left, top, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-      // console.log(left, top, pixel);
-    }
   };
 }
 

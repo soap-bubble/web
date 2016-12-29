@@ -29,6 +29,7 @@ import {
   HOTSPOTS_HIT_OBJECT_CREATE,
   HOTSPOTS_CANVAS_CREATED,
   HOTSPOTS_THETA,
+  HOTSPOTS_SET_VISIBILITY,
   HOTSPOTS_SCENE_CREATE,
   HOTSPOTS_CAMERA_CREATE,
   HOTSPOTS_CAMERA_TRANSLATE,
@@ -258,6 +259,30 @@ export function setHotspotsTheta(theta) {
     dispatch({
       type: HOTSPOTS_THETA,
       payload: theta,
+    });
+  };
+}
+
+export function setHotspotsVisibility(visible) {
+  return (dispatch, getState) => {
+    const { hotspots, pano } = getState();
+    const { visible: currentVisible } = hotspots;
+    if (visible === currentVisible) return;
+
+    const { scene3D } = pano;
+    const { visibleObject3D } = hotspots;
+
+    if (visible === true) {
+      scene3D.add(visibleObject3D);
+    } else if (visible === false){
+      scene3D.remove(visibleObject3D);
+    } else {
+      return;
+    }
+
+    dispatch({
+      type: HOTSPOTS_SET_VISIBILITY,
+      payload: visible,
     });
   };
 }

@@ -204,10 +204,14 @@ export function setSensitivity(sensitivity) {
 
 export function buildScene() {
   return (dispatch, getState) => {
+    const { hotspots } = getState();
+
     dispatch(createHotspots());
     const objects = [];
     objects.push(getState().pano.object3D);
-    objects.push(getState().hotspots.visibleObject3D);
+    if (hotspots.visible) {
+      objects.push(getState().hotspots.visibleObject3D);
+    }
     dispatch(createScene(objects));
   }
 }

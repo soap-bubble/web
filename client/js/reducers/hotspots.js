@@ -13,6 +13,7 @@ import {
   HOTSPOTS_HIT_OBJECT_CREATE,
   HOTSPOTS_VISIBLE_OBJECT_CREATE,
   HOTSPOTS_THETA,
+  HOTSPOTS_SET_VISIBILITY,
   HOTSPOTS_SCENE_CREATE,
   HOTSPOTS_CAMERA_CREATE,
   HOTSPOTS_CAMERA_TRANSLATE,
@@ -23,6 +24,7 @@ import createReducer from './createReducer';
 
 const reducer = createReducer({
   theta: -Math.PI / 2,
+  visible: false,
 }, {
   [HOTSPOTS_CANVAS_CREATED](hotspots, { payload: canvas }) {
     return {
@@ -107,6 +109,12 @@ const reducer = createReducer({
       ...hotspots,
       theta,
     }
+  },
+  [HOTSPOTS_SET_VISIBILITY](hotspots, { payload: visible }) {
+    return {
+      ...hotspots,
+      visible,
+    };
   },
   [HOTSPOTS_SCENE_CREATE](hotspots, { payload: scene3D }) {
     return {

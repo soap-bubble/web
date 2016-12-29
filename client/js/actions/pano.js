@@ -207,10 +207,10 @@ export function buildScene() {
     const { hotspots } = getState();
 
     dispatch(createHotspots());
-    const objects = [];
+    let objects = [];
     objects.push(getState().pano.object3D);
     if (hotspots.visible) {
-      objects.push(getState().hotspots.visibleObject3D);
+      objects = objects.concat(getState().hotspots.visibleObject3D);
     }
     dispatch(createScene(objects));
   }

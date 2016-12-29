@@ -6,6 +6,7 @@ import THREE, {
   Mesh,
   Scene,
   WebGLRenderer,
+  Object3D,
 } from 'three';
 
 import {
@@ -30,6 +31,7 @@ import {
   HOTSPOTS_CANVAS_CREATED,
   HOTSPOTS_THETA,
   HOTSPOTS_SET_VISIBILITY,
+  HOTSPOTS_SET_HIT_COLORS,
   HOTSPOTS_SCENE_CREATE,
   HOTSPOTS_CAMERA_CREATE,
   HOTSPOTS_CAMERA_TRANSLATE,
@@ -61,12 +63,8 @@ export function canvasCreated(canvas) {
 
 export function createPositions(hotspotsData) {
   return (dispatch) => {
-    const visiblePositions = new BufferAttribute(
-      new Float32Array(hotspotsData.length * 12), 3,
-    );
-    const hitPositions = new BufferAttribute(
-      new Float32Array(hotspotsData.length * 12), 3,
-    );
+    const visiblePositionsList = [];
+    const hitPositionsList = [];
 
     hotspotsData.map((hotspotData) => {
       let {
@@ -90,156 +88,210 @@ export function createPositions(hotspotsData) {
     }).forEach(([bottomLeft, bottomRight, topRight, topLeft], index) => {
       const offset = index * HOTSPOT_VERTEX_SIZE;
 
-      visiblePositions.setXYZ(offset, bottomLeft.x, bottomLeft.y, bottomLeft.z);
-      visiblePositions.setXYZ(offset + 1, bottomRight.x, bottomRight.y, bottomRight.z);
-      visiblePositions.setXYZ(offset + 2, topRight.x, topRight.y, topRight.z);
-      visiblePositions.setXYZ(offset + 3, topLeft.x, topLeft.y, topLeft.z);
+      const visiblePositions = new BufferAttribute(
+        new Float32Array(12), 3,
+      );
 
-      hitPositions.setXYZ(offset, bottomLeft.x, bottomLeft.y, bottomLeft.z);
-      hitPositions.setXYZ(offset + 1, bottomRight.x, bottomRight.y, bottomRight.z);
-      hitPositions.setXYZ(offset + 2, topRight.x, topRight.y, topRight.z);
-      hitPositions.setXYZ(offset + 3, topLeft.x, topLeft.y, topLeft.z);
+      const hitPositions = new BufferAttribute(
+        new Float32Array(12), 3,
+      );
+
+      visiblePositions.setXYZ(0, bottomLeft.x, bottomLeft.y, bottomLeft.z);
+      visiblePositions.setXYZ(1, bottomRight.x, bottomRight.y, bottomRight.z);
+      visiblePositions.setXYZ(2, topRight.x, topRight.y, topRight.z);
+      visiblePositions.setXYZ(3, topLeft.x, topLeft.y, topLeft.z);
+
+      hitPositions.setXYZ(0, bottomLeft.x, bottomLeft.y, bottomLeft.z);
+      hitPositions.setXYZ(1, bottomRight.x, bottomRight.y, bottomRight.z);
+      hitPositions.setXYZ(2, topRight.x, topRight.y, topRight.z);
+      hitPositions.setXYZ(3, topLeft.x, topLeft.y, topLeft.z);
+
+      visiblePositionsList.push(visiblePositions);
+      hitPositionsList.push(hitPositions);
     });
     dispatch({
       type: HOTSPOTS_VISIBLE_POSITIONS_CREATE,
-      payload: visiblePositions,
+      payload: visiblePositionsList,
     });
     dispatch({
       type: HOTSPOTS_HIT_POSITIONS_CREATE,
-      payload: hitPositions,
+      payload: hitPositionsList,
     });
   };
 }
 
 export function createUvs(count) {
   return (dispatch) => {
-    const visibleUvs = new BufferAttribute(new Float32Array(count * 8), 2);
-    const hitUvs = new BufferAttribute(new Float32Array(count * 8), 2);
-    for (let i = 0; i < count; i += 1) {
-      const offset = i * HOTSPOT_VERTEX_SIZE;
-      visibleUvs.setXY(offset, 0.0, 0.0);
-      visibleUvs.setXY(offset + 1, 1.0, 0.0);
-      visibleUvs.setXY(offset + 2, 1.0, 1.0);
-      visibleUvs.setXY(offset + 3, 0.0, 1.0);
+    const visibleUvsList = [];
+    const hitUvsList = [];
 
-      hitUvs.setXY(offset, 0.0, 0.0);
-      hitUvs.setXY(offset + 1, 1.0, 0.0);
-      hitUvs.setXY(offset + 2, 1.0, 1.0);
-      hitUvs.setXY(offset + 3, 0.0, 1.0);
+    for (let i = 0; i < count; i += 1) {
+      const visibleUvs = new BufferAttribute(new Float32Array(8), 2);
+      const hitUvs = new BufferAttribute(new Float32Array(8), 2);
+
+      const offset = i * HOTSPOT_VERTEX_SIZE;
+      visibleUvs.setXY(0, 0.0, 0.0);
+      visibleUvs.setXY(1, 1.0, 0.0);
+      visibleUvs.setXY(2, 1.0, 1.0);
+      visibleUvs.setXY(3, 0.0, 1.0);
+
+      hitUvs.setXY(0, 0.0, 0.0);
+      hitUvs.setXY(1, 1.0, 0.0);
+      hitUvs.setXY(2, 1.0, 1.0);
+      hitUvs.setXY(3, 0.0, 1.0);
+
+      visibleUvsList.push(visibleUvs);
+      hitUvsList.push(hitUvs);
     }
     dispatch({
       type: HOTSPOTS_VISIBLE_UVS_CREATE,
-      payload: visibleUvs,
+      payload: visibleUvsList,
     });
     dispatch({
       type: HOTSPOTS_HIT_UVS_CREATE,
-      payload: hitUvs,
+      payload: hitUvsList,
     });
   };
 }
 
 export function createIndex(count) {
   return (dispatch) => {
-    const indices = [];
+    const indicesList = [];
     for (let i = 0; i < count; i += 1) {
-      const offset = i * HOTSPOT_VERTEX_SIZE;
+      const indices = [];
       indices.push(
-        offset, offset + 1, offset + 2,
-        offset, offset + 2, offset + 3,
+        0, 1, 2,
+        0, 2, 3,
       );
+      indicesList.push(new Uint16Attribute(indices, 1));
     }
     dispatch({
       type: HOTSPOTS_VISIBLE_INDEX_CREATE,
-      payload: new Uint16Attribute(indices, 1),
+      payload: indicesList,
     });
     dispatch({
       type: HOTSPOTS_HIT_INDEX_CREATE,
-      payload: new Uint16Attribute([].concat(indices), 1),
+      payload: indicesList,
     });
   };
 }
 
 export function createGeometry({
-  visibleIndex,
-  visibleUvs,
-  visiblePositions,
-  hitIndex,
-  hitUvs,
-  hitPositions,
+  count,
+  visibleIndexList,
+  visibleUvsList,
+  visiblePositionsList,
+  hitIndexList,
+  hitUvsList,
+  hitPositionsList,
 }) {
   return (dispatch) => {
-    const visibleGeometry = new BufferGeometry();
-    const hitGeometry = new BufferGeometry();
+    const visibleGeometryList = [];
+    const hitGeometryList = [];
 
-    visibleGeometry.setIndex(visibleIndex);
-    visibleGeometry.addAttribute('position', visiblePositions);
-    visibleGeometry.addAttribute('uv', visibleUvs);
+    for (let i = 0; i < count; i++) {
+      const visibleGeometry = new BufferGeometry();
+      const hitGeometry = new BufferGeometry();
 
-    hitGeometry.setIndex(hitIndex);
-    hitGeometry.addAttribute('position', hitPositions);
-    hitGeometry.addAttribute('uv', hitUvs);
+      visibleGeometry.setIndex(visibleIndexList[i]);
+      visibleGeometry.addAttribute('position', visiblePositionsList[i]);
+      visibleGeometry.addAttribute('uv', visibleUvsList[i]);
+
+      hitGeometry.setIndex(hitIndexList[i]);
+      hitGeometry.addAttribute('position', hitPositionsList[i]);
+      hitGeometry.addAttribute('uv', hitUvsList[i]);
+
+      visibleGeometryList.push(visibleGeometry);
+      hitGeometryList.push(hitGeometry);
+    }
 
     dispatch({
       type: HOTSPOTS_VISIBLE_GEOMETRY_CREATE,
-      payload: visibleGeometry,
+      payload: visibleGeometryList,
     });
     dispatch({
       type: HOTSPOTS_HIT_GEOMETRY_CREATE,
-      payload: hitGeometry,
+      payload: hitGeometryList,
     });
   }
 }
 
-export function createMaterials() {
+export function createMaterials(count) {
   return (dispatch) => {
-    dispatch({
-      type: HOTSPOTS_HIT_MATERIAL_CREATE,
-      payload: new MeshBasicMaterial({
-        color: 0x0000ff,
-        side: THREE.DoubleSide,
-      }),
-    });
-    dispatch({
-      type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
-      payload: new MeshBasicMaterial({
+    const visibleMaterialList = [];
+    const hitMaterialList = [];
+    const hitColorList = [];
+    for (let i = 0; i < count; i++) {
+      let hitColor;
+      while(!hitColor || hitColorList.indexOf(hitColor) !== -1) {
+        hitColor = Math.floor(Math.random() * 0xFFFFFF);
+      }
+      hitColorList.push(hitColor);
+      visibleMaterialList.push(new MeshBasicMaterial({
         transparent: true,
         opacity: 0.3,
         color: 0x00ff00,
         side: THREE.DoubleSide,
-      }),
+      }));
+      hitMaterialList.push(new MeshBasicMaterial({
+        color: hitColor,
+        side: THREE.DoubleSide,
+      }))
+    }
+
+    dispatch({
+      type: HOTSPOTS_SET_HIT_COLORS,
+      payload: hitColorList,
+    });
+    dispatch({
+      type: HOTSPOTS_HIT_MATERIAL_CREATE,
+      payload: hitMaterialList,
+    });
+    dispatch({
+      type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+      payload: visibleMaterialList,
     });
   };
 }
 
-export function createObjects3D() {
+export function createObjects3D(count) {
   return (dispatch, getState) => {
     const {
       theta,
-      visibleGeometry,
-      visibleMaterial,
-      hitGeometry,
-      hitMaterial,
+      visibleGeometryList,
+      visibleMaterialList,
+      hitGeometryList,
+      hitMaterialList,
     } = getState().hotspots;
 
-    function createObject3D({ type, geometry, material }) {
+    function createObject3D({ geometry, material }) {
       const mesh = new Mesh(geometry, material);
       mesh.rotation.y += theta;
-      return {
-        type,
-        payload: mesh,
-      };
+      return mesh;
     }
 
-    dispatch(createObject3D({
+    const visibleObject = new Object3D();
+    const hitObject = new Object3D();
+
+    for (let i = 0; i < count; i++) {
+      visibleObject.add(createObject3D({
+        geometry: visibleGeometryList[i],
+        material: visibleMaterialList[i],
+      }));
+      hitObject.add(createObject3D({
+        geometry: hitGeometryList[i],
+        material: hitMaterialList[i],
+      }));
+    }
+
+    dispatch({
       type: HOTSPOTS_VISIBLE_OBJECT_CREATE,
-      geometry: getState().hotspots.visibleGeometry,
-      material: getState().hotspots.visibleMaterial,
-    }));
-    dispatch(createObject3D({
+      payload: visibleObject,
+    });
+    dispatch({
       type: HOTSPOTS_HIT_OBJECT_CREATE,
-      geometry: getState().hotspots.hitGeometry,
-      material: getState().hotspots.hitMaterial,
-    }));
+      payload: hitObject,
+    });
   };
 }
 
@@ -295,9 +347,12 @@ export function createHotspots() {
     dispatch(createPositions(hotspotsData));
     dispatch(createUvs(hotspotsData.length));
     dispatch(createIndex(hotspotsData.length));
-    dispatch(createGeometry(getState().hotspots));
-    dispatch(createMaterials());
-    dispatch(createObjects3D());
+    dispatch(createGeometry({
+      count: hotspotsData.length,
+      ...getState().hotspots,
+    }));
+    dispatch(createMaterials(hotspotsData.length));
+    dispatch(createObjects3D(hotspotsData.length));
     dispatch(buildScene());
     dispatch(buildRig());
   }
@@ -305,9 +360,7 @@ export function createHotspots() {
 
 export function buildScene() {
   return (dispatch, getState) => {
-    const objects = [];
-    objects.push(getState().hotspots.hitObject3D);
-    dispatch(createScene(objects));
+    dispatch(createScene([ getState().hotspots.hitObject3D ]));
   }
 }
 

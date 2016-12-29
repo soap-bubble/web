@@ -18,7 +18,7 @@ export default function ({
     const { clientX: left, clientY: top } = mouseEvent;
     const gl = canvas.getContext('webgl');
     gl.readPixels(left, top, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-    console.log(left, top, pixel);
+    // console.log(left, top, pixel);
   }
 
   function onMouseDown(mouseEvent) {

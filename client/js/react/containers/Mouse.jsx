@@ -2,7 +2,7 @@ import React, { PropTypes } from 'react';
 import cn from 'classnames';
 import { connect } from 'react-redux';
 
-function mapStateToProps({ ui, dimensions }) {
+function mapStateToProps({ ui, dimensions, hotspots }) {
   const {
     onMouseUp: onMouseUpCallbacks,
     onMouseMove: onMouseMoveCallbacks,
@@ -12,6 +12,9 @@ function mapStateToProps({ ui, dimensions }) {
     width,
     height,
   } = dimensions;
+  const {
+    hoverIndex
+  } = hotspots;
 
   return {
     onMouseUp(mouseEvent) {
@@ -25,6 +28,7 @@ function mapStateToProps({ ui, dimensions }) {
     },
     width,
     height,
+    hoverIndex,
   };
 }
 
@@ -34,11 +38,13 @@ const MousePresentation = ({
   onMouseDown,
   width,
   height,
+  hoverIndex,
 }) => (
   <div id="mouse"
     style={{
       width,
       height,
+      cursor: hoverIndex !== null ? 'pointer' : hoverIndex,
     }}
     onMouseUp={onMouseUp}
     onMouseMove={onMouseMove}

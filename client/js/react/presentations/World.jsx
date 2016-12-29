@@ -7,8 +7,8 @@ import Mouse from '../containers/Mouse';
 const World = () => {
   return (
     <div>
-      <Scene />
       <Hotspots />
+      <Scene />
       <Mouse />
       <Tools />
     </div>

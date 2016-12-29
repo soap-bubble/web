@@ -15,6 +15,7 @@ import {
   HOTSPOTS_THETA,
   HOTSPOTS_SET_VISIBILITY,
   HOTSPOTS_SET_HIT_COLORS,
+  HOTSPOTS_HOVER_INDEX,
   HOTSPOTS_SCENE_CREATE,
   HOTSPOTS_CAMERA_CREATE,
   HOTSPOTS_CAMERA_TRANSLATE,
@@ -25,7 +26,9 @@ import createReducer from './createReducer';
 
 const reducer = createReducer({
   theta: -Math.PI / 2,
-  visible: true,
+  visible: false,
+  hoverIndex: null,
+  hitColorList: [],
 }, {
   [HOTSPOTS_CANVAS_CREATED](hotspots, { payload: canvas }) {
     return {
@@ -121,6 +124,12 @@ const reducer = createReducer({
     return {
       ...hotspots,
       hitColorList,
+    };
+  },
+  [HOTSPOTS_HOVER_INDEX](hotspots, { payload: hoverIndex }) {
+    return {
+      ...hotspots,
+      hoverIndex,
     };
   },
   [HOTSPOTS_SCENE_CREATE](hotspots, { payload: scene3D }) {

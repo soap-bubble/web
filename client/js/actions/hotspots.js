@@ -32,6 +32,7 @@ import {
   HOTSPOTS_THETA,
   HOTSPOTS_SET_VISIBILITY,
   HOTSPOTS_SET_HIT_COLORS,
+  HOTSPOTS_HOVER_INDEX,
   HOTSPOTS_SCENE_CREATE,
   HOTSPOTS_CAMERA_CREATE,
   HOTSPOTS_CAMERA_TRANSLATE,
@@ -336,6 +337,13 @@ export function setHotspotsVisibility(visible) {
       type: HOTSPOTS_SET_VISIBILITY,
       payload: visible,
     });
+  };
+}
+
+export function setHoverIndex(index) {
+  return {
+    type: HOTSPOTS_HOVER_INDEX,
+    payload: index,
   };
 }
 

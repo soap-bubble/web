@@ -1,6 +1,11 @@
 import { DIMENSIONS_RESIZE } from './types';
 
 export function resize({ width, height }) {
+  function setSize({ camera, renderer}) {
+    renderer.setSize(width, height);
+    camera.aspect	= width / height;
+    camera.updateProjectionMatrix();
+  }
   return (dispatch, getState) => {
     dispatch({
       type: DIMENSIONS_RESIZE,
@@ -9,10 +14,8 @@ export function resize({ width, height }) {
         height,
       },
     });
-    const { camera, renderer } = getState().pano;
-    renderer.setSize(width, height);
-		camera.aspect	= width / height;
-		camera.updateProjectionMatrix();
+    setSize(getState().pano);
+    setSize(getState().hotspots);
   };
 }
 

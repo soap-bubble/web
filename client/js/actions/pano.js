@@ -10,7 +10,10 @@ import {
   Scene,
 } from 'three';
 import { range } from 'lodash';
-import { createHotspots } from './hotspots';
+import {
+  createHotspots,
+  positionCamera as positionHotspotCamera,
+ } from './hotspots';
 import {
   createCameraForType,
   createRendererForType,
@@ -240,6 +243,7 @@ export function positionCamera(vector3) {
       vector3,
       camera,
     }));
+    dispatch(positionHotspotCamera(vector3));
   };
 }
 

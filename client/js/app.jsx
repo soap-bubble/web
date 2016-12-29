@@ -8,7 +8,17 @@ import qs from 'query-string';
 import store from './store';
 import World from './react/presentations/World';
 import { fetchScene } from './actions/scene';
-import { buildScene, buildRig, startRenderLoop, positionCamera } from './actions/pano';
+import {
+  buildScene as buildPanoScene,
+  buildRig as buildPanoRig,
+  startRenderLoop as startPanoRenderLoop,
+  positionCamera,
+ } from './actions/pano';
+import {
+  buildScene as buildHotspotsScene,
+  buildRig as buildHotspotsRig,
+  startRenderLoop as startHotspotsRenderLoop,
+} from './actions/hotspots';
 import { resize } from './actions/dimensions';
 const qp = qs.parse(location.search);
 
@@ -29,11 +39,14 @@ window.onload = () => {
 
   store.dispatch(fetchScene(qp.scene || 1050))
     .then(() => {
-      store.dispatch(buildScene());
-      store.dispatch(buildRig());
+      store.dispatch(buildPanoScene());
+      store.dispatch(buildPanoRig());
+      store.dispatch(buildHotspotsScene());
+      store.dispatch(buildHotspotsRig());
       resizeToWindow();
       store.dispatch(positionCamera({ z: -0.4 }));
-      store.dispatch(startRenderLoop());
+      store.dispatch(startPanoRenderLoop());
+      store.dispatch(startHotspotsRenderLoop());
     });
 
   window.addEventListener('resize', () => {

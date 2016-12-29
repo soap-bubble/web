@@ -14,13 +14,10 @@ function mapStateToProps({ scene, dimensions }) {
   const {
     current: id,
     data,
-    interaction,
-    interactionMomemtum,
   } = scene || {};
   const { width, height } = dimensions;
   return {
     id,
-    data,
     width,
     height,
   };

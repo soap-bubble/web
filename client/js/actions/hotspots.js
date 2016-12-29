@@ -4,30 +4,43 @@ import THREE, {
   MeshBasicMaterial,
   BufferGeometry,
   Mesh,
+  Scene,
+  WebGLRenderer,
 } from 'three';
 
 import {
-  HOTSPOTS_INDEX_CREATE,
-  HOTSPOTS_POSITIONS_CREATE,
-  HOTSPOTS_UVS_CREATE,
-  HOTSPOTS_GEOMETRY_CREATE,
+  createCameraForType,
+  createRendererForType,
+  positionCameraForType,
+  addToRenderLoop,
+} from './common/three';
+import {
+  HOTSPOTS_VISIBLE_POSITIONS_CREATE,
+  HOTSPOTS_VISIBLE_UVS_CREATE,
+  HOTSPOTS_VISIBLE_INDEX_CREATE,
+  HOTSPOTS_VISIBLE_GEOMETRY_CREATE,
   HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+  HOTSPOTS_VISIBLE_OBJECT_CREATE,
+  HOTSPOTS_HIT_POSITIONS_CREATE,
+  HOTSPOTS_HIT_UVS_CREATE,
+  HOTSPOTS_HIT_INDEX_CREATE,
+  HOTSPOTS_HIT_GEOMETRY_CREATE,
   HOTSPOTS_HIT_MATERIAL_CREATE,
   HOTSPOTS_HIT_OBJECT_CREATE,
-  HOTSPOTS_VISIBLE_OBJECT_CREATE,
+  HOTSPOTS_CANVAS_CREATED,
   HOTSPOTS_THETA,
-  HOTSPOT_SCENE_CREATE,
-  HOTSPOT_CAMERA_CREATE,
-  HOTSPOT_CAMERA_TRANSLATE,
-  HOTSPOT_RENDERER_CREATE,
-  HOTSPOT_RENDER_LOOP,
+  HOTSPOTS_SCENE_CREATE,
+  HOTSPOTS_CAMERA_CREATE,
+  HOTSPOTS_CAMERA_TRANSLATE,
+  HOTSPOTS_RENDERER_CREATE,
+  HOTSPOTS_RENDER_LOOP,
 } from './types';
 
 const HOTSPOT_VERTEX_SIZE = 4;
 const SCALE_FACTOR = 1.0;
 const HOTSPOT_X_OFFSET = Math.PI / 3;
 const HOTSPOT_X_COORD_FACTOR = Math.PI / -1800;
-const HOTSPOT_Y_COORD_FACTOR = 0.004 * SCALE_FACTOR;
+const HOTSPOT_Y_COORD_FACTOR = 0.0022 * SCALE_FACTOR;
 const SIZE = 0.99 * SCALE_FACTOR;
 
 function cylinderMap(y, x) {
@@ -38,91 +51,148 @@ function cylinderMap(y, x) {
   };
 }
 
-export function createPositions(hotspotsData) {
-  const positions = new BufferAttribute(
-    new Float32Array(hotspotsData.length * 12), 3,
-  );
-
-  hotspotsData.map((hotspotData) => {
-    let {
-      rectTop: top,
-      rectRight: right,
-      rectBottom: bottom,
-      rectLeft: left,
-    } = hotspotData;
-
-    top *= HOTSPOT_Y_COORD_FACTOR;
-    bottom *= HOTSPOT_Y_COORD_FACTOR;
-    right = (HOTSPOT_X_COORD_FACTOR * right) + HOTSPOT_X_OFFSET;
-    left = (HOTSPOT_X_COORD_FACTOR * left) + HOTSPOT_X_OFFSET;
-
-    return [
-      cylinderMap(bottom, left),
-      cylinderMap(bottom, right),
-      cylinderMap(top, right),
-      cylinderMap(top, left),
-    ];
-  }).forEach(([bottomLeft, bottomRight, topRight, topLeft], index) => {
-    const offset = index * HOTSPOT_VERTEX_SIZE;
-    positions.setXYZ(offset, bottomLeft.x, bottomLeft.y, bottomLeft.z);
-    positions.setXYZ(offset + 1, bottomRight.x, bottomRight.y, bottomRight.z);
-    positions.setXYZ(offset + 2, topRight.x, topRight.y, topRight.z);
-    positions.setXYZ(offset + 3, topLeft.x, topLeft.y, topLeft.z);
-  });
+export function canvasCreated(canvas) {
   return {
-    type: HOTSPOTS_POSITIONS_CREATE,
-    payload: positions,
+    type: HOTSPOTS_CANVAS_CREATED,
+    payload: canvas,
+  };
+}
+
+export function createPositions(hotspotsData) {
+  return (dispatch) => {
+    const visiblePositions = new BufferAttribute(
+      new Float32Array(hotspotsData.length * 12), 3,
+    );
+    const hitPositions = new BufferAttribute(
+      new Float32Array(hotspotsData.length * 12), 3,
+    );
+
+    hotspotsData.map((hotspotData) => {
+      let {
+        rectTop: top,
+        rectRight: right,
+        rectBottom: bottom,
+        rectLeft: left,
+      } = hotspotData;
+
+      top *= HOTSPOT_Y_COORD_FACTOR;
+      bottom *= HOTSPOT_Y_COORD_FACTOR;
+      right = (HOTSPOT_X_COORD_FACTOR * right) + HOTSPOT_X_OFFSET;
+      left = (HOTSPOT_X_COORD_FACTOR * left) + HOTSPOT_X_OFFSET;
+
+      return [
+        cylinderMap(bottom, left),
+        cylinderMap(bottom, right),
+        cylinderMap(top, right),
+        cylinderMap(top, left),
+      ];
+    }).forEach(([bottomLeft, bottomRight, topRight, topLeft], index) => {
+      const offset = index * HOTSPOT_VERTEX_SIZE;
+      visiblePositions.setXYZ(offset, bottomLeft.x, bottomLeft.y, bottomLeft.z);
+      visiblePositions.setXYZ(offset + 1, bottomRight.x, bottomRight.y, bottomRight.z);
+      visiblePositions.setXYZ(offset + 2, topRight.x, topRight.y, topRight.z);
+      visiblePositions.setXYZ(offset + 3, topLeft.x, topLeft.y, topLeft.z);
+
+      hitPositions.setXYZ(offset, bottomLeft.x, bottomLeft.y, bottomLeft.z);
+      hitPositions.setXYZ(offset + 1, bottomRight.x, bottomRight.y, bottomRight.z);
+      hitPositions.setXYZ(offset + 2, topRight.x, topRight.y, topRight.z);
+      hitPositions.setXYZ(offset + 3, topLeft.x, topLeft.y, topLeft.z);
+    });
+    dispatch({
+      type: HOTSPOTS_VISIBLE_POSITIONS_CREATE,
+      payload: visiblePositions,
+    });
+    dispatch({
+      type: HOTSPOTS_HIT_POSITIONS_CREATE,
+      payload: hitPositions,
+    });
   };
 }
 
 export function createUvs(count) {
-  const uvs = new BufferAttribute(new Float32Array(count * 8), 2);
-  for (let i = 0; i < count; i += 1) {
-    const offset = i * HOTSPOT_VERTEX_SIZE;
-    uvs.setXY(offset, 0.0, 0.0);
-    uvs.setXY(offset + 1, 1.0, 0.0);
-    uvs.setXY(offset + 2, 1.0, 1.0);
-    uvs.setXY(offset + 3, 0.0, 1.0);
-  }
-  return {
-    type: HOTSPOTS_UVS_CREATE,
-    payload: uvs,
+  return (dispatch) => {
+    const visibleUvs = new BufferAttribute(new Float32Array(count * 8), 2);
+    const hitUvs = new BufferAttribute(new Float32Array(count * 8), 2);
+    for (let i = 0; i < count; i += 1) {
+      const offset = i * HOTSPOT_VERTEX_SIZE;
+      visibleUvs.setXY(offset, 0.0, 0.0);
+      visibleUvs.setXY(offset + 1, 1.0, 0.0);
+      visibleUvs.setXY(offset + 2, 1.0, 1.0);
+      visibleUvs.setXY(offset + 3, 0.0, 1.0);
+
+      hitUvs.setXY(offset, 0.0, 0.0);
+      hitUvs.setXY(offset + 1, 1.0, 0.0);
+      hitUvs.setXY(offset + 2, 1.0, 1.0);
+      hitUvs.setXY(offset + 3, 0.0, 1.0);
+    }
+    dispatch({
+      type: HOTSPOTS_VISIBLE_UVS_CREATE,
+      payload: visibleUvs,
+    });
+    dispatch({
+      type: HOTSPOTS_HIT_UVS_CREATE,
+      payload: hitUvs,
+    });
   };
 }
 
 export function createIndex(count) {
-  const indices = [];
-  for (let i = 0; i < count; i += 1) {
-    const offset = i * HOTSPOT_VERTEX_SIZE;
-    indices.push(
-      offset, offset + 1, offset + 2,
-      offset, offset + 2, offset + 3,
-    );
-  }
-  return {
-    type: HOTSPOTS_INDEX_CREATE,
-    payload: new Uint16Attribute(indices, 1),
+  return (dispatch) => {
+    const indices = [];
+    for (let i = 0; i < count; i += 1) {
+      const offset = i * HOTSPOT_VERTEX_SIZE;
+      indices.push(
+        offset, offset + 1, offset + 2,
+        offset, offset + 2, offset + 3,
+      );
+    }
+    dispatch({
+      type: HOTSPOTS_VISIBLE_INDEX_CREATE,
+      payload: new Uint16Attribute(indices, 1),
+    });
+    dispatch({
+      type: HOTSPOTS_HIT_INDEX_CREATE,
+      payload: new Uint16Attribute([].concat(indices), 1),
+    });
   };
 }
 
-export function createGeometry({ index, uvs, positions }) {
-  const geometry = new BufferGeometry();
-  geometry.setIndex(index);
-  geometry.addAttribute('position', positions);
-  geometry.addAttribute('uv', uvs);
-  return {
-    type: HOTSPOTS_GEOMETRY_CREATE,
-    payload: geometry,
-  };
+export function createGeometry({
+  visibleIndex,
+  visibleUvs,
+  visiblePositions,
+  hitIndex,
+  hitUvs,
+  hitPositions,
+}) {
+  return (dispatch) => {
+    const visibleGeometry = new BufferGeometry();
+    const hitGeometry = new BufferGeometry();
+
+    visibleGeometry.setIndex(visibleIndex);
+    visibleGeometry.addAttribute('position', visiblePositions);
+    visibleGeometry.addAttribute('uv', visibleUvs);
+
+    hitGeometry.setIndex(hitIndex);
+    hitGeometry.addAttribute('position', hitPositions);
+    hitGeometry.addAttribute('uv', hitUvs);
+
+    dispatch({
+      type: HOTSPOTS_VISIBLE_GEOMETRY_CREATE,
+      payload: visibleGeometry,
+    });
+    dispatch({
+      type: HOTSPOTS_HIT_GEOMETRY_CREATE,
+      payload: hitGeometry,
+    });
+  }
 }
 
 export function createHitMaterial() {
   return {
-    type: HOTSPOTS_VISIBLE_MATERIAL_CREATE,
+    type: HOTSPOTS_HIT_MATERIAL_CREATE,
     payload: new MeshBasicMaterial({
-      transparent: true,
-      opacity: 0.3,
-      color: 0x00ff00,
+      color: 0x0000ff,
       side: THREE.DoubleSide,
     }),
   };
@@ -155,9 +225,16 @@ export function createObject3D({ type, geometry, material }) {
 
 export function setHotspotsTheta(theta) {
   return (dispatch, getState) => {
-    const { object3D, theta: oldTheta } = getState().hotspots;
+    const {
+      visibleObject3D,
+      hitObject3D,
+      theta: oldTheta,
+    } = getState().hotspots;
 
-    object3D.rotation.y = object3D.rotation.y + theta - oldTheta;
+    visibleObject3D.rotation.y
+      = visibleObject3D.rotation.y + theta - oldTheta;
+    hitObject3D.rotation.y
+      = hitObject3D.rotation.y + theta - oldTheta;
 
     dispatch({
       type: HOTSPOTS_THETA,
@@ -174,17 +251,17 @@ export function createHotspots() {
     dispatch(createPositions(hotspotsData));
     dispatch(createUvs(hotspotsData.length));
     dispatch(createIndex(hotspotsData.length));
+    dispatch(createGeometry(getState().hotspots));
     dispatch(createVisibleMaterial());
     dispatch(createHitMaterial());
-    dispatch(createGeometry(getState().hotspots));
     dispatch(createObject3D({
       type: HOTSPOTS_VISIBLE_OBJECT_CREATE,
-      geometry: getState().hotspots.geometry,
+      geometry: getState().hotspots.visibleGeometry,
       material: getState().hotspots.visibleMaterial,
     }));
     dispatch(createObject3D({
       type: HOTSPOTS_HIT_OBJECT_CREATE,
-      geometry: getState().hotspots.geometry,
+      geometry: getState().hotspots.hitGeometry,
       material: getState().hotspots.hitMaterial,
     }));
   }
@@ -192,7 +269,6 @@ export function createHotspots() {
 
 export function buildScene() {
   return (dispatch, getState) => {
-    dispatch(createHotspots());
     const objects = [];
     objects.push(getState().hotspots.hitObject3D);
     dispatch(createScene(objects));
@@ -202,7 +278,7 @@ export function buildScene() {
 export function buildRig() {
   return (dispatch, getState) => {
     const { width, height } = getState().dimensions;
-    const { canvas } = getState().scene;
+    const { canvas } = getState().hotspots;
     dispatch(createCamera({ width, height }));
     dispatch(createRenderer({ canvas, width, height }));
   };
@@ -212,14 +288,14 @@ export function createScene(objects) {
   const scene = new Scene();
   objects.forEach(o => scene.add(o));
   return {
-    type: HOTSPOT_SCENE_CREATE,
+    type: HOTSPOTS_SCENE_CREATE,
     payload: scene,
   };
 }
 
 export function createCamera({ width, height }) {
   return createCameraForType({
-    type: HOTSPOT_CAMERA_CREATE,
+    type: HOTSPOTS_CAMERA_CREATE,
     width,
     height,
   });
@@ -229,7 +305,7 @@ export function positionCamera(vector3) {
   return (dispatch, getState) => {
     const { camera } = getState().hotspots;
     dispatch(positionCameraForType({
-      type: HOTSPOT_CAMERA_TRANSLATE,
+      type: HOTSPOTS_CAMERA_TRANSLATE,
       vector3,
       camera,
     }));
@@ -238,21 +314,32 @@ export function positionCamera(vector3) {
 }
 
 export function createRenderer({ canvas, width, height }) {
-  return createRendererForType({
-    type: HOTSPOT_RENDERER_CREATE,
+  const renderer = new WebGLRenderer({
     canvas,
-    width,
-    height,
+    alpha: true,
+    preserveDrawingBuffer: true,
   });
+  renderer.setSize(width, height);
+  renderer.setClearColor(0x000000, 0);
+  return {
+    type: HOTSPOTS_RENDERER_CREATE,
+    payload: renderer,
+  };
 }
 
 export function startRenderLoop() {
   return (dispatch, getState) => {
-    const { hotspots, pano, scene } = getState();
-    const { scene3D, camera, renderer } = scene;
+    const { hotspots } = getState();
+    const { scene3D, camera, renderer, canvas } = hotspots;
     dispatch({
-      type: HOTSPOT_RENDER_LOOP,
-      payload: addToRenderLoop(() => renderer.render(scene3D, camera)),
+      type: HOTSPOTS_RENDER_LOOP,
+      payload: addToRenderLoop(() => {
+        renderer.render(scene3D, camera);
+        // const pixel = new Uint8Array(4);
+        // const gl = canvas.getContext('webgl');
+        // gl.readPixels(500, 300, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
+        // console.log(pixel);
+      }),
     });
   };
 }

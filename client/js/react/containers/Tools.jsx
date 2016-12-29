@@ -13,7 +13,7 @@ import store from '../../store';
 function mapStateToProps({ scene, pano, hotspots }) {
   const {
     camera,
-  } = scene;
+  } = pano;
 
   const {
     sensitivity,

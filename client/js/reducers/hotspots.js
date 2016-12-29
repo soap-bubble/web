@@ -1,41 +1,81 @@
 import {
-  HOTSPOTS_POSITIONS_CREATE,
-  HOTSPOTS_UVS_CREATE,
-  HOTSPOTS_INDEX_CREATE,
-  HOTSPOTS_GEOMETRY_CREATE,
+  HOTSPOTS_CANVAS_CREATED,
+  HOTSPOTS_VISIBLE_POSITIONS_CREATE,
+  HOTSPOTS_VISIBLE_UVS_CREATE,
+  HOTSPOTS_VISIBLE_INDEX_CREATE,
+  HOTSPOTS_VISIBLE_GEOMETRY_CREATE,
+  HOTSPOTS_HIT_POSITIONS_CREATE,
+  HOTSPOTS_HIT_UVS_CREATE,
+  HOTSPOTS_HIT_INDEX_CREATE,
+  HOTSPOTS_HIT_GEOMETRY_CREATE,
   HOTSPOTS_HIT_MATERIAL_CREATE,
   HOTSPOTS_VISIBLE_MATERIAL_CREATE,
   HOTSPOTS_HIT_OBJECT_CREATE,
   HOTSPOTS_VISIBLE_OBJECT_CREATE,
   HOTSPOTS_THETA,
+  HOTSPOTS_SCENE_CREATE,
+  HOTSPOTS_CAMERA_CREATE,
+  HOTSPOTS_CAMERA_TRANSLATE,
+  HOTSPOTS_RENDERER_CREATE,
+  HOTSPOTS_RENDER_LOOP,
 } from '../actions/types';
 import createReducer from './createReducer';
 
 const reducer = createReducer({
   theta: -Math.PI / 2,
 }, {
-  [HOTSPOTS_POSITIONS_CREATE](hotspots, { payload: positions }) {
+  [HOTSPOTS_CANVAS_CREATED](hotspots, { payload: canvas }) {
     return {
       ...hotspots,
-      positions,
+      canvas,
     };
   },
-  [HOTSPOTS_UVS_CREATE](hotspots, { payload: uvs }) {
+  [HOTSPOTS_VISIBLE_POSITIONS_CREATE](hotspots, { payload: visiblePositions }) {
     return {
       ...hotspots,
-      uvs,
+      visiblePositions,
     };
   },
-  [HOTSPOTS_GEOMETRY_CREATE](hotspots, { payload: geometry }) {
+  [HOTSPOTS_VISIBLE_UVS_CREATE](hotspots, { payload: visibleUvs }) {
     return {
       ...hotspots,
-      geometry,
+      visibleUvs,
     };
   },
-  [HOTSPOTS_INDEX_CREATE](hotspots, { payload: index }) {
+  [HOTSPOTS_VISIBLE_GEOMETRY_CREATE](hotspots, { payload: visibleGeometry }) {
     return {
       ...hotspots,
-      index,
+      visibleGeometry,
+    };
+  },
+  [HOTSPOTS_VISIBLE_INDEX_CREATE](hotspots, { payload: visibleIndex }) {
+    return {
+      ...hotspots,
+      visibleIndex,
+    };
+  },
+  [HOTSPOTS_HIT_POSITIONS_CREATE](hotspots, { payload: hitPositions }) {
+    return {
+      ...hotspots,
+      hitPositions,
+    };
+  },
+  [HOTSPOTS_HIT_UVS_CREATE](hotspots, { payload: hitUvs }) {
+    return {
+      ...hotspots,
+      hitUvs,
+    };
+  },
+  [HOTSPOTS_HIT_GEOMETRY_CREATE](hotspots, { payload: hitGeometry }) {
+    return {
+      ...hotspots,
+      hitGeometry,
+    };
+  },
+  [HOTSPOTS_HIT_INDEX_CREATE](hotspots, { payload: hitIndex }) {
+    return {
+      ...hotspots,
+      hitIndex,
     };
   },
   [HOTSPOTS_HIT_MATERIAL_CREATE](hotspots, { payload: hitMaterial }) {
@@ -67,7 +107,31 @@ const reducer = createReducer({
       ...hotspots,
       theta,
     }
-  }
+  },
+  [HOTSPOTS_SCENE_CREATE](hotspots, { payload: scene3D }) {
+    return {
+      ...hotspots,
+      scene3D,
+    };
+  },
+  [HOTSPOTS_CAMERA_CREATE](hotspots, { payload: camera }) {
+    return {
+      ...hotspots,
+      camera,
+    };
+  },
+  [HOTSPOTS_RENDERER_CREATE](hotspots, { payload: renderer }) {
+    return {
+      ...hotspots,
+      renderer,
+    };
+  },
+  [HOTSPOTS_RENDER_LOOP](hotspots, { payload: renderLoop }) {
+    return {
+      ...hotspots,
+      renderLoop,
+    };
+  },
 });
 
 export default reducer;

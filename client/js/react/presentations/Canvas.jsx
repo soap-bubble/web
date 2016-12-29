@@ -23,11 +23,10 @@ const Scene = ({
 Scene.propTypes = {
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  id: PropTypes.number,
   createAction: PropTypes.func.isRequired,
-  onMouseUp: PropTypes.func.isRequired,
-  onMouseMove: PropTypes.func.isRequired,
-  onMouseDown: PropTypes.func.isRequired,
+  onMouseUp: PropTypes.func,
+  onMouseMove: PropTypes.func,
+  onMouseDown: PropTypes.func,
 };
 
 export default Scene;

@@ -140,7 +140,7 @@ export default function (dispatch) {
         left: 0,
       });
 
-      averageSpeed.left *= 50;
+      averageSpeed.left *= 20;
       averageSpeed.top *= 10;
       momentum.speed = {
         x: convertFromHorizontalSpeed(averageSpeed.top, sensitivity),

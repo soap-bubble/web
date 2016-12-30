@@ -14,7 +14,7 @@ import {
 import createReducer from './createReducer';
 
 const reducer = createReducer({
-  sensitivity: 100,
+  sensitivity: 50,
   controlType: 'touch',
   rotation: {
     x: 0,

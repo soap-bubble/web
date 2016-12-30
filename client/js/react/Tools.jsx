@@ -7,9 +7,9 @@ import {
   Checkbox,
 } from 'dis-gui';
 
-import { setSensitivity, positionCamera } from '../../actions/pano';
-import { setHotspotsTheta, setHotspotsVisibility } from '../../actions/hotspots';
-import store from '../../store';
+import { setSensitivity, positionCamera } from '../actions/pano';
+import { setHotspotsTheta, setHotspotsVisibility } from '../actions/hotspots';
+import store from '../store';
 
 function mapStateToProps({ scene, pano, hotspots }) {
   const {

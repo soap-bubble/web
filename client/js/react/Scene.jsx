@@ -1,14 +1,14 @@
 import { connect } from 'react-redux';
+
 import {
   fetchScene,
-} from '../../actions/scene';
+} from '../actions/scene';
 import {
   canvasCreated,
   sceneCreate,
-} from '../../actions/pano';
-
-import Canvas from '../presentations/Canvas';
-import momentum from '../../morpheus/momentum';
+} from '../actions/pano';
+import Canvas from './Canvas';
+import momentum from '../morpheus/momentum';
 
 function mapStateToProps({ scene, dimensions }) {
   const {

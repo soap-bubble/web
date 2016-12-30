@@ -1,11 +1,11 @@
 import { connect } from 'react-redux';
 
-import Canvas from '../presentations/Canvas';
+import Canvas from './Canvas';
 import {
   canvasCreated,
   sceneCreate,
-} from '../../actions/hotspots';
-import hotspots from '../../morpheus/hotspots';
+} from '../actions/hotspots';
+import hotspots from '../morpheus/hotspots';
 
 function mapStateToProps({ dimensions }) {
   const { width, height } = dimensions;

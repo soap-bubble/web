@@ -6,7 +6,7 @@ import { Vector3 } from 'three';
 import qs from 'query-string';
 
 import store from './store';
-import World from './react/presentations/World';
+import World from './react/World';
 import { fetchScene } from './actions/scene';
 import {
   createPano,

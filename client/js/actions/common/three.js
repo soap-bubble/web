@@ -2,10 +2,6 @@ import {
   PerspectiveCamera,
   WebGLRenderer,
 } from 'three';
-import {
-  pull
-} from 'lodash';
-import raf from 'raf';
 
 export function createCameraForType({ type, width, height }) {
   return {
@@ -35,27 +31,3 @@ export function createRendererForType({ type, canvas, width, height }) {
     payload: renderer,
   };
 }
-
-export const addToRenderLoop = (function createRendererIFEE() {
-  const renderCallbackList = [];
-  const isStarted = false;
-
-  function render() {
-    raf(render);
-    renderCallbackList.forEach(r => r());
-  }
-
-  function start() {
-    if (!isStarted) {
-      raf(render);
-    }
-  }
-
-  return (callback) => {
-    renderCallbackList.push(callback);
-    start();
-    return () => {
-      pull(renderCallbackList, callback);
-    };
-  }
-}());

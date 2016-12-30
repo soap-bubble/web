@@ -9,7 +9,7 @@ const loggingMiddleware = createLogger();
 
 const store = createStore(
   morphReducer,
-  applyMiddleware(thunkMiddleware, promiseMiddleware, loggingMiddleware),
+  applyMiddleware(thunkMiddleware, promiseMiddleware),
 );
 
 export default store;

@@ -19,8 +19,8 @@ import {
   createCameraForType,
   createRendererForType,
   positionCameraForType,
-  addToRenderLoop,
 } from './common/three';
+import renderEvents from '../utils/render';
 import {
   PANO_CANVAS_CREATED,
   PANO_GEOMETRIES_CREATE,
@@ -267,9 +267,11 @@ export function startRenderLoop() {
   return (dispatch, getState) => {
     const { pano } = getState();
     const { scene3D, camera, renderer } = pano;
+    const render = () => renderer.render(scene3D, camera);
+    renderEvents.on('render', render);
     dispatch({
       type: PANO_RENDER_LOOP,
-      payload: addToRenderLoop(() => renderer.render(scene3D, camera)),
+      payload: () => renderEvents.off('render', render),
     });
     dispatch(startPanoRenderLoop());
   };

@@ -13,8 +13,8 @@ import {
   createCameraForType,
   createRendererForType,
   positionCameraForType,
-  addToRenderLoop,
 } from './common/three';
+import renderEvents from '../utils/render';
 import {
   HOTSPOTS_VISIBLE_POSITIONS_CREATE,
   HOTSPOTS_VISIBLE_UVS_CREATE,
@@ -223,7 +223,9 @@ export function createMaterials(count) {
     const hitMaterialList = [];
     const hitColorList = [];
     for (let i = 0; i < count; i++) {
+      // A random color for the hotspot
       let hitColor;
+      // On the highly unlikely occurence of picking two 24-bit numbers in a hotspot set
       while(!hitColor || hitColorList.indexOf(hitColor) !== -1) {
         hitColor = Math.floor(Math.random() * 0xFFFFFF);
       }
@@ -413,8 +415,6 @@ export function positionCamera(vector3) {
 export function createRenderer({ canvas, width, height }) {
   const renderer = new WebGLRenderer({
     canvas,
-    alpha: true,
-    preserveDrawingBuffer: true,
   });
   renderer.setSize(width, height);
   renderer.setClearColor(0x000000, 0);
@@ -428,15 +428,11 @@ export function startRenderLoop() {
   return (dispatch, getState) => {
     const { hotspots } = getState();
     const { scene3D, camera, renderer, canvas } = hotspots;
+    const render = () => renderer.render(scene3D, camera);
+    renderEvents.on('render', render);
     dispatch({
       type: HOTSPOTS_RENDER_LOOP,
-      payload: addToRenderLoop(() => {
-        renderer.render(scene3D, camera);
-        // const pixel = new Uint8Array(4);
-        // const gl = canvas.getContext('webgl');
-        // gl.readPixels(500, 300, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-        // console.log(pixel);
-      }),
+      payload: () => renderEvents.off('render', render),
     });
   };
 }

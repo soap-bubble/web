@@ -13,6 +13,8 @@ import {
 import store from '../store';
 import renderEvents from '../utils/render';
 
+
+
 export default function ({
   dispatch,
   canvas,
@@ -28,6 +30,7 @@ export default function ({
   //  reading pixel data is only valid immediately after a render.  We therefor
   //  delay checking pixel data until the next render
   let coordsToCheck;
+  renderEvents.removeAllListeners('after');
   renderEvents.on('after', () => {
     if (coordsToCheck) {
       const { left: x, top } = coordsToCheck;

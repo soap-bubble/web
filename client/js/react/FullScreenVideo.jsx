@@ -3,6 +3,9 @@ import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
 import { videoLoadComplete } from '../actions/video'
+import {
+  ended as transitionEnded
+} from '../actions/transition';
 import Video from './Video';
 
 function mapStateToProps({ video, dimensions }) {
@@ -30,6 +33,9 @@ function mapDisptachToProps(dispatch) {
     videoCanPlay(name) {
       dispatch(videoLoadComplete(name, videoEl));
     },
+    videoEnded(name) {
+      dispatch(transitionEnded());
+    },
   };
 }
 
@@ -44,6 +50,7 @@ export default connect(
   current,
   videoCreated,
   videoCanPlay,
+  videoEnded,
 }) => {
   const offscreenLoading = loading.map(url => (
     <Video
@@ -67,6 +74,7 @@ export default connect(
       width={width}
       height={height}
       onCanPlayThrough={videoCanPlay.bind(null, url)}
+      onEnded={videoEnded.bind(null, url)}
       loop={false}
       autoPlay={false}
       offscreen={false}

@@ -1,18 +1,7 @@
 import { bySceneId } from '../service/scene';
 import {
-  resize
-} from './dimensions';
-import {
-  createPano,
-  startRenderLoop as startPanoRenderLoop,
-  positionCamera,
-} from './pano';
-import {
-  hotspotsLoaded,
-} from './hotspots';
-import {
-  playFullscreenVideo,
-} from './video';
+  display,
+} from './game';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
@@ -58,7 +47,7 @@ export function goToScene(id) {
     const { loading, loaded } = video;
 
     function doIt(sceneData) {
-      dispatch(display(sceneData));
+      dispatch(display());
     }
 
     let promise;
@@ -71,49 +60,5 @@ export function goToScene(id) {
         .then(doIt);
     }
     return promise;
-  };
-}
-
-export function displayPanorama(sceneData) {
-  return (dispatch) => {
-    const { casts } = sceneData;
-    const hotspotsData = casts.filter(c => c.castId === 0);
-
-    dispatch(hotspotsLoaded(hotspotsData));
-    dispatch(createPano(sceneData));
-    dispatch(resize({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    }));
-    dispatch(positionCamera({ z: -0.4 }));
-    dispatch(startPanoRenderLoop());
-  };
-}
-
-export function displayTransition(sceneData) {
-  return (dispatch) => {
-    const { casts } = sceneData;
-    const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
-    const fileName = `/${transitionCast.fileName}.webm`;
-    dispatch(resize({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    }));
-    dispatch(playFullscreenVideo(fileName));
-  };
-}
-
-export function display(sceneData) {
-  return (dispatch) => {
-    const sceneActionMap = {
-      panorama: displayPanorama,
-      special: displayTransition,
-      transition: displayTransition,
-    }
-    const sceneType = SCENE_TYPE_LIST[sceneData.sceneType];
-    const sceneActionFunction = sceneActionMap[sceneType];
-    if (sceneActionFunction) {
-      dispatch(sceneActionFunction(sceneData));
-    }
   };
 }

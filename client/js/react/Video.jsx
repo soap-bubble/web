@@ -15,7 +15,7 @@ const Video = ({
   <video
     style={{
       visibility: offscreen ? 'hidden' : 'visible',
-      'object-fit': 'cover',
+      objectFit: 'cover',
     }}
     ref={videoCreated}
     src={src}

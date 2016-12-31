@@ -2,6 +2,9 @@ import {
   VIDEO_LOAD_START,
   VIDEO_LOAD_COMPLETE,
 } from './types';
+import {
+  resize,
+} from './dimensions';
 
 // Map of names to promises
 const loading = {};

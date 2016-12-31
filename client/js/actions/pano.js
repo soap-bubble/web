@@ -15,9 +15,13 @@ import {
   pad,
 } from '../utils/string';
 import {
+  resize,
+} from './dimensions';
+import {
   createHotspots,
+  hotspotsLoaded,
   positionCamera as positionHotspotCamera,
-  startRenderLoop as startPanoRenderLoop,
+  startRenderLoop as startHotspotRenderLoop,
  } from './hotspots';
 import {
   createCameraForType,
@@ -273,6 +277,23 @@ export function startRenderLoop() {
       type: PANO_RENDER_LOOP,
       payload: () => renderEvents.off('render', render),
     });
-    dispatch(startPanoRenderLoop());
+    dispatch(startHotspotRenderLoop());
+  };
+}
+
+
+export function display(sceneData) {
+  return (dispatch) => {
+    const { casts } = sceneData;
+    const hotspotsData = casts.filter(c => c.castId === 0);
+
+    dispatch(hotspotsLoaded(hotspotsData));
+    dispatch(createPano(sceneData));
+    dispatch(resize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    }));
+    dispatch(positionCamera({ z: -0.4 }));
+    dispatch(startRenderLoop());
   };
 }

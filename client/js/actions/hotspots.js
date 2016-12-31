@@ -10,6 +10,9 @@ import THREE, {
 } from 'three';
 
 import {
+  goToScene,
+} from './scene';
+import {
   createCameraForType,
   createRendererForType,
   positionCameraForType,
@@ -461,6 +464,8 @@ export function activateHotspotIndex(index) {
         type: HOTSPOTS_ACTIVATED,
         payload: data[index],
       });
+      const { param1: nextSceneId } = data[index];
+      dispatch(goToScene(nextSceneId));
     }
   }
 }

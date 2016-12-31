@@ -7,12 +7,7 @@ import qs from 'query-string';
 
 import store from './store';
 import World from './react/World';
-import { fetchScene } from './actions/scene';
-import {
-  createPano,
-  startRenderLoop as startPanoRenderLoop,
-  positionCamera,
- } from './actions/pano';
+import { goToScene } from './actions/scene';
 import { resize } from './actions/dimensions';
 const qp = qs.parse(location.search);
 
@@ -31,13 +26,11 @@ window.onload = () => {
     document.getElementById('root'),
   );
 
-  store.dispatch(fetchScene(qp.scene || 1050))
-    .then(() => {
-      store.dispatch(createPano());
-      resizeToWindow();
-      store.dispatch(positionCamera({ z: -0.4 }));
-      store.dispatch(startPanoRenderLoop());
-    });
+  // if (qp.video) {
+  //   const
+  // }
+
+  store.dispatch(goToScene(qp.scene || 1050));
 
   window.addEventListener('resize', () => {
     resizeToWindow();

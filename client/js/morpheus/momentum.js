@@ -139,14 +139,12 @@ export default function (dispatch) {
         top: 0,
         left: 0,
       });
-
       averageSpeed.left *= 20;
       averageSpeed.top *= 10;
       momentum.speed = {
         x: convertFromHorizontalSpeed(averageSpeed.top, sensitivity),
         y: convertFromVerticalSpeed(averageSpeed.left, sensitivity),
       };
-      console.log('momentum speed', momentum.speed);
       clearInterval(momentum.intervalId);
       momentum.intervalId = setInterval(updateMomentum, 50);
     }

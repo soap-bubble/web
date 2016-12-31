@@ -10,6 +10,10 @@ import {
   Scene,
 } from 'three';
 import { range } from 'lodash';
+
+import {
+  pad,
+} from '../utils/string';
 import {
   createHotspots,
   positionCamera as positionHotspotCamera,
@@ -110,10 +114,6 @@ export function createMaterials(fileNames) {
     type: PANO_MATERIALS_CREATE,
     payload: materials,
   };
-}
-
-function pad(value, length) {
-  return (value.toString().length < length) ? pad(`0${value}`, length) : value;
 }
 
 function generateFileNames(fileName) {

@@ -3,6 +3,7 @@ import dimensions from './dimensions';
 import pano from './pano';
 import hotspots from './hotspots';
 import ui from './ui';
+import video from './video';
 
 const initialState = {
 };
@@ -14,5 +15,6 @@ export default function (state = initialState, action) {
     pano: pano(state, 'pano', action),
     hotspots: hotspots(state, 'hotspots', action),
     ui: ui(state, 'ui', action),
+    video: video(state, 'video', action),
   };
 }

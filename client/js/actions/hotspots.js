@@ -16,6 +16,7 @@ import {
 } from './common/three';
 import renderEvents from '../utils/render';
 import {
+  HOTSPOTS_LOADED,
   HOTSPOTS_VISIBLE_POSITIONS_CREATE,
   HOTSPOTS_VISIBLE_UVS_CREATE,
   HOTSPOTS_VISIBLE_INDEX_CREATE,
@@ -38,6 +39,7 @@ import {
   HOTSPOTS_CAMERA_TRANSLATE,
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
+  HOTSPOTS_ACTIVATED,
 } from './types';
 
 const HOTSPOT_VERTEX_SIZE = 4;
@@ -52,6 +54,13 @@ function cylinderMap(y, x) {
     x: SIZE * Math.sin(x),
     y: -y,
     z: SIZE * Math.cos(x),
+  };
+}
+
+export function hotspotsLoaded(data) {
+  return {
+    type: HOTSPOTS_LOADED,
+    payload: data,
   };
 }
 
@@ -343,10 +352,16 @@ export function setHotspotsVisibility(visible) {
 }
 
 export function setHoverIndex(index) {
-  return {
-    type: HOTSPOTS_HOVER_INDEX,
-    payload: index,
-  };
+  return (dispatch, getState) => {
+    const { hotspots } = getState();
+    const { hoverIndex } = hotspots;
+    if (hoverIndex !== index) {
+      dispatch({
+        type: HOTSPOTS_HOVER_INDEX,
+        payload: index,
+      });
+    }
+  }
 }
 
 export function createHotspots() {
@@ -435,4 +450,17 @@ export function startRenderLoop() {
       payload: () => renderEvents.off('render', render),
     });
   };
+}
+
+export function activateHotspotIndex(index) {
+  return (dispatch, getState) => {
+    const { hotspots } = getState();
+    const { data } = hotspots;
+    if (data && data[index]) {
+      dispatch({
+        type: HOTSPOTS_ACTIVATED,
+        payload: data[index],
+      });
+    }
+  }
 }

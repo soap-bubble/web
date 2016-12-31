@@ -3,6 +3,8 @@ import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
   SCENE_CREATE_3D,
+  SCENE_DISPLAY_PANORAMA,
+  SCENE_DISPLAY_TRANSITION,
 } from '../actions/types';
 
 const reducer = createReducer({
@@ -12,29 +14,41 @@ const reducer = createReducer({
   loaded: {},
   data: null,
 }, {
-  [SCENE_LOAD_START](scene, { payload: id }) {
+  [SCENE_LOAD_START](scene, { payload: id, meta: fetchPromise }) {
     const { loading } = scene;
-
-    loading[id] = true;
-
     return {
       ...scene,
-      loading,
+      loading: {
+        ...loading,
+        [id]: fetchPromise,
+      },
     };
   },
   [SCENE_LOAD_COMPLETE](scene, { payload: data }) {
     const { loading, loaded } = scene;
     const { sceneId: id } = data;
-
-    loading[id] = null;
-    loaded[id] = true;
-
     return {
       ...scene,
       current: id,
-      loading,
-      loaded,
+      loading: {
+        ...loading,
+        [id]: null,
+      },
+      loaded: {
+        ...loaded,
+        [id]: data,
+      },
       data,
+    };
+  },
+  [SCENE_DISPLAY_PANORAMA](scene, { payload: sceneData }) {
+    return {
+      ...scene,
+    };
+  },
+  [SCENE_DISPLAY_TRANSITION](scene, { payload: sceneData }) {
+    return {
+      ...scene,
     };
   },
 });

@@ -1,4 +1,6 @@
 import {
+  HOTSPOTS_LOADED,
+  HOTSPOTS_ACTIVATED,
   HOTSPOTS_CANVAS_CREATED,
   HOTSPOTS_VISIBLE_POSITIONS_CREATE,
   HOTSPOTS_VISIBLE_UVS_CREATE,
@@ -30,6 +32,18 @@ const reducer = createReducer({
   hoverIndex: null,
   hitColorList: [],
 }, {
+  [HOTSPOTS_LOADED](hotspots, { payload: data }) {
+    return {
+      ...hotspots,
+      data,
+    };
+  },
+  [HOTSPOTS_ACTIVATED](hotspots, { payload: activated }) {
+    return {
+      ...hotspots,
+      activated,
+    };
+  },
   [HOTSPOTS_CANVAS_CREATED](hotspots, { payload: canvas }) {
     return {
       ...hotspots,

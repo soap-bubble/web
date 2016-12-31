@@ -2,9 +2,11 @@ import { DIMENSIONS_RESIZE } from './types';
 
 export function resize({ width, height }) {
   function setSize({ camera, renderer}) {
-    renderer.setSize(width, height);
-    camera.aspect	= width / height;
-    camera.updateProjectionMatrix();
+    if (camera && renderer) {
+      renderer.setSize(width, height);
+      camera.aspect	= width / height;
+      camera.updateProjectionMatrix();
+    }
   }
   return (dispatch, getState) => {
     dispatch({

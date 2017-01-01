@@ -75,7 +75,7 @@ export default function ({
       // User pressed and released mouse button inside a valid hotspot
       // TODO: debounce??
       if (wasMouseUpped && possibleValidClick && hotspotIndex !== null) {
-        dispatch(activateHotspotIndex(hotspotIndex));
+        //dispatch(activateHotspotIndex(hotspotIndex));
       }
 
       // Reset for next time

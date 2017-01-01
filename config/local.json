@@ -1,6 +1,6 @@
 {
   "mongodb": {
-    "uri": "mongodb://localhost/morpheus_dev"
+    "uri": "mongodb://localhost/morpheus_dev-2"
   },
-  "gameDbPath": "../GameDB"
+  "gameDbPath": "./GameDB"
 }

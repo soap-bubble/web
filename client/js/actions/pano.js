@@ -66,10 +66,10 @@ export function createGeometries(fileNames) {
       -sliceWidth, sliceHeight, sliceDepth,
     ]), 3);
     const uvs = new BufferAttribute(new Float32Array([
-      0.0, 0.0,
       1.0, 0.0,
-      1.0, 1.0,
+      0.0, 0.0,
       0.0, 1.0,
+      1.0, 1.0,
     ]), 2);
 
     const indices = new Uint16Attribute([
@@ -95,7 +95,7 @@ export function createObject3D({ theta = 0, geometries, materials }) {
   const meshes = geometries.map((g, i) => {
     const m = materials[i];
     const mesh = new Mesh(g, m);
-    mesh.rotation.y = (i * twentyFourthRad) + theta;
+    mesh.rotation.y = -(i * twentyFourthRad) + theta;
     return mesh;
   });
 

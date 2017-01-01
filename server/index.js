@@ -5,6 +5,7 @@ import config from 'config';
 import mongoose from 'mongoose';
 import routes from './routes';
 import morpheus from './models/morpheus';
+import prime from './prime';
 
 mongoose.Promise = Promise;
 const logger = bunyan.createLogger({name: 'webgl-pano-server'});
@@ -24,7 +25,17 @@ app.use('/api', routes);
 
 app.db = mongoose.connect(config.mongodb.uri, {server:{auto_reconnect:true}});
 morpheus.install(app.db);
-
+mongoose.connection.once('open', function () {
+  morpheus.get('Scene').find().exec().then((scenes) => {
+    if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
+      logger.info('Attempting to prime DB');
+      prime((err) => {
+        if (err) return logger.error('Failed to prime db', err);
+        logger.info('db primed');
+      })
+    }
+  });
+});
 app.listen(8050, () => {
   logger.info('server up and running on 8050');
 });

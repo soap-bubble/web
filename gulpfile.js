@@ -10,25 +10,7 @@ var Server = require('karma').Server;
 
 var watch = false;
 var src = {};
-//
-// function webpackBuild(opts) {
-//   return gulp.src(['client/js/app.js'])
-//     .pipe(named())
-//     .pipe(webpack(_.extend({
-//     }, webpackConfig, opts)))
-//     .pipe(gulp.dest('public/js'));
-// }
-//
-// gulp.task('webpack:client', function() {
-//   return webpackBuild();
-// });
-//
-// gulp.task('webpack:client:watch', function() {
-//   return webpackBuild({
-//     watch: true,
-//     devtool: 'sourcemap'
-//   });
-// });
+
 
 gulp.task('webpack:client', (cb) => {
   const webpack_watch = spawn('./node_modules/.bin/webpack', ['--color']);

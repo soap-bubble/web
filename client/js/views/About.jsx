@@ -2,8 +2,21 @@ import React from 'react';
 
 const About = () => {
   return (
-    <div>
-      About!
+    <div className="container">
+      <div className="row">
+        <h2>About Soap Bubble</h2>
+        <p>Soap Bubble is a multimedia produciton company responsible for the game <i>Morpheus</i> released in 1998.</p>
+        <p>We are attempting to re-release Morpheus as a web game, playable on all modern desktops.  The game has been completely rewritten from scratch while re-using the existing game assets.  Eventually, we would like to remaster the game assets.</p>
+        <h2>Source code</h2>
+        <p><a href="https://github.com/CaptEmulation/webgl-pano">https://github.com/CaptEmulation/webgl-pano</a></p>
+        <p>The source code is open source!  Original game files and some additional tools to acutally run are however still private.</p>
+        <h2>Twitch</h2>
+        <p><a href="https://www.twitch.tv/morpheusdev">https://www.twitch.tv/morpheusdev</a></p>
+        <p>Want to watch Morpheus being developed?  Follow use on Twitch.tv!</p>
+        <h2>Twitter</h2>
+        <p><a href="https://www.twitch.tv/morpheusdev">@dev_morpheus</a></p>
+        <p>Want the scoop on all of the Morpheus happenings?  Follow us on Twitter.</p>
+      </div>
     </div>
   );
 };

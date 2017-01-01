@@ -65,7 +65,7 @@ const Tools = ({
     cameraTools.push(<DGNumber label="Translate Z" key="camera:z" value={camera.position.z} min={-5} max={5} step={0.001} onChange={setCameraPositionZ}/>);
   }
   return (
-    <GUI style={{ controlWidth: 500 }}>
+    <GUI expanded={false} style={{ controlWidth: 500 }}>
       <Folder label='Camera'>
         {cameraTools}
       </Folder>

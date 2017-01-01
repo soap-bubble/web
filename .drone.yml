@@ -1,0 +1,20 @@
+pipeline:
+  build:
+    image: node:4.6.1
+    commands:
+      - npm install
+      - npm run build
+    when:
+      branch: master
+      event: push
+
+  publish:
+    image: plugins/docker
+    registry: docker.soapbubble.online:5000
+    username: drone
+    password: cobBomGopabyocVi
+    repo: soapbubble/online
+    tag: latest
+    when:
+      branch: master
+      event: push

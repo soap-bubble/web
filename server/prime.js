@@ -1,6 +1,6 @@
+// NOTE: This file is useless to anyone who does not possess morpheus.map.json
 var jf = require('jsonfile');
-var config = require('config');
-var morpheus = require('./lib/models/morpheus');
+var morpheus = require('./models/morpheus');
 var mongoose = require('mongoose');
 var bunyan = require('bunyan');
 var util = require('util');
@@ -11,11 +11,7 @@ var logger = bunyan.createLogger({ name: 'primeDb' });
 var passed = 0, failed = 0;
 /** @type {Array} */ var items;
 
-mongoose.connect(config.mongodb.uri, {server:{auto_reconnect:true}});
-var db = mongoose.connection;
-morpheus.install(db);
-
-function loadMorpheus(callback) {
+export default function loadMorpheus(callback) {
   jf.readFile('morpheus.map.json', function (err, obj) {
     if (err) throw err;
     logger.info('Morpheus JSON loaded.');
@@ -53,7 +49,6 @@ function loadMorpheus(callback) {
       })
         .then(function (model) {
           // Reset display
-          process.stdout.cursorTo(0);
           process.stdout.write(sprintf('(%d/%d)', ++passed, length));
           return model;
         }, function (err) {
@@ -72,13 +67,4 @@ function loadMorpheus(callback) {
         close();
       });
   });
-}
-
-db.once('open', () => {
-  loadMorpheus();
-})
-
-function close() {
-  db.close();
-  process.exit();
 }

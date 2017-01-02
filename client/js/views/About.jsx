@@ -9,10 +9,10 @@ const About = () => {
         <p>We are attempting to re-release Morpheus as a web game, playable on all modern desktops.  The game has been completely rewritten from scratch while re-using the existing game assets.  Eventually, we would like to remaster the game assets.</p>
         <h2>Source code</h2>
         <p><a href="https://github.com/CaptEmulation/webgl-pano">https://github.com/CaptEmulation/webgl-pano</a></p>
-        <p>The source code is open source!  Original game files and some additional tools to acutally run are however still private.</p>
+        <p>The source code is open source!  Original game files and some additional tools are still private.</p>
         <h2>Twitch</h2>
         <p><a href="https://www.twitch.tv/morpheusdev">https://www.twitch.tv/morpheusdev</a></p>
-        <p>Want to watch Morpheus being developed?  Follow use on Twitch.tv!</p>
+        <p>Want to watch Morpheus being developed?  Follow us on Twitch.tv!</p>
         <h2>Twitter</h2>
         <p><a href="https://www.twitch.tv/morpheusdev">@dev_morpheus</a></p>
         <p>Want the scoop on all of the Morpheus happenings?  Follow us on Twitter.</p>

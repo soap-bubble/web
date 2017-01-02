@@ -82,6 +82,11 @@ const Examples = ({
   return (
     <div>
       <Grid columns={4} Cell={ExampleCell} data={data}/>
+      <div className="row">
+        <div className="centered">
+          This is just a small taste of what the current web app can do.  These examples are "view only" because enabling user interaction with hotspots has too many bugs.  Once the game is running better you will be able to play it!
+        </div>
+      </div>
     </div>
   );
 };

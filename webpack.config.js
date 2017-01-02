@@ -77,7 +77,9 @@ module.exports = {
   plugins: [
     new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor_[hash].bundle.js'),
     new HtmlWebpackPlugin({
-      template: './client/html/index.html'
+      title: 'Soap Bubble Productions',
+      template: './client/html/index.html',
+      favicon: './client/html/favicon.ico',
     }),
     new CleanWebpackPlugin(['public'], {
       verbose: true,

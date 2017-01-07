@@ -1,3 +1,4 @@
+import game from './game';
 import scene from './scene';
 import dimensions from './dimensions';
 import pano from './pano';
@@ -11,6 +12,7 @@ const initialState = {
 
 export default function (state = initialState, action) {
   return {
+    game: game(state, 'game', action),
     scene: scene(state, 'scene', action),
     dimensions: dimensions(state, 'dimensions', action),
     pano: pano(state, 'pano', action),

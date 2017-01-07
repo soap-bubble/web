@@ -7,11 +7,16 @@ import {
   Checkbox,
 } from 'dis-gui';
 
+import { setVolume } from '../actions/game';
 import { setSensitivity, positionCamera } from '../actions/pano';
 import { setHotspotsTheta, setHotspotsVisibility } from '../actions/hotspots';
 import store from '../store';
 
-function mapStateToProps({ scene, pano, hotspots }) {
+function mapStateToProps({ game, scene, pano, hotspots }) {
+  const {
+    volume,
+  } = game;
+
   const {
     camera,
   } = pano;
@@ -26,6 +31,7 @@ function mapStateToProps({ scene, pano, hotspots }) {
   } = hotspots;
 
   return {
+    volume: volume * 100,
     camera,
     sensitivity,
     hotspotsTheta,
@@ -46,6 +52,9 @@ function mapDisptachToProps(dispatch) {
     },
     setHotspotsVisibility(value) {
       dispatch(setHotspotsVisibility(value));
+    },
+    setVolume(volume) {
+      dispatch(setVolume(volume / 100));
     }
   };
 }
@@ -59,6 +68,8 @@ const Tools = ({
   setCameraPositionZ,
   setSensitivity,
   setHotspotsVisibility,
+  volume,
+  setVolume,
 }) => {
   const cameraTools = [];
   if (camera) {
@@ -66,8 +77,11 @@ const Tools = ({
   }
   return (
     <GUI expanded={false} style={{ controlWidth: 500 }}>
-      <Folder label='Camera'>
+      {cameraTools.length ? <Folder label='Camera'>
         {cameraTools}
+      </Folder> : null}
+      <Folder label='Game'>
+        <DGNumber label='Volume' value={volume} min={0} max={100} step={1} onChange={setVolume} />
       </Folder>
       <Folder label='Scene'>
         <DGNumber label='Sensitivity' value={sensitivity} min={20} max={200} step={1} onChange={setSensitivity}/>

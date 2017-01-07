@@ -7,6 +7,16 @@ import {
 import {
   SCENE_TYPE_LIST,
 } from '../morpheus/scene';
+import {
+  GAME_SET_VOLUME,
+} from './types';
+
+export function setVolume(volume) {
+  return {
+    type: GAME_SET_VOLUME,
+    payload: volume,
+  }
+}
 
 export function display() {
   return (dispatch, getState) => {

@@ -5,7 +5,21 @@ module.exports = {
   target: 'web',
   entry: {
     app: './client/js/app.jsx',
-    vendor: ['lodash', 'three', 'react', 'react-redux', 'redux', 'react-dom'],
+    vendor: [
+      'lodash',
+      'three',
+      'react',
+      'react-redux',
+      'redux',
+      'react-dom',
+      'raf',
+      'redux-promise',
+      'redux-thunk',
+      'dis-gui',
+      'classnames',
+      'bluebird',
+      'babel-polyfill',
+    ],
   },
   output: {
     path: path.join(__dirname, 'public/js'),

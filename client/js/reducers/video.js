@@ -8,17 +8,17 @@ export default createReducer({
   loading: {},
   loaded: {},
 }, {
-  [VIDEO_LOAD_START](video, { payload: name, meta: promise }) {
+  [VIDEO_LOAD_START](video, { payload: name }) {
     const { loading } = video;
     return {
       ...video,
       loading: {
         ...loading,
-        [name]: promise,
+        [name]: true,
       },
     };
   },
-  [VIDEO_LOAD_COMPLETE](video, { payload: name }) {
+  [VIDEO_LOAD_COMPLETE](video, { payload: name, meta: videoEl }) {
     const { loading, loaded } = video;
     return {
       ...video,
@@ -28,7 +28,7 @@ export default createReducer({
       },
       loaded: {
         ...loaded,
-        [name]: loading[name],
+        [name]: videoEl,
       },
     };
   },

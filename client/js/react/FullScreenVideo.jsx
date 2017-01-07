@@ -8,19 +8,24 @@ import {
 } from '../actions/transition';
 import Video from './Video';
 
-function mapStateToProps({ video, dimensions }) {
+function mapStateToProps({ game, video, dimensions }) {
+  const { volume } = game;
   const { loading: loadingMap, loaded: loadedMap } = video;
   const { width, height } = dimensions;
   const loading = Object
     .keys(loadingMap)
     .filter(url => loadingMap[url]);
   const loaded = Object
-    .keys(loadingMap);
+    .keys(loadedMap);
+
+  values(loadedMap).forEach(videoEl => videoEl.volume = volume);
+
   return {
     loading,
     loaded,
     width,
     height,
+    volume,
   }
 }
 
@@ -61,7 +66,7 @@ export default connect(
       height={height}
       onCanPlayThrough={videoCanPlay.bind(null, url)}
       loop={false}
-      autoPlay={false}
+      autoPlay={true}
       offscreen={true}
     />
   ));
@@ -76,7 +81,7 @@ export default connect(
       onCanPlayThrough={videoCanPlay.bind(null, url)}
       onEnded={videoEnded.bind(null, url)}
       loop={false}
-      autoPlay={false}
+      autoPlay={true}
       offscreen={false}
     />
   ));

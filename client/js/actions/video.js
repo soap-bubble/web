@@ -1,3 +1,5 @@
+import Promise from 'bluebird'
+
 import {
   VIDEO_LOAD_START,
   VIDEO_LOAD_COMPLETE,
@@ -14,32 +16,35 @@ export function videoLoadComplete(name, video) {
     throw new Error(`No way to complete a video load for ${name} which was never started`);
   }
 
-  loading[name].resolve(video);
+  if (!loading[name].videoEl) {
+    loading[name].videoEl = video;
+  }
 
   return {
     type: VIDEO_LOAD_COMPLETE,
     payload: name,
+    meta: video,
   };
 }
 
-export function videoLoad(name) {
+export function videoLoad(name, autoPlay) {
   if (loading[name]) {
     return;
   }
 
-  loading[name] = Promise.defer()
+  loading[name] = {
+    autoPlay,
+  };
+
   return {
     type: VIDEO_LOAD_START,
     payload: name,
-    meta: loading[name].promise,
+    meta: loading[name],
   };
 }
 
 export function playFullscreenVideo(name) {
   return (dispatch, getState) => {
-    dispatch(videoLoad(name));
-    loading[name].promise.then((videoEl) => {
-      videoEl.play();
-    });
+    dispatch(videoLoad(name, true));
   }
 }

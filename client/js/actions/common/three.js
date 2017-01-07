@@ -4,9 +4,10 @@ import {
 } from 'three';
 
 export function createCameraForType({ type, width, height }) {
+  const camera = new PerspectiveCamera(55, width / height, 0.01, 1000);
   return {
     type,
-    payload: new PerspectiveCamera(55, width / height, 0.01, 1000),
+    payload: camera,
   };
 }
 

@@ -1,4 +1,5 @@
 import {
+  DeviceOrientationControls,
   BackSide,
   BufferGeometry,
   Object3D,
@@ -14,6 +15,7 @@ import { range } from 'lodash';
 import {
   pad,
 } from '../utils/string';
+import DeviceOrientation from './common/DeviceOrientation'
 import {
   resize,
 } from './dimensions';
@@ -102,9 +104,12 @@ export function createObject3D({ theta = 0, geometries, materials }) {
   const object3D = new Object3D();
   meshes.forEach(m => object3D.add(m));
 
+  //const orientation = new DeviceOrientation(object3D);
+
   return {
     type: PANO_OBJECT_CREATE,
     payload: object3D,
+    meta: null,
   };
 }
 
@@ -159,42 +164,41 @@ export function rotateBy({ x: deltaX, y: deltaY }) {
   return (dispatch, getState) => {
     const { hotspots, pano } = getState();
     let {
-      x: panoX,
-      y: panoY,
+      x,
+      y,
     } = pano.object3D.rotation;
-    let {
-      x: hotspotsX,
-      y: hotspotsY,
-    } = hotspots.visibleObject3D.rotation;
 
-    panoX += deltaX;
-    panoY += deltaY;
-    hotspotsX += deltaX;
-    hotspotsY += deltaY;
+    x += deltaX;
+    y += deltaY;
 
-    const panoRot = clamp({
-      x: panoX,
-      y: panoY,
-    });
-
-    const hotspotsRot = clamp({
-      x: hotspotsX,
-      y: hotspotsY,
-    });
-
-    Object.assign(hotspots.hitObject3D.rotation, hotspotsRot);
-    Object.assign(hotspots.visibleObject3D.rotation, hotspotsRot);
-    Object.assign(pano.object3D.rotation, panoRot);
-
-    dispatch(rotate(pano.object3D.rotation));
+    dispatch(rotate({ x, y }));
   }
 
 }
 
 export function rotate({ x, y }) {
-  return {
-    type: PANO_ROTATION,
-    payload: { x, y },
+  return (dispatch, getState) => {
+    const { hotspots, pano } = getState();
+    const { theta } = hotspots;
+
+    const panoRot = clamp({
+      x,
+      y,
+    });
+
+    const hotRot = clamp({
+      x,
+      y: y + theta,
+    });
+
+    Object.assign(hotspots.hitObject3D.rotation, hotRot);
+    Object.assign(hotspots.visibleObject3D.rotation, hotRot);
+    Object.assign(pano.object3D.rotation, panoRot);
+
+    dispatch({
+      type: PANO_ROTATION,
+      payload: { x, y },
+    });
   };
 }
 
@@ -270,8 +274,11 @@ export function createRenderer({ canvas, width, height }) {
 export function startRenderLoop() {
   return (dispatch, getState) => {
     const { pano } = getState();
-    const { scene3D, camera, renderer } = pano;
-    const render = () => renderer.render(scene3D, camera);
+    const { scene3D, camera, renderer, orientation } = pano;
+    const render = () => {
+      //orientation.update();
+      renderer.render(scene3D, camera);
+    };
     renderEvents.on('render', render);
     dispatch({
       type: PANO_RENDER_LOOP,

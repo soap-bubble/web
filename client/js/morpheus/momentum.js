@@ -1,12 +1,17 @@
 import { last } from 'lodash';
 import {
   rotateBy,
+  rotate,
 } from '../actions/pano';
 import store from '../store';
 import {
   addMouseUp,
   addMouseMove,
   addMouseDown,
+  addTouchStart,
+  addTouchMove,
+  addTouchEnd,
+  addTouchCancel,
 } from '../actions/ui';
 
 export default function (dispatch) {
@@ -41,7 +46,6 @@ export default function (dispatch) {
     return (delta * DEG_TO_RAD) / (7.0 * ((19 - sensitivity) / 18.0 ));
   }
 
-
   function updateMomentum() {
     const { pano } = store.getState();
     const {
@@ -71,8 +75,7 @@ export default function (dispatch) {
     dispatch(rotateBy(momentum.speed));
   }
 
-  function onMouseDown(mouseEvent) {
-    const { clientX: left, clientY: top } = mouseEvent;
+  function onInteractionStart({ left, top }) {
     interaction.startTime = Date.now();
     interaction.active = true;
     interaction.positions = [{ top, left, time: interaction.startTime }];
@@ -80,9 +83,8 @@ export default function (dispatch) {
     clearInterval(interaction.intervalId);
   }
 
-  function onMouseMove(mouseEvent) {
+  function onInteractionMove({ left, top }) {
     if (interaction.active) {
-      const { clientX: left, clientY: top } = mouseEvent;
       const { pano } = store.getState();
       const {
         controlType,
@@ -109,8 +111,7 @@ export default function (dispatch) {
     }
   }
 
-  function onMouseUp(mouseEvent) {
-    const { clientX: left, clientY: top } = mouseEvent;
+  function onInteractionEnd({ left, top }) {
     const {
       interactionDebounce,
       sensitivity,
@@ -151,7 +152,55 @@ export default function (dispatch) {
     interaction.active = false;
   }
 
+  function onTouchStart(touchEvent) {
+    const { touches } = touchEvent;
+    if (touches.length) {
+      const { clientX: left, clientY: top } = touches[0];
+      onInteractionStart({ top, left });
+    }
+  }
+
+  function onTouchMove(touchEvent) {
+    const { touches } = touchEvent;
+    if (touches.length) {
+      const { clientX: left, clientY: top } = touches[0];
+      onInteractionMove({ top, left });
+    }
+  }
+
+  function onTouchEnd(touchEvent) {
+    const { touches } = touchEvent;
+    if (touches.length) {
+      const { clientX: left, clientY: top } = touches[0];
+      onInteractionEnd({ top, left });
+    }
+  }
+
+  function onTouchCancel(touchEvent) {
+
+  }
+
+  function onMouseDown(mouseEvent) {
+    const { clientX: left, clientY: top } = mouseEvent;
+    onInteractionStart({ left, top });
+  }
+
+  function onMouseMove(mouseEvent) {
+    const { clientX: left, clientY: top } = mouseEvent;
+    onInteractionMove({ left, top });
+  }
+
+
+  function onMouseUp(mouseEvent) {
+    const { clientX: left, clientY: top } = mouseEvent;
+    onInteractionEnd({ left, top });
+  }
+
   dispatch(addMouseUp(onMouseUp));
   dispatch(addMouseMove(onMouseMove));
   dispatch(addMouseDown(onMouseDown));
+  dispatch(addTouchStart(onTouchStart));
+  dispatch(addTouchMove(onTouchMove));
+  dispatch(addTouchEnd(onTouchEnd));
+  dispatch(addTouchCancel(onTouchCancel));
 }

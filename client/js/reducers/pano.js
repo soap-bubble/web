@@ -34,10 +34,11 @@ const reducer = createReducer({
       geometries,
     };
   },
-  [PANO_OBJECT_CREATE](pano, { payload: object3D }) {
+  [PANO_OBJECT_CREATE](pano, { payload: object3D, meta: orientation }) {
     return {
       ...pano,
       object3D,
+      orientation,
     };
   },
   [PANO_MATERIALS_CREATE](pano, { payload: materials }) {

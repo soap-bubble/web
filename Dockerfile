@@ -1,14 +1,10 @@
 FROM node:4.6.1
-
-# use changes to package.json to force Docker not to use the cache
-# when we change our application's nodejs dependencies:
-COPY package.json /tmp/package.json
-RUN cd /tmp && npm install
-RUN mkdir -p /opt/app && cp -a /tmp/node_modules /opt/app/
-
-# From here we load our application's code in, therefore the previous docker
-# "layer" thats been cached will be used if possible
+# Doing this first because we don't want to change this layer often
+RUN mkdir -p /opt/app
+COPY GameDB/ /opt/app/GameDB
+COPY package.json /opt/app/
 WORKDIR /opt/app
+RUN npm install
 COPY . /opt/app
 ENV NODE_ENV=production
 CMD npm run start

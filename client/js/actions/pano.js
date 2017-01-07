@@ -13,6 +13,9 @@ import {
 import { range } from 'lodash';
 
 import {
+  getAssetUrl,
+} from '../service/gamedb';
+import {
   pad,
 } from '../utils/string';
 import DeviceOrientation from './common/DeviceOrientation'
@@ -127,7 +130,7 @@ export function createMaterials(fileNames) {
 
 function generateFileNames(fileName) {
   return range(1, 25)
-    .map(digit => `${fileName}.${pad(digit, 2)}.png`);
+    .map(digit => getAssetUrl(`${fileName}.${pad(digit, 2)}.png`));
 }
 
 export function createPano() {

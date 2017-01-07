@@ -27,7 +27,7 @@ import {
 import createReducer from './createReducer';
 
 const reducer = createReducer({
-  theta: -Math.PI / 2,
+  theta: 0,
   visible: false,
   hoverIndex: null,
   hitColorList: [],

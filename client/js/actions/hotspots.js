@@ -54,9 +54,9 @@ const SIZE = 0.99 * SCALE_FACTOR;
 
 function cylinderMap(y, x) {
   return {
-    x: SIZE * Math.sin(x),
+    x: SIZE * Math.sin(x - Math.PI / 2),
     y: -y,
-    z: SIZE * Math.cos(x),
+    z: SIZE * Math.cos(x - Math.PI / 2),
   };
 }
 

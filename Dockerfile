@@ -1,7 +1,6 @@
 FROM node:4.6.1
 # Doing this first because we don't want to change this layer often
 RUN mkdir -p /opt/app
-COPY GameDB/ /opt/app/GameDB
 COPY package.json /opt/app/
 WORKDIR /opt/app
 RUN npm install

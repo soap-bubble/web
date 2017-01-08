@@ -8,6 +8,9 @@ import {
   goToScene,
 } from './scene';
 import {
+  getAssetUrl,
+} from '../service/gamedb';
+import {
   TRANSITION_START,
   TRANSITION_END,
 } from './types';
@@ -17,7 +20,7 @@ export function display(sceneData) {
     const { casts } = sceneData;
     const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
     const { nextSceneId }= transitionCast;
-    const fileName = `/${transitionCast.fileName}.webm`;
+    const fileName = getAssetUrl(`${transitionCast.fileName}.webm`);
     dispatch(resize({
       width: window.innerWidth,
       height: window.innerHeight,

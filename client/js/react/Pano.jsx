@@ -8,6 +8,7 @@ import {
   canvasCreated,
   sceneCreate,
 } from '../actions/pano';
+import store from '../store';
 import Canvas from './Canvas';
 import momentum from '../morpheus/momentum';
 
@@ -25,11 +26,11 @@ function mapStateToProps({ scene, dimensions }) {
 
 function mapDisptachToProps(dispatch) {
   return {
-    installInteractionHandlers() {
-      momentum(dispatch);
-    },
     createAction(canvas) {
       dispatch(canvasCreated(canvas));
+      if (store.getState().hotspots.isPano) {
+        momentum(dispatch);
+      }
     }
   };
 }
@@ -37,27 +38,6 @@ function mapDisptachToProps(dispatch) {
 const Pano = connect(
   mapStateToProps,
   mapDisptachToProps,
-)(class extends React.Component {
-  componentDidMount() {
-    this.props.installInteractionHandlers();
-  }
-
-  render() {
-    const {
-      id,
-      width,
-      height,
-      createAction,
-    } = this.props;
-    return (
-      <Canvas
-        id={id}
-        width={width}
-        height={height}
-        createAction={createAction}
-      />
-    );
-  }
-});
+)(Canvas);
 
 export default Pano;

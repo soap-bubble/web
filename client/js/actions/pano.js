@@ -294,10 +294,6 @@ export function startRenderLoop() {
 
 export function display(sceneData) {
   return (dispatch) => {
-    const { casts } = sceneData;
-    const hotspotsData = casts.filter(c => c.castId === 0);
-
-    dispatch(hotspotsLoaded(hotspotsData));
     dispatch(createPano(sceneData));
     dispatch(resize({
       width: window.innerWidth,

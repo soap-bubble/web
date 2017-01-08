@@ -43,6 +43,7 @@ import {
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
   HOTSPOTS_ACTIVATED,
+  SCENE_END,
 } from './types';
 
 const HOTSPOT_VERTEX_SIZE = 4;
@@ -460,6 +461,9 @@ export function activateHotspotIndex(index) {
     const { hotspots } = getState();
     const { data } = hotspots;
     if (data && data[index]) {
+      dispatch({
+        type: SCENE_END,
+      });
       dispatch({
         type: HOTSPOTS_ACTIVATED,
         payload: data[index],

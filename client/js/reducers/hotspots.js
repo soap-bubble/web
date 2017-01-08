@@ -23,6 +23,7 @@ import {
   HOTSPOTS_CAMERA_TRANSLATE,
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
+  SCENE_LOAD_COMPLETE,
 } from '../actions/types';
 import createReducer from './createReducer';
 
@@ -170,6 +171,16 @@ const reducer = createReducer({
       renderLoop,
     };
   },
+  [SCENE_LOAD_COMPLETE](hotspots, { payload: sceneData }) {
+    const { casts } = sceneData;
+    const data = casts.filter(c => c.castId === 0);
+    const isPano = !!(casts.find(c => c.__t === 'PanoCast'));
+    return {
+      ...hotspots,
+      data,
+      isPano,
+    };
+  }
 });
 
 export default reducer;

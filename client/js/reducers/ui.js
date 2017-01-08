@@ -1,5 +1,10 @@
+import {
+  without,
+  defaults,
+} from 'lodash';
 import createReducer from './createReducer';
 import {
+  SCENE_END,
   UI_ADD_ONMOUSEUP,
   UI_ADD_ONMOUSEMOVE,
   UI_ADD_ONMOUSEDOWN,
@@ -9,7 +14,33 @@ import {
   UI_ADD_ONTOUCHCANCEL,
 } from '../actions/types';
 
+function reducerForType(type) {
+  return function (ui, { payload: callback, meta }) {
+    let { [type]: handlerList } = ui;
+    let { removeOnSceneEnd } = ui;
+    const { sceneOnly } = meta;
+    if (sceneOnly) {
+      removeOnSceneEnd = Object.assign({}, removeOnSceneEnd);
+      let removeHandlerList = removeOnSceneEnd[type];
+      if(!removeHandlerList) {
+        removeHandlerList = [ callback ]
+      } else {
+        removeHandlerList = removeHandlerList.concat([ callback ]);
+      }
+      removeOnSceneEnd[type] = removeHandlerList;
+    }
+    handlerList = handlerList.concat([ callback ]);
+    const ret = {
+      ...ui,
+      [type]: handlerList,
+      removeOnSceneEnd,
+    };
+    return ret;
+  }
+}
+
 const reducer = createReducer({
+  removeOnSceneEnd: {},
   onMouseUp: [],
   onMouseMove: [],
   onMouseDown: [],
@@ -18,62 +49,26 @@ const reducer = createReducer({
   onTouchEnd: [],
   onTouchCancel: [],
 }, {
-  [UI_ADD_ONMOUSEUP](ui, { payload: callback }) {
-    let { onMouseUp } = ui;
-    onMouseUp = onMouseUp.concat([ callback ]);
+  [SCENE_END](ui) {
+    let { removeOnSceneEnd } = ui;
+    const newUi = { ...ui };
+    Object.keys(removeOnSceneEnd).forEach((type) => {
+      const stack = ui[type];
+      const callbacks = removeOnSceneEnd[type];
+      newUi[type] = without.apply(null, stack.concat(callbacks));
+    });
     return {
-      ...ui,
-      onMouseUp,
-    };
+      ...defaults(newUi, ui),
+      removeOnSceneEnd: {},
+    }
   },
-  [UI_ADD_ONMOUSEMOVE](ui, { payload: callback }) {
-    let { onMouseMove } = ui;
-    onMouseMove = onMouseMove.concat([ callback ]);
-    return {
-      ...ui,
-      onMouseMove,
-    };
-  },
-  [UI_ADD_ONMOUSEDOWN](ui, { payload: callback }) {
-    let { onMouseDown } = ui;
-    onMouseDown = onMouseDown.concat([ callback ]);
-    return {
-      ...ui,
-      onMouseDown,
-    };
-  },
-  [UI_ADD_ONTOUCHSTART](ui, { payload: callback }) {
-    let { onTouchStart } = ui;
-    onTouchStart = onTouchStart.concat([ callback ]);
-    return {
-      ...ui,
-      onTouchStart,
-    };
-  },
-  [UI_ADD_ONTOUCHMOVE](ui, { payload: callback }) {
-    let { onTouchMove } = ui;
-    onTouchMove = onTouchMove.concat([ callback ]);
-    return {
-      ...ui,
-      onTouchMove,
-    };
-  },
-  [UI_ADD_ONTOUCHEND](ui, { payload: callback }) {
-    let { onTouchEnd } = ui;
-    onTouchEnd = onTouchEnd.concat([ callback ]);
-    return {
-      ...ui,
-      onTouchEnd,
-    };
-  },
-  [UI_ADD_ONTOUCHCANCEL](ui, { payload: callback }) {
-    let { onTouchCancel } = ui;
-    onTouchCancel = onTouchCancel.concat([ callback ]);
-    return {
-      ...ui,
-      onTouchCancel,
-    };
-  }
+  [UI_ADD_ONMOUSEUP]: reducerForType('onMouseUp'),
+  [UI_ADD_ONMOUSEMOVE]: reducerForType('onMouseMove'),
+  [UI_ADD_ONMOUSEDOWN]: reducerForType('onMouseDown'),
+  [UI_ADD_ONTOUCHSTART]: reducerForType('onTouchStart'),
+  [UI_ADD_ONTOUCHMOVE]: reducerForType('onTouchMove'),
+  [UI_ADD_ONTOUCHEND]: reducerForType('onTouchEnd'),
+  [UI_ADD_ONTOUCHCANCEL]: reducerForType('onTouchCancel')
 });
 
 export default reducer;

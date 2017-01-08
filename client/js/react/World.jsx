@@ -4,8 +4,8 @@ import React from 'react';
 import {
   SCENE_TYPE_LIST,
 } from '../morpheus/scene';
-import Scene from './Scene';
-import Hotspots from './HotspotsHitDetector';
+import Pano from './Pano';
+import Hotspots3D from './Hotspots3D';
 import Tools from './Tools';
 import Mouse from './Mouse';
 import FullScreenVideo from './FullScreenVideo';
@@ -23,7 +23,7 @@ const World = ({
 }) => {
   let actors = [];
   const sceneActorMap = {
-    panorama: [<Hotspots key='scene:hotspots'/>, <Scene key='scene'/>],
+    panorama: [<Hotspots3D key='scene:hotspots'/>, <Pano key='scene'/>],
     transition: [<FullScreenVideo key='scene:video' />]
   };
 

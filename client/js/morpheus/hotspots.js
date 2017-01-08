@@ -20,6 +20,7 @@ export default function ({
   canvas,
 }) {
   const pixel = new Uint8Array(4);
+  const clickStartPos = { left: 0, top: 0 };
   let possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -63,8 +64,10 @@ export default function ({
       // Update our state
 
       // User initiated event inside a hotspot so could be valid
-      if (wasMouseDowned && hotspotIndex !== null) {
+      if (!possibleValidClick && wasMouseDowned && (hotspotIndex !== null)) {
         possibleValidClick = true;
+        clickStartPos.left = coordsToCheck.left;
+        clickStartPos.top = coordsToCheck.top;
       }
 
       // We were a possible valid click, but user left the hotspot so invalidate
@@ -75,11 +78,18 @@ export default function ({
       // User pressed and released mouse button inside a valid hotspot
       // TODO: debounce??
       if (wasMouseUpped && possibleValidClick && hotspotIndex !== null) {
-        //dispatch(activateHotspotIndex(hotspotIndex));
+        const interactionDistance = Math.sqrt(
+          Math.pow(clickStartPos.left - coordsToCheck.left, 2)
+           + Math.pow(clickStartPos.top - coordsToCheck.top, 2)
+        );
+        // Only allow taps, not drag-n-release
+        if (interactionDistance < 20) {
+          dispatch(activateHotspotIndex(hotspotIndex));
+        }
       }
 
       // Reset for next time
-      possibleValidClick = !wasMouseUpped;
+      possibleValidClick = !wasMouseUpped && possibleValidClick;
       wasMouseMoved = false;
       wasMouseUpped = false;
       wasMouseDowned = false;
@@ -100,7 +110,7 @@ export default function ({
   }
 
   function onMouseMove(mouseEvent) {
-    wasMouseDowned = true;
+    wasMouseMoved = true;
     rememberEvent(mouseEvent);
   }
 

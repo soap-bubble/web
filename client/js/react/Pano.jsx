@@ -1,3 +1,4 @@
+import React from 'react';
 import { connect } from 'react-redux';
 
 import {
@@ -13,7 +14,6 @@ import momentum from '../morpheus/momentum';
 function mapStateToProps({ scene, dimensions }) {
   const {
     current: id,
-    data,
   } = scene || {};
   const { width, height } = dimensions;
   return {
@@ -24,14 +24,9 @@ function mapStateToProps({ scene, dimensions }) {
 }
 
 function mapDisptachToProps(dispatch) {
-  momentum(dispatch);
-
   return {
-    fetchScene(id) {
-      dispatch(fetchScene(id))
-        .then(() => {
-          dispatch(sceneCreate());
-        });
+    installInteractionHandlers() {
+      momentum(dispatch);
     },
     createAction(canvas) {
       dispatch(canvasCreated(canvas));
@@ -39,9 +34,30 @@ function mapDisptachToProps(dispatch) {
   };
 }
 
-const Scene = connect(
+const Pano = connect(
   mapStateToProps,
   mapDisptachToProps,
-)(Canvas);
+)(class extends React.Component {
+  componentDidMount() {
+    this.props.installInteractionHandlers();
+  }
 
-export default Scene;
+  render() {
+    const {
+      id,
+      width,
+      height,
+      createAction,
+    } = this.props;
+    return (
+      <Canvas
+        id={id}
+        width={width}
+        height={height}
+        createAction={createAction}
+      />
+    );
+  }
+});
+
+export default Pano;

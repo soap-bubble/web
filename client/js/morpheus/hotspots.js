@@ -5,6 +5,10 @@ import {
   addMouseUp,
   addMouseMove,
   addMouseDown,
+  addTouchStart,
+  addTouchMove,
+  addTouchEnd,
+  addTouchCancel,
 } from '../actions/ui';
 import {
   setHoverIndex,
@@ -104,6 +108,34 @@ export default function ({
     coordsToCheck = { left, top };
   }
 
+  function onTouchStart(touchEvent) {
+    const { touches } = touchEvent;
+    if (touches.length) {
+      wasMouseDowned = true;
+      rememberEvent(touches[0]);
+    }
+  }
+
+  function onTouchMove(touchEvent) {
+    const { touches } = touchEvent;
+    if (touches.length) {
+      wasMouseMoved = true;
+      rememberEvent(touches[0]);
+    }
+  }
+
+  function onTouchEnd(touchEvent) {
+    const { touches } = touchEvent;
+    if (touches.length) {
+      wasMouseUpped = true;
+      rememberEvent(touches[0]);
+    }
+  }
+
+  function onTouchCancel(touchEvent) {
+
+  }
+
   function onMouseUp(mouseEvent) {
     wasMouseUpped = true;
     rememberEvent(mouseEvent);
@@ -122,4 +154,8 @@ export default function ({
   dispatch(addMouseUp(onMouseUp));
   dispatch(addMouseMove(onMouseMove));
   dispatch(addMouseDown(onMouseDown));
+  dispatch(addTouchStart(onTouchStart));
+  dispatch(addTouchMove(onTouchMove));
+  dispatch(addTouchEnd(onTouchEnd));
+  dispatch(addTouchCancel(onTouchCancel));
 }

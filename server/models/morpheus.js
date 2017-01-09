@@ -114,6 +114,7 @@ class MovieSpecialCast extends MovieCast {
       "looping": Boolean,
       "dissolveToNextScene": Boolean,
       "nextSceneId": Number,
+      "angleAtEnd": Number,
     });
   }
 }

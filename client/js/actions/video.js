@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import {
   VIDEO_LOAD_START,
   VIDEO_LOAD_COMPLETE,
+  VIDEO_PLAY_DONE,
 } from './types';
 import {
   resize,
@@ -40,6 +41,13 @@ export function videoLoad(name, autoPlay) {
     type: VIDEO_LOAD_START,
     payload: name,
     meta: loading[name],
+  };
+}
+
+export function videoPlayDone(name) {
+  return {
+    type: VIDEO_PLAY_DONE,
+    payload: name,
   };
 }
 

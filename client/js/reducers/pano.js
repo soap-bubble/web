@@ -10,6 +10,7 @@ import {
   PANO_CAMERA_POSITION,
   PANO_RENDER_LOOP,
   PANO_RENDERER_CREATE,
+  TRANSITION_END,
 } from '../actions/types';
 import createReducer from './createReducer';
 
@@ -20,6 +21,7 @@ const reducer = createReducer({
     x: 0,
     y: 0,
   },
+  startAngle: 0,
   interactionDebounce: 5,
 }, {
   [PANO_CANVAS_CREATED](scene, { payload: canvas }) {
@@ -91,6 +93,24 @@ const reducer = createReducer({
     return {
       ...pano,
       renderLoop,
+    };
+  },
+  [TRANSITION_END](pano, { payload: transition }) {
+    let { angleAtEnd } = transition;
+    let { rotation } = pano;
+    let startAngle = 0;
+    if (angleAtEnd !== -1) {
+      //angleAtEnd = angleAtEnd * 0.856;
+      startAngle = angleAtEnd * Math.PI / 1800;
+      startAngle -= Math.PI - (Math.PI / 6);
+    }
+    return {
+      ...pano,
+      startAngle,
+      rotation: {
+        ...rotation,
+        y: startAngle,
+      },
     };
   },
 });

@@ -28,7 +28,7 @@ export function display(sceneData) {
     dispatch(playFullscreenVideo(fileName));
     dispatch({
       type: TRANSITION_START,
-      payload: nextSceneId,
+      payload: transitionCast,
     });
   };
 }
@@ -36,10 +36,11 @@ export function display(sceneData) {
 export function ended() {
   return (dispatch, getState) => {
     const { transition } = getState();
-    const { nextSceneId } = transition;
+    const { data } = transition;
+    const { nextSceneId } = data;
     dispatch({
       type: TRANSITION_END,
-      payload: nextSceneId,
+      payload: data,
     });
     dispatch(goToScene(nextSceneId));
   };

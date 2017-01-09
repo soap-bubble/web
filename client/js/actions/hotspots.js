@@ -279,6 +279,9 @@ export function createObjects3D(count) {
       hitGeometryList,
       hitMaterialList,
     } = getState().hotspots;
+    const {
+      startAngle,
+    } = getState().pano;
 
     function createObject3D({ geometry, material }) {
       const mesh = new Mesh(geometry, material);
@@ -299,6 +302,9 @@ export function createObjects3D(count) {
         material: hitMaterialList[i],
       }));
     }
+
+    visibleObject.rotation.y += startAngle;
+    hitObject.rotation.y += startAngle;
 
     dispatch({
       type: HOTSPOTS_VISIBLE_OBJECT_CREATE,

@@ -5,18 +5,18 @@ import {
 } from '../actions/types';
 
 const reducer = createReducer({
-  nextSceneId: null,
+
 }, {
-  [TRANSITION_START](transition, { payload: nextSceneId }) {
+  [TRANSITION_START](transition, { payload: data }) {
     return {
       ...transition,
-      nextSceneId,
+      data,
     };
   },
   [TRANSITION_END](transition) {
     return {
       ...transition,
-      nextSceneId: null,
+      data: null,
     };
   },
 });

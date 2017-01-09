@@ -96,7 +96,7 @@ export function createGeometries(fileNames) {
   };
 }
 
-export function createObject3D({ theta = 0, geometries, materials }) {
+export function createObject3D({ theta = 0, geometries, materials, startAngle }) {
   const meshes = geometries.map((g, i) => {
     const m = materials[i];
     const mesh = new Mesh(g, m);
@@ -106,7 +106,7 @@ export function createObject3D({ theta = 0, geometries, materials }) {
 
   const object3D = new Object3D();
   meshes.forEach(m => object3D.add(m));
-
+  object3D.rotation.y += startAngle;
   //const orientation = new DeviceOrientation(object3D);
 
   return {

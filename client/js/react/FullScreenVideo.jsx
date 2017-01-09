@@ -2,7 +2,10 @@ import { values } from 'lodash';
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
-import { videoLoadComplete } from '../actions/video'
+import {
+  videoLoadComplete,
+  videoPlayDone,
+} from '../actions/video'
 import {
   ended as transitionEnded
 } from '../actions/transition';
@@ -16,9 +19,12 @@ function mapStateToProps({ game, video, dimensions }) {
     .keys(loadingMap)
     .filter(url => loadingMap[url]);
   const loaded = Object
-    .keys(loadedMap);
+    .keys(loadedMap)
+    .filter(url => loadedMap[url]);
 
-  values(loadedMap).forEach(videoEl => videoEl.volume = volume);
+  values(loadedMap)
+    .filter(videoEl => videoEl)
+    .forEach(videoEl => videoEl.volume = volume);
 
   return {
     loading,
@@ -40,6 +46,7 @@ function mapDisptachToProps(dispatch) {
     },
     videoEnded(name) {
       dispatch(transitionEnded());
+      dispatch(videoPlayDone(name));
     },
   };
 }

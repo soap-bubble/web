@@ -20,7 +20,7 @@ export function display(sceneData) {
     const { casts } = sceneData;
     const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
     const { nextSceneId }= transitionCast;
-    const fileName = getAssetUrl(`${transitionCast.fileName}.webm`);
+    const fileName = getAssetUrl(`${transitionCast.fileName}`);
     dispatch(resize({
       width: window.innerWidth,
       height: window.innerHeight,

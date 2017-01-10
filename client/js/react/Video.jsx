@@ -18,7 +18,6 @@ const Video = ({
       objectFit: 'cover',
     }}
     ref={videoCreated}
-    src={src}
     width={width}
     height={height}
     autoPlay={autoPlay}
@@ -27,7 +26,16 @@ const Video = ({
     onCanPlayThrough={onCanPlayThrough}
     onEnded={onEnded}
     onPlaying={onPlaying}
-  />
+  >
+    <source
+      src={`${src}.webm`}
+      type="video/webm" 
+    />
+    <source
+      src={`${src}.mp4`}
+      type="video/mp4"
+    />
+  </video>
 )
 
 Video.displayName = 'Video';

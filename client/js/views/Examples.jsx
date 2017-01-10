@@ -84,7 +84,7 @@ const Examples = ({
       <Grid columns={3} Cell={ExampleCell} data={data}/>
       <div className="container">
         <div className="centered">
-          <br />This is just a small taste of what the current web app can do.  These examples are "view only" because enabling user interaction with hotspots has too many bugs.  Once the game is running better you will be able to play it!
+          <br />Navigation is now enabled!  However the experience is not at all optimized.  It just "barely works"
         </div>
       </div>
     </div>

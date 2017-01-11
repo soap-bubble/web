@@ -374,25 +374,6 @@ export function setHoverIndex(index) {
   }
 }
 
-export function createHotspots() {
-  return (dispatch, getState) => {
-    const { casts } = getState().scene.data;
-    const hotspotsData = casts.filter(c => c.castId === 0);
-
-    dispatch(createPositions(hotspotsData));
-    dispatch(createUvs(hotspotsData.length));
-    dispatch(createIndex(hotspotsData.length));
-    dispatch(createGeometry({
-      count: hotspotsData.length,
-      ...getState().hotspots,
-    }));
-    dispatch(createMaterials(hotspotsData.length));
-    dispatch(createObjects3D(hotspotsData.length));
-    dispatch(buildScene());
-    dispatch(buildRig());
-  }
-}
-
 export function buildScene() {
   return (dispatch, getState) => {
     dispatch(createScene([ getState().hotspots.hitObject3D ]));
@@ -477,5 +458,30 @@ export function activateHotspotIndex(index) {
       const { param1: nextSceneId } = data[index];
       dispatch(goToScene(nextSceneId));
     }
+  }
+}
+
+export function load() {
+  return (dispatch, getState) => {
+    const { loaded, cache } = getState().scene;
+    const { casts } = cache[loaded];
+    const hotspotsData = casts.filter(c => c.castId === 0);
+
+    dispatch(createPositions(hotspotsData));
+    dispatch(createUvs(hotspotsData.length));
+    dispatch(createIndex(hotspotsData.length));
+    dispatch(createGeometry({
+      count: hotspotsData.length,
+      ...getState().hotspots,
+    }));
+    dispatch(createMaterials(hotspotsData.length));
+    dispatch(createObjects3D(hotspotsData.length));
+    dispatch(buildScene());
+  }
+}
+
+export function display() {
+  return (dispatch) => {
+    dispatch(buildRig());
   }
 }

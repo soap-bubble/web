@@ -1,5 +1,5 @@
 import {
-  display as displayPano,
+  load as loadPano,
 } from './pano';
 import {
   display as displayTransition,
@@ -21,9 +21,10 @@ export function setVolume(volume) {
 export function display() {
   return (dispatch, getState) => {
     const { scene } = getState();
-    const { data: sceneData } = scene;
+    const { loaded, cache } = scene;
+    const sceneData = cache[loaded];
     const sceneActionMap = {
-      panorama: displayPano,
+      panorama: loadPano,
       special: displayTransition,
       transition: displayTransition,
     }

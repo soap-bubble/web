@@ -4,11 +4,11 @@ import {
   BufferGeometry,
   Object3D,
   BufferAttribute,
-  ImageUtils,
   Uint16Attribute,
   MeshBasicMaterial,
   Mesh,
   Scene,
+  TextureLoader,
 } from 'three';
 import { range } from 'lodash';
 
@@ -23,7 +23,8 @@ import {
   resize,
 } from './dimensions';
 import {
-  createHotspots,
+  load as loadHotspots,
+  dispplay as displayHotspots,
   hotspotsLoaded,
   positionCamera as positionHotspotCamera,
   startRenderLoop as startHotspotRenderLoop,
@@ -46,6 +47,8 @@ import {
   PANO_CAMERA_POSITION,
   PANO_RENDERER_CREATE,
   PANO_RENDER_LOOP,
+  PANO_TEXTURES_LOAD_SUCCESS,
+  PANO_TEXTURES_LOAD_FAILURE,
 } from './types';
 
 const twentyFourthRad = (15 / 180) * Math.PI;
@@ -117,37 +120,40 @@ export function createObject3D({ theta = 0, geometries, materials, startAngle })
 }
 
 export function createMaterials(fileNames) {
-  const materials = fileNames.map(f => new MeshBasicMaterial({
-    side: BackSide,
-    map: ImageUtils.loadTexture(f),
-  }));
+  return (dispatch) => {
+    const loader = new TextureLoader();
+    const materials = [];
+    Promise.all(fileNames
+      .map(f => new Promise(
+        (resolve, reject) => materials.push(new MeshBasicMaterial({
+          side: BackSide,
+          map: loader.load(
+            f,
+            resolve,
+            undefined,
+            reject,
+          ),
+        })
+      ))))
+      .then(() => dispatch({
+        type: PANO_TEXTURES_LOAD_SUCCESS,
+        payload: fileNames
+      }))
+      .catch((err) => dispatch({
+        type: PANO_TEXTURES_LOAD_FAILURE,
+        payload: err,
+      }));
 
-  return {
-    type: PANO_MATERIALS_CREATE,
-    payload: materials,
+    dispatch({
+      type: PANO_MATERIALS_CREATE,
+      payload: materials,
+    });
   };
 }
 
 function generateFileNames(fileName) {
   return range(1, 25)
     .map(digit => getAssetUrl(`${fileName}.${pad(digit, 2)}.png`));
-}
-
-export function createPano() {
-  return (dispatch, getState) => {
-    const { casts } = getState().scene.data;
-    // eslint-disable-next-line no-underscore-dangle
-    const panoCastData = casts.find(c => c.__t === 'PanoCast');
-    const { fileName } = panoCastData;
-    const fileNames = generateFileNames(fileName);
-
-    dispatch(createGeometries(fileNames));
-    dispatch(createMaterials(fileNames));
-    dispatch(createObject3D(getState().pano));
-    dispatch(createHotspots());
-    dispatch(buildScene());
-    dispatch(buildRig());
-  };
 }
 
 const UP_DOWN_LIMIT = 8.5 * Math.PI / 180;
@@ -217,7 +223,6 @@ export function buildScene() {
   return (dispatch, getState) => {
     const { hotspots } = getState();
 
-    dispatch(createHotspots());
     let objects = [];
     objects.push(getState().pano.object3D);
     if (hotspots.visible) {
@@ -291,15 +296,32 @@ export function startRenderLoop() {
   };
 }
 
+export function load(sceneData) {
+  return (dispatch, getState) => {
+    const { cache, loaded } = getState().scene;
+    const { casts } = cache[loaded];
+    // eslint-disable-next-line no-underscore-dangle
+    const panoCastData = casts.find(c => c.__t === 'PanoCast');
+    const { fileName } = panoCastData;
+    const fileNames = generateFileNames(fileName);
 
-export function display(sceneData) {
+    dispatch(createGeometries(fileNames));
+    dispatch(createMaterials(fileNames));
+    dispatch(createObject3D(getState().pano));
+    dispatch(loadHotspots());
+    dispatch(buildScene());
+  };
+}
+
+export function display() {
   return (dispatch) => {
-    dispatch(createPano(sceneData));
+    dispatch(buildRig());
     dispatch(resize({
       width: window.innerWidth,
       height: window.innerHeight,
     }));
     dispatch(positionCamera({ z: -0.4 }));
+    dispatch(displayHotspots());
     dispatch(startRenderLoop());
   };
 }

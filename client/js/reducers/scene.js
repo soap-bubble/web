@@ -5,40 +5,34 @@ import {
   SCENE_CREATE_3D,
   SCENE_DISPLAY_PANORAMA,
   SCENE_DISPLAY_TRANSITION,
+  PANO_TEXTURES_LOAD_SUCCESS,
+  PANO_TEXTURES_LOAD_FAILURE,
 } from '../actions/types';
 
 const reducer = createReducer({
   canvas: null,
-  current: 1050,
-  loading: {},
-  loaded: {},
-  data: null,
+  previous: null,
+  current: null,
+  loaded: null,
+  next: null,
+  cache: {},
 }, {
   [SCENE_LOAD_START](scene, { payload: id, meta: fetchPromise }) {
-    const { loading } = scene;
     return {
       ...scene,
-      loading: {
-        ...loading,
-        [id]: fetchPromise,
-      },
+      next: id,
     };
   },
   [SCENE_LOAD_COMPLETE](scene, { payload: data }) {
-    const { loading, loaded } = scene;
+    const { cache } = scene;
     const { sceneId: id } = data;
     return {
       ...scene,
-      current: id,
-      loading: {
-        ...loading,
-        [id]: null,
-      },
-      loaded: {
-        ...loaded,
+      loaded: id,
+      cache: {
+        ...cache,
         [id]: data,
       },
-      data,
     };
   },
   [SCENE_DISPLAY_PANORAMA](scene, { payload: sceneData }) {
@@ -49,8 +43,17 @@ const reducer = createReducer({
   [SCENE_DISPLAY_TRANSITION](scene, { payload: sceneData }) {
     return {
       ...scene,
+      next: null,
     };
   },
+  [PANO_TEXTURES_LOAD_SUCCESS](scene) {
+    const { loaded } = scene;
+    return {
+      ...scene,
+      current: loaded,
+      next: null,
+    }
+  }
 });
 
 export default reducer;

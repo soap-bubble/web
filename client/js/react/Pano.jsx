@@ -7,6 +7,7 @@ import {
 import {
   canvasCreated,
   sceneCreate,
+  display,
 } from '../actions/pano';
 import store from '../store';
 import Canvas from './Canvas';
@@ -31,6 +32,7 @@ function mapDisptachToProps(dispatch) {
       if (store.getState().hotspots.isPano) {
         momentum(dispatch);
       }
+      dispatch(display());
     }
   };
 }

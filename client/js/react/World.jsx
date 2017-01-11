@@ -11,7 +11,8 @@ import Mouse from './Mouse';
 import FullScreenVideo from './FullScreenVideo';
 
 function mapStateToProps({ scene }) {
-  const { data: sceneData } = scene;
+  const { cache, current } = scene;
+  const sceneData = cache[current];
   const sceneType = sceneData ? SCENE_TYPE_LIST[sceneData.sceneType] : 'none';
   return {
     sceneType,

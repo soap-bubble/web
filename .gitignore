@@ -49,3 +49,4 @@ jspm_packages
 # data files
 morpheus.map.json
 GameDB
+config/local.json

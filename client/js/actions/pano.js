@@ -24,7 +24,6 @@ import {
 } from './dimensions';
 import {
   load as loadHotspots,
-  dispplay as displayHotspots,
   hotspotsLoaded,
   positionCamera as positionHotspotCamera,
   startRenderLoop as startHotspotRenderLoop,
@@ -139,10 +138,13 @@ export function createMaterials(fileNames) {
         type: PANO_TEXTURES_LOAD_SUCCESS,
         payload: fileNames
       }))
-      .catch((err) => dispatch({
-        type: PANO_TEXTURES_LOAD_FAILURE,
-        payload: err,
-      }));
+      .catch((err) => {
+        debugger;
+        dispatch({
+          type: PANO_TEXTURES_LOAD_FAILURE,
+          payload: err,
+        })
+      });
 
     dispatch({
       type: PANO_MATERIALS_CREATE,
@@ -156,7 +158,7 @@ function generateFileNames(fileName) {
     .map(digit => getAssetUrl(`${fileName}.${pad(digit, 2)}.png`));
 }
 
-const UP_DOWN_LIMIT = 8.5 * Math.PI / 180;
+const UP_DOWN_LIMIT = 7.5 * Math.PI / 180;
 
 function clamp({ x, y }) {
   if (x > UP_DOWN_LIMIT) {
@@ -251,11 +253,17 @@ export function createScene(objects) {
 }
 
 export function createCamera({ width, height }) {
-  return createCameraForType({
-    type: PANO_CAMERA_CREATE,
-    width,
-    height,
-  });
+  return (dispatch, getState) => {
+    const { hotspots } = getState();
+    const { cameraPosition: position } = hotspots;
+
+    dispatch(createCameraForType({
+      type: PANO_CAMERA_CREATE,
+      width,
+      height,
+      position,
+    }));
+  };
 }
 
 export function positionCamera(vector3) {
@@ -320,8 +328,7 @@ export function display() {
       width: window.innerWidth,
       height: window.innerHeight,
     }));
-    dispatch(positionCamera({ z: -0.4 }));
-    dispatch(displayHotspots());
+    dispatch(positionCamera({ z: -0.225 }));
     dispatch(startRenderLoop());
   };
 }

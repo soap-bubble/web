@@ -399,11 +399,17 @@ export function createScene(objects) {
 }
 
 export function createCamera({ width, height }) {
-  return createCameraForType({
-    type: HOTSPOTS_CAMERA_CREATE,
-    width,
-    height,
-  });
+  return (dispatch, getState) => {
+    const { hotspots } = getState();
+    const { cameraPosition: position } = hotspots;
+
+    dispatch(createCameraForType({
+      type: HOTSPOTS_CAMERA_CREATE,
+      width,
+      height,
+      position,
+    }));
+  };
 }
 
 export function positionCamera(vector3) {

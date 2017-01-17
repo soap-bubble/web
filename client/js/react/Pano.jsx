@@ -28,11 +28,13 @@ function mapStateToProps({ scene, dimensions }) {
 function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
-      dispatch(canvasCreated(canvas));
-      if (store.getState().hotspots.isPano) {
-        momentum(dispatch);
+      if (canvas) {
+        dispatch(canvasCreated(canvas));
+        if (store.getState().hotspots.isPano) {
+          momentum(dispatch);
+        }
+        dispatch(display());
       }
-      dispatch(display());
     }
   };
 }

@@ -42,23 +42,12 @@ export function fetchScene(id) {
 }
 
 export function goToScene(id) {
-  return (dispatch, getState) => {
-    const { video } = getState();
-    const { loading, loaded } = video;
-
-    function doIt(sceneData) {
+  return (dispatch) => {
+    function doIt() {
       dispatch(display());
     }
 
-    let promise;
-    if (loading[id]) {
-      promise = loading[id].then(doIt);
-    } else if (loaded[id]){
-      promise = loaded[id].then(doIt);
-    } else {
-      promise = dispatch(fetchScene(id))
-        .then(doIt);
-    }
-    return promise;
+    return dispatch(fetchScene(id))
+      .then(doIt);
   };
 }

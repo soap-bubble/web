@@ -165,6 +165,16 @@ const reducer = createReducer({
       renderer,
     };
   },
+  [HOTSPOTS_CAMERA_TRANSLATE](hotspots, { payload: vector3 }) {
+    const { cameraPosition } = hotspots;
+    return {
+      ...hotspots,
+      cameraPosition: {
+        ...cameraPosition,
+        vector3,
+      },
+    };
+  },
   [HOTSPOTS_RENDER_LOOP](hotspots, { payload: renderLoop }) {
     return {
       ...hotspots,

@@ -1,4 +1,7 @@
 import {
+  isUndefined,
+} from 'lodash';
+import {
   PANO_CANVAS_CREATED,
   PANO_GEOMETRIES_CREATE,
   PANO_OBJECT_CREATE,
@@ -58,7 +61,7 @@ const reducer = createReducer({
   [PANO_SET_SENSITIVITY](pano, { payload: sensitivity }) {
     return {
       ...pano,
-      sensitivity
+      sensitivity,
     };
   },
   [PANO_SCENE_CREATE](pano, { payload: scene3D }) {
@@ -96,12 +99,11 @@ const reducer = createReducer({
     };
   },
   [TRANSITION_END](pano, { payload: transition }) {
-    let { angleAtEnd } = transition;
-    let { rotation } = pano;
+    const { angleAtEnd } = transition;
+    const { rotation } = pano;
     let startAngle = 0;
-    if (angleAtEnd !== -1) {
-      //angleAtEnd = angleAtEnd * 0.856;
-      startAngle = angleAtEnd * Math.PI / 1800;
+    if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+      startAngle = (angleAtEnd * Math.PI) / 1800;
       startAngle -= Math.PI - (Math.PI / 6);
     }
     return {
@@ -114,7 +116,5 @@ const reducer = createReducer({
     };
   },
 });
-
-
 
 export default reducer;

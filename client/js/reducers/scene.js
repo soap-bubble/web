@@ -2,12 +2,21 @@ import createReducer from './createReducer';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
-  SCENE_CREATE_3D,
   SCENE_DISPLAY_PANORAMA,
   SCENE_DISPLAY_TRANSITION,
   PANO_TEXTURES_LOAD_SUCCESS,
-  PANO_TEXTURES_LOAD_FAILURE,
+  VIDEO_IS_PLAYING,
+//  PANO_TEXTURES_LOAD_FAILURE,
 } from '../actions/types';
+
+function sceneEnd(scene) {
+  const { loaded } = scene;
+  return {
+    ...scene,
+    current: loaded,
+    next: null,
+  };
+}
 
 const reducer = createReducer({
   canvas: null,
@@ -17,7 +26,7 @@ const reducer = createReducer({
   next: null,
   cache: {},
 }, {
-  [SCENE_LOAD_START](scene, { payload: id, meta: fetchPromise }) {
+  [SCENE_LOAD_START](scene, { payload: id }) {
     return {
       ...scene,
       next: id,
@@ -35,25 +44,19 @@ const reducer = createReducer({
       },
     };
   },
-  [SCENE_DISPLAY_PANORAMA](scene, { payload: sceneData }) {
+  [SCENE_DISPLAY_PANORAMA](scene) {
     return {
       ...scene,
     };
   },
-  [SCENE_DISPLAY_TRANSITION](scene, { payload: sceneData }) {
+  [SCENE_DISPLAY_TRANSITION](scene) {
     return {
       ...scene,
       next: null,
     };
   },
-  [PANO_TEXTURES_LOAD_SUCCESS](scene) {
-    const { loaded } = scene;
-    return {
-      ...scene,
-      current: loaded,
-      next: null,
-    }
-  }
+  [PANO_TEXTURES_LOAD_SUCCESS]: sceneEnd,
+  [VIDEO_IS_PLAYING]: sceneEnd,
 });
 
 export default reducer;

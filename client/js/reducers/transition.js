@@ -5,7 +5,7 @@ import {
 } from '../actions/types';
 
 const reducer = createReducer({
-
+  
 }, {
   [TRANSITION_START](transition, { payload: data }) {
     return {

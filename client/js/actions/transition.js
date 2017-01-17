@@ -25,11 +25,11 @@ export function display(sceneData) {
       width: window.innerWidth,
       height: window.innerHeight,
     }));
-    dispatch(playFullscreenVideo(fileName));
     dispatch({
       type: TRANSITION_START,
       payload: transitionCast,
     });
+    dispatch(playFullscreenVideo(fileName));
   };
 }
 

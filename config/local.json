@@ -1,5 +1,5 @@
 {
   "mongodb": {
-    "uri": "mongodb://localhost/morpheus_dev-4"
+    "uri": "mongodb://localhost/morpheus_dev-6"
   }
 }

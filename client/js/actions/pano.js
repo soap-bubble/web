@@ -158,7 +158,7 @@ function generateFileNames(fileName) {
     .map(digit => getAssetUrl(`${fileName}.${pad(digit, 2)}.png`));
 }
 
-const UP_DOWN_LIMIT = 7.5 * Math.PI / 180;
+const UP_DOWN_LIMIT = 7.5 * (Math.PI / 180);
 
 function clamp({ x, y }) {
   if (x > UP_DOWN_LIMIT) {
@@ -304,7 +304,7 @@ export function startRenderLoop() {
   };
 }
 
-export function load(sceneData) {
+export function load() {
   return (dispatch, getState) => {
     const { cache, loaded } = getState().scene;
     const { casts } = cache[loaded];
@@ -328,7 +328,7 @@ export function display() {
       width: window.innerWidth,
       height: window.innerHeight,
     }));
-    dispatch(positionCamera({ z: -0.225 }));
+    dispatch(positionCamera({ z: -0.325 }));
     dispatch(startRenderLoop());
   };
 }

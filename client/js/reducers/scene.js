@@ -6,14 +6,16 @@ import {
   SCENE_DISPLAY_TRANSITION,
   PANO_TEXTURES_LOAD_SUCCESS,
   VIDEO_IS_PLAYING,
+  TRANSITION_END,
 //  PANO_TEXTURES_LOAD_FAILURE,
 } from '../actions/types';
 
 function sceneEnd(scene) {
-  const { loaded } = scene;
+  const { loaded, current } = scene;
   return {
     ...scene,
     current: loaded,
+    previous: current,
     next: null,
   };
 }
@@ -55,7 +57,40 @@ const reducer = createReducer({
       next: null,
     };
   },
-  [PANO_TEXTURES_LOAD_SUCCESS]: sceneEnd,
+  [PANO_TEXTURES_LOAD_SUCCESS](scene) {
+    const { cache, current, isTransitionEndedWaitingOnTextureLoad } = scene;
+    if (isTransitionEndedWaitingOnTextureLoad) {
+      return sceneEnd({
+        ...scene,
+        isTransitionEndedWaitingOnTextureLoad: false,
+      });
+    }
+    const sceneData = cache[current];
+    if (sceneData) {
+      const { casts } = sceneData;
+      const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
+      if (transitionCast) {
+        return {
+          ...scene,
+          isWaitingOnTransistion: true,
+        };
+      }
+    }
+    return sceneEnd(scene);
+  },
+  [TRANSITION_END](scene) {
+    const { isWaitingOnTransistion } = scene;
+    if (isWaitingOnTransistion) {
+      return sceneEnd({
+        ...scene,
+        isWaitingOnTransistion: false,
+      });
+    }
+    return {
+      ...scene,
+      isTransitionEndedWaitingOnTextureLoad: true,
+    };
+  },
   [VIDEO_IS_PLAYING]: sceneEnd,
 });
 

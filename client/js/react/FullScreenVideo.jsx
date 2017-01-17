@@ -2,13 +2,20 @@ import { values } from 'lodash';
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
+import store from '../store';
 import {
   videoLoadComplete,
   videoIsPlaying,
   videoPlayDone,
-} from '../actions/video'
+} from '../actions/video';
 import {
-  ended as transitionEnded
+  fetchScene,
+} from '../actions/scene';
+import {
+  load as loadPano,
+} from '../actions/pano';
+import {
+  ended as transitionEnded,
 } from '../actions/transition';
 import Video from './Video';
 
@@ -35,6 +42,16 @@ function mapDisptachToProps(dispatch) {
     },
     videoPlaying(name) {
       dispatch(videoIsPlaying(name));
+      const { scene } = store.getState();
+      const { current, cache } = scene;
+      const sceneData = cache[current];
+      const { casts } = sceneData;
+      const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
+      const { nextSceneId } = transitionCast;
+      if (nextSceneId) {
+        // dispatch(fetchScene(nextSceneId))
+        //   .then(() => dispatch(loadPano()));
+      }
     },
     videoEnded(name) {
       dispatch(transitionEnded());

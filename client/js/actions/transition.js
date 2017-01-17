@@ -5,8 +5,12 @@ import {
   playFullscreenVideo,
 } from './video';
 import {
+  fetchScene,
   goToScene,
 } from './scene';
+import {
+  load as loadPano,
+} from './pano';
 import {
   getAssetUrl,
 } from '../service/gamedb';

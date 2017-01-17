@@ -4,7 +4,7 @@ import {
   VIDEO_IS_PLAYING,
   VIDEO_LOAD_COMPLETE,
   VIDEO_PLAY_DONE,
-  PANO_TEXTURES_LOAD_SUCCESS,
+  PANO_RENDER_LOOP,
 } from '../actions/types';
 
 export default createReducer({
@@ -48,7 +48,7 @@ export default createReducer({
       },
     };
   },
-  [PANO_TEXTURES_LOAD_SUCCESS]() {
+  [PANO_RENDER_LOOP]() {
     return {};
   },
 });

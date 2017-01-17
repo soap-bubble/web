@@ -30,10 +30,6 @@ export function videoLoadComplete(name, video) {
 }
 
 export function videoLoad(name, autoPlay) {
-  if (loading[name]) {
-    return;
-  }
-
   loading[name] = {
     autoPlay,
   };

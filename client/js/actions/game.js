@@ -15,7 +15,7 @@ export function setVolume(volume) {
   return {
     type: GAME_SET_VOLUME,
     payload: volume,
-  }
+  };
 }
 
 export function display() {

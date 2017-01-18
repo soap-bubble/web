@@ -30,7 +30,7 @@ window.onload = () => {
   //   const
   // }
 
-  store.dispatch(goToScene(qp.scene || 1050));
+  store.dispatch(goToScene(qp.scene || 8010));
 
   window.addEventListener('resize', () => {
     resizeToWindow();

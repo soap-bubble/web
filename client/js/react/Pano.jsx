@@ -7,6 +7,7 @@ import {
 import {
   canvasCreated,
   sceneCreate,
+  display,
 } from '../actions/pano';
 import store from '../store';
 import Canvas from './Canvas';
@@ -27,9 +28,12 @@ function mapStateToProps({ scene, dimensions }) {
 function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
-      dispatch(canvasCreated(canvas));
-      if (store.getState().hotspots.isPano) {
-        momentum(dispatch);
+      if (canvas) {
+        dispatch(canvasCreated(canvas));
+        if (store.getState().hotspots.isPano) {
+          momentum(dispatch);
+        }
+        dispatch(display());
       }
     }
   };

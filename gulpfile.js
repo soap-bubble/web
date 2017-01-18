@@ -1,3 +1,6 @@
+/* eslint-disable */
+'use strict';
+
 var gulp = require('gulp');
 var babel = require('gulp-babel');
 var nodemon = require('gulp-nodemon');
@@ -5,15 +8,20 @@ var webpackConfig = require('./webpack.config');
 var runSequence = require('run-sequence');
 var browserSync = require('browser-sync');
 var _ = require('lodash');
-var spawn = require('child_process').spawn;
+var spawn = require('cross-spawn').spawn;
 var Server = require('karma').Server;
+var path = require('path');
 
 var watch = false;
 var src = {};
 
 
 gulp.task('webpack:client', (cb) => {
-  const webpack_watch = spawn('./node_modules/.bin/webpack', ['--color']);
+  let command = './node_modules/.bin/webpack';
+  if (process.platform === 'win32') {
+    command += '.cmd';
+  }
+  const webpack_watch = spawn(path.resolve(command), ['--color']);
 
   webpack_watch.stdout.on('data', (data) => {
     console.log(`webpack: ${data}`);
@@ -32,7 +40,11 @@ gulp.task('webpack:client', (cb) => {
 
 
 gulp.task('webpack:client:watch', (cb) => {
-  const webpack_watch = spawn('./node_modules/.bin/webpack', ['--watch', '--devtool=source-map', '--color']);
+  let command = './node_modules/.bin/webpack';
+  if (process.platform === 'win32') {
+    command += '.cmd';
+  }
+  const webpack_watch = spawn(path.resolve(command), ['--watch', '--devtool=source-map', '--color']);
 
   webpack_watch.stdout.on('data', (data) => {
     console.log(`webpack: ${data}`);
@@ -46,6 +58,10 @@ gulp.task('webpack:client:watch', (cb) => {
     console.log(`webpack exited with code ${code}`);
     cb();
   });
+
+  webpack_watch.on('error', (err) => {
+    console.error(err);
+  })
 });
 
 gulp.task('copy:html', function () {

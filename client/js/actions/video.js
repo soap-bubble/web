@@ -3,6 +3,7 @@ import Promise from 'bluebird'
 import {
   VIDEO_LOAD_START,
   VIDEO_LOAD_COMPLETE,
+  VIDEO_IS_PLAYING,
   VIDEO_PLAY_DONE,
 } from './types';
 import {
@@ -29,10 +30,6 @@ export function videoLoadComplete(name, video) {
 }
 
 export function videoLoad(name, autoPlay) {
-  if (loading[name]) {
-    return;
-  }
-
   loading[name] = {
     autoPlay,
   };
@@ -41,6 +38,13 @@ export function videoLoad(name, autoPlay) {
     type: VIDEO_LOAD_START,
     payload: name,
     meta: loading[name],
+  };
+}
+
+export function videoIsPlaying(name) {
+  return {
+    type: VIDEO_IS_PLAYING,
+    payload: name,
   };
 }
 

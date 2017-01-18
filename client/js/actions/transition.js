@@ -5,8 +5,12 @@ import {
   playFullscreenVideo,
 } from './video';
 import {
+  fetchScene,
   goToScene,
 } from './scene';
+import {
+  load as loadPano,
+} from './pano';
 import {
   getAssetUrl,
 } from '../service/gamedb';
@@ -25,11 +29,11 @@ export function display(sceneData) {
       width: window.innerWidth,
       height: window.innerHeight,
     }));
-    dispatch(playFullscreenVideo(fileName));
     dispatch({
       type: TRANSITION_START,
       payload: transitionCast,
     });
+    dispatch(playFullscreenVideo(fileName));
   };
 }
 

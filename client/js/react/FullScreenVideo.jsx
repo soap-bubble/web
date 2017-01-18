@@ -2,37 +2,33 @@ import { values } from 'lodash';
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
+import store from '../store';
 import {
   videoLoadComplete,
+  videoIsPlaying,
   videoPlayDone,
-} from '../actions/video'
+} from '../actions/video';
 import {
-  ended as transitionEnded
+  fetchScene,
+} from '../actions/scene';
+import {
+  load as loadPano,
+} from '../actions/pano';
+import {
+  ended as transitionEnded,
 } from '../actions/transition';
 import Video from './Video';
 
 function mapStateToProps({ game, video, dimensions }) {
   const { volume } = game;
-  const { loading: loadingMap, loaded: loadedMap } = video;
   const { width, height } = dimensions;
-  const loading = Object
-    .keys(loadingMap)
-    .filter(url => loadingMap[url]);
-  const loaded = Object
-    .keys(loadedMap)
-    .filter(url => loadedMap[url]);
-
-  values(loadedMap)
-    .filter(videoEl => videoEl)
-    .forEach(videoEl => videoEl.volume = volume);
 
   return {
-    loading,
-    loaded,
+    video,
     width,
     height,
     volume,
-  }
+  };
 }
 
 function mapDisptachToProps(dispatch) {
@@ -43,6 +39,19 @@ function mapDisptachToProps(dispatch) {
     },
     videoCanPlay(name) {
       dispatch(videoLoadComplete(name, videoEl));
+    },
+    videoPlaying(name) {
+      dispatch(videoIsPlaying(name));
+      const { scene } = store.getState();
+      const { current, cache } = scene;
+      const sceneData = cache[current];
+      const { casts } = sceneData;
+      const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
+      const { nextSceneId } = transitionCast;
+      if (nextSceneId) {
+        // dispatch(fetchScene(nextSceneId))
+        //   .then(() => dispatch(loadPano()));
+      }
     },
     videoEnded(name) {
       dispatch(transitionEnded());
@@ -55,47 +64,68 @@ export default connect(
   mapStateToProps,
   mapDisptachToProps,
 )(({
-  loading,
-  loaded,
+  video,
   width,
   height,
-  current,
   videoCreated,
   videoCanPlay,
+  videoPlaying,
   videoEnded,
 }) => {
-  const offscreenLoading = loading.map(url => (
-    <Video
-      key={`fullscreenvideo:${url}`}
-      videoCreated={videoCreated}
-      src={url}
-      width={width}
-      height={height}
-      onCanPlayThrough={videoCanPlay.bind(null, url)}
-      loop={false}
-      autoPlay={true}
-      offscreen={true}
-    />
-  ));
+  const videos = Object.keys(video).map(url => {
+    const v = video[url];
+    if (v.state === 'loading') {
+      return (<Video
+        key={`fullscreenvideo:${url}`}
+        videoCreated={videoCreated}
+        src={url}
+        width={width}
+        height={height}
+        onCanPlayThrough={videoCanPlay.bind(null, url)}
+        onPlaying={videoPlaying.bind(null, url)}
+        onEnded={videoEnded.bind(null, url)}
+        autoPlay
+        offscreen
+      />);
+    } else if (v.state === 'loaded') {
+      return (<Video
+        key={`fullscreenvideo:${url}`}
+        videoCreated={videoCreated}
+        src={url}
+        width={width}
+        height={height}
+        onCanPlayThrough={videoCanPlay.bind(null, url)}
+        onPlaying={videoPlaying.bind(null, url)}
+        onEnded={videoEnded.bind(null, url)}
+        autoPlay
+      />);
+    } else if (v.state === 'playing') {
+      return (<Video
+        key={`fullscreenvideo:${url}`}
+        videoCreated={videoCreated}
+        src={url}
+        width={width}
+        height={height}
+        onCanPlayThrough={videoCanPlay.bind(null, url)}
+        onPlaying={videoPlaying.bind(null, url)}
+        onEnded={videoEnded.bind(null, url)}
+        autoPlay
+      />);
+    } else if (v.state === 'done') {
+      return (<Video
+        key={`fullscreenvideo:${url}`}
+        videoCreated={videoCreated}
+        src={url}
+        width={width}
+        height={height}
+        autoPlay
+      />);
+    }
+  });
 
-  const playing = loaded.map(url => (
-    <Video
-      key={`fullscreenvideo:${url}`}
-      videoCreated={videoCreated}
-      src={url}
-      width={width}
-      height={height}
-      onCanPlayThrough={videoCanPlay.bind(null, url)}
-      onEnded={videoEnded.bind(null, url)}
-      loop={false}
-      autoPlay={true}
-      offscreen={false}
-    />
-  ));
   return (
     <div>
-      {offscreenLoading}
-      {playing}
+      {videos}
     </div>
   );
 });

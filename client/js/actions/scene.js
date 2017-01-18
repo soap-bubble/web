@@ -5,13 +5,9 @@ import {
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
-  SCENE_DISPLAY_PANORAMA,
-  SCENE_DISPLAY_TRANSITION,
 } from './types';
-import {
-  SCENE_TYPE_LIST,
-} from '../morpheus/scene';
 
+const sceneCache = {};
 
 export function sceneLoadComplete(responseData) {
   return {
@@ -30,6 +26,12 @@ export function sceneLoadStarted(id, fetch) {
 
 export function fetchScene(id) {
   return (dispatch) => {
+    if (!id) {
+      debugger;
+    }
+    if (sceneCache[id]) {
+      return sceneCache[id];
+    }
     const fetch = bySceneId(id)
       .then(response => response.data)
       .then((sceneData) => {
@@ -42,23 +44,12 @@ export function fetchScene(id) {
 }
 
 export function goToScene(id) {
-  return (dispatch, getState) => {
-    const { video } = getState();
-    const { loading, loaded } = video;
-
-    function doIt(sceneData) {
+  return (dispatch) => {
+    function doIt() {
       dispatch(display());
     }
 
-    let promise;
-    if (loading[id]) {
-      promise = loading[id].then(doIt);
-    } else if (loaded[id]){
-      promise = loaded[id].then(doIt);
-    } else {
-      promise = dispatch(fetchScene(id))
-        .then(doIt);
-    }
-    return promise;
+    return dispatch(fetchScene(id))
+      .then(doIt);
   };
 }

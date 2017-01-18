@@ -1,51 +1,54 @@
 import createReducer from './createReducer';
 import {
   VIDEO_LOAD_START,
+  VIDEO_IS_PLAYING,
   VIDEO_LOAD_COMPLETE,
   VIDEO_PLAY_DONE,
+  PANO_RENDER_LOOP,
 } from '../actions/types';
 
 export default createReducer({
-  loading: {},
-  loaded: {},
-  done: {},
+
 }, {
   [VIDEO_LOAD_START](video, { payload: name }) {
-    const { loading } = video;
     return {
       ...video,
-      loading: {
-        ...loading,
-        [name]: true,
-      },
+      [name]: { state: 'loading' },
     };
   },
   [VIDEO_LOAD_COMPLETE](video, { payload: name, meta: videoEl }) {
-    const { loading, loaded } = video;
+    const { [name]: thisVideo } = video;
     return {
       ...video,
-      loading: {
-        ...loading,
-        [name]: null,
+      [name]: {
+        ...thisVideo,
+        state: 'loaded',
+        el: videoEl,
       },
-      loaded: {
-        ...loaded,
-        [name]: videoEl,
+    };
+  },
+  [VIDEO_IS_PLAYING](video, { payload: name, meta: videoEl }) {
+    const { [name]: thisVideo } = video;
+    return {
+      ...video,
+      [name]: {
+        ...thisVideo,
+        state: 'playing',
+        el: videoEl,
       },
     };
   },
   [VIDEO_PLAY_DONE](video, { payload: name }) {
-    const { loaded, done } = video;
+    const { [name]: thisVideo } = video;
     return {
       ...video,
-      loaded: {
-        ...loaded,
-        [name]: null,
-      },
-      done: {
-        ...done,
-        [name]: loaded[name],
+      [name]: {
+        ...thisVideo,
+        state: 'done',
       },
     };
+  },
+  [PANO_RENDER_LOOP]() {
+    return {};
   },
 });

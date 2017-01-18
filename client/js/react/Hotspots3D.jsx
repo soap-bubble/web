@@ -6,6 +6,7 @@ import Canvas from './Canvas';
 import {
   canvasCreated,
   sceneCreate,
+  display as displayHotspots,
 } from '../actions/hotspots';
 import hotspots from '../morpheus/hotspots';
 
@@ -27,6 +28,7 @@ function mapDisptachToProps(dispatch) {
       dispatch(canvasCreated(canvas));
       if (store.getState().hotspots.isPano) {
         hotspots({ dispatch, canvas });
+        dispatch(displayHotspots());
       }
     },
   };

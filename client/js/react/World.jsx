@@ -1,3 +1,4 @@
+import { values } from 'lodash';
 import { connect } from 'react-redux';
 import React from 'react';
 
@@ -9,26 +10,41 @@ import Hotspots3D from './Hotspots3D';
 import Tools from './Tools';
 import Mouse from './Mouse';
 import FullScreenVideo from './FullScreenVideo';
+import loggerFactory from '../utils/logger';
 
-function mapStateToProps({ scene }) {
-  const { data: sceneData } = scene;
+const logger = loggerFactory('World');
+
+function mapStateToProps({ scene, transition }) {
+  const { data: isTransitionLoading } = transition;
+  const { cache, current } = scene;
+  const sceneData = cache[current];
   const sceneType = sceneData ? SCENE_TYPE_LIST[sceneData.sceneType] : 'none';
   return {
     sceneType,
+    isTransitionLoading,
   };
 }
 
 const World = ({
   sceneType,
+  isTransitionLoading,
 }) => {
   let actors = [];
+
+  logger.info(`World render ${sceneType}`);
+
   const sceneActorMap = {
-    panorama: [<Hotspots3D key='scene:hotspots'/>, <Pano key='scene'/>],
-    transition: [<FullScreenVideo key='scene:video' />]
+    panorama: [<Hotspots3D key="scene:hotspots" />, <Pano key="scene" />],
+    transition: [<FullScreenVideo key="scene:video" />],
   };
 
   if (sceneActorMap[sceneType]) {
     actors = actors.concat(sceneActorMap[sceneType]);
+  }
+
+  if (sceneType !== 'transition' && isTransitionLoading) {
+    logger.info('Offscreen video loading');
+    actors = actors.concat(<FullScreenVideo key="scene:video" />);
   }
 
   return (

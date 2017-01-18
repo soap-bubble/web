@@ -2,55 +2,96 @@ import createReducer from './createReducer';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
-  SCENE_CREATE_3D,
   SCENE_DISPLAY_PANORAMA,
   SCENE_DISPLAY_TRANSITION,
+  PANO_TEXTURES_LOAD_SUCCESS,
+  VIDEO_IS_PLAYING,
+  TRANSITION_END,
+//  PANO_TEXTURES_LOAD_FAILURE,
 } from '../actions/types';
+
+function sceneEnd(scene) {
+  const { loaded, current } = scene;
+  return {
+    ...scene,
+    current: loaded,
+    previous: current,
+    next: null,
+  };
+}
 
 const reducer = createReducer({
   canvas: null,
-  current: 1050,
-  loading: {},
-  loaded: {},
-  data: null,
+  previous: null,
+  current: null,
+  loaded: null,
+  next: null,
+  cache: {},
 }, {
-  [SCENE_LOAD_START](scene, { payload: id, meta: fetchPromise }) {
-    const { loading } = scene;
+  [SCENE_LOAD_START](scene, { payload: id }) {
     return {
       ...scene,
-      loading: {
-        ...loading,
-        [id]: fetchPromise,
-      },
+      next: id,
     };
   },
   [SCENE_LOAD_COMPLETE](scene, { payload: data }) {
-    const { loading, loaded } = scene;
+    const { cache } = scene;
     const { sceneId: id } = data;
     return {
       ...scene,
-      current: id,
-      loading: {
-        ...loading,
-        [id]: null,
-      },
-      loaded: {
-        ...loaded,
+      loaded: id,
+      cache: {
+        ...cache,
         [id]: data,
       },
-      data,
     };
   },
-  [SCENE_DISPLAY_PANORAMA](scene, { payload: sceneData }) {
+  [SCENE_DISPLAY_PANORAMA](scene) {
     return {
       ...scene,
     };
   },
-  [SCENE_DISPLAY_TRANSITION](scene, { payload: sceneData }) {
+  [SCENE_DISPLAY_TRANSITION](scene) {
     return {
       ...scene,
+      next: null,
     };
   },
+  [PANO_TEXTURES_LOAD_SUCCESS](scene) {
+    const { cache, current, isTransitionEndedWaitingOnTextureLoad } = scene;
+    if (isTransitionEndedWaitingOnTextureLoad) {
+      return sceneEnd({
+        ...scene,
+        isTransitionEndedWaitingOnTextureLoad: false,
+      });
+    }
+    const sceneData = cache[current];
+    if (sceneData) {
+      const { casts } = sceneData;
+      const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
+      if (transitionCast) {
+        return {
+          ...scene,
+          isWaitingOnTransistion: true,
+        };
+      }
+    }
+    return sceneEnd(scene);
+  },
+  [TRANSITION_END](scene) {
+    const { isWaitingOnTransistion } = scene;
+    if (isWaitingOnTransistion) {
+      return sceneEnd({
+        ...scene,
+        isWaitingOnTransistion: false,
+      });
+    }
+    return {
+      ...scene,
+      isTransitionEndedWaitingOnTextureLoad: true,
+    };
+  },
+  [VIDEO_IS_PLAYING]: sceneEnd,
 });
 
 export default reducer;

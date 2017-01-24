@@ -39,6 +39,8 @@ jspm_packages
 # Build
 lib
 public
+view
+client/build
 
 # secrets
 secrets.yml

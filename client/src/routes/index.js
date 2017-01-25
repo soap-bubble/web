@@ -1,12 +1,19 @@
 import React from 'react';
-import { Route, IndexRoute } from 'react-router';
+import { Router, Route, IndexRedirect } from 'react-router';
+import { browserHistory } from 'react-router';
 
-import Contents from '../views/Contents';
+import Page from '../components/Page';
+import About from '../components/About';
+import Examples from '../containers/Examples';
 
 const routes = (
-  <Route path="/">
-    <IndexRoute component={Contents} />\
-  </Route>
+  <Router history={ browserHistory }>
+    <Route path="/" component={Page}>
+      <IndexRedirect to="/examples" />
+      <Route path="about" component={About} />
+      <Route path="examples" component={Examples} />
+    </Route>
+  </Router>
 );
 
 export default routes;

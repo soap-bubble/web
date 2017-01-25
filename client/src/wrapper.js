@@ -1,10 +1,10 @@
-import React, { Component, PropTypes } from 'react'
-import { Provider } from 'react-redux'
+import React from 'react';
+import { Provider } from 'react-redux';
 
 const Wrapper = ({ store, children }) => (
-    <Provider store={ store }>
-      { children }
-    </Provider>
+  <Provider store={ store }>
+    { children }
+  </Provider>
 );
 
 Wrapper.propTypes = {

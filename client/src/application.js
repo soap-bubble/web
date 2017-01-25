@@ -6,7 +6,9 @@ import { render } from 'react-isomorphic-render'
 import settings from './react-isomorphic-render'
 
 import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap/dist/css/bootstrap-theme.min.css';
 import '../assets/styles/main.scss';
+
 require('react-responsive-ui/styles/react-responsive-ui.css')
 
 // renders the webpage on the client side

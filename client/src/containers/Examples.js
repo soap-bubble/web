@@ -80,14 +80,7 @@ const Examples = ({
   data,
 }) => {
   return (
-    <div>
-      <Grid columns={3} Cell={ExampleCell} data={data}/>
-      <div className="container">
-        <div className="centered">
-          <br />Navigation is now enabled!  However the experience is not at all optimized.  It just "barely works"
-        </div>
-      </div>
-    </div>
+    <Grid columns={3} Cell={ExampleCell} data={data}/>
   );
 };
 

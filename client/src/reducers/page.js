@@ -3,17 +3,20 @@ import {
   CHANGE_PAGE,
 } from '../actions/types';
 
-const reducer = createReducer({
-  current: 'examples',
-  navItems: [{
-    name: 'about',
-    label: 'About'
-  }, {
-    name: 'examples',
-    label: 'Gallery'
-  }],
+const available = [{
+  route: 'about',
+  label: 'About'
 }, {
-  [CHANGE_PAGE](page, { payload: current }) {
+  route: 'examples',
+  label: 'Gallery'
+}];
+
+const reducer = createReducer({
+  current: available[1],
+  available,
+}, {
+  [CHANGE_PAGE](page, { payload: route }) {
+    const current = available.find(a => route === a.route);
     return {
       ...page,
       current,

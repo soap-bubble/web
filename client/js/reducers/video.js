@@ -10,10 +10,10 @@ import {
 export default createReducer({
 
 }, {
-  [VIDEO_LOAD_START](video, { payload: name }) {
+  [VIDEO_LOAD_START](video, { payload: name, meta: type }) {
     return {
       ...video,
-      [name]: { state: 'loading' },
+      [name]: { state: 'loading', type },
     };
   },
   [VIDEO_LOAD_COMPLETE](video, { payload: name, meta: videoEl }) {
@@ -48,7 +48,13 @@ export default createReducer({
       },
     };
   },
-  [PANO_RENDER_LOOP]() {
-    return {};
+  [PANO_RENDER_LOOP](video) {
+    return Object.keys(video).reduce((acc, name) => {
+      const vid = video[name];
+      if (vid.type === 'MovieSpecialCast') {
+        delete acc[name];
+      }
+      return acc;
+    }, { ...video });
   },
 });

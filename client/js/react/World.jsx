@@ -9,7 +9,7 @@ import Pano from './Pano';
 import Hotspots3D from './Hotspots3D';
 import Tools from './Tools';
 import Mouse from './Mouse';
-import FullScreenVideo from './FullScreenVideo';
+import Transition from './Transition';
 import loggerFactory from '../utils/logger';
 
 const logger = loggerFactory('World');
@@ -35,7 +35,7 @@ const World = ({
 
   const sceneActorMap = {
     panorama: [<Hotspots3D key="scene:hotspots" />, <Pano key="scene" />],
-    transition: [<FullScreenVideo key="scene:video" />],
+    transition: [<Transition key="scene:video" />],
   };
 
   if (sceneActorMap[sceneType]) {
@@ -44,7 +44,7 @@ const World = ({
 
   if (sceneType !== 'transition' && isTransitionLoading) {
     logger.info('Offscreen video loading');
-    actors = actors.concat(<FullScreenVideo key="scene:video" />);
+    actors = actors.concat(<Transition key="scene:video" />);
   }
 
   return (

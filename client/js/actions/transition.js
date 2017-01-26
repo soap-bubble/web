@@ -2,7 +2,7 @@ import {
   resize,
 } from './dimensions';
 import {
-  playFullscreenVideo,
+  videoLoad,
 } from './video';
 import {
   fetchScene,
@@ -33,7 +33,7 @@ export function display(sceneData) {
       type: TRANSITION_START,
       payload: transitionCast,
     });
-    dispatch(playFullscreenVideo(fileName));
+    dispatch(videoLoad(fileName, 'MovieSpecialCast', true));
   };
 }
 

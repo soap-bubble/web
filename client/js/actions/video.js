@@ -29,7 +29,7 @@ export function videoLoadComplete(name, video) {
   };
 }
 
-export function videoLoad(name, autoPlay) {
+export function videoLoad(name, type, autoPlay) {
   loading[name] = {
     autoPlay,
   };
@@ -37,7 +37,7 @@ export function videoLoad(name, autoPlay) {
   return {
     type: VIDEO_LOAD_START,
     payload: name,
-    meta: loading[name],
+    meta: type,
   };
 }
 
@@ -53,10 +53,4 @@ export function videoPlayDone(name) {
     type: VIDEO_PLAY_DONE,
     payload: name,
   };
-}
-
-export function playFullscreenVideo(name) {
-  return (dispatch, getState) => {
-    dispatch(videoLoad(name, true));
-  }
 }

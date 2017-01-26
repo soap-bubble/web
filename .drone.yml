@@ -1,6 +1,6 @@
 pipeline:
   build:
-    image: node:4.6.1
+    image: node:boron
     commands:
       - npm install
       - npm run build

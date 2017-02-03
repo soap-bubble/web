@@ -9,8 +9,7 @@ pipeline:
 
   publish:
     image: plugins/docker
-    registry: docker.soapbubble.online:5000
-    repo: soapbubble/online
+    repo: docker.soapbubble.online:5000/soapbubble/online
     tag: latest
     when:
       branch: master

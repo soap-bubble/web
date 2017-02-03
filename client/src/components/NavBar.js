@@ -13,8 +13,8 @@ const NavBar = ({ page, onPageChange }) => (
     <Navbar.Collapse>
       <Nav onSelect={onPageChange}>
         {page.available.map(({ label, route }) => (
-          <LinkContainer to={`/${route}`}>
-            <NavItem active={page.current.route === route} key={`page:${route}`} eventKey={route}>{label}</NavItem>
+          <LinkContainer key={`page:${route}`} to={`/${route}`}>
+            <NavItem active={page.current.route === route} eventKey={route}>{label}</NavItem>
           </LinkContainer>
         ))}
       </Nav>

@@ -1,14 +1,17 @@
 import React from 'react'
 import webpageServer from 'react-isomorphic-render/server'
+import { head, title, meta } from 'react-isomorphic-render'
 import { devtools } from 'universal-webpack'
 import path from 'path'
 
 import settings from '../src/react-isomorphic-render'
 
-const WEB_SERVICE_PORT = 3000
-const PAGE_SERVICE_PORT = 3002
+const FB_APP_ID = process.env.SOAPBUBBLE_FB_APP_ID || '';
+const WEB_SERVICE_PORT = 3000;
+const PAGE_SERVICE_PORT = 3002;
 
 export default function(parameters) {
+
   // Starts webpage rendering server
   const server = webpageServer(settings, {
     // HTTP host and port for performing all AJAX requests
@@ -18,8 +21,8 @@ export default function(parameters) {
     // Specify `secure: true` flag to use `https` protocol instead of `http`.
     application: {
       host: 'localhost',
-      port: WEB_SERVICE_PORT
-      // secure: true
+      port: WEB_SERVICE_PORT,
+      secure: false,
     },
 
     // Http Urls to javascripts and (optionally) CSS styles
@@ -43,7 +46,7 @@ export default function(parameters) {
       // }
 
       // Add "favicon"
-      //result.icon = require('../assets/favicon.ico');
+      result.icon = require('../assets/img/favicon.png');
 
       // Return assets
       return result
@@ -54,12 +57,26 @@ export default function(parameters) {
       // (this `head()` function is optional and is not required)
       // (its gonna work with or without this `head()` parameter)
       head(path) {
+        const metas = [
+          // <meta charset="utf-8"/>
+          { charset: 'utf-8' },
+
+          // <meta name="..." content="..."/>
+          { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' },
+
+          // <meta property="..." content="..."/>
+          { property: 'og:title',       content: 'Soapbubble Productions' },
+          { property: 'og:description', content: 'The main site for the development of Soapbubble Productions title: Morpheus' },
+          { property: 'og:locale',      content: 'en_US' },
+          { property: 'og:type',        content: 'website' },
+          { property: 'og:url',         content: 'http://soapbubble.online/examples' },
+          { property: 'og:image',       content: `http://soapbubble.online${require('../assets/img/scene_100000.png')}` },
+          { property: 'fb:app_id',      content: FB_APP_ID },
+        ];
         if (process.env.NODE_ENV !== 'production') {
-          // `devtools` just tampers with CSS styles a bit.
-          // It's not required for operation and can be omitted.
-          // It just removes the "flash of unstyled content" in development mode.
-          return `<script>${devtools({ ...parameters, entry: 'main' })}</script>`
+          metas.push(`<script>${devtools({ ...parameters, entry: 'main' })}</script>`);
         }
+        return head('Soapbubble Productions', metas);
       },
 
       // Isomorphic CSS flag
@@ -72,7 +89,7 @@ export default function(parameters) {
         `;
       }
     }
-  })
+  });
 
   // Start webpage rendering server
   server.listen(PAGE_SERVICE_PORT, function(error) {

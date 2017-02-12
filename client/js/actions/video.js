@@ -10,18 +10,7 @@ import {
   resize,
 } from './dimensions';
 
-// Map of names to promises
-const loading = {};
-
 export function videoLoadComplete(name, video) {
-  if (!loading[name]) {
-    throw new Error(`No way to complete a video load for ${name} which was never started`);
-  }
-
-  if (!loading[name].videoEl) {
-    loading[name].videoEl = video;
-  }
-
   return {
     type: VIDEO_LOAD_COMPLETE,
     payload: name,
@@ -29,15 +18,11 @@ export function videoLoadComplete(name, video) {
   };
 }
 
-export function videoLoad(name, type, autoPlay) {
-  loading[name] = {
-    autoPlay,
-  };
-
+export function videoLoad(name, cast, videoEl) {
   return {
     type: VIDEO_LOAD_START,
     payload: name,
-    meta: type,
+    meta: { cast, el: videoEl },
   };
 }
 

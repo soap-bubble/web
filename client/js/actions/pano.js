@@ -29,6 +29,9 @@ import {
   startRenderLoop as startHotspotRenderLoop,
  } from './hotspots';
 import {
+  load as loadPanoAnim,
+} from './panoAnim';
+import {
   createCameraForType,
   createRendererForType,
   positionCameraForType,
@@ -43,6 +46,7 @@ import {
   PANO_SET_SENSITIVITY,
   PANO_CAMERA_CREATE,
   PANO_SCENE_CREATE,
+  PANO_SCENE_UPDATE,
   PANO_CAMERA_POSITION,
   PANO_RENDERER_CREATE,
   PANO_RENDER_LOOP,
@@ -50,7 +54,7 @@ import {
   PANO_TEXTURES_LOAD_FAILURE,
 } from './types';
 
-const twentyFourthRad = (15 / 180) * Math.PI;
+const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
 const sliceHeight = 0.55;
 const sliceDepth = 1.0;
@@ -252,6 +256,19 @@ export function createScene(objects) {
   };
 }
 
+export function addToPanoScene(...rest) {
+  return (dispatch, getState) => {
+    const { object3D, startAngle } = getState().pano;
+    rest.forEach((o) => {
+      object3D.add(o)
+    });
+    return {
+      type: PANO_SCENE_UPDATE,
+      payload: object3D,
+    };
+  }
+}
+
 export function createCamera({ width, height }) {
   return (dispatch, getState) => {
     const { hotspots } = getState();
@@ -317,6 +334,7 @@ export function load() {
     dispatch(createMaterials(fileNames));
     dispatch(createObject3D(getState().pano));
     dispatch(loadHotspots());
+    dispatch(loadPanoAnim());
     dispatch(buildScene());
   };
 }

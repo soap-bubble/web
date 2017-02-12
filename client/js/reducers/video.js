@@ -5,15 +5,18 @@ import {
   VIDEO_LOAD_COMPLETE,
   VIDEO_PLAY_DONE,
   PANO_RENDER_LOOP,
+  TRANSITION_START,
 } from '../actions/types';
 
 export default createReducer({
 
 }, {
-  [VIDEO_LOAD_START](video, { payload: name, meta: type }) {
+  [VIDEO_LOAD_START](video, { payload: name, meta: { cast, el } }) {
+    const { __t: type, looping } = cast;
+
     return {
       ...video,
-      [name]: { state: 'loading', type },
+      [name]: { state: 'loading', type, looping, el },
     };
   },
   [VIDEO_LOAD_COMPLETE](video, { payload: name, meta: videoEl }) {
@@ -23,7 +26,7 @@ export default createReducer({
       [name]: {
         ...thisVideo,
         state: 'loaded',
-        el: videoEl,
+        el: videoEl || thisVideo.el,
       },
     };
   },
@@ -34,7 +37,7 @@ export default createReducer({
       [name]: {
         ...thisVideo,
         state: 'playing',
-        el: videoEl,
+        el: videoEl || thisVideo.el,
       },
     };
   },
@@ -52,6 +55,15 @@ export default createReducer({
     return Object.keys(video).reduce((acc, name) => {
       const vid = video[name];
       if (vid.type === 'MovieSpecialCast') {
+        delete acc[name];
+      }
+      return acc;
+    }, { ...video });
+  },
+  [TRANSITION_START](video) {
+    return Object.keys(video).reduce((acc, name) => {
+      const vid = video[name];
+      if (vid.type === 'PanoAnim') {
         delete acc[name];
       }
       return acc;

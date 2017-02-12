@@ -5,10 +5,11 @@ import React from 'react';
 import {
   SCENE_TYPE_LIST,
 } from '../morpheus/scene';
-import Pano from './Pano';
-import Hotspots3D from './Hotspots3D';
+
+
 import Tools from './Tools';
 import Mouse from './Mouse';
+import Scene3D from './Scene3D';
 import Transition from './Transition';
 import loggerFactory from '../utils/logger';
 
@@ -34,7 +35,7 @@ const World = ({
   logger.info(`World render ${sceneType}`);
 
   const sceneActorMap = {
-    panorama: [<Hotspots3D key="scene:hotspots" />, <Pano key="scene" />],
+    panorama: [<Scene3D key="scene:pano" />],
     transition: [<Transition key="scene:video" />],
   };
 

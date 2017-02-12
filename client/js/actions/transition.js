@@ -33,7 +33,7 @@ export function display(sceneData) {
       type: TRANSITION_START,
       payload: transitionCast,
     });
-    dispatch(videoLoad(fileName, 'MovieSpecialCast', true));
+    dispatch(videoLoad(fileName, transitionCast, true));
   };
 }
 

@@ -4,48 +4,38 @@ import { connect } from 'react-redux';
 
 import store from '../store';
 import {
+  videoLoad,
   videoLoadComplete,
-  videoIsPlaying,
   videoPlayDone,
 } from '../actions/video';
 import {
-  fetchScene,
-} from '../actions/scene';
-import {
-  load as loadPano,
-} from '../actions/pano';
-import {
-  ended as transitionEnded,
-} from '../actions/transition';
+  panoAnimLoaded,
+} from '../actions/panoAnim';
 import Video from './Video';
 
-function mapStateToProps({ game, video, dimensions }) {
-  const { volume } = game;
+function mapStateToProps({ video, dimensions }) {
   const { width, height } = dimensions;
 
   return {
     video,
     width,
     height,
-    volume,
   };
 }
 
-function mapDisptachToProps(dispatch) {
-  let videoEl;
+function mapDisptachToProps(dispatch, props) {
   return {
-    videoCreated(_videoEl) {
-      videoEl = _videoEl;
+    videoCreated(name, videoEl) {
+      //dispatch(videoLoad(name, videoEl));
     },
-    videoCanPlay(name) {
+    videoCanPlay(name, { currentTarget: videoEl }) {
       dispatch(videoLoadComplete(name, videoEl));
+      dispatch(panoAnimLoaded(name, videoEl));
     },
-    videoPlaying(name) {
-      dispatch(videoIsPlaying(name));
+    videoPlaying(name, { currentTarget: videoEl }) {
     },
-    videoEnded(name) {
-      dispatch(transitionEnded());
-      dispatch(videoPlayDone(name));
+    videoEnded(name, { currentTarget: videoEl }) {
+      dispatch(videoPlayDone(name, videoEl));
     },
   };
 }
@@ -54,9 +44,8 @@ export default connect(
   mapStateToProps,
   mapDisptachToProps,
 )(({
+  looping,
   video,
-  width,
-  height,
   videoCreated,
   videoCanPlay,
   videoPlaying,
@@ -67,52 +56,47 @@ export default connect(
     if (v.state === 'loading') {
       return (<Video
         key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
+        videoCreated={videoCreated.bind(null, url)}
         src={url}
-        width={width}
-        height={height}
-        onCanPlayThrough={videoCanPlay.bind(null, url)}
+        onLoadedMetadata={videoCanPlay.bind(null, url)}
         onPlaying={videoPlaying.bind(null, url)}
         onEnded={videoEnded.bind(null, url)}
+        loop={v.looping}
         autoPlay
         offscreen
-        fullscreen
       />);
     } else if (v.state === 'loaded') {
       return (<Video
         key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
+        videoCreated={videoCreated.bind(null, url)}
         src={url}
-        width={width}
-        height={height}
-        onCanPlayThrough={videoCanPlay.bind(null, url)}
+        onLoadedMetadata={videoCanPlay.bind(null, url)}
         onPlaying={videoPlaying.bind(null, url)}
         onEnded={videoEnded.bind(null, url)}
         autoPlay
-        fullscreen
+        loop={v.looping}
+        offscreen
       />);
     } else if (v.state === 'playing') {
       return (<Video
         key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
+        videoCreated={videoCreated.bind(null, url)}
         src={url}
-        width={width}
-        height={height}
-        onCanPlayThrough={videoCanPlay.bind(null, url)}
+        onLoadedMetadata={videoCanPlay.bind(null, url)}
         onPlaying={videoPlaying.bind(null, url)}
         onEnded={videoEnded.bind(null, url)}
+        loop={v.looping}
+        offscreen
         autoPlay
-        fullscreen
       />);
     } else if (v.state === 'done') {
       return (<Video
         key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
+        videoCreated={videoCreated.bind(null, url)}
         src={url}
-        width={width}
-        height={height}
+        loop={v.looping}
         autoPlay
-        fullscreen
+        offscreen
       />);
     }
   });

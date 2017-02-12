@@ -3,11 +3,13 @@ import React, { PropTypes } from 'react';
 const Video = ({
   src,
   offscreen,
+  fullscreen,
   width,
   height,
   videoCreated,
   autoPlay = false,
   loop = false,
+  onLoadedMetadata,
   onCanPlayThrough,
   onEnded,
   onPlaying,
@@ -15,7 +17,7 @@ const Video = ({
   <video
     style={{
       visibility: offscreen ? 'hidden' : 'visible',
-      objectFit: 'cover',
+      objectFit: fullscreen ? 'cover' : null,
     }}
     ref={videoCreated}
     width={width}
@@ -23,13 +25,14 @@ const Video = ({
     autoPlay={autoPlay}
     loop={loop}
     controls={false}
+    onLoadedMetadata={onLoadedMetadata}
     onCanPlayThrough={onCanPlayThrough}
     onEnded={onEnded}
     onPlaying={onPlaying}
   >
     <source
       src={`${src}.webm`}
-      type="video/webm" 
+      type="video/webm"
     />
     <source
       src={`${src}.mp4`}

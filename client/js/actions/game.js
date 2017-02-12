@@ -8,6 +8,7 @@ import {
   SCENE_TYPE_LIST,
 } from '../morpheus/scene';
 import {
+  GAME_SCENE_LOADING,
   GAME_SET_VOLUME,
 } from './types';
 
@@ -31,6 +32,10 @@ export function display() {
     const sceneType = SCENE_TYPE_LIST[sceneData.sceneType];
     const sceneActionFunction = sceneActionMap[sceneType];
     if (sceneActionFunction) {
+      dispatch({
+        type: GAME_SCENE_LOADING,
+        payload: sceneData,
+      });
       dispatch(sceneActionFunction(sceneData));
     }
   };

@@ -7,4 +7,4 @@ RUN npm install
 COPY . /opt/app
 ENV NODE_ENV=production
 CMD npm run start
-EXPOSE 8060
+EXPOSE 8050

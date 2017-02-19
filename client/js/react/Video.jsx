@@ -9,6 +9,8 @@ const Video = ({
   videoCreated,
   autoPlay = false,
   loop = false,
+  muted = false,
+  playsinline,
   crossOrigin = 'anonymous',
   onLoadedMetadata,
   onCanPlayThrough,
@@ -32,6 +34,8 @@ const Video = ({
     onPlaying={onPlaying}
     crossorigin={crossOrigin}
     crossOrigin={crossOrigin}
+    muted={muted}
+    playsinline={playsinline}
   >
     <source
       src={`${src}.webm`}

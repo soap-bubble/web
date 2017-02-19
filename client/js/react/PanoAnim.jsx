@@ -62,20 +62,25 @@ export default connect(
         onPlaying={videoPlaying.bind(null, url)}
         onEnded={videoEnded.bind(null, url)}
         loop={v.looping}
-        autoPlay
         offscreen
+        muted
+        playsinline
       />);
     } else if (v.state === 'loaded') {
       return (<Video
         key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated.bind(null, url)}
+        videoCreated={(videoEl) => {
+          videoEl && videoEl.play();
+          videoCreated(url);
+        }}
         src={url}
         onLoadedMetadata={videoCanPlay.bind(null, url)}
         onPlaying={videoPlaying.bind(null, url)}
         onEnded={videoEnded.bind(null, url)}
-        autoPlay
         loop={v.looping}
         offscreen
+        muted
+        playsinline
       />);
     } else if (v.state === 'playing') {
       return (<Video
@@ -87,7 +92,8 @@ export default connect(
         onEnded={videoEnded.bind(null, url)}
         loop={v.looping}
         offscreen
-        autoPlay
+        muted
+        playsinline
       />);
     } else if (v.state === 'done') {
       return (<Video
@@ -97,6 +103,8 @@ export default connect(
         loop={v.looping}
         autoPlay
         offscreen
+        muted
+        playsinline
       />);
     }
   });

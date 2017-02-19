@@ -84,6 +84,7 @@
     "redux-thunk": "^2.1.0",
     "service-builder": "^0.2.2",
     "three": "^0.79.0",
+    "user-agent-parser": "^0.6.0",
     "wagner-core": "^0.2.0"
   }
 }

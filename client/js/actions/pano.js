@@ -143,7 +143,6 @@ export function createMaterials(fileNames) {
         payload: fileNames
       }))
       .catch((err) => {
-        debugger;
         dispatch({
           type: PANO_TEXTURES_LOAD_FAILURE,
           payload: err,

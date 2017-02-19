@@ -15,7 +15,7 @@ import {
 } from 'three';
 
 import {
-  getAssetUrl,
+  getPanoAnimUrl,
 } from '../service/gamedb';
 import {
   addToPanoScene,
@@ -107,7 +107,7 @@ export function load() {
     casts
       .filter(c => c.__t === 'PanoAnim')
       .forEach(panoAnimCastData => {
-        const fileName = getAssetUrl(panoAnimCastData.fileName);
+        const fileName = getPanoAnimUrl(panoAnimCastData.fileName);
         dispatch(videoLoad(fileName, panoAnimCastData, true));
       });
   };

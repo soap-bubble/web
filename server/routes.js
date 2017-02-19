@@ -2,6 +2,7 @@ import _ from 'lodash';
 import bunyan from 'bunyan';
 import express from 'express';
 import morpheus from './models/morpheus';
+import https from 'https';
 
 const logger = bunyan.createLogger({name: 'webgl-pano-server'});
 const router = express.Router();
@@ -36,6 +37,25 @@ router
       logger.error({ req: `/scene/${sceneId}`, error: err });
       res.send(500).send(err);
     });
+  })
+  .get('/brokeniOSProxy/*', (req, res) => {
+    logger.info('Requesting proxied request to AWS for content', {
+      params: req.params,
+      headers: req.headers,
+    });
+    req.pipe(https.request({
+      protocol: 'https:',
+      hostname: 's3-us-west-2.amazonaws.com',
+      path: `/soapbubble-morpheus-dev/${req.params[0]}`,
+      method: 'GET',
+      headers: _.omit(req.headers, 'host', 'referer'),
+    }, (proxyResponse) => {
+      logger.info('Received reponse from endpoint and sending back to client', {
+        headers: proxyResponse.headers,
+      });
+      res.set(proxyResponse.headers);
+      proxyResponse.pipe(res);
+    }));
   });
 
 export default router;

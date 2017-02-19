@@ -30,7 +30,7 @@ const Video = ({
     onCanPlayThrough={onCanPlayThrough}
     onEnded={onEnded}
     onPlaying={onPlaying}
-    crossOrigin={crossOrigin}
+    crossorigin={crossOrigin}
   >
     <source
       src={`${src}.webm`}

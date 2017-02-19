@@ -73,15 +73,26 @@ export default function(parameters) {
           { property: 'og:image',       content: `http://soapbubble.online${require('../assets/img/scene_100000.png')}` },
           { property: 'fb:app_id',      content: FB_APP_ID },
         ];
-        if (process.env.NODE_ENV !== 'production') {
-          metas.push(`<script>${devtools({ ...parameters, entry: 'main' })}</script>`);
-        }
+
+        // if (process.env.NODE_ENV !== 'production') {
+        //   scripts.push({
+        //     innerHTML: `${devtools({ ...parameters, entry: 'main' })}`
+        //   });
+        // }
+
         return head('Soapbubble Productions', metas);
       },
 
       // Isomorphic CSS flag
       bodyStart(path) {
-        return `
+        return 
+          `<script>(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+                    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+                    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+                    })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
+                    ga('create', 'UA-92268324-1', 'auto');
+                    ga('send', 'pageview');
+          </script>
           <script>
             // This line is just for CSS
             document.body.classList.add('javascript-is-enabled');

@@ -31,6 +31,7 @@ const Video = ({
     onEnded={onEnded}
     onPlaying={onPlaying}
     crossorigin={crossOrigin}
+    crossOrigin={crossOrigin}
   >
     <source
       src={`${src}.webm`}

@@ -118,7 +118,8 @@ export function panoAnimLoaded(name, videoEl) {
     const { panoAnim, video, pano } = getState();
     const { startAngle } = pano;
     const { casts } = panoAnim;
-    const panoAnimCast = casts.find(c => c.fileName === name);
+    const panoAnimCast = casts
+      .find(c => name.indexOf(c.fileName) !== -1);
     const panoAnimVideo = video[name];
     if (panoAnimCast && panoAnimVideo) {
       const { frame } = panoAnimCast;

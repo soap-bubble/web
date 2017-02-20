@@ -2,10 +2,13 @@ import {
   load as loadPano,
 } from './pano';
 import {
+  display as displaySpecial,
+} from './special';
+import {
   display as displayTransition,
 } from './transition';
 import {
-  SCENE_TYPE_LIST,
+  getSceneType,
 } from '../morpheus/scene';
 import {
   GAME_SCENE_LOADING,
@@ -26,10 +29,10 @@ export function display() {
     const sceneData = cache[loaded];
     const sceneActionMap = {
       panorama: loadPano,
-      special: displayTransition,
+      special: displaySpecial,
       transition: displayTransition,
     }
-    const sceneType = SCENE_TYPE_LIST[sceneData.sceneType];
+    const sceneType = getSceneType(sceneData);
     const sceneActionFunction = sceneActionMap[sceneType];
     if (sceneActionFunction) {
       dispatch({

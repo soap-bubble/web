@@ -7,6 +7,7 @@ import {
   PANO_TEXTURES_LOAD_SUCCESS,
   VIDEO_IS_PLAYING,
   TRANSITION_END,
+  SPECIAL_IS_LOADED,
 //  PANO_TEXTURES_LOAD_FAILURE,
 } from '../actions/types';
 
@@ -92,6 +93,7 @@ const reducer = createReducer({
     };
   },
   [VIDEO_IS_PLAYING]: sceneEnd,
+  [SPECIAL_IS_LOADED]: sceneEnd,
 });
 
 export default reducer;

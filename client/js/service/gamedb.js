@@ -15,5 +15,6 @@ export function getPanoAnimUrl(assetPath) {
 }
 
 export function getAssetUrl(assetPath) {
-  return `${url}${assetPath}`;
+  const path = assetPath.replace('deck', 'Deck');
+  return `${url}${path}`;
 }

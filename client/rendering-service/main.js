@@ -80,7 +80,7 @@ export default function(parameters) {
         //   });
         // }
 
-        const headText return head('Soapbubble Productions', metas);
+        return head('Soapbubble Productions', metas);
       },
 
       // Isomorphic CSS flag

@@ -3,7 +3,7 @@ import baseConfiguration from './webpack.config.client';
 
 const WEBPACK_DEV_SERVER_PORT = 3001
 
-const configuration = baseConfiguration({ development: true, css_bundle: true });
+const configuration = baseConfiguration({ development: true, css_bundle: true }, { devtool: 'source-map' });
 
 // configuration.devtool = 'inline-eval-cheap-source-map'
 

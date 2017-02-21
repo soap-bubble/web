@@ -6,12 +6,18 @@ import { createStore, applyMiddleware, combineReducers } from 'redux';
 
 import reducers from '../reducers';
 
-const routingMiddleware = routerMiddleware(history);
-const loggingMiddleware = process.env.NODE_ENV !== 'production' ? createLogger() : undefined;
+const middlewares = [
+  thunkMiddleware,
+  routerMiddleware(history),
+];
+
+if (process.env.NODE_ENV !== 'production') {
+  middlewares.push(createLogger());
+}
 
 const store = createStore(
   combineReducers(reducers),
-  applyMiddleware(thunkMiddleware, loggingMiddleware, routingMiddleware),
+  applyMiddleware.apply(null, middlewares),
 );
 
 export default store;

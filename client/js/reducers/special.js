@@ -6,12 +6,18 @@ import createReducer from './createReducer';
 
 const reducer = createReducer({
   data: {},
+  hotspotData: [],
   url: '',
 }, {
-  [SPECIAL_START](special, { payload: sceneData, meta: url }) {
+  [SPECIAL_START](special, { payload: sceneData, meta }) {
+    const {
+      url,
+      hotspotData,
+    } = meta;
     return {
       ...special,
       data: sceneData,
+      hotspotData,
       url
     };
   },
@@ -19,6 +25,7 @@ const reducer = createReducer({
     return {
       ...special,
       data: {},
+      hotspotData: [],
       url: '',
     };
   },

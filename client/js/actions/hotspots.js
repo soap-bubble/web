@@ -469,20 +469,24 @@ export function activateHotspotIndex(index) {
 
 export function load() {
   return (dispatch, getState) => {
-    const { loaded, cache } = getState().scene;
+    const { hotspots, scene } = getState();
+    const { loaded, cache } = scene;
+    const { isPano } = hotspots;
     const { casts } = cache[loaded];
     const hotspotsData = casts.filter(c => c.castId === 0);
 
-    dispatch(createPositions(hotspotsData));
-    dispatch(createUvs(hotspotsData.length));
-    dispatch(createIndex(hotspotsData.length));
-    dispatch(createGeometry({
-      count: hotspotsData.length,
-      ...getState().hotspots,
-    }));
-    dispatch(createMaterials(hotspotsData.length));
-    dispatch(createObjects3D(hotspotsData.length));
-    dispatch(buildScene());
+    if (hotspotsData && isPano) {
+      dispatch(createPositions(hotspotsData));
+      dispatch(createUvs(hotspotsData.length));
+      dispatch(createIndex(hotspotsData.length));
+      dispatch(createGeometry({
+        count: hotspotsData.length,
+        ...getState().hotspots,
+      }));
+      dispatch(createMaterials(hotspotsData.length));
+      dispatch(createObjects3D(hotspotsData.length));
+      dispatch(buildScene());
+    }
   }
 }
 

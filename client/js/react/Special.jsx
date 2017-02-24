@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import React from 'react';
 
+import flatspot from '../morpheus/flatspot';
 import {
   specialImgIsLoaded,
 } from '../actions/special';
@@ -8,6 +9,7 @@ import {
 function mapStateToProps({ special, dimensions }) {
   const {
     url: backgroundUrl,
+    hotspotData,
   } = special;
   const {
     width,
@@ -16,17 +18,19 @@ function mapStateToProps({ special, dimensions }) {
 
   return {
     backgroundUrl,
+    hotspotData,
     width,
     height,
   }
 }
 
-function mapDispatchToProps(dispatch) {
+function mapDispatchToProps(dispatch, { hotspotData }) {
 
   return {
     onImgIsLoaded() {
       dispatch(specialImgIsLoaded());
-    }
+      flatspot(dispatch, hotspotData);
+    },
   }
 }
 

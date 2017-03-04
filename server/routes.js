@@ -20,6 +20,9 @@ router
     logger.info({ req: `/scene/${sceneId}` });
     morpheus.get('Scene').findOne({ sceneId }).exec().then(scene => {
       logger.info({ req: `/scene/${sceneId}`, scene })
+      if (!scene) {
+        throw new Error(`${sceneId} not found`);
+      }
       const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
       logger.info({ req: `/scene/${sceneId}`, castsToLoad });
       if (castsToLoad.length) {
@@ -35,6 +38,20 @@ router
       }
     }, err => {
       logger.error({ req: `/scene/${sceneId}`, error: err });
+      res.send(500).send(err);
+    });
+  })
+  .get('/cast/:castId', (req, res) => {
+    const castId = Number(req.params.castId);
+    logger.info({ req: `/cast/${castId}` });
+    morpheus.get('Cast').findOne({ castId }).exec().then(cast => {
+      logger.info({ req: `/cast/${castId}`, cast })
+      if (!cast) {
+        throw new Error(`${castId} not found`);
+      }
+      res.json(cast);
+    }, err => {
+      logger.error({ req: `/cast/${castId}`, error: err });
       res.send(500).send(err);
     });
   })

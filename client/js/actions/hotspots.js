@@ -469,13 +469,15 @@ export function activateHotspotIndex(index) {
 
 export function load() {
   return (dispatch, getState) => {
-    const { hotspots, scene } = getState();
+    const state = getState();
+    const { hotspots, scene } = state;
     const { loaded, cache } = scene;
     const { isPano } = hotspots;
     const { casts } = cache[loaded];
     const hotspotsData = casts.filter(c => c.castId === 0);
 
     if (hotspotsData && isPano) {
+      // 3D hotspots
       dispatch(createPositions(hotspotsData));
       dispatch(createUvs(hotspotsData.length));
       dispatch(createIndex(hotspotsData.length));

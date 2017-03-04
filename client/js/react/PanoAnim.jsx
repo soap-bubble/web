@@ -64,7 +64,7 @@ export default connect(
         loop={v.looping}
         offscreen
         muted
-        playsinline
+        playsInline
       />);
     } else if (v.state === 'loaded') {
       return (<Video
@@ -80,7 +80,7 @@ export default connect(
         loop={v.looping}
         offscreen
         muted
-        playsinline
+        playsInline
       />);
     } else if (v.state === 'playing') {
       return (<Video
@@ -93,7 +93,7 @@ export default connect(
         loop={v.looping}
         offscreen
         muted
-        playsinline
+        playsInline
       />);
     } else if (v.state === 'done') {
       return (<Video
@@ -104,7 +104,7 @@ export default connect(
         autoPlay
         offscreen
         muted
-        playsinline
+        playsInline
       />);
     }
   });

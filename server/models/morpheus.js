@@ -2,13 +2,13 @@ import _ from 'lodash';
 import { Schema } from 'mongoose';
 var util = require('util');
 
-class Morhpeus extends Schema {
+class Morpheus extends Schema {
   constructor(opts) {
     super(opts)
   }
 }
 
-class Cast extends Morhpeus {
+class Cast extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({
@@ -17,27 +17,7 @@ class Cast extends Morhpeus {
   }
 }
 
-class ControlledMovieCast extends Cast {
-  constructor(opts) {
-    super(opts);
-    this.add({
-      controlledLocation: {
-        "x": Number,
-        "y": Number
-      },
-      companionMovieCastId: Number,
-      scale: Number,
-      controlledMovieCallbacks: [ {
-        frames: Number,
-        direction: Number,
-        callbackWhen: Number,
-        gameState: Number
-      } ]
-    });
-  }
-}
-
-class GameState extends Morhpeus {
+class GameState extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({
@@ -85,6 +65,26 @@ class MovieCast extends Cast {
   }
 }
 
+class ControlledMovieCast extends MovieCast {
+  constructor(opts) {
+    super(opts);
+    this.add({
+      controlledLocation: {
+        "x": Number,
+        "y": Number
+      },
+      companionMovieCastId: Number,
+      scale: Number,
+      controlledMovieCallbacks: [ {
+        frames: Number,
+        direction: Number,
+        callbackWhen: Number,
+        gameState: Number
+      } ]
+    });
+  }
+}
+
 class PanoAnim extends MovieCast {
   constructor(opts) {
     super(opts);
@@ -123,7 +123,7 @@ class PanoCast extends MovieCast {}
 class PreloadCast extends MovieCast {}
 class SoundCast extends MovieCast {}
 
-class Scene extends Morhpeus {
+class Scene extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({

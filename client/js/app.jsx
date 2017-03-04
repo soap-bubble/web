@@ -25,11 +25,7 @@ window.onload = () => {
     </Provider>,
     document.getElementById('root'),
   );
-
-  // if (qp.video) {
-  //   const
-  // }
-
+  
   store.dispatch(goToScene(qp.scene || 8010));
 
   window.addEventListener('resize', () => {

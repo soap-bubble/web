@@ -38,8 +38,7 @@ function createPosition(panoAnimData) {
   const panoAnimPositionList = [];
   const { location, frame } = panoAnimData;
   let { width, height  } = panoAnimData;
-  // Morpheus data is bugged / swapped
-  let { x: y, y: x } = location;
+  let { x, y } = location;
 
   let right = -((2 * SLICE_WIDTH) * (x / SLICE_PIX_WIDTH) - SLICE_WIDTH);
   let left = -((2 * SLICE_WIDTH) * ((x + width) / SLICE_PIX_WIDTH) - SLICE_WIDTH);

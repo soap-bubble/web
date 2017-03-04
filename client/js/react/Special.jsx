@@ -179,6 +179,7 @@ function mapDispatchToProps(dispatch) {
   return {
     onImgIsLoaded(imgEl) {
       dispatch(specialImgIsLoaded());
+      onWindowResize();
     },
     onCanvasCreate(_canvas) {
       if (_canvas) {

@@ -66,7 +66,7 @@ const World = ({
     <div>
       {actors}
       <Mouse />
-      <Tools />
+      { process.env.NODE_ENV !== 'production' ? <Tools /> : null }
     </div>
   );
 };

@@ -1,5 +1,6 @@
 import React from 'react';
 import { Router, Route, IndexRedirect } from 'react-router';
+import { browserHistory, createMemoryHistory } from 'react-router';
 import history from './history';
 
 import Page from '../components/Page';

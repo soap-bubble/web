@@ -47,11 +47,7 @@ export default function loadMorpheus(callback) {
           });
         }
       })
-        .then(function (model) {
-          // Reset display
-          process.stdout.write(sprintf('(%d/%d)', ++passed, length));
-          return model;
-        }, function (err) {
+        .catch((err) => {
           logger.error(util.inspect(err));
           throw err;
         });
@@ -60,7 +56,7 @@ export default function loadMorpheus(callback) {
     // Wait for everything
     return Promise.all(everythingPassed)
       .then(function (everything) {
-        process.stdout.write('\n');
+        logger.info(`Wrote ${everything.length} entries`);
       }, function (err) {
         logger.error('Failed to load db because: ' + util.inspect(err));
       })

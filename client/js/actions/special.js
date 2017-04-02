@@ -155,7 +155,7 @@ export function display(sceneData) {
     const { casts } = sceneData;
     const rootCast = casts.find(c => c.castId === sceneData.sceneId);
     const hotspotsData = casts.filter(c => c.castId === 0);
-    const url = `${getAssetUrl(`${rootCast.fileName}`)}.png`;
+    const url = getAssetUrl(rootCast.fileName, 'png');
     dispatch(resize({
       width: window.innerWidth,
       height: window.innerHeight,

@@ -2,12 +2,10 @@ import path from 'path';
 import express from 'express';
 import bunyan from 'bunyan';
 import config from 'config';
-import mongoose from 'mongoose';
 import routes from './routes';
 import morpheus from './models/morpheus';
-import prime from './prime';
+import db, { update as dbUpdate, getModel } from './db';
 
-mongoose.Promise = Promise;
 const logger = bunyan.createLogger({name: 'webgl-pano-server'});
 const app = express();
 
@@ -23,10 +21,8 @@ app.use('/GameDB', express.static(gameDbPath));
 app.use(express.static('public'));
 app.use('/api', routes);
 
-app.db = mongoose.connect(config.mongodb.uri, {server:{auto_reconnect:true}});
-morpheus.install(app.db);
-mongoose.connection.once('open', function () {
-  morpheus.get('Scene').find().exec().then((scenes) => {
+app.db = db(() => {
+  getModel('Scene').find().exec().then((scenes) => {
     if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
       logger.info('Attempting to prime DB');
       prime((err) => {
@@ -36,6 +32,7 @@ mongoose.connection.once('open', function () {
     }
   });
 });
+
 app.listen(8050, () => {
   logger.info('server up and running on 8050');
 });

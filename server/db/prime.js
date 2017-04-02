@@ -1,6 +1,6 @@
 // NOTE: This file is useless to anyone who does not possess morpheus.map.json
 var jf = require('jsonfile');
-var morpheus = require('./models/morpheus');
+import { getModel } from './index';
 var mongoose = require('mongoose');
 var bunyan = require('bunyan');
 var util = require('util');
@@ -32,7 +32,7 @@ export default function loadMorpheus(callback) {
     var everythingPassed = items.map(function (morpheusObj, index) {
       return new Promise((resolve, reject) => {
         // Create model
-        var Model = morpheus.get(morpheusObj.type);
+        var Model = getModel(morpheusObj.type);
 
         if (!Model) {
           reject('Failed to create DB Model for ' + morpheusObj.type);
@@ -61,10 +61,9 @@ export default function loadMorpheus(callback) {
     return Promise.all(everythingPassed)
       .then(function (everything) {
         process.stdout.write('\n');
-        close();
       }, function (err) {
         logger.error('Failed to load db because: ' + util.inspect(err));
-        close();
-      });
+      })
+      .then(callback);
   });
 }

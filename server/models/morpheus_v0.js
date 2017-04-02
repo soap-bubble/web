@@ -1,14 +1,14 @@
 import _ from 'lodash';
 import { Schema } from 'mongoose';
-var util = require('util');
+import util from 'util';
 
-class Morpheus extends Schema {
+export class Morpheus extends Schema {
   constructor(opts) {
     super(opts)
   }
 }
 
-class Cast extends Morpheus {
+export class Cast extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({
@@ -17,7 +17,7 @@ class Cast extends Morpheus {
   }
 }
 
-class GameState extends Morpheus {
+export class GameState extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({
@@ -31,7 +31,7 @@ class GameState extends Morpheus {
   }
 }
 
-class HotSpot extends Cast {
+export class HotSpot extends Cast {
   constructor(opts) {
     super(opts);
     this.add({
@@ -56,7 +56,7 @@ class HotSpot extends Cast {
   }
 }
 
-class MovieCast extends Cast {
+export class MovieCast extends Cast {
   constructor(opts) {
     super(opts);
     this.add({
@@ -65,7 +65,7 @@ class MovieCast extends Cast {
   }
 }
 
-class ControlledMovieCast extends MovieCast {
+export class ControlledMovieCast extends MovieCast {
   constructor(opts) {
     super(opts);
     this.add({
@@ -85,7 +85,7 @@ class ControlledMovieCast extends MovieCast {
   }
 }
 
-class PanoAnim extends MovieCast {
+export class PanoAnim extends MovieCast {
   constructor(opts) {
     super(opts);
     this.add({
@@ -99,7 +99,7 @@ class PanoAnim extends MovieCast {
   }
 }
 
-class MovieSpecialCast extends MovieCast {
+export class MovieSpecialCast extends MovieCast {
   constructor(opts) {
     super(opts);
     this.add({
@@ -119,11 +119,11 @@ class MovieSpecialCast extends MovieCast {
   }
 }
 
-class PanoCast extends MovieCast {}
-class PreloadCast extends MovieCast {}
-class SoundCast extends MovieCast {}
+export class PanoCast extends MovieCast {}
+export class PreloadCast extends MovieCast {}
+export class SoundCast extends MovieCast {}
 
-class Scene extends Morpheus {
+export class Scene extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({
@@ -134,36 +134,4 @@ class Scene extends Morpheus {
       casts: [ Schema.Types.Mixed ]
     });
   }
-}
-
-exports.classes = {};
-
-exports.install = function (db) {
-  var apply = function (name, Class) {
-    return (exports.classes[name] = db.model(name, new Class()));
-  }
-  var discriminate = function (Parent, name, Class) {
-    return (exports.classes[name] = Parent.discriminator(name, new Class()));
-  }
-
-  var cast = apply('Cast', Cast);
-  discriminate(cast, 'ControlledMovieCast', ControlledMovieCast);
-  discriminate(cast, 'HotSpot', HotSpot);
-  discriminate(cast, 'MovieCast', MovieCast);
-  discriminate(cast, 'MovieSpecialCast', MovieSpecialCast);
-  discriminate(cast, 'PanoAnim', PanoAnim);
-  discriminate(cast, 'PanoCast', PanoCast);
-  discriminate(cast, 'PreloadCast', PreloadCast);
-  discriminate(cast, 'SoundCast', SoundCast);
-
-  apply('GameState', GameState);
-  apply('Scene', Scene);
-};
-
-exports.get = function (className) {
-  if (typeof className === 'undefined') {
-    return _(exports.classes).values();
-  }
-
-  return exports.classes[className];
 }

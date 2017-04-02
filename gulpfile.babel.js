@@ -10,10 +10,26 @@ var _ = require('lodash');
 var spawn = require('cross-spawn').spawn;
 var Server = require('karma').Server;
 var path = require('path');
+import bunyan from 'bunyan';
+import dbInit, { update as dbUpdate, prime as dbPrime } from './server/db';
 
+const logger = bunyan.createLogger({ name: 'gulpfile' });
 var watch = false;
 var src = {};
 
+gulp.task('db:update', (cb) => {
+  const db = dbInit(() => {
+    logger.info('DB connection opened');
+    dbUpdate(() => db.disconnect(cb));
+  });
+});
+
+gulp.task('db:prime', (cb) => {
+  const db = dbInit(() => {
+    logger.info('DB connection opned');
+    dbPrime(() => db.disconnect(cb));
+  });
+});
 
 gulp.task('webpack:client', (cb) => {
   let command = './node_modules/.bin/webpack';

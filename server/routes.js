@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import bunyan from 'bunyan';
 import express from 'express';
-import morpheus from './models/morpheus';
+import { getModel } from './db';
 import https from 'https';
 
 const logger = bunyan.createLogger({name: 'webgl-pano-server'});
@@ -9,7 +9,7 @@ const router = express.Router();
 
 router
   .get('/scenes', function (req, res) {
-    morpheus.get('Scene').find().exec().then((scenes) => {
+    getModel('Scene').find().exec().then((scenes) => {
       res.json(scenes);
     }, err => {
       res.send(500, err);
@@ -18,7 +18,7 @@ router
   .get('/scene/:sceneId', (req, res) => {
     const sceneId = Number(req.params.sceneId);
     logger.info({ req: `/scene/${sceneId}` });
-    morpheus.get('Scene').findOne({ sceneId }).exec().then(scene => {
+    getModel('Scene').findOne({ sceneId }).exec().then(scene => {
       logger.info({ req: `/scene/${sceneId}`, scene })
       if (!scene) {
         throw new Error(`${sceneId} not found`);
@@ -26,7 +26,7 @@ router
       const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
       logger.info({ req: `/scene/${sceneId}`, castsToLoad });
       if (castsToLoad.length) {
-        morpheus.get('Cast').find({ castId: { $in: castsToLoad } }).exec().then(casts => {
+        getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then(casts => {
           logger.info({ req: `/scene/${sceneId}`, casts: casts });
           scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
           res.json(scene);
@@ -44,7 +44,7 @@ router
   .get('/cast/:castId', (req, res) => {
     const castId = Number(req.params.castId);
     logger.info({ req: `/cast/${castId}` });
-    morpheus.get('Cast').findOne({ castId }).exec().then(cast => {
+    getModel('Cast').findOne({ castId }).exec().then(cast => {
       logger.info({ req: `/cast/${castId}`, cast })
       if (!cast) {
         throw new Error(`${castId} not found`);

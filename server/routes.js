@@ -12,7 +12,7 @@ router
     getModel('Scene').find().exec().then((scenes) => {
       res.json(scenes);
     }, err => {
-      res.send(500, err);
+      res.status(500).send(err);
     });
   })
   .get('/scene/:sceneId', (req, res) => {
@@ -21,7 +21,8 @@ router
     getModel('Scene').findOne({ sceneId }).exec().then(scene => {
       logger.info({ req: `/scene/${sceneId}`, scene })
       if (!scene) {
-        throw new Error(`${sceneId} not found`);
+        console.error(`${sceneId} not found`);
+        return res.status(404).send('Not found');
       }
       const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
       logger.info({ req: `/scene/${sceneId}`, castsToLoad });
@@ -31,14 +32,14 @@ router
           scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
           res.json(scene);
         }, err => {
-          res.send(500).send(err);
+          res.status(500).send(err);
         });
       } else {
         res.json(scene);
       }
     }, err => {
       logger.error({ req: `/scene/${sceneId}`, error: err });
-      res.send(500).send(err);
+      res.status(500).send(err);
     });
   })
   .get('/cast/:castId', (req, res) => {
@@ -47,12 +48,13 @@ router
     getModel('Cast').findOne({ castId }).exec().then(cast => {
       logger.info({ req: `/cast/${castId}`, cast })
       if (!cast) {
-        throw new Error(`${castId} not found`);
+        console.error(`${castId} not found`);
+        return res.status(404).send('Not found');
       }
       res.json(cast);
     }, err => {
       logger.error({ req: `/cast/${castId}`, error: err });
-      res.send(500).send(err);
+      res.status(500).send(err);
     });
   })
   .get('/brokeniOSProxy/*', (req, res) => {

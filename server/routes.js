@@ -1,14 +1,15 @@
 import _ from 'lodash';
 import bunyan from 'bunyan';
 import express from 'express';
-import { getModel } from './db';
 import https from 'https';
 
-const logger = bunyan.createLogger({name: 'webgl-pano-server'});
+import { getModel } from './db';
+
+const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
 const router = express.Router();
 
 router
-  .get('/scenes', function (req, res) {
+  .get('/scenes', (req, res) => {
     getModel('Scene').find().exec().then((scenes) => {
       res.json(scenes);
     }, (err) => {
@@ -25,26 +26,27 @@ router
   .get('/scene/:sceneId', (req, res) => {
     const sceneId = Number(req.params.sceneId);
     logger.info({ req: `/scene/${sceneId}` });
-    getModel('Scene').findOne({ sceneId }).exec().then(scene => {
-      logger.info({ req: `/scene/${sceneId}`, scene })
-      if (!scene) {
-        console.error(`${sceneId} not found`);
-        return res.status(404).send('Not found');
-      }
-      const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
-      logger.info({ req: `/scene/${sceneId}`, castsToLoad });
-      if (castsToLoad.length) {
-        getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then(casts => {
-          logger.info({ req: `/scene/${sceneId}`, casts: casts });
-          scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
+    getModel('Scene').findOne({ sceneId }).exec().then((scene) => {
+      logger.info({ req: `/scene/${sceneId}`, sceneId });
+      if (scene) {
+        const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
+        logger.info({ req: `/scene/${sceneId}`, castsToLoad });
+        if (castsToLoad.length) {
+          getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then((casts) => {
+            logger.info({ req: `/scene/${sceneId}`, casts });
+            scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
+            res.json(scene);
+          }, (err) => {
+            res.status(500).send(err);
+          });
+        } else {
           res.json(scene);
-        }, err => {
-          res.status(500).send(err);
-        });
+        }
       } else {
-        res.json(scene);
+        logger.error('not found', { sceneId });
+        res.status(404).send('Not found');
       }
-    }, err => {
+    }, (err) => {
       logger.error({ req: `/scene/${sceneId}`, error: err });
       res.status(500).send(err);
     });
@@ -52,14 +54,15 @@ router
   .get('/cast/:castId', (req, res) => {
     const castId = Number(req.params.castId);
     logger.info({ req: `/cast/${castId}` });
-    getModel('Cast').findOne({ castId }).exec().then(cast => {
-      logger.info({ req: `/cast/${castId}`, cast })
-      if (!cast) {
-        console.error(`${castId} not found`);
-        return res.status(404).send('Not found');
+    getModel('Cast').findOne({ castId }).exec().then((cast) => {
+      logger.info({ req: `/cast/${castId}`, cast });
+      if (cast) {
+        res.json(cast);
+      } else {
+        logger.error(`${castId} not found`);
+        res.status(404).send('Not found');
       }
-      res.json(cast);
-    }, err => {
+    }, (err) => {
       logger.error({ req: `/cast/${castId}`, error: err });
       res.status(500).send(err);
     });

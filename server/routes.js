@@ -11,7 +11,14 @@ router
   .get('/scenes', function (req, res) {
     getModel('Scene').find().exec().then((scenes) => {
       res.json(scenes);
-    }, err => {
+    }, (err) => {
+      res.status(500).send(err);
+    });
+  })
+  .get('/gamestate', (req, res) => {
+    getModel('GameState').find().exec().then((gamestates) => {
+      res.json(gamestates);
+    }, (err) => {
       res.status(500).send(err);
     });
   })

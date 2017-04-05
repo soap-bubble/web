@@ -1,6 +1,6 @@
 /* eslint-disable */
 'use strict';
-
+import 'bluebird';
 var gulp = require('gulp');
 var babel = require('gulp-babel');
 var nodemon = require('gulp-nodemon');
@@ -11,24 +11,36 @@ var spawn = require('cross-spawn').spawn;
 var Server = require('karma').Server;
 var path = require('path');
 import bunyan from 'bunyan';
-import dbInit, { update as dbUpdate, prime as dbPrime } from './server/db';
+import dbInit, { get as getDb, update as dbUpdate, prime as dbPrime } from './server/db';
 
 const logger = bunyan.createLogger({ name: 'gulpfile' });
 var watch = false;
 var src = {};
 
-gulp.task('db:update', (cb) => {
-  const db = dbInit(() => {
-    logger.info('DB connection opened');
-    dbUpdate(() => db.disconnect(cb));
+gulp.task('db:test', (cb) => {
+  dbInit().then((db) => {
+    db.disconnect();
   });
 });
 
+gulp.task('db:update', (cb) => {
+  dbInit()
+    .then((db) => {
+      logger.info('DB connection opened');
+      return dbUpdate()
+        .then(() => db.disconnect());
+    })
+    .then(cb);
+});
+
 gulp.task('db:prime', (cb) => {
-  const db = dbInit(() => {
-    logger.info('DB connection opned');
-    dbPrime(() => db.disconnect(cb));
-  });
+  dbInit()
+    .then((db) => {
+      logger.info('DB connection opned');
+      return dbPrime()
+        .then(() => db.disconnect());
+    })
+    .then(cb);
 });
 
 gulp.task('webpack:client', (cb) => {

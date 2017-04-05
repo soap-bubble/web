@@ -1,4 +1,5 @@
 import { values, set } from 'lodash';
+
 export const classes = {};
 
 export default function install(db, {
@@ -14,18 +15,18 @@ export default function install(db, {
   GameState,
   Scene,
 }) {
-  var apply = function (name, Class) {
+  function apply(name, Class) {
     const model = db.model(name, new Class());
     set(classes, name, model);
     return model;
   }
-  var discriminate = function (Parent, name, Class) {
+  function discriminate(Parent, name, Class) {
     const model = Parent.discriminator(name, new Class());
     set(classes, name, model);
     return model;
   }
 
-  var cast = apply('Cast', Cast);
+  const cast = apply('Cast', Cast);
   discriminate(cast, 'ControlledMovieCast', ControlledMovieCast);
   discriminate(cast, 'HotSpot', HotSpot);
   discriminate(cast, 'MovieCast', MovieCast);
@@ -37,11 +38,11 @@ export default function install(db, {
 
   apply('GameState', GameState);
   apply('Scene', Scene);
-};
+}
 
 export function get(className) {
   if (typeof className === 'undefined') {
-    return _(classes).values();
+    return values(classes);
   }
 
   return classes[className];

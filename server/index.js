@@ -3,15 +3,17 @@ import express from 'express';
 import bunyan from 'bunyan';
 import config from 'config';
 import routes from './routes';
-import morpheus from './models/morpheus';
-import db, { update as dbUpdate, getModel } from './db';
+import { getModel } from './db/install';
+import db, { prime } from './db';
 
-const logger = bunyan.createLogger({name: 'webgl-pano-server'});
+const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
 const app = express();
 
 if (app.get('env') !== 'production') {
-  var browserSync = require('browser-sync');
-  var bs = browserSync({ logSnippet: false });
+  // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+  const browserSync = require('browser-sync');
+  const bs = browserSync({ logSnippet: false });
+  // eslint-disable-next-line import/no-extraneous-dependencies, global-require
   app.use(require('connect-browser-sync')(bs));
 }
 
@@ -25,10 +27,9 @@ app.db = db(() => {
   getModel('Scene').find().exec().then((scenes) => {
     if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
       logger.info('Attempting to prime DB');
-      prime((err) => {
-        if (err) return logger.error('Failed to prime db', err);
-        logger.info('db primed');
-      })
+      prime()
+        .then(() => logger.info('db primed'))
+        .catch(err => logger.error('Failed to prime db', err));
     }
   });
 });

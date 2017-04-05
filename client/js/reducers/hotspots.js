@@ -127,7 +127,7 @@ const reducer = createReducer({
     return {
       ...hotspots,
       theta,
-    }
+    };
   },
   [HOTSPOTS_SET_VISIBILITY](hotspots, { payload: visible }) {
     return {
@@ -190,7 +190,7 @@ const reducer = createReducer({
       data,
       isPano,
     };
-  }
+  },
 });
 
 export default reducer;

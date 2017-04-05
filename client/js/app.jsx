@@ -2,7 +2,6 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { Vector3 } from 'three';
 import qs from 'query-string';
 
 import store from './store';
@@ -10,6 +9,7 @@ import World from './react/World';
 import { goToScene } from './actions/scene';
 import { fetchInitial as fetchInitialGameState } from './actions/gameState';
 import { resize } from './actions/dimensions';
+
 const qp = qs.parse(location.search);
 
 function resizeToWindow() {

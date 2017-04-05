@@ -26,9 +26,6 @@ export function sceneLoadStarted(id, fetch) {
 
 export function fetchScene(id) {
   return (dispatch) => {
-    if (!id) {
-      debugger;
-    }
     if (sceneCache[id]) {
       return sceneCache[id];
     }

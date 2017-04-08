@@ -1,4 +1,5 @@
 import {
+  SPECIAL_IMAGES_LOADED,
   SCENE_LOAD_COMPLETE,
   SPECIAL_START,
   SPECIAL_END,
@@ -10,6 +11,7 @@ import createReducer from './createReducer';
 const reducer = createReducer({
   data: {},
   hotspots: [],
+  images: {},
   url: '',
   canvas: null,
   hitColorList: [],
@@ -18,7 +20,16 @@ const reducer = createReducer({
     return {
       ...special,
       hitColorList,
-    }
+    };
+  },
+  [SPECIAL_IMAGES_LOADED](special, { payload: images }) {
+    return {
+      ...special,
+      images: images.reduce((memo, curr) => {
+        memo[curr.castId] = curr;
+        return memo;
+      }, {}),
+    };
   },
   [SCENE_LOAD_COMPLETE](special, { payload: sceneData }) {
     const { casts } = sceneData;
@@ -28,7 +39,7 @@ const reducer = createReducer({
       hotspots: hotspotsData,
     };
   },
-  [SPECIAL_START](special, { payload: sceneData, meta }) {
+  [SPECIAL_START](special, { meta }) {
     const {
       url,
     } = meta;
@@ -41,7 +52,7 @@ const reducer = createReducer({
     return {
       ...special,
       canvas,
-    }
+    };
   },
   [SPECIAL_END](special) {
     return {

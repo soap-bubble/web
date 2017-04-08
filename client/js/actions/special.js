@@ -3,14 +3,15 @@ import {
   resize,
 } from './dimensions';
 import {
-  load as loadHotspots,
-} from './hotspots';
-import {
   getAssetUrl,
 } from '../service/gamedb';
 import {
+  loadAsImage,
+} from '../service/image';
+import {
   SPECIAL_START,
   SPECIAL_IS_LOADED,
+  SPECIAL_IMAGES_LOADED,
   SPECIAL_END,
   SPECIAL_CANVAS,
   SPECIAL_HOTSPOTS_COLORLIST,
@@ -26,7 +27,7 @@ export function specialHitCanvaseCreated(canvas) {
   return {
     type: SPECIAL_CANVAS,
     payload: canvas,
-  }
+  };
 }
 
 const ORIGINAL_HEIGHT = 400;
@@ -148,14 +149,14 @@ export function generateHitColorList(hotspots) {
     payload: hitColorList,
   };
 }
-//dispatch(generateHitColorList(hotspotsData));
 
 export function display(sceneData) {
   return (dispatch) => {
     const { casts } = sceneData;
-    const rootCast = casts.find(c => c.castId === sceneData.sceneId);
+    // The lead cast is the cast whoms castId matches the sceneId
+    const leadCast = casts.find(c => c.castId === sceneData.sceneId);
     const hotspotsData = casts.filter(c => c.castId === 0);
-    const url = getAssetUrl(rootCast.fileName, 'png');
+    const url = getAssetUrl(leadCast.fileName, 'png');
     dispatch(resize({
       width: window.innerWidth,
       height: window.innerHeight,
@@ -169,5 +170,27 @@ export function display(sceneData) {
         hotspotsData,
       },
     });
+  };
+}
+
+export function load(sceneData) {
+  return (dispatch) => {
+    const { casts } = sceneData;
+    // Extras are casts with non-zero castId that does not match sceneId
+    const extrasCasts = casts.filter(c => c.castId && c.castId !== sceneData.sceneId);
+    Promise.all([
+      extrasCasts.map(cast => loadAsImage(cast)
+        .then(img => ({
+          img,
+          castId: cast.castId,
+        }))),
+    ])
+      .then((images) => {
+        dispatch({
+          payload: images,
+          type: SPECIAL_IMAGES_LOADED,
+        });
+        dispatch(display(sceneData));
+      });
   };
 }

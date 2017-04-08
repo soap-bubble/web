@@ -2,7 +2,7 @@ import {
   load as loadPano,
 } from './pano';
 import {
-  display as displaySpecial,
+  load as loadSpecial,
 } from './special';
 import {
   display as displayTransition,
@@ -29,7 +29,7 @@ export function display() {
     const sceneData = cache[loaded];
     const sceneActionMap = {
       panorama: loadPano,
-      special: displaySpecial,
+      special: loadSpecial,
       transition: displayTransition,
     }
     const sceneType = getSceneType(sceneData);

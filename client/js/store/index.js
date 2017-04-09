@@ -9,9 +9,8 @@ let middleware;
 if (process.env.NODE_ENV === 'production') {
   middleware = applyMiddleware(thunkMiddleware, promiseMiddleware);
 } else {
-  middleware = applyMiddleware(thunkMiddleware, promiseMiddleware, loggingMiddleware);
+  middleware = applyMiddleware(thunkMiddleware, promiseMiddleware, createLogger());
 }
-const loggingMiddleware = createLogger();
 
 const store = createStore(
   morphReducer,

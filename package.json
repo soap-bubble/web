@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build:server": "babel server -d lib",
+    "build:server": "babel server -d lib --copy-files",
     "build:client": "gulp build:client",
     "build:client:watch": "gulp build:client:watch",
     "gulp": "gulp",

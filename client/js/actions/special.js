@@ -14,6 +14,7 @@ import {
   SPECIAL_IMAGES_LOADED,
   SPECIAL_END,
   SPECIAL_CANVAS,
+  SPECIAL_CONTROLLED_FRAMES,
   SPECIAL_HOTSPOTS_COLORLIST,
 } from './types';
 
@@ -94,16 +95,105 @@ function clipRect({ width, height, top, left, right, bottom }) {
   };
 }
 
+function calculateControlledFrameLocation({ cast, gameStates, images, rect }) {
+  const { controlledMovieCallbacks, castId, width, height } = cast;
+  const { gameState: gameStateId } = controlledMovieCallbacks[0];
+  const gameState = gameStates[gameStateId];
+  const image = images[castId];
+  const { value } = gameState;
+
+  const source = {
+    x: value * width,
+    y: 0,
+    sizeX: width,
+    sizeY: height,
+  };
+
+  return [
+    image,
+    rect.x,
+    rect.y,
+    rect.sizeX,
+    rect.sizeY,
+    source.x,
+    source.y,
+    source.sizeX,
+    source.sizeY,
+  ];
+}
+
+export function generateControlledFrames() {
+  return (dispatch, getState) => {
+    const { gameState, special, dimensions } = getState();
+    const { idMap: gameStates } = gameState;
+    const { data: sceneData, images } = special;
+    const { casts } = sceneData;
+    const controlledCasts = casts.filter(c => c.__t === 'ControlledMovieCast');
+    const { width, height } = dimensions;
+    dispatch({
+      type: SPECIAL_CONTROLLED_FRAMES,
+      payload: controlledCasts.reduce((memo, cast) => {
+        const { castId, controlledLocation } = cast;
+        const rect = clipRect({
+          top: controlledLocation.x,
+          left: controlledLocation.y,
+          right: controlledLocation.x + width,
+          bottom: controlledLocation.y + height,
+          width,
+          height,
+        });
+        memo[castId] = calculateControlledFrameLocation({
+          cast,
+          gameStates,
+          images,
+          rect,
+        });
+        return memo;
+      }, {}),
+    });
+  };
+}
+
+export function generateSpecialImages(canvas) {
+  return (dispatch, getState) => {
+    const { gameState, special } = getState();
+    const { idMap: gameStates } = gameState;
+    const { data: sceneData, images } = special;
+    const { casts } = sceneData;
+    const controlledCasts = casts.filter(c => c.__t === 'ControlledMovieCast');
+    const { width, height } = canvas;
+    controlledCasts.forEach((cast) => {
+      const { controlledLocation } = cast;
+      const rect = clipRect({
+        top: controlledLocation.x,
+        left: controlledLocation.y,
+        right: controlledLocation.x + width,
+        bottom: controlledLocation.y + height,
+        width,
+        height,
+      });
+      // drawFrameToCanvas({
+      //   cast,
+      //   gameStates,
+      //   images,
+      //   rect,
+      //   canvas,
+      // });
+    });
+  };
+}
+
 export function generateHitCanvas(canvas) {
   return (dispatch, getState) => {
+    const { special } = getState();
     const { width, height } = canvas;
-    const { hotspots } = getState().special;
-    let { hitColorList } = getState().special;
+    const { hotspots, images } = special;
+    let { hitColorList } = special;
     if (hitColorList.length !== hotspots.length) {
       dispatch(generateHitColorList(hotspots));
-      hitColorList = getState().special.hitColorList;
+      hitColorList = special.hitColorList;
     }
-    const ctx=canvas.getContext('2d');
+    const context = canvas.getContext('2d');
     for (let i = hitColorList.length - 1; i >= 0; i--) {
       const color = hitColorList[i];
       const {
@@ -121,16 +211,16 @@ export function generateHitCanvas(canvas) {
         height,
       });
       //ctx.fillStyle = `#${color.toString(16)}`;
-      ctx.color = 'black';
-      ctx.lineWidth = 5;
-      ctx.rect(
-        rect.x,
-        rect.y,
-        rect.sizeX,
-        rect.sizeY,
-      );
+      // ctx.color = 'black';
+      // ctx.lineWidth = 5;
+      // ctx.rect(
+      //   rect.x,
+      //   rect.y,
+      //   rect.sizeX,
+      //   rect.sizeY,
+      // );
     }
-    ctx.stroke();
+    // ctx.stroke();
   };
 }
 
@@ -162,6 +252,7 @@ export function display(sceneData) {
       height: window.innerHeight,
     }));
     dispatch(generateHitColorList(hotspotsData));
+    dispatch(generateControlledFrames());
     dispatch({
       type: SPECIAL_START,
       payload: sceneData,
@@ -178,8 +269,9 @@ export function load(sceneData) {
     const { casts } = sceneData;
     // Extras are casts with non-zero castId that does not match sceneId
     const extrasCasts = casts.filter(c => c.castId && c.castId !== sceneData.sceneId);
+    const controlledCasts = extrasCasts.filter(c => c.__t === 'ControlledMovieCast');
     Promise.all([
-      extrasCasts.map(cast => loadAsImage(cast)
+      controlledCasts.map(cast => loadAsImage(cast.fileName)
         .then(img => ({
           img,
           castId: cast.castId,

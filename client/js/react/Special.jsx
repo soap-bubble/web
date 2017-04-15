@@ -14,6 +14,7 @@ import {
   specialImgIsLoaded,
   specialHitCanvaseCreated,
   generateHitCanvas,
+  generateSpecialImages,
 } from '../actions/special';
 
 const ORIGINAL_HEIGHT = 480;
@@ -35,7 +36,7 @@ function mapStateToProps({ special, dimensions }) {
     width,
     height,
     canvas,
-  }
+  };
 }
 
 function mapDispatchToProps(dispatch) {
@@ -58,7 +59,7 @@ function mapDispatchToProps(dispatch) {
 
     const { dimensions } = store.getState();
     const { width: newWidth, height: newHeight } = dimensions;
-    if (width != newWidth || height != newHeight) {
+    if (width !== newWidth || height !== newHeight) {
       const onScreenAspectRatio = newWidth / newHeight;
       if (onScreenAspectRatio > ORIGINAL_ASPECT_RATIO) {
         clip.horizontal = 0;
@@ -173,6 +174,7 @@ function mapDispatchToProps(dispatch) {
   function onWindowResize() {
     if (canvas) {
       dispatch(generateHitCanvas(canvas));
+      dispatch(generateSpecialImages(canvas));
     }
   }
 
@@ -190,6 +192,7 @@ function mapDispatchToProps(dispatch) {
       canvas = _canvas;
       dispatch(specialHitCanvaseCreated(canvas));
       dispatch(generateHitCanvas(canvas));
+      dispatch(generateSpecialImages(canvas));
     },
     onMouseDown,
     onMouseUp,

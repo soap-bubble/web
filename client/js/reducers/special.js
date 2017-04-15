@@ -1,4 +1,5 @@
 import {
+  SPECIAL_CONTROLLED_FRAMES,
   SPECIAL_IMAGES_LOADED,
   SCENE_LOAD_COMPLETE,
   SPECIAL_START,
@@ -15,6 +16,7 @@ const reducer = createReducer({
   url: '',
   canvas: null,
   hitColorList: [],
+  controlledFrames: {},
 }, {
   [SPECIAL_HOTSPOTS_COLORLIST](special, { payload: hitColorList }) {
     return {
@@ -31,11 +33,18 @@ const reducer = createReducer({
       }, {}),
     };
   },
+  [SPECIAL_CONTROLLED_FRAMES](special, { payload: controlledFrames }) {
+    return {
+      ...special,
+      controlledFrames,
+    }
+  },
   [SCENE_LOAD_COMPLETE](special, { payload: sceneData }) {
     const { casts } = sceneData;
     const hotspotsData = casts.filter(c => c.castId === 0);
     return {
       ...special,
+      data: sceneData,
       hotspots: hotspotsData,
     };
   },

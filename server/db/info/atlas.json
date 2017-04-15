@@ -1,0 +1,1306 @@
+{
+  "GameDB/Deck2Bth/disglassSPC": {
+    "width": 232,
+    "height": 156
+  },
+  "GameDB/Deck2Bth/lockbuttSPC": {
+    "width": 220,
+    "height": 148
+  },
+  "GameDB/Deck3For/projrunSPC": {
+    "width": 340,
+    "height": 108
+  },
+  "GameDB/Elevator/elevindSPC": {
+    "width": 192,
+    "height": 188
+  },
+  "GameDB/Deck3Aft/tempgageSPC": {
+    "width": 474,
+    "height": 124
+  },
+  "GameDB/Deck1/cannonSPC": {
+    "width": 176,
+    "height": 196
+  },
+  "GameDB/Deck1/carglverSPC": {
+    "width": 136,
+    "height": 152
+  },
+  "GameDB/Deck1/crabSPC": {
+    "width": 240,
+    "height": 192
+  },
+  "GameDB/Deck1/rangeNBSPC": {
+    "width": 184,
+    "height": 168
+  },
+  "GameDB/Deck1/rangeSPC": {
+    "width": 172,
+    "height": 156
+  },
+  "GameDB/Deck1/rcktlverSPC": {
+    "width": 128,
+    "height": 136
+  },
+  "GameDB/Harem/tapestrSPC": {
+    "width": 118,
+    "height": 162
+  },
+  "GameDB/neuro/staticSPC": {
+    "width": 284,
+    "height": 300
+  },
+  "GameDB/h2oFront/dartSPC": {
+    "width": 168,
+    "height": 156
+  },
+  "GameDB/sanitory/podbut1SPC": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/All/hiresbutANI": {
+    "width": 72,
+    "height": 48
+  },
+  "GameDB/All/onbutANI": {
+    "width": 36,
+    "height": 36
+  },
+  "GameDB/All/transbutANI": {
+    "width": 72,
+    "height": 56
+  },
+  "GameDB/All/volbutANI": {
+    "width": 92,
+    "height": 56
+  },
+  "GameDB/All/winsizeANI": {
+    "width": 84,
+    "height": 56
+  },
+  "GameDB/Deck1/balloonANI": {
+    "width": 60,
+    "height": 64
+  },
+  "GameDB/Deck1/carglev2ANI": {
+    "width": 136,
+    "height": 152
+  },
+  "GameDB/Deck1/carglv17ANI": {
+    "width": 96,
+    "height": 88
+  },
+  "GameDB/Deck1/cigslideANI": {
+    "width": 144,
+    "height": 100
+  },
+  "GameDB/Deck1/corridorANI": {
+    "width": 124,
+    "height": 208
+  },
+  "GameDB/Deck1/corrlockANI": {
+    "width": 124,
+    "height": 208
+  },
+  "GameDB/Deck1/corrunlkANI": {
+    "width": 128,
+    "height": 212
+  },
+  "GameDB/Deck1/flybrdg1ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck1/flybrdg2ANI": {
+    "width": 68,
+    "height": 64
+  },
+  "GameDB/Deck1/globeNEANI": {
+    "width": 112,
+    "height": 124
+  },
+  "GameDB/Deck1/globeNWANI": {
+    "width": 112,
+    "height": 124
+  },
+  "GameDB/Deck1/globeSANI": {
+    "width": 124,
+    "height": 120
+  },
+  "GameDB/Deck1/logrecLtANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck1/radarANI": {
+    "width": 168,
+    "height": 148
+  },
+  "GameDB/Deck1/rcktlev2ANI": {
+    "width": 128,
+    "height": 140
+  },
+  "GameDB/Deck1/wheelANI": {
+    "width": 320,
+    "height": 320
+  },
+  "GameDB/Deck1/wind16ANI": {
+    "width": 92,
+    "height": 60
+  },
+  "GameDB/Deck1/windmillANI": {
+    "width": 128,
+    "height": 52
+  },
+  "GameDB/Deck2/MBtubeANI": {
+    "width": 36,
+    "height": 48
+  },
+  "GameDB/Deck2/gymuranANI": {
+    "width": 196,
+    "height": 196
+  },
+  "GameDB/Deck2/jandescANI": {
+    "width": 196,
+    "height": 224
+  },
+  "GameDB/Deck2/mbdisksANI": {
+    "width": 196,
+    "height": 108
+  },
+  "GameDB/Deck2/mbinst1ANI": {
+    "width": 88,
+    "height": 72
+  },
+  "GameDB/Deck2/mbinst2ANI": {
+    "width": 88,
+    "height": 72
+  },
+  "GameDB/Deck2/mbinst3ANI": {
+    "width": 72,
+    "height": 68
+  },
+  "GameDB/Deck2/mbplayANI": {
+    "width": 176,
+    "height": 88
+  },
+  "GameDB/Deck2/mbsongsANI": {
+    "width": 180,
+    "height": 56
+  },
+  "GameDB/Deck2/mbtubeupANI": {
+    "width": 40,
+    "height": 48
+  },
+  "GameDB/Deck2/runpumpANI": {
+    "width": 176,
+    "height": 76
+  },
+  "GameDB/Deck2Bth/canisterANI": {
+    "width": 76,
+    "height": 92
+  },
+  "GameDB/Deck2Bth/canloopANI": {
+    "width": 180,
+    "height": 100
+  },
+  "GameDB/Deck2Bth/dckEfb11ANI": {
+    "width": 64,
+    "height": 60
+  },
+  "GameDB/Deck2Bth/dckEfb12ANI": {
+    "width": 128,
+    "height": 64
+  },
+  "GameDB/Deck2Bth/dckEfb13ANI": {
+    "width": 108,
+    "height": 108
+  },
+  "GameDB/Deck2Bth/dckWfb15ANI": {
+    "width": 128,
+    "height": 96
+  },
+  "GameDB/Deck2Bth/dckair13ANI": {
+    "width": 84,
+    "height": 72
+  },
+  "GameDB/Deck2Bth/dckair14ANI": {
+    "width": 88,
+    "height": 60
+  },
+  "GameDB/Deck2Bth/dckair19ANI": {
+    "width": 108,
+    "height": 260
+  },
+  "GameDB/Deck2Bth/dckair20ANI": {
+    "width": 60,
+    "height": 260
+  },
+  "GameDB/Deck2Bth/scrblockANI": {
+    "width": 72,
+    "height": 132
+  },
+  "GameDB/Deck2Bth/suncastANI": {
+    "width": 240,
+    "height": 224
+  },
+  "GameDB/Deck2Bth/sunshdwANI": {
+    "width": 212,
+    "height": 84
+  },
+  "GameDB/Deck3For/JCwalks2ANI": {
+    "width": 144,
+    "height": 148
+  },
+  "GameDB/Deck3For/JCwalksANI": {
+    "width": 144,
+    "height": 148
+  },
+  "GameDB/Deck3For/bellstrtANI": {
+    "width": 320,
+    "height": 200
+  },
+  "GameDB/Deck3For/janbed7ANI": {
+    "width": 128,
+    "height": 171
+  },
+  "GameDB/Deck3For/jandoor7ANI": {
+    "width": 80,
+    "height": 88
+  },
+  "GameDB/Deck3For/kinepl1aANI": {
+    "width": 84,
+    "height": 144
+  },
+  "GameDB/Deck3For/kinepl1bANI": {
+    "width": 84,
+    "height": 144
+  },
+  "GameDB/Deck3For/kinepl2aANI": {
+    "width": 84,
+    "height": 140
+  },
+  "GameDB/Deck3For/kinepl2bANI": {
+    "width": 84,
+    "height": 140
+  },
+  "GameDB/Deck3For/phardiagANI": {
+    "width": 44,
+    "height": 44
+  },
+  "GameDB/Deck3Aft/BMserumANI": {
+    "width": 88,
+    "height": 106
+  },
+  "GameDB/Deck3Aft/BSserumANI": {
+    "width": 60,
+    "height": 84
+  },
+  "GameDB/Deck3Aft/GTserumANI": {
+    "width": 88,
+    "height": 124
+  },
+  "GameDB/Deck3Aft/IFneedleANI": {
+    "width": 172,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/LGserumANI": {
+    "width": 88,
+    "height": 88
+  },
+  "GameDB/Deck3Aft/MBcrankBANI": {
+    "width": 88,
+    "height": 84
+  },
+  "GameDB/Deck3Aft/MBcrankFANI": {
+    "width": 96,
+    "height": 80
+  },
+  "GameDB/Deck3Aft/MBturnANI": {
+    "width": 116,
+    "height": 260
+  },
+  "GameDB/Deck3Aft/atomspryANI": {
+    "width": 76,
+    "height": 84
+  },
+  "GameDB/Deck3Aft/fntbutcANI": {
+    "width": 60,
+    "height": 140
+  },
+  "GameDB/Deck3Aft/fntbutlANI": {
+    "width": 48,
+    "height": 136
+  },
+  "GameDB/Deck3Aft/fntbutrANI": {
+    "width": 52,
+    "height": 132
+  },
+  "GameDB/Deck3Aft/fntwaterANI": {
+    "width": 300,
+    "height": 136
+  },
+  "GameDB/Deck3Aft/fountcANI": {
+    "width": 60,
+    "height": 136
+  },
+  "GameDB/Deck3Aft/fountlrANI": {
+    "width": 300,
+    "height": 140
+  },
+  "GameDB/Deck3Aft/glwSRbutANI": {
+    "width": 68,
+    "height": 68
+  },
+  "GameDB/Deck3Aft/herblANI": {
+    "width": 32,
+    "height": 28
+  },
+  "GameDB/Deck3Aft/herbrANI": {
+    "width": 32,
+    "height": 32
+  },
+  "GameDB/Deck3Aft/influx#1ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/influx#2ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/influx#3ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/influx3ANI": {
+    "width": 272,
+    "height": 252
+  },
+  "GameDB/Deck3Aft/scrbBMANI": {
+    "width": 160,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/scrbBSANI": {
+    "width": 160,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/scrbCMANI": {
+    "width": 160,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/scrbGTANI": {
+    "width": 160,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/scrbJMANI": {
+    "width": 160,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/scrbopenANI": {
+    "width": 172,
+    "height": 60
+  },
+  "GameDB/Deck3Aft/trnkhookANI": {
+    "width": 120,
+    "height": 116
+  },
+  "GameDB/Deck3Aft/uranindANI": {
+    "width": 200,
+    "height": 200
+  },
+  "GameDB/CargoH/airdoorANI": {
+    "width": 80,
+    "height": 136
+  },
+  "GameDB/CargoH/airengANI": {
+    "width": 60,
+    "height": 88
+  },
+  "GameDB/CargoH/airhndlANI": {
+    "width": 192,
+    "height": 160
+  },
+  "GameDB/CargoH/doorwhlANI": {
+    "width": 164,
+    "height": 72
+  },
+  "GameDB/CargoH/dwnlevIANI": {
+    "width": 80,
+    "height": 208
+  },
+  "GameDB/CargoH/dwnlevIIANI": {
+    "width": 84,
+    "height": 204
+  },
+  "GameDB/CargoH/holdII13ANI": {
+    "width": 120,
+    "height": 192
+  },
+  "GameDB/CargoH/holdIIE10ANI": {
+    "width": 100,
+    "height": 160
+  },
+  "GameDB/CargoH/holdIIIEANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/CargoH/holdIIS13ANI": {
+    "width": 80,
+    "height": 104
+  },
+  "GameDB/CargoH/holdIIW16ANI": {
+    "width": 96,
+    "height": 180
+  },
+  "GameDB/CargoH/uplevIANI": {
+    "width": 80,
+    "height": 208
+  },
+  "GameDB/CargoH/uplevIIANI": {
+    "width": 80,
+    "height": 212
+  },
+  "GameDB/CargoH/uplevIIIANI": {
+    "width": 84,
+    "height": 224
+  },
+  "GameDB/Elevator/florind1ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Elevator/florind2ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Elevator/florind3ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Elevator/florind4ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Harem/pyramidaANI": {
+    "width": 240,
+    "height": 320
+  },
+  "GameDB/Harem/symbol1ANI": {
+    "width": 132,
+    "height": 204
+  },
+  "GameDB/Harem/symbol2ANI": {
+    "width": 184,
+    "height": 192
+  },
+  "GameDB/Harem/symbol3ANI": {
+    "width": 168,
+    "height": 196
+  },
+  "GameDB/Harem/symbol4ANI": {
+    "width": 164,
+    "height": 200
+  },
+  "GameDB/Harem/symbol5ANI": {
+    "width": 168,
+    "height": 196
+  },
+  "GameDB/Voodoo/EUpANI": {
+    "width": 128,
+    "height": 260
+  },
+  "GameDB/Voodoo/beach23ANI": {
+    "width": 44,
+    "height": 224
+  },
+  "GameDB/Voodoo/beach3ANI": {
+    "width": 36,
+    "height": 200
+  },
+  "GameDB/Voodoo/bridge4aANI": {
+    "width": 56,
+    "height": 288
+  },
+  "GameDB/Voodoo/bridge4bANI": {
+    "width": 60,
+    "height": 36
+  },
+  "GameDB/Voodoo/cemetaryANI": {
+    "width": 48,
+    "height": 160
+  },
+  "GameDB/Voodoo/cerewf23ANI": {
+    "width": 40,
+    "height": 164
+  },
+  "GameDB/Voodoo/cerewf2ANI": {
+    "width": 48,
+    "height": 160
+  },
+  "GameDB/Voodoo/firedol1ANI": {
+    "width": 92,
+    "height": 204
+  },
+  "GameDB/Voodoo/firedol2ANI": {
+    "width": 152,
+    "height": 208
+  },
+  "GameDB/Voodoo/firedol3ANI": {
+    "width": 264,
+    "height": 208
+  },
+  "GameDB/Voodoo/grave2ANI": {
+    "width": 64,
+    "height": 120
+  },
+  "GameDB/Voodoo/grave3ANI": {
+    "width": 60,
+    "height": 160
+  },
+  "GameDB/Voodoo/grave4ANI": {
+    "width": 60,
+    "height": 164
+  },
+  "GameDB/Voodoo/grave6ANI": {
+    "width": 60,
+    "height": 160
+  },
+  "GameDB/Voodoo/grave7ANI": {
+    "width": 60,
+    "height": 80
+  },
+  "GameDB/Voodoo/grave8ANI": {
+    "width": 64,
+    "height": 140
+  },
+  "GameDB/Voodoo/grave9ANI": {
+    "width": 60,
+    "height": 148
+  },
+  "GameDB/Voodoo/meltdol1ANI": {
+    "width": 108,
+    "height": 200
+  },
+  "GameDB/Voodoo/meltdol2ANI": {
+    "width": 196,
+    "height": 208
+  },
+  "GameDB/Voodoo/meltdol3ANI": {
+    "width": 132,
+    "height": 204
+  },
+  "GameDB/Voodoo/monkey1ANI": {
+    "width": 108,
+    "height": 88
+  },
+  "GameDB/Voodoo/monkey2ANI": {
+    "width": 96,
+    "height": 84
+  },
+  "GameDB/Voodoo/monkey3ANI": {
+    "width": 92,
+    "height": 80
+  },
+  "GameDB/Voodoo/monkey4ANI": {
+    "width": 84,
+    "height": 76
+  },
+  "GameDB/Voodoo/monkey5ANI": {
+    "width": 88,
+    "height": 88
+  },
+  "GameDB/Voodoo/monkey6ANI": {
+    "width": 84,
+    "height": 80
+  },
+  "GameDB/Voodoo/monkey7ANI": {
+    "width": 100,
+    "height": 76
+  },
+  "GameDB/Voodoo/monkey8ANI": {
+    "width": 112,
+    "height": 92
+  },
+  "GameDB/Voodoo/monkey9ANI": {
+    "width": 92,
+    "height": 84
+  },
+  "GameDB/Voodoo/monktoyANI": {
+    "width": 260,
+    "height": 284
+  },
+  "GameDB/Voodoo/obolisk4ANI": {
+    "width": 36,
+    "height": 108
+  },
+  "GameDB/carnival/800004ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/800052ANI": {
+    "width": 184,
+    "height": 132
+  },
+  "GameDB/carnival/800053ANI": {
+    "width": 320,
+    "height": 200
+  },
+  "GameDB/carnival/801051ANI": {
+    "width": 136,
+    "height": 84
+  },
+  "GameDB/carnival/801052ANI": {
+    "width": 320,
+    "height": 200
+  },
+  "GameDB/carnival/803031ANI": {
+    "width": 368,
+    "height": 172
+  },
+  "GameDB/carnival/803051ANI": {
+    "width": 64,
+    "height": 176
+  },
+  "GameDB/carnival/803052ANI": {
+    "width": 56,
+    "height": 176
+  },
+  "GameDB/carnival/803053ANI": {
+    "width": 60,
+    "height": 176
+  },
+  "GameDB/carnival/803054ANI": {
+    "width": 56,
+    "height": 176
+  },
+  "GameDB/carnival/803055ANI": {
+    "width": 56,
+    "height": 176
+  },
+  "GameDB/carnival/803056ANI": {
+    "width": 68,
+    "height": 176
+  },
+  "GameDB/carnival/803057ANI": {
+    "width": 136,
+    "height": 160
+  },
+  "GameDB/carnival/804009ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/804051ANI": {
+    "width": 128,
+    "height": 396
+  },
+  "GameDB/carnival/805009ANI": {
+    "width": 128,
+    "height": 80
+  },
+  "GameDB/carnival/806004ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/806005ANI": {
+    "width": 128,
+    "height": 80
+  },
+  "GameDB/carnival/806006ANI": {
+    "width": 56,
+    "height": 108
+  },
+  "GameDB/carnival/806026ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/806027ANI": {
+    "width": 132,
+    "height": 60
+  },
+  "GameDB/carnival/806028ANI": {
+    "width": 156,
+    "height": 72
+  },
+  "GameDB/carnival/806036ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/806037ANI": {
+    "width": 124,
+    "height": 60
+  },
+  "GameDB/carnival/806038ANI": {
+    "width": 152,
+    "height": 76
+  },
+  "GameDB/carnival/806046ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/806047ANI": {
+    "width": 120,
+    "height": 60
+  },
+  "GameDB/carnival/806048ANI": {
+    "width": 148,
+    "height": 80
+  },
+  "GameDB/carnival/806055ANI": {
+    "width": 268,
+    "height": 220
+  },
+  "GameDB/carnival/806056ANI": {
+    "width": 220,
+    "height": 184
+  },
+  "GameDB/carnival/806060ANI": {
+    "width": 92,
+    "height": 120
+  },
+  "GameDB/carnival/806062ANI": {
+    "width": 56,
+    "height": 260
+  },
+  "GameDB/carnival/806063ANI": {
+    "width": 60,
+    "height": 260
+  },
+  "GameDB/carnival/806065ANI": {
+    "width": 104,
+    "height": 60
+  },
+  "GameDB/carnival/807004ANI": {
+    "width": 92,
+    "height": 68
+  },
+  "GameDB/carnival/807005ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/carnival/807025ANI": {
+    "width": 160,
+    "height": 216
+  },
+  "GameDB/carnival/807052ANI": {
+    "width": 216,
+    "height": 120
+  },
+  "GameDB/carnival/807058ANI": {
+    "width": 264,
+    "height": 112
+  },
+  "GameDB/carnival/807062ANI": {
+    "width": 256,
+    "height": 140
+  },
+  "GameDB/carnival/807064ANI": {
+    "width": 280,
+    "height": 228
+  },
+  "GameDB/carnival/807065ANI": {
+    "width": 320,
+    "height": 168
+  },
+  "GameDB/carnival/807066ANI": {
+    "width": 196,
+    "height": 145
+  },
+  "GameDB/carnival/807072ANI": {
+    "width": 188,
+    "height": 120
+  },
+  "GameDB/carnival/bloomersANI": {
+    "width": 112,
+    "height": 100
+  },
+  "GameDB/carnival/cardsANI": {
+    "width": 52,
+    "height": 72
+  },
+  "GameDB/carnival/dimlightANI": {
+    "width": 80,
+    "height": 80
+  },
+  "GameDB/carnival/knot1ANI": {
+    "width": 60,
+    "height": 320
+  },
+  "GameDB/carnival/knot2ANI": {
+    "width": 48,
+    "height": 320
+  },
+  "GameDB/carnival/knot3ANI": {
+    "width": 44,
+    "height": 320
+  },
+  "GameDB/carnival/knot4ANI": {
+    "width": 36,
+    "height": 320
+  },
+  "GameDB/carnival/knot5ANI": {
+    "width": 36,
+    "height": 320
+  },
+  "GameDB/carnival/suitclseANI": {
+    "width": 176,
+    "height": 120
+  },
+  "GameDB/carnival/suitoutANI": {
+    "width": 160,
+    "height": 100
+  },
+  "GameDB/iceNchat/icepickANI": {
+    "width": 220,
+    "height": 280
+  },
+  "GameDB/iceNchat/pickpanoANI": {
+    "width": 72,
+    "height": 112
+  },
+  "GameDB/neuro/galteANI": {
+    "width": 180,
+    "height": 144
+  },
+  "GameDB/neuro/mexlerANI": {
+    "width": 176,
+    "height": 148
+  },
+  "GameDB/neuro/swanANI": {
+    "width": 168,
+    "height": 144
+  },
+  "GameDB/neuro/thermonANI": {
+    "width": 172,
+    "height": 144
+  },
+  "GameDB/sanitory/BMwcButtANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/sanitory/BSwcButtANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/sanitory/LGwcButtANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/sanitory/podknob1ANI": {
+    "width": 80,
+    "height": 72
+  },
+  "GameDB/sanitory/podknob2ANI": {
+    "width": 76,
+    "height": 72
+  },
+  "GameDB/sanitory/podknob3ANI": {
+    "width": 76,
+    "height": 72
+  },
+  "GameDB/sanitory/podrtswANI": {
+    "width": 108,
+    "height": 144
+  },
+  "GameDB/sanitory/podrtwl1ANI": {
+    "width": 60,
+    "height": 252
+  },
+  "GameDB/sanitory/podrtwl2ANI": {
+    "width": 56,
+    "height": 252
+  },
+  "GameDB/sanitory/podrtwl3ANI": {
+    "width": 60,
+    "height": 252
+  },
+  "GameDB/sanitory/saniN23ANI": {
+    "width": 128,
+    "height": 216
+  },
+  "GameDB/sanitory/saniN24ANI": {
+    "width": 128,
+    "height": 132
+  },
+  "GameDB/sanitory/wcButtANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/h2oFront/barpoleANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/h2oFront/box1missANI": {
+    "width": 320,
+    "height": 88
+  },
+  "GameDB/h2oFront/box2missANI": {
+    "width": 292,
+    "height": 60
+  },
+  "GameDB/h2oFront/box3missANI": {
+    "width": 376,
+    "height": 80
+  },
+  "GameDB/h2oFront/box4missANI": {
+    "width": 312,
+    "height": 64
+  },
+  "GameDB/h2oFront/box5missANI": {
+    "width": 312,
+    "height": 64
+  },
+  "GameDB/h2oFront/box6missANI": {
+    "width": 316,
+    "height": 72
+  },
+  "GameDB/h2oFront/cartfl1ANI": {
+    "width": 320,
+    "height": 208
+  },
+  "GameDB/h2oFront/cartfl2ANI": {
+    "width": 360,
+    "height": 248
+  },
+  "GameDB/h2oFront/cartfl3ANI": {
+    "width": 360,
+    "height": 248
+  },
+  "GameDB/h2oFront/cartop0ANI": {
+    "width": 340,
+    "height": 268
+  },
+  "GameDB/h2oFront/cartop1ANI": {
+    "width": 348,
+    "height": 264
+  },
+  "GameDB/h2oFront/cartop2ANI": {
+    "width": 348,
+    "height": 264
+  },
+  "GameDB/h2oFront/ffroseANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/h2oFront/fireANI": {
+    "width": 96,
+    "height": 80
+  },
+  "GameDB/h2oFront/maChinaANI": {
+    "width": 108,
+    "height": 128
+  },
+  "GameDB/h2oFront/maEgyptANI": {
+    "width": 116,
+    "height": 128
+  },
+  "GameDB/h2oFront/maEnglanANI": {
+    "width": 96,
+    "height": 128
+  },
+  "GameDB/h2oFront/maFranceANI": {
+    "width": 104,
+    "height": 124
+  },
+  "GameDB/h2oFront/maNYANI": {
+    "width": 92,
+    "height": 104
+  },
+  "GameDB/h2oFront/maRomeANI": {
+    "width": 96,
+    "height": 96
+  },
+  "GameDB/h2oFront/mufftagANI": {
+    "width": 180,
+    "height": 184
+  },
+  "GameDB/h2oFront/noroseFFANI": {
+    "width": 96,
+    "height": 60
+  },
+  "GameDB/h2oFront/noroseWHANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/h2oFront/pinAANI": {
+    "width": 68,
+    "height": 68
+  },
+  "GameDB/h2oFront/pinBANI": {
+    "width": 64,
+    "height": 64
+  },
+  "GameDB/h2oFront/pinFANI": {
+    "width": 60,
+    "height": 68
+  },
+  "GameDB/h2oFront/pinGANI": {
+    "width": 72,
+    "height": 72
+  },
+  "GameDB/h2oFront/pinRANI": {
+    "width": 64,
+    "height": 68
+  },
+  "GameDB/h2oFront/pinYANI": {
+    "width": 64,
+    "height": 64
+  },
+  "GameDB/h2oFront/pub24ANI": {
+    "width": 44,
+    "height": 100
+  },
+  "GameDB/h2oFront/pull1ANI": {
+    "width": 284,
+    "height": 328
+  },
+  "GameDB/h2oFront/pull2ANI": {
+    "width": 220,
+    "height": 332
+  },
+  "GameDB/h2oFront/pull4ANI": {
+    "width": 100,
+    "height": 336
+  },
+  "GameDB/h2oFront/pull5ANI": {
+    "width": 220,
+    "height": 332
+  },
+  "GameDB/h2oFront/sween18ANI": {
+    "width": 116,
+    "height": 260
+  },
+  "GameDB/h2oFront/tap1dartANI": {
+    "width": 200,
+    "height": 60
+  },
+  "GameDB/h2oFront/tap2dartANI": {
+    "width": 216,
+    "height": 60
+  },
+  "GameDB/h2oFront/tap3dartANI": {
+    "width": 184,
+    "height": 60
+  },
+  "GameDB/h2oFront/tap4dartANI": {
+    "width": 252,
+    "height": 88
+  },
+  "GameDB/h2oFront/tap5dartANI": {
+    "width": 200,
+    "height": 72
+  },
+  "GameDB/h2oFront/tap6dartANI": {
+    "width": 228,
+    "height": 60
+  },
+  "GameDB/Deck4/AliteANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/AondkANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/Aunlit5ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/IliteANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/InjectD1ANI": {
+    "width": 216,
+    "height": 160
+  },
+  "GameDB/Deck4/InjectD2ANI": {
+    "width": 216,
+    "height": 100
+  },
+  "GameDB/Deck4/IondkANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/Iunlit5ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/LbuttonUANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/RbuttonDANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/SRliteBMANI": {
+    "width": 36,
+    "height": 40
+  },
+  "GameDB/Deck4/SRliteBSANI": {
+    "width": 32,
+    "height": 48
+  },
+  "GameDB/Deck4/SRliteCMANI": {
+    "width": 36,
+    "height": 36
+  },
+  "GameDB/Deck4/SRliteGTANI": {
+    "width": 36,
+    "height": 48
+  },
+  "GameDB/Deck4/SRliteJMANI": {
+    "width": 36,
+    "height": 48
+  },
+  "GameDB/Deck4/SRliteLGANI": {
+    "width": 32,
+    "height": 40
+  },
+  "GameDB/Deck4/SRswitchANI": {
+    "width": 136,
+    "height": 216
+  },
+  "GameDB/Deck4/ScallbutANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/SguageANI": {
+    "width": 132,
+    "height": 124
+  },
+  "GameDB/Deck4/SguageofANI": {
+    "width": 132,
+    "height": 124
+  },
+  "GameDB/Deck4/StoggleANI": {
+    "width": 112,
+    "height": 96
+  },
+  "GameDB/Deck4/UPlever1ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/UPlever2ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/UPlightANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/UcallbutANI": {
+    "width": 60,
+    "height": 64
+  },
+  "GameDB/Deck4/UguageOnANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/UtoggleANI": {
+    "width": 124,
+    "height": 96
+  },
+  "GameDB/Deck4/VliteANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/VondkANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/Vunlit5ANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/aoffANI": {
+    "width": 64,
+    "height": 64
+  },
+  "GameDB/Deck4/baclevANI": {
+    "width": 136,
+    "height": 176
+  },
+  "GameDB/Deck4/dkStogglANI": {
+    "width": 108,
+    "height": 124
+  },
+  "GameDB/Deck4/dkUPliteANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/forlevANI": {
+    "width": 124,
+    "height": 184
+  },
+  "GameDB/Deck4/gondladdANI": {
+    "width": 280,
+    "height": 232
+  },
+  "GameDB/Deck4/injectU1ANI": {
+    "width": 216,
+    "height": 160
+  },
+  "GameDB/Deck4/injectU2ANI": {
+    "width": 216,
+    "height": 100
+  },
+  "GameDB/Deck4/ioffANI": {
+    "width": 68,
+    "height": 60
+  },
+  "GameDB/Deck4/rodsDANI": {
+    "width": 216,
+    "height": 160
+  },
+  "GameDB/Deck4/rodsUANI": {
+    "width": 216,
+    "height": 160
+  },
+  "GameDB/Deck4/scramlitANI": {
+    "width": 60,
+    "height": 60
+  },
+  "GameDB/Deck4/stageE1ANI": {
+    "width": 60,
+    "height": 180
+  },
+  "GameDB/Deck4/stageE5ANI": {
+    "width": 32,
+    "height": 88
+  },
+  "GameDB/Deck4/stageN21ANI": {
+    "width": 60,
+    "height": 180
+  },
+  "GameDB/Deck4/stageN5ANI": {
+    "width": 60,
+    "height": 180
+  },
+  "GameDB/Deck4/stageW21ANI": {
+    "width": 60,
+    "height": 120
+  },
+  "GameDB/Deck4/ufripplANI": {
+    "width": 404,
+    "height": 156
+  },
+  "GameDB/Deck4/urangageANI": {
+    "width": 160,
+    "height": 152
+  },
+  "GameDB/Deck4/valveDANI": {
+    "width": 164,
+    "height": 188
+  },
+  "GameDB/Deck4/valveUANI": {
+    "width": 164,
+    "height": 188
+  },
+  "GameDB/Deck4/valvetrnANI": {
+    "width": 240,
+    "height": 188
+  },
+  "GameDB/Deck4/voffANI": {
+    "width": 68,
+    "height": 60
+  }
+}

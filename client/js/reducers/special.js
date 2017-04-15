@@ -28,7 +28,7 @@ const reducer = createReducer({
     return {
       ...special,
       images: images.reduce((memo, curr) => {
-        memo[curr.castId] = curr;
+        memo[curr.castId] = curr.img;
         return memo;
       }, {}),
     };
@@ -37,7 +37,7 @@ const reducer = createReducer({
     return {
       ...special,
       controlledFrames,
-    }
+    };
   },
   [SCENE_LOAD_COMPLETE](special, { payload: sceneData }) {
     const { casts } = sceneData;

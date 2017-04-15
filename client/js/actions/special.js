@@ -1,4 +1,7 @@
-
+import {
+  map,
+} from 'lodash';
+import Promise from 'bluebird';
 import {
   resize,
 } from './dimensions';
@@ -12,7 +15,6 @@ import {
   SPECIAL_START,
   SPECIAL_IS_LOADED,
   SPECIAL_IMAGES_LOADED,
-  SPECIAL_END,
   SPECIAL_CANVAS,
   SPECIAL_CONTROLLED_FRAMES,
   SPECIAL_HOTSPOTS_COLORLIST,
@@ -47,23 +49,24 @@ function clipRect({ width, height, top, left, right, bottom }) {
     let y = (top * heightScaler) - (clipHeight / 2);
     let sizeY = (bottom - top) * heightScaler;
 
-    if (y < 0) {
-      sizeY += y;
-      y = 0;
-    } else if (y > height) {
-      console.error('HOTSPOT IS OFFSCREEN!!!');
-      sizeY -= (y - height);
-      y = height;
-    }
-    if (y + sizeY > height) {
-      sizeY = height - y;
-    }
+    // if (y < 0) {
+    //   sizeY += y;
+    //   y = 0;
+    // } else if (y > height) {
+    //   console.error('HOTSPOT IS OFFSCREEN!!!');
+    //   sizeY -= (y - height);
+    //   y = height;
+    // }
+    // if (y + sizeY > height) {
+    //   sizeY = height - y;
+    // }
 
     return {
       x,
       y,
       sizeX,
       sizeY,
+
     };
   }
   const adjustedWidth = height * ORIGINAL_ASPECT_RATIO;
@@ -75,17 +78,17 @@ function clipRect({ width, height, top, left, right, bottom }) {
 
   let x = (left * widthScaler) - (clipWidth / 2);
   let sizeX = (right - left) * widthScaler;
-  if (x < 0) {
-    sizeX += x;
-    x = 0;
-  } else if (x > width) {
-    console.error('HOTSPOT IS OFFSCREEN!!!');
-    sizeX -= (y - width);
-    x = width;
-  }
-  if (x + sizeX > width) {
-    sizeX = width - x;
-  }
+  // if (x < 0) {
+  //   sizeX += x;
+  //   x = 0;
+  // } else if (x > width) {
+  //   console.error('HOTSPOT IS OFFSCREEN!!!');
+  //   sizeX -= (y - width);
+  //   x = width;
+  // }
+  // if (x + sizeX > width) {
+  //   sizeX = width - x;
+  // }
 
   return {
     x,
@@ -95,11 +98,10 @@ function clipRect({ width, height, top, left, right, bottom }) {
   };
 }
 
-function calculateControlledFrameLocation({ cast, gameStates, images, rect }) {
-  const { controlledMovieCallbacks, castId, width, height } = cast;
+function calculateControlledFrameLocation({ cast, gameStates, rect }) {
+  const { controlledMovieCallbacks, width, height } = cast;
   const { gameState: gameStateId } = controlledMovieCallbacks[0];
   const gameState = gameStates[gameStateId];
-  const image = images[castId];
   const { value } = gameState;
 
   const source = {
@@ -110,15 +112,14 @@ function calculateControlledFrameLocation({ cast, gameStates, images, rect }) {
   };
 
   return [
-    image,
+    source.x,
+    source.y,
+    source.sizeX - 1,
+    source.sizeY,
     rect.x,
     rect.y,
     rect.sizeX,
     rect.sizeY,
-    source.x,
-    source.y,
-    source.sizeX,
-    source.sizeY,
   ];
 }
 
@@ -126,7 +127,7 @@ export function generateControlledFrames() {
   return (dispatch, getState) => {
     const { gameState, special, dimensions } = getState();
     const { idMap: gameStates } = gameState;
-    const { data: sceneData, images } = special;
+    const { data: sceneData } = special;
     const { casts } = sceneData;
     const controlledCasts = casts.filter(c => c.__t === 'ControlledMovieCast');
     const { width, height } = dimensions;
@@ -135,17 +136,16 @@ export function generateControlledFrames() {
       payload: controlledCasts.reduce((memo, cast) => {
         const { castId, controlledLocation } = cast;
         const rect = clipRect({
-          top: controlledLocation.x,
-          left: controlledLocation.y,
-          right: controlledLocation.x + width,
-          bottom: controlledLocation.y + height,
+          left: controlledLocation.x,
+          top: controlledLocation.y,
+          right: controlledLocation.x + cast.width,
+          bottom: controlledLocation.y + cast.height,
           width,
           height,
         });
         memo[castId] = calculateControlledFrameLocation({
           cast,
           gameStates,
-          images,
           rect,
         });
         return memo;
@@ -156,30 +156,21 @@ export function generateControlledFrames() {
 
 export function generateSpecialImages(canvas) {
   return (dispatch, getState) => {
-    const { gameState, special } = getState();
-    const { idMap: gameStates } = gameState;
-    const { data: sceneData, images } = special;
-    const { casts } = sceneData;
-    const controlledCasts = casts.filter(c => c.__t === 'ControlledMovieCast');
-    const { width, height } = canvas;
-    controlledCasts.forEach((cast) => {
-      const { controlledLocation } = cast;
-      const rect = clipRect({
-        top: controlledLocation.x,
-        left: controlledLocation.y,
-        right: controlledLocation.x + width,
-        bottom: controlledLocation.y + height,
-        width,
-        height,
-      });
-      // drawFrameToCanvas({
-      //   cast,
-      //   gameStates,
-      //   images,
-      //   rect,
-      //   canvas,
-      // });
-    });
+    const { special } = getState();
+    const { controlledFrames, images } = special;
+    const ctx = canvas.getContext('2d');
+    if (Object.keys(images).length && Object.keys(controlledFrames).length) {
+      const canvasDrawOps = map(controlledFrames,
+        (op, castId) => [images[castId], ...op],
+      );
+      for (let i = 0; i < canvasDrawOps.length; i += 1) {
+        const op = canvasDrawOps[i];
+        ctx.drawImage(...op);
+      }
+      // canvasDrawOps.forEach(op =>
+      //   ctx.drawImage(...op),
+      // );
+    }
   };
 }
 
@@ -270,13 +261,11 @@ export function load(sceneData) {
     // Extras are casts with non-zero castId that does not match sceneId
     const extrasCasts = casts.filter(c => c.castId && c.castId !== sceneData.sceneId);
     const controlledCasts = extrasCasts.filter(c => c.__t === 'ControlledMovieCast');
-    Promise.all([
-      controlledCasts.map(cast => loadAsImage(cast.fileName)
-        .then(img => ({
-          img,
-          castId: cast.castId,
-        }))),
-    ])
+    Promise.all(controlledCasts.map(cast => loadAsImage(cast.fileName)
+      .then(img => ({
+        img,
+        castId: cast.castId,
+      }))))
       .then((images) => {
         dispatch({
           payload: images,

@@ -14,6 +14,7 @@ import {
   specialImgIsLoaded,
   specialHitCanvaseCreated,
   generateHitCanvas,
+  generateControlledFrames,
   generateSpecialImages,
 } from '../actions/special';
 
@@ -174,6 +175,7 @@ function mapDispatchToProps(dispatch) {
   function onWindowResize() {
     if (canvas) {
       dispatch(generateHitCanvas(canvas));
+      dispatch(generateControlledFrames(canvas));
       dispatch(generateSpecialImages(canvas));
     }
   }

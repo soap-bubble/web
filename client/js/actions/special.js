@@ -37,7 +37,7 @@ const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
-function clipRect({ width, height, top, left, right, bottom }) {
+function clipRect({ width, height, top, left, right, bottom, clip = false }) {
   if (width / height > ORIGINAL_ASPECT_RATIO) {
     const adjustedHeight = width / ORIGINAL_ASPECT_RATIO;
     const clipHeight = adjustedHeight - height;
@@ -49,17 +49,19 @@ function clipRect({ width, height, top, left, right, bottom }) {
     let y = (top * heightScaler) - (clipHeight / 2);
     let sizeY = (bottom - top) * heightScaler;
 
-    // if (y < 0) {
-    //   sizeY += y;
-    //   y = 0;
-    // } else if (y > height) {
-    //   console.error('HOTSPOT IS OFFSCREEN!!!');
-    //   sizeY -= (y - height);
-    //   y = height;
-    // }
-    // if (y + sizeY > height) {
-    //   sizeY = height - y;
-    // }
+    if (clip) {
+      if (y < 0) {
+        sizeY += y;
+        y = 0;
+      } else if (y > height) {
+        sizeY -= (y - height);
+        y = height;
+      }
+      if (y + sizeY > height) {
+        sizeY = height - y;
+      }
+    }
+
 
     return {
       x,
@@ -78,17 +80,19 @@ function clipRect({ width, height, top, left, right, bottom }) {
 
   let x = (left * widthScaler) - (clipWidth / 2);
   let sizeX = (right - left) * widthScaler;
-  // if (x < 0) {
-  //   sizeX += x;
-  //   x = 0;
-  // } else if (x > width) {
-  //   console.error('HOTSPOT IS OFFSCREEN!!!');
-  //   sizeX -= (y - width);
-  //   x = width;
-  // }
-  // if (x + sizeX > width) {
-  //   sizeX = width - x;
-  // }
+
+  if (clip) {
+    if (x < 0) {
+      sizeX += x;
+      x = 0;
+    } else if (x > width) {
+      sizeX -= (y - width);
+      x = width;
+    }
+    if (x + sizeX > width) {
+      sizeX = width - x;
+    }
+  }
 
   return {
     x,

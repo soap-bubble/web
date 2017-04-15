@@ -26,7 +26,7 @@ export function specialImgIsLoaded() {
   };
 }
 
-export function specialHitCanvaseCreated(canvas) {
+export function specialCanvasCreated(canvas) {
   return {
     type: SPECIAL_CANVAS,
     payload: canvas,
@@ -68,7 +68,6 @@ function clipRect({ width, height, top, left, right, bottom, clip = false }) {
       y,
       sizeX,
       sizeY,
-
     };
   }
   const adjustedWidth = height * ORIGINAL_ASPECT_RATIO;
@@ -118,7 +117,7 @@ function calculateControlledFrameLocation({ cast, gameStates, rect }) {
   return [
     source.x,
     source.y,
-    source.sizeX - 1,
+    source.sizeX,
     source.sizeY,
     rect.x,
     rect.y,
@@ -158,10 +157,10 @@ export function generateControlledFrames() {
   };
 }
 
-export function generateSpecialImages(canvas) {
+export function generateSpecialImages() {
   return (dispatch, getState) => {
     const { special } = getState();
-    const { controlledFrames, images } = special;
+    const { controlledFrames, images, canvas } = special;
     const ctx = canvas.getContext('2d');
     if (Object.keys(images).length && Object.keys(controlledFrames).length) {
       const canvasDrawOps = map(controlledFrames,
@@ -178,17 +177,16 @@ export function generateSpecialImages(canvas) {
   };
 }
 
-export function generateHitCanvas(canvas) {
+export function generateHitCanvas() {
   return (dispatch, getState) => {
     const { special } = getState();
+    const { hotspots, canvas } = special;
     const { width, height } = canvas;
-    const { hotspots, images } = special;
     let { hitColorList } = special;
     if (hitColorList.length !== hotspots.length) {
       dispatch(generateHitColorList(hotspots));
       hitColorList = special.hitColorList;
     }
-    const context = canvas.getContext('2d');
     for (let i = hitColorList.length - 1; i >= 0; i--) {
       const color = hitColorList[i];
       const {

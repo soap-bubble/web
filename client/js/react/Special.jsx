@@ -12,7 +12,7 @@ import {
 } from '../actions/hotspots';
 import {
   specialImgIsLoaded,
-  specialHitCanvaseCreated,
+  specialCanvasCreated,
   generateHitCanvas,
   generateControlledFrames,
   generateSpecialImages,
@@ -174,9 +174,9 @@ function mapDispatchToProps(dispatch) {
   let canvas;
   function onWindowResize() {
     if (canvas) {
-      dispatch(generateHitCanvas(canvas));
-      dispatch(generateControlledFrames(canvas));
-      dispatch(generateSpecialImages(canvas));
+      dispatch(generateHitCanvas());
+      dispatch(generateControlledFrames());
+      dispatch(generateSpecialImages());
     }
   }
 
@@ -192,9 +192,9 @@ function mapDispatchToProps(dispatch) {
         window.removeEventListener('resize', onWindowResize);
       }
       canvas = _canvas;
-      dispatch(specialHitCanvaseCreated(canvas));
-      dispatch(generateHitCanvas(canvas));
-      dispatch(generateSpecialImages(canvas));
+      dispatch(specialCanvasCreated(canvas));
+      dispatch(generateHitCanvas());
+      dispatch(generateSpecialImages());
     },
     onMouseDown,
     onMouseUp,

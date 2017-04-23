@@ -41,12 +41,13 @@ export function fetchScene(id) {
 }
 
 export function goToScene(id) {
-  return (dispatch) => {
-    function doIt() {
-      dispatch(display());
-    }
+  return (dispatch, getState) => {
+    const { scene } = getState();
+    const { current } = scene;
 
-    return dispatch(fetchScene(id))
-      .then(doIt);
+    if (id !== 0 && (!current || current !== id)) {
+      return dispatch(fetchScene(id))
+        .then(() => dispatch(display()));
+    }
   };
 }

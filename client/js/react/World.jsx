@@ -62,6 +62,8 @@ const World = ({
   //   actors = actors.concat(<Transition key="scene:video" />);
   // }
 
+  logger.info(`Rendering for scene ${currentSceneType}`);
+
   return (
     <div>
       {actors}

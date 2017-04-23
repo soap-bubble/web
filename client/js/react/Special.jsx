@@ -44,7 +44,6 @@ function mapDispatchToProps(dispatch) {
   let canvas;
   function onWindowResize() {
     if (canvas) {
-      dispatch(generateHitCanvas());
       dispatch(generateControlledFrames());
       dispatch(generateSpecialImages());
     }
@@ -58,14 +57,14 @@ function mapDispatchToProps(dispatch) {
     onCanvasCreate(_canvas) {
       if (_canvas) {
         window.addEventListener('resize', onWindowResize);
+        canvas = _canvas;
+        dispatch(specialCanvasCreated(canvas));
+        dispatch(generateSpecialImages());
+        flatspot(dispatch);
       } else {
         window.removeEventListener('resize', onWindowResize);
       }
-      canvas = _canvas;
-      dispatch(specialCanvasCreated(canvas));
-      dispatch(generateHitCanvas());
-      dispatch(generateSpecialImages());
-      flatspot(dispatch);
+
     },
   };
 }

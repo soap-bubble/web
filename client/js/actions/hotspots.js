@@ -19,6 +19,7 @@ import {
 } from './common/three';
 import renderEvents from '../utils/render';
 import {
+  GAME_SET_CURSOR,
   HOTSPOTS_LOADED,
   HOTSPOTS_VISIBLE_POSITIONS_CREATE,
   HOTSPOTS_VISIBLE_UVS_CREATE,
@@ -364,11 +365,16 @@ export function setHotspotsVisibility(visible) {
 export function setHoverIndex(index) {
   return (dispatch, getState) => {
     const { hotspots } = getState();
-    const { hoverIndex } = hotspots;
+    const { hoverIndex, data } = hotspots;
     if (hoverIndex !== index) {
       dispatch({
         type: HOTSPOTS_HOVER_INDEX,
         payload: index,
+      });
+      const { cursorShapeWhenActive: morpheusCursor  } = data[index];
+      dispatch({
+        type: GAME_SET_CURSOR,
+        payload: morpheusCursor,
       });
     }
   }

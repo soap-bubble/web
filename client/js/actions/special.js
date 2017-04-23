@@ -1,10 +1,14 @@
 import {
   map,
+  each,
 } from 'lodash';
 import Promise from 'bluebird';
 import {
   resize,
 } from './dimensions';
+import {
+  handleHotspot,
+} from './gameState';
 import {
   getAssetUrl,
 } from '../service/gamedb';
@@ -12,12 +16,17 @@ import {
   loadAsImage,
 } from '../service/image';
 import {
+  ACTION_TYPES,
+  GESTURES,
+} from '../morpheus/constants';
+import {
+  GAME_SET_CURSOR,
   SPECIAL_START,
   SPECIAL_IS_LOADED,
   SPECIAL_IMAGES_LOADED,
   SPECIAL_CANVAS,
   SPECIAL_CONTROLLED_FRAMES,
-  SPECIAL_HOTSPOTS_COLORLIST,
+  SPECIAL_HOTSPOTS_LIST,
 } from './types';
 
 export function specialImgIsLoaded() {
@@ -177,60 +186,73 @@ export function generateSpecialImages() {
   };
 }
 
-export function generateHitCanvas() {
-  return (dispatch, getState) => {
-    const { special } = getState();
-    const { hotspots, canvas } = special;
-    const { width, height } = canvas;
-    let { hitColorList } = special;
-    if (hitColorList.length !== hotspots.length) {
-      dispatch(generateHitColorList(hotspots));
-      hitColorList = special.hitColorList;
-    }
-    for (let i = hitColorList.length - 1; i >= 0; i--) {
-      const color = hitColorList[i];
-      const {
-        rectTop: top,
-        rectLeft: left,
-        rectRight: right,
-        rectBottom: bottom
-      } = hotspots[i];
-      const rect = clipRect({
-        top,
-        left,
-        right,
-        bottom,
-        width,
-        height,
-      });
-      //ctx.fillStyle = `#${color.toString(16)}`;
-      // ctx.color = 'black';
-      // ctx.lineWidth = 5;
-      // ctx.rect(
-      //   rect.x,
-      //   rect.y,
-      //   rect.sizeX,
-      //   rect.sizeY,
-      // );
-    }
-    // ctx.stroke();
+export function generateHotspots(hotspots) {
+  return {
+    type: SPECIAL_HOTSPOTS_LIST,
+    payload: hotspots,
   };
 }
 
-
-export function generateHitColorList(hotspots) {
-  const hitColorList = [];
-  for (let i = 0, length = hotspots.length; i < length; i++) {
-    let hitColor;
-    while(!hitColor || hitColorList.indexOf(hitColor) !== -1) {
-      hitColor = Math.floor(Math.random() * 0xFFFFFF);
+export function handleMouseEvent({ type, top, left, hotspot }) {
+  return (dispatch, getState) => {
+    const {
+      comparators,
+      gesture,
+      cursorShapeWhenActive,
+    } = hotspot;
+    const gestureType = GESTURES[gesture];
+    if (type === gestureType) {
+      dispatch(handleHotspot(hotspot));
     }
-    hitColorList.push(hitColor);
-  }
-  return {
-    type: SPECIAL_HOTSPOTS_COLORLIST,
-    payload: hitColorList,
   };
+}
+//
+// switch(gestureType) {
+//   case 'MouseDown':  // 0
+//
+//     break;
+//   case 'MouseUp':    // 1
+//
+//     break;
+//   case 'MouseClick': // 2
+//
+//     break;
+//   case 'MouseEnter': // 3
+//
+//     break;
+//   case 'MouseLeave': // 4
+//
+//     break;
+//   case 'MouseNone':  // 5
+//
+//     break;
+//   case 'Always':     // 6
+//
+//     break;
+//   case 'SceneEnter': // 7
+//
+//     break;
+//   case 'SceneExit':  // 8
+//
+//     break;
+// }
+
+export function setHoverIndex(index) {
+  return (dispatch, getState) => {
+    const { special } = getState();
+    const { hotspots } = special;
+
+    const hotspot = hotspots[index];
+    const { cursorShapeWhenActive: morpheusCursor  } = hotspot;
+    dispatch({
+      type: GAME_SET_CURSOR,
+      payload: morpheusCursor,
+    });
+  };
+}
+
+export function activateHotspotIndex(index) {
+
 }
 
 export function display(sceneData) {
@@ -244,7 +266,7 @@ export function display(sceneData) {
       width: window.innerWidth,
       height: window.innerHeight,
     }));
-    dispatch(generateHitColorList(hotspotsData));
+    dispatch(generateHotspots(hotspotsData));
     dispatch(generateControlledFrames());
     dispatch({
       type: SPECIAL_START,

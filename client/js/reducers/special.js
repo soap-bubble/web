@@ -4,7 +4,7 @@ import {
   SCENE_LOAD_COMPLETE,
   SPECIAL_START,
   SPECIAL_END,
-  SPECIAL_HOTSPOTS_COLORLIST,
+  SPECIAL_HOTSPOTS_LIST,
   SPECIAL_CANVAS,
 } from '../actions/types';
 import createReducer from './createReducer';
@@ -15,13 +15,13 @@ const reducer = createReducer({
   images: {},
   url: '',
   canvas: null,
-  hitColorList: [],
+  hotspots: [],
   controlledFrames: {},
 }, {
-  [SPECIAL_HOTSPOTS_COLORLIST](special, { payload: hitColorList }) {
+  [SPECIAL_HOTSPOTS_LIST](special, { payload: hotspots }) {
     return {
       ...special,
-      hitColorList,
+      hotspots,
     };
   },
   [SPECIAL_IMAGES_LOADED](special, { payload: images }) {

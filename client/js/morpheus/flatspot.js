@@ -1,10 +1,11 @@
 import {
   each,
+  difference,
 } from 'lodash';
 import {
-  setHoverIndex,
+  handleMouseEvent,
   activateHotspotIndex,
-} from '../actions/hotspots';
+} from '../actions/special';
 import {
   addMouseUp,
   addMouseMove,
@@ -22,6 +23,7 @@ const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
 export default function (dispatch) {
   const clickStartPos = { left: 0, top: 0 };
+  let wasActiveHotspots = [];
   let possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -35,9 +37,7 @@ export default function (dispatch) {
 
   function updateState({ top, left }) {
     const { hotspots } = store.getState().special;
-    // Check if we hit a hotspot
-    let hotspotIndex = null;
-
+    const nowActiveHotspots = [];
     const { dimensions } = store.getState();
     const { width: newWidth, height: newHeight } = dimensions;
     if (width !== newWidth || height !== newHeight) {
@@ -69,39 +69,76 @@ export default function (dispatch) {
         && top < rectBottom
         && left > rectLeft
         && left < rectRight) {
-        hotspotIndex = index;
-        dispatch(setHoverIndex(hotspotIndex));
-        return false;
+        nowActiveHotspots.push(hotspot);
       }
     });
     // Update our state
 
+    // Events for hotspots we have left
+    difference(wasActiveHotspots, nowActiveHotspots)
+      .forEach(hotspot => dispatch(handleMouseEvent({
+        type: 'MouseLeave',
+        top,
+        left,
+        hotspot,
+      })));
+
+    // Events for hotspots we have entered
+    difference(nowActiveHotspots, wasActiveHotspots)
+      .forEach(hotspot => dispatch(handleMouseEvent({
+        type: 'MouseEnter',
+        top,
+        left,
+        hotspot,
+      })));
+
     // User initiated event inside a hotspot so could be valid
-    if (!possibleValidClick && wasMouseDowned && (hotspotIndex !== null)) {
-      possibleValidClick = true;
-      clickStartPos.left = left;
-      clickStartPos.top = top;
+    if (wasMouseDowned && nowActiveHotspots.length) {
+      nowActiveHotspots
+        .forEach(hotspot => dispatch(handleMouseEvent({
+          type: 'MouseDown',
+          top,
+          left,
+          hotspot,
+        })));
     }
 
     // We were a possible valid click, but user left the hotspot so invalidate
-    if (wasMouseMoved && possibleValidClick && hotspotIndex === null) {
-      possibleValidClick = false;
+    if (wasMouseMoved) {
+      nowActiveHotspots.forEach(hotspot => dispatch(handleMouseEvent({
+        type: 'MouseMove',
+        top,
+        left,
+        hotspot,
+      })));
     }
 
     // User pressed and released mouse button inside a valid hotspot
     // TODO: debounce??
-    if (wasMouseUpped && possibleValidClick && hotspotIndex !== null) {
-      const interactionDistance = Math.sqrt(
-        ((clickStartPos.left - left) ** 2)
-         + ((clickStartPos.top - top) ** 2));
-      // Only allow taps, not drag-n-release
-      if (interactionDistance < 20) {
-        dispatch(activateHotspotIndex(hotspotIndex));
-      }
+    if (wasMouseUpped && nowActiveHotspots.length) {
+      nowActiveHotspots.forEach(hotspot => dispatch(handleMouseEvent({
+        type: 'MouseUp',
+        top,
+        left,
+        hotspot,
+      })));
+      nowActiveHotspots.forEach(hotspot => dispatch(handleMouseEvent({
+        type: 'MouseClick',
+        top,
+        left,
+        hotspot,
+      })));
     }
 
-    // Reset for next time
-    possibleValidClick = !wasMouseUpped && possibleValidClick;
+    difference(hotspots, nowActiveHotspots)
+      .forEach(hotspot => dispatch(handleMouseEvent({
+        type: 'MouseNone',
+        top,
+        left,
+        hotspot,
+      })));
+
+    wasActiveHotspots = nowActiveHotspots;
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;

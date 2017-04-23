@@ -16,6 +16,9 @@ import {
   addTouchCancel,
 } from '../actions/ui';
 import store from '../store';
+import loggerFactory from '../utils/logger';
+
+const logger = loggerFactory('flatspot');
 
 const ORIGINAL_HEIGHT = 480;
 const ORIGINAL_WIDTH = 640;
@@ -30,10 +33,31 @@ export default function (dispatch) {
   let wasMouseUpped = false;
   let width;
   let height;
+  let clipWidth;
+  let clipHeight;
+  let widthScaler;
+  let heightScaler;
   const clip = {
     horizontal: 100,
     vertical: 100,
   };
+
+  function handleHotspotDispatches({
+    type,
+    top,
+    left,
+    hotspots,
+  }) {
+    hotspots.some(hotspot => {
+      dispatch(handleMouseEvent({
+        type,
+        top,
+        left,
+        hotspot,
+      }));
+      return hotspot.defaultPass;
+    });
+  }
 
   function updateState({ top, left }) {
     const { hotspots } = store.getState().special;
@@ -41,22 +65,39 @@ export default function (dispatch) {
     const { dimensions } = store.getState();
     const { width: newWidth, height: newHeight } = dimensions;
     if (width !== newWidth || height !== newHeight) {
-      const onScreenAspectRatio = newWidth / newHeight;
-      if (onScreenAspectRatio > ORIGINAL_ASPECT_RATIO) {
-        clip.horizontal = 0;
-        clip.vertical = newHeight * (onScreenAspectRatio - ORIGINAL_ASPECT_RATIO);
-      } else if (onScreenAspectRatio <= ORIGINAL_ASPECT_RATIO) {
-        clip.vertical = 0;
-        clip.horizontal = newWidth * (onScreenAspectRatio - ORIGINAL_ASPECT_RATIO);
-      }
       width = newWidth;
       height = newHeight;
+      const onScreenAspectRatio = newWidth / newHeight;
+      if (onScreenAspectRatio > ORIGINAL_ASPECT_RATIO) {
+        const adjustedHeight = width / ORIGINAL_ASPECT_RATIO;
+        clipHeight = adjustedHeight - height;
+        clipWidth = 0;
+        widthScaler = width / ORIGINAL_WIDTH;
+        heightScaler = adjustedHeight / ORIGINAL_HEIGHT;
+      } else {
+        const adjustedWidth = height * ORIGINAL_ASPECT_RATIO;
+        clipWidth = adjustedWidth - width;
+        clipHeight = 0;
+        widthScaler = adjustedWidth / ORIGINAL_WIDTH;
+        heightScaler = height / ORIGINAL_HEIGHT;
+      }
     }
 
     const adjustedClickPos = {
-      top: (ORIGINAL_HEIGHT * ((top + clip.vertical) / 2)) / (height + clip.vertical),
-      left: (ORIGINAL_WIDTH * ((left + clip.horizontal) / 2)) / (width + clip.horizontal),
+      top: (top / heightScaler) + (clipHeight / 2),
+      left: (left / widthScaler) + (clipWidth / 2),
     };
+
+    logger.info('Handling mouse event', JSON.stringify({
+      wasMouseUpped,
+      wasMouseMoved,
+      wasMouseDowned,
+      adjustedClickPos,
+      originalClickPos: {
+        top,
+        left,
+      },
+    }, null, 2));
 
     each(hotspots, (hotspot, index) => {
       const {
@@ -65,78 +106,74 @@ export default function (dispatch) {
         rectLeft,
         rectRight,
       } = hotspot;
-      if (top > rectTop
-        && top < rectBottom
-        && left > rectLeft
-        && left < rectRight) {
+      if (adjustedClickPos.top > rectTop
+        && adjustedClickPos.top < rectBottom
+        && adjustedClickPos.left > rectLeft
+        && adjustedClickPos.left < rectRight) {
         nowActiveHotspots.push(hotspot);
       }
     });
     // Update our state
 
     // Events for hotspots we have left
-    difference(wasActiveHotspots, nowActiveHotspots)
-      .forEach(hotspot => dispatch(handleMouseEvent({
-        type: 'MouseLeave',
-        top,
-        left,
-        hotspot,
-      })));
+    handleHotspotDispatches({
+      type: 'MouseLeave',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: difference(wasActiveHotspots, nowActiveHotspots),
+    });
 
     // Events for hotspots we have entered
-    difference(nowActiveHotspots, wasActiveHotspots)
-      .forEach(hotspot => dispatch(handleMouseEvent({
-        type: 'MouseEnter',
-        top,
-        left,
-        hotspot,
-      })));
+    handleHotspotDispatches({
+      type: 'MouseEnter',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: difference(nowActiveHotspots, wasActiveHotspots),
+    });
 
     // User initiated event inside a hotspot so could be valid
     if (wasMouseDowned && nowActiveHotspots.length) {
-      nowActiveHotspots
-        .forEach(hotspot => dispatch(handleMouseEvent({
-          type: 'MouseDown',
-          top,
-          left,
-          hotspot,
-        })));
+      handleHotspotDispatches({
+        type: 'MouseDown',
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots,
+      });
     }
 
     // We were a possible valid click, but user left the hotspot so invalidate
     if (wasMouseMoved) {
-      nowActiveHotspots.forEach(hotspot => dispatch(handleMouseEvent({
+      handleHotspotDispatches({
         type: 'MouseMove',
-        top,
-        left,
-        hotspot,
-      })));
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots
+      });
     }
 
     // User pressed and released mouse button inside a valid hotspot
     // TODO: debounce??
     if (wasMouseUpped && nowActiveHotspots.length) {
-      nowActiveHotspots.forEach(hotspot => dispatch(handleMouseEvent({
+      handleHotspotDispatches({
         type: 'MouseUp',
-        top,
-        left,
-        hotspot,
-      })));
-      nowActiveHotspots.forEach(hotspot => dispatch(handleMouseEvent({
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots,
+      });
+      handleHotspotDispatches({
         type: 'MouseClick',
-        top,
-        left,
-        hotspot,
-      })));
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots,
+      });
     }
 
-    difference(hotspots, nowActiveHotspots)
-      .forEach(hotspot => dispatch(handleMouseEvent({
-        type: 'MouseNone',
-        top,
-        left,
-        hotspot,
-      })));
+    handleHotspotDispatches({
+      type: 'MouseNone',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: difference(hotspots, nowActiveHotspots),
+    });
 
     wasActiveHotspots = nowActiveHotspots;
     wasMouseMoved = false;

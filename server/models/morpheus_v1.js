@@ -20,6 +20,8 @@ export const ControlledMovieCast = v1(class extends v0.ControlledMovieCast {
     super(opts);
     this.add({
       atlas: Boolean,
+      width: Number,
+      height: Number,
     });
   }
 });

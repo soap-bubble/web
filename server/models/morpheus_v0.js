@@ -12,7 +12,8 @@ export class Cast extends Morpheus {
   constructor(opts) {
     super(opts);
     this.add({
-      castId: Number
+      castId: Number,
+      initiallyEnabled: Boolean,
     });
   }
 }

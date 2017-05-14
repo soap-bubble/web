@@ -17,8 +17,6 @@ import {
 import store from '../store';
 import renderEvents from '../utils/render';
 
-
-
 export default function ({
   dispatch,
   canvas,

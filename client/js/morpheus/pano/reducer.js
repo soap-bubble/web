@@ -13,8 +13,8 @@ import {
   PANO_CAMERA_POSITION,
   PANO_RENDER_LOOP,
   PANO_RENDERER_CREATE,
-  TRANSITION_END,
-} from '../actions/types';
+  PANO_ENTER,
+} from './actionsTypes';
 import createReducer from './createReducer';
 
 const reducer = createReducer({
@@ -98,8 +98,7 @@ const reducer = createReducer({
       renderLoop,
     };
   },
-  [TRANSITION_END](pano, { payload: transition }) {
-    const { angleAtEnd } = transition;
+  [PANO_ENTER](pano, { payload: angleAtEnd }) {
     const { rotation } = pano;
     let startAngle = 0;
     if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {

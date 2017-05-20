@@ -1,6 +1,9 @@
 {
   "presets": ["stage-0", "react", "es2015"],
   "plugins": [
-    "transform-decorators-legacy"
+    "transform-decorators-legacy",
+    ["module-resolver", {
+      "root": ["./client/js"]
+    }]
   ]
 }

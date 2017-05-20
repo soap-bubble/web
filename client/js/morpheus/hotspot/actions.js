@@ -10,14 +10,14 @@ import THREE, {
 } from 'three';
 
 import {
-  goToScene,
-} from './scene';
+  actions as sceneActions,
+} from '../scene';
 import {
   createCameraForType,
   createRendererForType,
   positionCameraForType,
-} from './common/three';
-import renderEvents from '../utils/render';
+} from 'utils/three';
+import renderEvents from 'utils/render';
 import {
   GAME_SET_CURSOR,
   HOTSPOTS_LOADED,
@@ -44,8 +44,8 @@ import {
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
   HOTSPOTS_ACTIVATED,
-  SCENE_END,
-} from './types';
+  HOTSPOTS_ENTER,
+} from './actionTypes';
 
 const HOTSPOT_VERTEX_SIZE = 4;
 const SCALE_FACTOR = 1.0;
@@ -460,15 +460,13 @@ export function activateHotspotIndex(index) {
     const { hotspots } = getState();
     const { data } = hotspots;
     if (data && data[index]) {
-      dispatch({
-        type: SCENE_END,
-      });
+      // FIXME SCENE_END here
       dispatch({
         type: HOTSPOTS_ACTIVATED,
         payload: data[index],
       });
       const { param1: nextSceneId } = data[index];
-      dispatch(goToScene(nextSceneId));
+      dispatch(sceneActions.goToScene(nextSceneId));
     }
   }
 }

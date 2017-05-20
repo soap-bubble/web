@@ -14,20 +14,17 @@ import { range } from 'lodash';
 
 import {
   getAssetUrl,
-} from '../service/gamedb';
+} from 'service/gamedb';
 import {
   pad,
-} from '../utils/string';
-import DeviceOrientation from './common/DeviceOrientation'
+} from 'utils/string';
+import DeviceOrientation from 'utils/DeviceOrientation'
 import {
   resize,
 } from './dimensions';
 import {
-  load as loadHotspots,
-  hotspotsLoaded,
-  positionCamera as positionHotspotCamera,
-  startRenderLoop as startHotspotRenderLoop,
- } from './hotspots';
+  actions as hotspotActions,
+} from 'morpheus/hotspot'
 import {
   load as loadPanoAnim,
 } from './panoAnim';
@@ -35,8 +32,8 @@ import {
   createCameraForType,
   createRendererForType,
   positionCameraForType,
-} from './common/three';
-import renderEvents from '../utils/render';
+} from 'utils/three';
+import renderEvents from 'utils/render';
 import {
   PANO_CANVAS_CREATED,
   PANO_GEOMETRIES_CREATE,
@@ -52,7 +49,8 @@ import {
   PANO_RENDER_LOOP,
   PANO_TEXTURES_LOAD_SUCCESS,
   PANO_TEXTURES_LOAD_FAILURE,
-} from './types';
+  PANO_ENTER,
+} from './actionTypes';
 
 const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
@@ -290,7 +288,7 @@ export function positionCamera(vector3) {
       vector3,
       camera,
     }));
-    dispatch(positionHotspotCamera(vector3));
+    dispatch(hotspotActions.positionCamera(vector3));
   };
 }
 
@@ -316,7 +314,7 @@ export function startRenderLoop() {
       type: PANO_RENDER_LOOP,
       payload: () => renderEvents.off('render', render),
     });
-    dispatch(startHotspotRenderLoop());
+    dispatch(hotspotActions.startRenderLoop());
   };
 }
 
@@ -332,7 +330,7 @@ export function load() {
     dispatch(createGeometries(fileNames));
     dispatch(createMaterials(fileNames));
     dispatch(createObject3D(getState().pano));
-    dispatch(loadHotspots());
+    dispatch(hotspotActions.load());
     dispatch(loadPanoAnim());
     dispatch(buildScene());
   };
@@ -347,5 +345,12 @@ export function display() {
     }));
     dispatch(positionCamera({ z: -0.325 }));
     dispatch(startRenderLoop());
+  };
+}
+
+export function enter(angle) {
+  return {
+    type: PANO_ENTER,
+    payload: angle,
   };
 }

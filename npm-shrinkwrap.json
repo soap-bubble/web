@@ -395,6 +395,32 @@
       "resolved": "https://registry.npmjs.org/babel-plugin-check-es2015-constants/-/babel-plugin-check-es2015-constants-6.22.0.tgz",
       "dev": true
     },
+    "babel-plugin-module-resolver": {
+      "version": "2.7.1",
+      "from": "babel-plugin-module-resolver@latest",
+      "resolved": "https://registry.npmjs.org/babel-plugin-module-resolver/-/babel-plugin-module-resolver-2.7.1.tgz",
+      "dev": true,
+      "dependencies": {
+        "brace-expansion": {
+          "version": "1.1.7",
+          "from": "brace-expansion@>=1.1.7 <2.0.0",
+          "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.7.tgz",
+          "dev": true
+        },
+        "glob": {
+          "version": "7.1.2",
+          "from": "glob@>=7.1.1 <8.0.0",
+          "resolved": "https://registry.npmjs.org/glob/-/glob-7.1.2.tgz",
+          "dev": true
+        },
+        "minimatch": {
+          "version": "3.0.4",
+          "from": "minimatch@>=3.0.4 <4.0.0",
+          "resolved": "https://registry.npmjs.org/minimatch/-/minimatch-3.0.4.tgz",
+          "dev": true
+        }
+      }
+    },
     "babel-plugin-syntax-async-functions": {
       "version": "6.13.0",
       "from": "babel-plugin-syntax-async-functions@>=6.8.0 <7.0.0",
@@ -2165,6 +2191,26 @@
           "version": "0.7.1",
           "from": "ms@0.7.1",
           "resolved": "https://registry.npmjs.org/ms/-/ms-0.7.1.tgz"
+        }
+      }
+    },
+    "find-babel-config": {
+      "version": "1.1.0",
+      "from": "find-babel-config@>=1.0.1 <2.0.0",
+      "resolved": "https://registry.npmjs.org/find-babel-config/-/find-babel-config-1.1.0.tgz",
+      "dev": true,
+      "dependencies": {
+        "json5": {
+          "version": "0.5.1",
+          "from": "json5@>=0.5.1 <0.6.0",
+          "resolved": "https://registry.npmjs.org/json5/-/json5-0.5.1.tgz",
+          "dev": true
+        },
+        "path-exists": {
+          "version": "3.0.0",
+          "from": "path-exists@>=3.0.0 <4.0.0",
+          "resolved": "https://registry.npmjs.org/path-exists/-/path-exists-3.0.0.tgz",
+          "dev": true
         }
       }
     },

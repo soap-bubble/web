@@ -1907,6 +1907,12 @@
       "resolved": "https://registry.npmjs.org/eslint-config-airbnb-base/-/eslint-config-airbnb-base-10.0.1.tgz",
       "dev": true
     },
+    "eslint-import-resolver-babel-module": {
+      "version": "3.0.0",
+      "from": "eslint-import-resolver-babel-module@latest",
+      "resolved": "https://registry.npmjs.org/eslint-import-resolver-babel-module/-/eslint-import-resolver-babel-module-3.0.0.tgz",
+      "dev": true
+    },
     "eslint-import-resolver-node": {
       "version": "0.2.3",
       "from": "eslint-import-resolver-node@>=0.2.0 <0.3.0",
@@ -1935,7 +1941,7 @@
     },
     "eslint-plugin-import": {
       "version": "2.2.0",
-      "from": "eslint-plugin-import@>=2.2.0 <3.0.0",
+      "from": "https://registry.npmjs.org/eslint-plugin-import/-/eslint-plugin-import-2.2.0.tgz",
       "resolved": "https://registry.npmjs.org/eslint-plugin-import/-/eslint-plugin-import-2.2.0.tgz",
       "dev": true
     },
@@ -5719,7 +5725,7 @@
     },
     "reselect": {
       "version": "3.0.1",
-      "from": "reselect@latest",
+      "from": "https://registry.npmjs.org/reselect/-/reselect-3.0.1.tgz",
       "resolved": "https://registry.npmjs.org/reselect/-/reselect-3.0.1.tgz"
     },
     "resolve": {

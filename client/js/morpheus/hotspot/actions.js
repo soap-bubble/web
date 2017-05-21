@@ -11,10 +11,9 @@ import THREE, {
 
 import {
   actions as sceneActions,
-} from '../scene';
+} from 'morpheus/scene';
 import {
   createCameraForType,
-  createRendererForType,
   positionCameraForType,
 } from 'utils/three';
 import renderEvents from 'utils/render';
@@ -44,7 +43,6 @@ import {
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
   HOTSPOTS_ACTIVATED,
-  HOTSPOTS_ENTER,
 } from './actionTypes';
 
 const HOTSPOT_VERTEX_SIZE = 4;
@@ -56,9 +54,9 @@ const SIZE = 0.99 * SCALE_FACTOR;
 
 function cylinderMap(y, x) {
   return {
-    x: SIZE * Math.sin(x - Math.PI / 2),
+    x: SIZE * Math.sin(x - (Math.PI / 2)),
     y: -y,
-    z: SIZE * Math.cos(x - Math.PI / 2),
+    z: SIZE * Math.cos(x - (Math.PI / 2)),
   };
 }
 
@@ -144,7 +142,6 @@ export function createUvs(count) {
       const visibleUvs = new BufferAttribute(new Float32Array(8), 2);
       const hitUvs = new BufferAttribute(new Float32Array(8), 2);
 
-      const offset = i * HOTSPOT_VERTEX_SIZE;
       visibleUvs.setXY(0, 0.0, 0.0);
       visibleUvs.setXY(1, 1.0, 0.0);
       visibleUvs.setXY(2, 1.0, 1.0);

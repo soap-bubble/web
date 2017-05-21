@@ -2,6 +2,15 @@ import {
   each,
 } from 'lodash';
 import {
+  actions as gameActions,
+} from 'morpheus/game';
+import {
+  actions as hotspotActions,
+} from 'morpheus/hotspots';
+import store from 'store';
+import renderEvents from 'utils/render';
+
+const {
   addMouseUp,
   addMouseMove,
   addMouseDown,
@@ -9,13 +18,11 @@ import {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} from '../actions/ui';
-import {
+} = gameActions;
+const {
   setHoverIndex,
   activateHotspotIndex,
-} from '../actions/hotspots';
-import store from '../store';
-import renderEvents from '../utils/render';
+} = hotspotActions;
 
 export default function ({
   dispatch,

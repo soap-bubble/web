@@ -18,16 +18,16 @@ import {
 import {
   pad,
 } from 'utils/string';
-import DeviceOrientation from 'utils/DeviceOrientation'
+// import DeviceOrientation from 'utils/DeviceOrientation'
 import {
-  resize,
-} from './dimensions';
+  actions as gameActions,
+} from 'morpheus/game';
 import {
   actions as hotspotActions,
-} from 'morpheus/hotspot'
+} from 'morpheus/hotspot';
 import {
-  load as loadPanoAnim,
-} from './panoAnim';
+  actions as animActions,
+} from 'morpheus/panoAnim';
 import {
   createCameraForType,
   createRendererForType,
@@ -331,7 +331,7 @@ export function load() {
     dispatch(createMaterials(fileNames));
     dispatch(createObject3D(getState().pano));
     dispatch(hotspotActions.load());
-    dispatch(loadPanoAnim());
+    dispatch(animActions.load());
     dispatch(buildScene());
   };
 }
@@ -339,7 +339,7 @@ export function load() {
 export function display() {
   return (dispatch) => {
     dispatch(buildRig());
-    dispatch(resize({
+    dispatch(gameActions.resize({
       width: window.innerWidth,
       height: window.innerHeight,
     }));

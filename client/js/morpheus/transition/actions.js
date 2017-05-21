@@ -1,23 +1,19 @@
 import {
-  resize,
-} from './dimensions';
+  actions as gameActions,
+} from 'morpheus/game';
 import {
-  videoLoad,
-} from './video';
+  action as videoActions,
+} from 'morpheus/video';
 import {
-  fetchScene,
-  goToScene,
-} from './scene';
-import {
-  load as loadPano,
-} from './pano';
+  actions as sceneActions,
+} from 'morpheus/scene';
 import {
   getAssetUrl,
-} from '../service/gamedb';
+} from 'service/gamedb';
 import {
   TRANSITION_START,
   TRANSITION_END,
-} from './types';
+} from './actionTypes';
 
 export function display(sceneData) {
   return (dispatch) => {
@@ -25,7 +21,7 @@ export function display(sceneData) {
     const transitionCast = casts.find(c => c.castId === sceneData.sceneId);
     const { nextSceneId }= transitionCast;
     const fileName = getAssetUrl(`${transitionCast.fileName}`);
-    dispatch(resize({
+    dispatch(gameActions.resize({
       width: window.innerWidth,
       height: window.innerHeight,
     }));
@@ -33,7 +29,7 @@ export function display(sceneData) {
       type: TRANSITION_START,
       payload: transitionCast,
     });
-    dispatch(videoLoad(fileName, transitionCast, true));
+    dispatch(videoActions.videoLoad(fileName, transitionCast, true));
   };
 }
 
@@ -46,6 +42,6 @@ export function ended() {
       type: TRANSITION_END,
       payload: data,
     });
-    dispatch(goToScene(nextSceneId));
+    dispatch(sceneActions.goToScene(nextSceneId));
   };
 }

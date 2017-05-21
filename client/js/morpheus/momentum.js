@@ -1,10 +1,13 @@
 import { last } from 'lodash';
 import {
-  rotateBy,
-  rotate,
-} from '../actions/pano';
-import store from '../store';
+  actions as panoActions,
+} from 'morpheus/pano';
+import store from 'store';
 import {
+  actions as gameActions,
+} from 'morpheus/game';
+
+const {
   addMouseUp,
   addMouseMove,
   addMouseDown,
@@ -12,7 +15,7 @@ import {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} from '../actions/ui';
+} = gameActions;
 
 export default function (dispatch) {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
@@ -72,7 +75,7 @@ export default function (dispatch) {
       clearInterval(momentum.intervalId);
     }
 
-    dispatch(rotateBy(momentum.speed));
+    dispatch(panoActions.rotateBy(momentum.speed));
   }
 
   function onInteractionStart({ left, top }) {
@@ -104,7 +107,7 @@ export default function (dispatch) {
         interaction.positions.shift();
       }
 
-      dispatch(rotateBy({
+      dispatch(panoActions.rotateBy({
         x: delta.vertical,
         y: delta.horizontal,
       }));

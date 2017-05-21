@@ -15,7 +15,7 @@ export function castEnabled({ comparators }) {
     }) => {
       const gs = _gamestates[gameStateId];
 
-      switch(TEST_TYPES[testType]) {
+      switch (TEST_TYPES[testType]) {
         case 'EqualTo':
           return value === gs.value;
         case 'NotEqualTo':
@@ -23,10 +23,10 @@ export function castEnabled({ comparators }) {
         case 'GreaterThan':
           return value > gs.value;
         case 'LessThan':
-          return value < gs.value
+          return value < gs.value;
         default:
           return false;
       }
-    })
-  )
+    }),
+  );
 }

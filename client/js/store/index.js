@@ -3,7 +3,7 @@ import promiseMiddleware from 'redux-promise';
 import createLogger from 'redux-logger';
 import { createStore, applyMiddleware } from 'redux';
 
-import morphReducer from '../reducers';
+import { reducer } from 'utils/createReducer';
 
 let middleware;
 if (process.env.NODE_ENV === 'production') {
@@ -14,7 +14,7 @@ if (process.env.NODE_ENV === 'production') {
 }
 
 const store = createStore(
-  morphReducer,
+  reducer,
   middleware,
 );
 

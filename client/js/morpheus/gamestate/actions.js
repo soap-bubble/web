@@ -1,26 +1,26 @@
-import store from '../store';
-import { fetchInitial as fetchInitialGameState } from '../../service/gameState';
+import store from 'store';
+import { fetchInitial as fetchInitialGameState } from 'service/gameState';
 import {
-  generateControlledFrames,
-  generateSpecialImages,
-} from '../../actions/special';
+  actions as specialActions,
+} from 'morpheus/special';
+import {
+  actions as sceneActions,
+} from 'morpheus/scene';
+
 import {
   API_ERROR,
   LOAD_COMPLETE,
   UPDATE,
   SCENE_END,
-} from '../actionTypes';
+} from './actionTypes';
 import {
   ACTION_TYPES,
   TEST_TYPES,
 } from '../constants';
-import {
-  goToScene,
-} from '../../actions/scene';
 
 export function gameStateLoadComplete(responseData) {
   return {
-    type: GAMESTATE_LOAD_COMPLETE,
+    type: LOAD_COMPLETE,
     payload: responseData,
   };
 }
@@ -35,7 +35,7 @@ export function fetchInitial() {
 
 export function updateGameState(gamestateId, value) {
   return {
-    type: GAMESTATE_UPDATE,
+    type: UPDATE,
     payload: value,
     meta: gamestateId,
   };
@@ -81,9 +81,9 @@ export function handleHotspot(hotspot) {
         case 'ChangeScene':
           const { param1: nextSceneId } = hotspot;
           dispatch({
-            type: 'SCENE_END',
+            type: SCENE_END,
           });
-          dispatch(goToScene(nextSceneId));
+          dispatch(sceneActions.goToScene(nextSceneId));
           break;
       }
     }
@@ -93,6 +93,6 @@ export function handleHotspot(hotspot) {
 
 window.updateGameState = (gamestateId, value) => {
   store.dispatch(updateGameState(gamestateId, value));
-  store.dispatch(generateControlledFrames());
-  store.dispatch(generateSpecialImages());
+  store.dispatch(specialActions.generateControlledFrames());
+  store.dispatch(specialActions.generateSpecialImages());
 };

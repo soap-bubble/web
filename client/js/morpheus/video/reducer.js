@@ -1,4 +1,4 @@
-import createReducer from './createReducer';
+import createReducer from 'utils/createReducer';
 import {
   VIDEO_LOAD_START,
   VIDEO_IS_PLAYING,
@@ -6,7 +6,7 @@ import {
   VIDEO_PLAY_DONE,
   PANO_RENDER_LOOP,
   TRANSITION_START,
-} from '../actions/types';
+} from './actionTypes';
 
 export default createReducer({
 
@@ -16,7 +16,7 @@ export default createReducer({
 
     return {
       ...video,
-      [name]: { state: 'loading', type, looping, el },
+      [name]: { state: 'loading', type, looping, el, url: name },
     };
   },
   [VIDEO_LOAD_COMPLETE](video, { payload: name, meta: videoEl }) {

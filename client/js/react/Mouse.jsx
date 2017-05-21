@@ -1,8 +1,10 @@
 import React, { PropTypes } from 'react';
-import cn from 'classnames';
 import { connect } from 'react-redux';
+import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
 
-function mapStateToProps({ ui, dimensions, game }) {
+function mapStateToProps(state) {
   const {
     onMouseUp: onMouseUpCallbacks,
     onMouseMove: onMouseMoveCallbacks,
@@ -11,14 +13,10 @@ function mapStateToProps({ ui, dimensions, game }) {
     onTouchMove: onTouchMoveCallbacks,
     onTouchEnd: onTouchEndCallbacks,
     onTouchCancel: onTouchCancelCallbacks,
-  } = ui;
-  const {
-    width,
-    height,
-  } = dimensions;
-  const {
-    cursor
-  } = game;
+  } = gameSelectors(state);
+  const width = gameSelectors.width(state);
+  const height = gameSelectors.height(state);
+  const cursor = gameSelectors.cursor(state);
 
   return {
     onMouseUp(mouseEvent) {
@@ -41,7 +39,7 @@ function mapStateToProps({ ui, dimensions, game }) {
       onTouchEndCallbacks.forEach(c => c(touchEvent));
     },
     onTouchCancel(touchEvent) {
-      onTouchCancel.forEach(c => c(touchEvent));
+      onTouchCancelCallbacks.forEach(c => c(touchEvent));
     },
     width,
     height,
@@ -61,7 +59,8 @@ const MousePresentation = ({
   height,
   cursor,
 }) => (
-  <div id="mouse"
+  <div
+    id="mouse"
     style={{
       width,
       height,
@@ -75,7 +74,7 @@ const MousePresentation = ({
     onTouchEnd={onTouchEnd}
     onTouchCancel={onTouchCancel}
   />
-)
+);
 
 MousePresentation.propTypes = {
   onMouseUp: PropTypes.func,
@@ -87,6 +86,7 @@ MousePresentation.propTypes = {
   onTouchCancel: PropTypes.func,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  cursor: PropTypes.string,
 };
 
 export default connect(

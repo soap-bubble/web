@@ -4,21 +4,21 @@ import {
 } from 'lodash';
 import Promise from 'bluebird';
 import {
-  resize,
-} from './dimensions';
+  actions as gameActions,
+} from 'morpheus/game';
 import {
-  handleHotspot,
-} from './gameState';
+  actions as gameStateActions,
+} from 'morpheus/gameState';
 import {
   getAssetUrl,
-} from '../service/gamedb';
+} from 'service/gamedb';
 import {
   loadAsImage,
-} from '../service/image';
+} from 'service/image';
 import {
   ACTION_TYPES,
   GESTURES,
-} from '../morpheus/constants';
+} from 'morpheus/constants';
 import {
   GAME_SET_CURSOR,
   SPECIAL_START,
@@ -27,7 +27,7 @@ import {
   SPECIAL_CANVAS,
   SPECIAL_CONTROLLED_FRAMES,
   SPECIAL_HOTSPOTS_LIST,
-} from './types';
+} from './actionTypes';
 
 export function specialImgIsLoaded() {
   return {
@@ -202,7 +202,7 @@ export function handleMouseEvent({ type, top, left, hotspot }) {
     } = hotspot;
     const gestureType = GESTURES[gesture];
     if (type === gestureType) {
-      dispatch(handleHotspot(hotspot));
+      dispatch(gameStateActions.handleHotspot(hotspot));
     }
   };
 }
@@ -262,7 +262,7 @@ export function display(sceneData) {
     const leadCast = casts.find(c => c.castId === sceneData.sceneId);
     const hotspotsData = casts.filter(c => c.castId === 0);
     const url = getAssetUrl(leadCast.fileName, 'png');
-    dispatch(resize({
+    dispatch(gameActions.resize({
       width: window.innerWidth,
       height: window.innerHeight,
     }));

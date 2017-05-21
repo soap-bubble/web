@@ -1,6 +1,6 @@
-import actions from './actions';
+import * as selectors from './selectors';
 import reducer from './reducer';
-import selectors from './selectors';
+import * as actions from './actions';
 
 export const SCENE_TYPE_LIST = {
   1: 'panorama',
@@ -27,7 +27,7 @@ export function getSceneType(sceneData) {
 }
 
 export {
-  actions,
-  reducer,
   selectors,
+  reducer,
+  actions,
 };

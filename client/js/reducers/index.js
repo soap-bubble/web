@@ -10,9 +10,6 @@ import transition from './transition';
 import ui from './ui';
 import video from './video';
 
-const initialState = {
-};
-
 export default function (state = initialState, action) {
   return {
     game: game(state, 'game', action),

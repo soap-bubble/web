@@ -3,10 +3,15 @@ import {
   difference,
 } from 'lodash';
 import {
-  handleMouseEvent,
-  activateHotspotIndex,
-} from '../actions/special';
+  actions as specialActions,
+} from 'morpheus/special';
 import {
+  actions as gameActions,
+} from 'morpheus/game';
+import store from 'store';
+import loggerFactory from 'utils/logger';
+
+const {
   addMouseUp,
   addMouseMove,
   addMouseDown,
@@ -14,9 +19,10 @@ import {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} from '../actions/ui';
-import store from '../store';
-import loggerFactory from '../utils/logger';
+} = gameActions;
+const {
+  handleMouseEvent,
+} = specialActions;
 
 const logger = loggerFactory('flatspot');
 

@@ -4,8 +4,8 @@ import {
 
 import { bySceneId } from 'service/scene';
 import {
-  display,
-} from './game';
+  actions as gameActions,
+} from 'morpheus/game';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
@@ -56,7 +56,7 @@ export function goToScene(id) {
 
     if (id !== 0 && (!current || current !== id)) {
       return dispatch(fetchScene(id))
-        .then(() => dispatch(display()));
+        .then(() => dispatch(gameActions.display()));
     }
   };
 }

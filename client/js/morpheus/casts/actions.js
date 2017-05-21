@@ -3,7 +3,7 @@ import {
   EXITING,
   ENTER,
   EXIT,
-} frfom './actionTypes';
+} from './actionTypes';
 
 export function doEnter() {
   return {

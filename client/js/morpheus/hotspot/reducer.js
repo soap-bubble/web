@@ -1,3 +1,4 @@
+import createReducer from 'utils/createReducer';
 import {
   HOTSPOTS_LOADED,
   HOTSPOTS_ACTIVATED,
@@ -24,8 +25,7 @@ import {
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
   HOTSPOTS_ENTER,
-} from './actionsTypes';
-import createReducer from './createReducer';
+} from './actionTypes';
 
 const reducer = createReducer({
   theta: 0,

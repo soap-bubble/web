@@ -1,14 +1,9 @@
-import Promise from 'bluebird'
-
 import {
   VIDEO_LOAD_START,
   VIDEO_LOAD_COMPLETE,
   VIDEO_IS_PLAYING,
   VIDEO_PLAY_DONE,
-} from './types';
-import {
-  resize,
-} from './dimensions';
+} from './actionTypes';
 
 export function videoLoadComplete(name, video) {
   return {

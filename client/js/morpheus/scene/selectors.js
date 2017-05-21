@@ -6,3 +6,7 @@ export const previousScene = createSelector(state => state.scene.previousScene);
 export const isEntering = createSelector(state => state.scene.status === 'entering');
 export const isExiting = createSelector(state => state.scene.status === 'exiting');
 export const isLive = createSelector(state => state.scene.status === 'live');
+export const currentSceneId = createSelector(
+  currentScene,
+  cs => cs.sceneId,
+);

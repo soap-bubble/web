@@ -1,42 +1,20 @@
 import { connect } from 'react-redux';
 import React from 'react';
+import flatspot from 'morpheus/flatspot';
 import {
-  each,
-} from 'lodash';
-
-import flatspot from '../morpheus/flatspot';
-import store from '../store';
+  actions as specialActions,
+  selectors as specialSelectors,
+} from 'morpheus/special';
 import {
-  setHoverIndex,
-  activateHotspotIndex,
-} from '../actions/hotspots';
-import {
-  specialImgIsLoaded,
-  specialCanvasCreated,
-  generateHitCanvas,
-  generateControlledFrames,
-  generateSpecialImages,
-} from '../actions/special';
+  selectors as gameSelectors,
+} from 'morpheus/game';
 
-const ORIGINAL_HEIGHT = 480;
-const ORIGINAL_WIDTH = 640;
-const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
-
-function mapStateToProps({ special, dimensions }) {
-  const {
-    url: backgroundUrl,
-    canvas,
-  } = special;
-  const {
-    width,
-    height,
-  } = dimensions;
-
+function mapStateToProps(state) {
   return {
-    backgroundUrl,
-    width,
-    height,
-    canvas,
+    backgroundUrl: specialSelectors.url(state),
+    width: gameSelectors.width(state),
+    height: gameSelectors.height(state),
+    canvas: specialSelectors.canvas(state),
   };
 }
 
@@ -44,27 +22,26 @@ function mapDispatchToProps(dispatch) {
   let canvas;
   function onWindowResize() {
     if (canvas) {
-      dispatch(generateControlledFrames());
-      dispatch(generateSpecialImages());
+      dispatch(specialActions.generateControlledFrames());
+      dispatch(specialActions.generateSpecialImages());
     }
   }
 
   return {
-    onImgIsLoaded(imgEl) {
-      dispatch(specialImgIsLoaded());
+    onImgIsLoaded() {
+      dispatch(specialActions.specialImgIsLoaded());
       onWindowResize();
     },
     onCanvasCreate(_canvas) {
       if (_canvas) {
         window.addEventListener('resize', onWindowResize);
         canvas = _canvas;
-        dispatch(specialCanvasCreated(canvas));
-        dispatch(generateSpecialImages());
+        dispatch(specialActions.specialCanvasCreated(canvas));
+        dispatch(specialActions.generateSpecialImages());
         flatspot(dispatch);
       } else {
         window.removeEventListener('resize', onWindowResize);
       }
-
     },
   };
 }

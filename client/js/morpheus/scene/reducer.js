@@ -1,4 +1,4 @@
-import createReducer from '../../reducers/createReducer';
+import createReducer from 'utils/createReducer';
 import {
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
@@ -7,7 +7,7 @@ import {
   SCENE_DO_ACTION,
 } from './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('scene', {
   backgroundScene: null,
   currentScene: null,
   previousScene: null,

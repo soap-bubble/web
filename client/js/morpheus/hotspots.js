@@ -6,7 +6,7 @@ import {
 } from 'morpheus/game';
 import {
   actions as hotspotActions,
-} from 'morpheus/hotspots';
+} from 'morpheus/hotspot';
 import store from 'store';
 import renderEvents from 'utils/render';
 

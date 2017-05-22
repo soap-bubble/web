@@ -39,81 +39,84 @@ function reducerForType(type) {
       removeOnSceneEnd,
     };
     return ret;
-  }
+  };
 }
 
-const reducer = createReducer({
-  volume: 1,
-  cursor: 'crosshair',
-  width: 800,
-  height: 480,
-  removeOnSceneEnd: {},
-  onMouseUp: [],
-  onMouseMove: [],
-  onMouseDown: [],
-  onTouchStart: [],
-  onTouchMove: [],
-  onTouchEnd: [],
-  onTouchCancel: [],
-}, {
-  [SCENE_END](ui) {
-    const { removeOnSceneEnd } = ui;
-    const newUi = { ...ui };
-    Object.keys(removeOnSceneEnd).forEach((type) => {
-      const stack = ui[type];
-      const callbacks = removeOnSceneEnd[type];
-      newUi[type] = without.apply(null, stack.concat(callbacks));
-    });
-    return {
-      ...defaults(newUi, ui),
-      removeOnSceneEnd: {},
-    }
-  },
-  [ADD_ONMOUSEUP]: reducerForType('onMouseUp'),
-  [ADD_ONMOUSEMOVE]: reducerForType('onMouseMove'),
-  [ADD_ONMOUSEDOWN]: reducerForType('onMouseDown'),
-  [ADD_ONTOUCHSTART]: reducerForType('onTouchStart'),
-  [ADD_ONTOUCHMOVE]: reducerForType('onTouchMove'),
-  [ADD_ONTOUCHEND]: reducerForType('onTouchEnd'),
-  [ADD_ONTOUCHCANCEL]: reducerForType('onTouchCancel'),
-  [DIMENSIONS_RESIZE](windowState, { payload }) {
-    const { width, height } = payload;
-    return {
-      ...windowState,
-      width,
-      height,
-    };
-  },
-  [GAME_SET_VOLUME](game, { payload: volume }) {
-    return {
-      ...game,
-      volume,
-    };
-  },
-  [GAME_SET_CURSOR](game, { payload: morpheusCursor }) {
-    let cursor;
-    switch (morpheusCursor) {
-      case 10002:
-        cursor = 'pointer';
-        break;
-      case 10005:
-        cursor = 'alias';
-        break;
-      case 10008:
-        cursor = 'grab';
-        break;
-      case 10009:
-        cursor = 'grabbing';
-        break;
-      default:
-        cursor = 'move';
-    }
+const reducer = createReducer(
+  'game',
+  {
+    volume: 1,
+    cursor: 'crosshair',
+    width: 800,
+    height: 480,
+    removeOnSceneEnd: {},
+    onMouseUp: [],
+    onMouseMove: [],
+    onMouseDown: [],
+    onTouchStart: [],
+    onTouchMove: [],
+    onTouchEnd: [],
+    onTouchCancel: [],
+  }, {
+    [SCENE_END](ui) {
+      const { removeOnSceneEnd } = ui;
+      const newUi = { ...ui };
+      Object.keys(removeOnSceneEnd).forEach((type) => {
+        const stack = ui[type];
+        const callbacks = removeOnSceneEnd[type];
+        newUi[type] = without(...stack.concat(callbacks));
+      });
+      return {
+        ...defaults(newUi, ui),
+        removeOnSceneEnd: {},
+      };
+    },
+    [ADD_ONMOUSEUP]: reducerForType('onMouseUp'),
+    [ADD_ONMOUSEMOVE]: reducerForType('onMouseMove'),
+    [ADD_ONMOUSEDOWN]: reducerForType('onMouseDown'),
+    [ADD_ONTOUCHSTART]: reducerForType('onTouchStart'),
+    [ADD_ONTOUCHMOVE]: reducerForType('onTouchMove'),
+    [ADD_ONTOUCHEND]: reducerForType('onTouchEnd'),
+    [ADD_ONTOUCHCANCEL]: reducerForType('onTouchCancel'),
+    [DIMENSIONS_RESIZE](windowState, { payload }) {
+      const { width, height } = payload;
+      return {
+        ...windowState,
+        width,
+        height,
+      };
+    },
+    [GAME_SET_VOLUME](game, { payload: volume }) {
+      return {
+        ...game,
+        volume,
+      };
+    },
+    [GAME_SET_CURSOR](game, { payload: morpheusCursor }) {
+      let cursor;
+      switch (morpheusCursor) {
+        case 10002:
+          cursor = 'pointer';
+          break;
+        case 10005:
+          cursor = 'alias';
+          break;
+        case 10008:
+          cursor = 'grab';
+          break;
+        case 10009:
+          cursor = 'grabbing';
+          break;
+        default:
+          cursor = 'move';
+      }
 
-    return {
-      ...game,
-      cursor,
-    };
+      return {
+        ...game,
+        cursor,
+      };
+    },
   },
-});
+);
 
 export default reducer;

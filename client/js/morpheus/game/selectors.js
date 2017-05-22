@@ -5,6 +5,10 @@ export const cursor = createSelector(
   game,
   _game => _game.cursor,
 );
+export const volume = createSelector(
+  game,
+  _game => _game.volume,
+);
 export const width = createSelector(
   game,
   _game => _game.width,

@@ -1,16 +1,19 @@
 import { connect } from 'react-redux';
 import React from 'react';
-
+import {
+  selectors as hotspotSelectors,
+} from 'morpheus/hotspot';
+import {
+  selectors as panoAnimSelectors,
+} from 'morpheus/panoAnim';
 import Hotspots3D from './Hotspots3D';
 import Pano from './Pano';
 import PanoAnim from './PanoAnim';
 
-function mapStateToProps({ hotspots, panoAnim }) {
-  const { isPano } = hotspots;
-  const { isPanoAnim } = panoAnim;
+function mapStateToProps(state) {
   return {
-    isPano,
-    isPanoAnim,
+    isPano: hotspotSelectors.isPano(state),
+    isPanoAnim: panoAnimSelectors.isPanoAnim(state),
   };
 }
 
@@ -25,9 +28,9 @@ const Scene3D = ({
   if (isPanoAnim) elements.push(<PanoAnim key="scene:panoAnim" />);
   return (
     <div>
-     { elements }
-     </div>
-   );
+      { elements }
+    </div>
+  );
 };
 
 export default connect(mapStateToProps)(Scene3D);

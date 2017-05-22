@@ -1,74 +1,25 @@
-import { values } from 'lodash';
 import { connect } from 'react-redux';
 import React from 'react';
-
 import {
-  getSceneType,
-} from '../morpheus/scene';
-
-
-import Tools from './Tools';
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
+// import Tools from './Tools';
 import Mouse from './Mouse';
-import Special from './Special';
-import Scene3D from './Scene3D';
-import Transition from './Transition';
-import loggerFactory from '../utils/logger';
 
-const logger = loggerFactory('World');
-
-function mapStateToProps({ scene, transition }) {
-  const { data: isTransitionLoading } = transition;
-  const { cache, current, loaded } = scene;
-  const currentSceneData = cache[current];
-  const loadedSceneData = cache[loaded];
+function mapStateToProps(state) {
   return {
-    currentSceneData,
-    loadedSceneData,
-    isTransitionLoading,
+    currentScenes: sceneSelectors.currentScenes(state),
   };
 }
 
 const World = ({
-  currentSceneData,
-  loadedSceneData,
-  isTransitionLoading,
+  currentScenes,
 }) => {
-  let actors = [];
-
-  const currentSceneActorMap = {
-    panorama: [<Scene3D key="scene:pano" />],
-    special: [<Special key="scene:special" />],
-    transition: [<Transition key="scene:video" />],
-  };
-
-  const loadedSceneActorMap = {
-    special: [<Special key="scene:special" />],
-    transition: [<Transition key="scene:video" />],
-  };
-
-  const currentSceneType = getSceneType(currentSceneData);
-  const loadedSceneType = getSceneType(loadedSceneData);
-
-  if (currentSceneType) {
-    actors = actors.concat(currentSceneActorMap[currentSceneType]);
-  }
-
-  if (currentSceneType !== loadedSceneType && loadedSceneActorMap[loadedSceneType]) {
-    actors = actors.concat(loadedSceneActorMap[loadedSceneType]);
-  }
-
-  // if (sceneType !== 'transition' && isTransitionLoading) {
-  //   logger.info('Offscreen video loading');
-  //   actors = actors.concat(<Transition key="scene:video" />);
-  // }
-
-  logger.info(`Rendering for scene ${currentSceneType}`);
-
   return (
     <div>
-      {actors}
+      {currentScenes}
       <Mouse />
-      { process.env.NODE_ENV !== 'production' ? <Tools /> : null }
+      { /* process.env.NODE_ENV !== 'production' ? <Tools /> : null */ }
     </div>
   );
 };

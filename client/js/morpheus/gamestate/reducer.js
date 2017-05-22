@@ -1,10 +1,10 @@
+import createReducer from 'utils/createReducer';
 import {
   GAMESTATE_UPDATE,
   GAMESTATE_LOAD_COMPLETE,
-} from './actionsTypes';
-import createReducer from './createReducer';
+} from './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('gamestate', {
   idMap: {},
 }, {
   [GAMESTATE_UPDATE](gamestate, { payload: value, meta: gamestateId }) {

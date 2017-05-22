@@ -7,8 +7,8 @@ import {
   actions as gameActions,
 } from 'morpheus/game';
 import {
-  actions as gameStateActions,
-} from 'morpheus/gameState';
+  actions as gamestateActions,
+} from 'morpheus/gamestate';
 import {
   getAssetUrl,
 } from 'service/gamedb';
@@ -16,7 +16,6 @@ import {
   loadAsImage,
 } from 'service/image';
 import {
-  ACTION_TYPES,
   GESTURES,
 } from 'morpheus/constants';
 import {
@@ -193,16 +192,14 @@ export function generateHotspots(hotspots) {
   };
 }
 
-export function handleMouseEvent({ type, top, left, hotspot }) {
-  return (dispatch, getState) => {
+export function handleMouseEvent({ type, hotspot }) {
+  return (dispatch) => {
     const {
-      comparators,
       gesture,
-      cursorShapeWhenActive,
     } = hotspot;
     const gestureType = GESTURES[gesture];
     if (type === gestureType) {
-      dispatch(gameStateActions.handleHotspot(hotspot));
+      dispatch(gamestateActions.handleHotspot(hotspot));
     }
   };
 }
@@ -243,7 +240,7 @@ export function setHoverIndex(index) {
     const { hotspots } = special;
 
     const hotspot = hotspots[index];
-    const { cursorShapeWhenActive: morpheusCursor  } = hotspot;
+    const { cursorShapeWhenActive: morpheusCursor } = hotspot;
     dispatch({
       type: GAME_SET_CURSOR,
       payload: morpheusCursor,

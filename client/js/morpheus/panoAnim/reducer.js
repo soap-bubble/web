@@ -4,7 +4,7 @@ import {
   PANOANIM_OBJECT_CREATE,
 } from './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('panoAnim', {
   panoCastsData: [],
   object3D: null,
 }, {

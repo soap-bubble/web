@@ -1,4 +1,4 @@
-import { values } from 'lodash';
+import { curry } from 'lodash';
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
 
@@ -59,11 +59,11 @@ export default connect(
   loading.forEach(v => videos.push(
     <Video
       key={`fullscreenvideo:${v.url}`}
-      videoCreated={videoCreated.bind(null, v.url)}
-      src={url}
-      onLoadedMetadata={videoCanPlay.bind(null, v.url)}
-      onPlaying={videoPlaying.bind(null, v.url)}
-      onEnded={videoEnded.bind(null, v.url)}
+      videoCreated={curry(videoCreated, v.url)}
+      src={v.url}
+      onLoadedMetadata={curry(videoCanPlay, v.url)}
+      onPlaying={curry(videoPlaying, v.url)}
+      onEnded={curry(videoEnded, v.url)}
       loop={v.looping}
       offscreen
       muted
@@ -79,42 +79,42 @@ export default connect(
         videoCreated(v.url);
       }}
       src={v.url}
-      onLoadedMetadata={videoCanPlay.bind(null, v.url)}
-      onPlaying={videoPlaying.bind(null, v.url)}
-      onEnded={videoEnded.bind(null, v.url)}
+      onLoadedMetadata={curry(videoCanPlay, v.url)}
+      onPlaying={curry(videoPlaying, v.url)}
+      onEnded={curry(videoEnded, v.url)}
       loop={v.looping}
       offscreen
       muted
       playsInline
-    />
+    />,
   ));
 
   playing.forEach(v => videos.push(
     <Video
       key={`fullscreenvideo:${v.url}`}
-      videoCreated={videoCreated.bind(null, v.url)}
+      videoCreated={curry(videoCreated, v.url)}
       src={v.url}
-      onLoadedMetadata={videoCanPlay.bind(null, v.url)}
-      onPlaying={videoPlaying.bind(null, v.url)}
-      onEnded={videoEnded.bind(null, v.url)}
+      onLoadedMetadata={curry(videoCanPlay, v.url)}
+      onPlaying={curry(videoPlaying, v.url)}
+      onEnded={curry(videoEnded, v.url)}
       loop={v.looping}
       offscreen
       muted
       playsInline
-    />
+    />,
   ));
 
   done.forEach(v => videos.push(
     <Video
       key={`fullscreenvideo:${v.url}`}
-      videoCreated={videoCreated.bind(null, v.url)}
+      videoCreated={curry(videoCreated, v.url)}
       src={v.url}
       loop={v.looping}
       autoPlay
       offscreen
       muted
       playsInline
-    />
+    />,
   ));
 
   return (

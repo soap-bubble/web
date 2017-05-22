@@ -8,9 +8,7 @@ import {
   TRANSITION_START,
 } from './actionTypes';
 
-export default createReducer({
-
-}, {
+export default createReducer('video', {}, {
   [VIDEO_LOAD_START](video, { payload: name, meta: { cast, el } }) {
     const { __t: type, looping } = cast;
 

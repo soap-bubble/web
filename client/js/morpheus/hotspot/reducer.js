@@ -27,7 +27,7 @@ import {
   HOTSPOTS_ENTER,
 } from './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('hotspot', {
   theta: 0,
   visible: false,
   hoverIndex: null,

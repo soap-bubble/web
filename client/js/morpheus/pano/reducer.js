@@ -1,6 +1,7 @@
 import {
   isUndefined,
 } from 'lodash';
+import createReducer from 'utils/createReducer';
 import {
   PANO_CANVAS_CREATED,
   PANO_GEOMETRIES_CREATE,
@@ -14,10 +15,9 @@ import {
   PANO_RENDER_LOOP,
   PANO_RENDERER_CREATE,
   PANO_ENTER,
-} from './actionsTypes';
-import createReducer from './createReducer';
+} from './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('pano', {
   sensitivity: 50,
   controlType: 'touch',
   rotation: {

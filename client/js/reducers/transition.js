@@ -1,10 +1,12 @@
-import createReducer from 'utils/createReducer';
+import createReducer from './createReducer';
 import {
   TRANSITION_START,
   TRANSITION_END,
-} from './actionTypes';
+} from '../actions/types';
 
-const reducer = createReducer('transition', {}, {
+const reducer = createReducer({
+  
+}, {
   [TRANSITION_START](transition, { payload: data }) {
     return {
       ...transition,

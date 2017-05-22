@@ -9,13 +9,12 @@ import {
   SPECIAL_CANVAS,
 } from './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('special', {
   data: {},
   hotspots: [],
   images: {},
   url: '',
   canvas: null,
-  hotspots: [],
   controlledFrames: {},
 }, {
   [SPECIAL_HOTSPOTS_LIST](special, { payload: hotspots }) {

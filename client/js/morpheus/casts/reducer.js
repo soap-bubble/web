@@ -1,4 +1,4 @@
-import createReducer from '../../reducers/createReducer';
+import createReducer from 'utils/createReducer';
 import {
   ENTERING,
   EXITING,
@@ -6,7 +6,7 @@ import {
   EXIT,
 } frfom './actionTypes';
 
-const reducer = createReducer({
+const reducer = createReducer('casts', {
   current: [],
   previous: [],
   background: [],

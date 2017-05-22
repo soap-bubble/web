@@ -45,7 +45,7 @@ const Video = ({
       type="video/mp4"
     />
   </video>
-)
+);
 
 Video.displayName = 'Video';
 

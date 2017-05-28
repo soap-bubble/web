@@ -44,8 +44,8 @@ export default function ({
   renderEvents.on('after', () => {
     if (coordsToCheck) {
       const { left: x, top } = coordsToCheck;
-      const { hotspots } = store.getState();
-      const { hitColorList } = hotspots;
+      const { hotspot } = store.getState();
+      const { hitColorList } = hotspot;
       const gl = canvas.getContext('webgl');
       // readPixels reads from lower left so need to inverse top (y) coordinate
       const y = canvas.height - top;

@@ -43,6 +43,7 @@ import {
   HOTSPOTS_RENDERER_CREATE,
   HOTSPOTS_RENDER_LOOP,
   HOTSPOTS_ACTIVATED,
+  HOTSPOTS_ENTER,
 } from './actionTypes';
 
 const HOTSPOT_VERTEX_SIZE = 4;
@@ -276,7 +277,7 @@ export function createObjects3D(count) {
       visibleMaterialList,
       hitGeometryList,
       hitMaterialList,
-    } = getState().hotspots;
+    } = getState().hotspot;
     const {
       startAngle,
     } = getState().pano;
@@ -321,7 +322,7 @@ export function setHotspotsTheta(theta) {
       visibleObject3D,
       hitObject3D,
       theta: oldTheta,
-    } = getState().hotspots;
+    } = getState().hotspot;
 
     visibleObject3D.rotation.y
       = visibleObject3D.rotation.y + theta - oldTheta;
@@ -337,16 +338,16 @@ export function setHotspotsTheta(theta) {
 
 export function setHotspotsVisibility(visible) {
   return (dispatch, getState) => {
-    const { hotspots, pano } = getState();
-    const { visible: currentVisible } = hotspots;
+    const { hotspot, pano } = getState();
+    const { visible: currentVisible } = hotspot;
     if (visible === currentVisible) return;
 
     const { scene3D } = pano;
-    const { visibleObject3D } = hotspots;
+    const { visibleObject3D } = hotspot;
 
     if (visible === true) {
       scene3D.add(visibleObject3D);
-    } else if (visible === false){
+    } else if (visible === false) {
       scene3D.remove(visibleObject3D);
     } else {
       return;
@@ -361,8 +362,8 @@ export function setHotspotsVisibility(visible) {
 
 export function setHoverIndex(index) {
   return (dispatch, getState) => {
-    const { hotspots } = getState();
-    const { hoverIndex, data } = hotspots;
+    const { hotspot } = getState();
+    const { hoverIndex, data } = hotspot;
     if (hoverIndex !== index) {
       dispatch({
         type: HOTSPOTS_HOVER_INDEX,
@@ -379,14 +380,14 @@ export function setHoverIndex(index) {
 
 export function buildScene() {
   return (dispatch, getState) => {
-    dispatch(createScene([ getState().hotspots.hitObject3D ]));
+    dispatch(createScene([ getState().hotspot.hitObject3D ]));
   }
 }
 
 export function buildRig() {
   return (dispatch, getState) => {
-    const { width, height } = getState().dimensions;
-    const { canvas } = getState().hotspots;
+    const { width, height } = getState().game;
+    const { canvas } = getState().hotspot;
     dispatch(createCamera({ width, height }));
     dispatch(createRenderer({ canvas, width, height }));
   };
@@ -403,8 +404,8 @@ export function createScene(objects) {
 
 export function createCamera({ width, height }) {
   return (dispatch, getState) => {
-    const { hotspots } = getState();
-    const { cameraPosition: position } = hotspots;
+    const { hotspot } = getState();
+    const { cameraPosition: position } = hotspot;
 
     dispatch(createCameraForType({
       type: HOTSPOTS_CAMERA_CREATE,
@@ -417,7 +418,7 @@ export function createCamera({ width, height }) {
 
 export function positionCamera(vector3) {
   return (dispatch, getState) => {
-    const { camera } = getState().hotspots;
+    const { camera } = getState().hotspot;
     dispatch(positionCameraForType({
       type: HOTSPOTS_CAMERA_TRANSLATE,
       vector3,
@@ -441,8 +442,8 @@ export function createRenderer({ canvas, width, height }) {
 
 export function startRenderLoop() {
   return (dispatch, getState) => {
-    const { hotspots } = getState();
-    const { scene3D, camera, renderer, canvas } = hotspots;
+    const { hotspot } = getState();
+    const { scene3D, camera, renderer, canvas } = hotspot;
     const render = () => renderer.render(scene3D, camera);
     renderEvents.on('render', render);
     dispatch({
@@ -454,8 +455,8 @@ export function startRenderLoop() {
 
 export function activateHotspotIndex(index) {
   return (dispatch, getState) => {
-    const { hotspots } = getState();
-    const { data } = hotspots;
+    const { hotspot } = getState();
+    const { data } = hotspot;
     if (data && data[index]) {
       // FIXME SCENE_END here
       dispatch({
@@ -471,10 +472,10 @@ export function activateHotspotIndex(index) {
 export function load() {
   return (dispatch, getState) => {
     const state = getState();
-    const { hotspots, scene } = state;
-    const { loaded, cache } = scene;
-    const { isPano } = hotspots;
-    const { casts } = cache[loaded];
+    const { hotspot, scene } = state;
+    const { currentScene: sceneData } = scene;
+    const { isPano } = hotspot;
+    const { casts } = sceneData;
     const hotspotsData = casts.filter(c => c.castId === 0);
 
     if (hotspotsData && isPano) {
@@ -484,7 +485,7 @@ export function load() {
       dispatch(createIndex(hotspotsData.length));
       dispatch(createGeometry({
         count: hotspotsData.length,
-        ...getState().hotspots,
+        ...getState().hotspot,
       }));
       dispatch(createMaterials(hotspotsData.length));
       dispatch(createObjects3D(hotspotsData.length));

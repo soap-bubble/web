@@ -4,7 +4,7 @@ import {
   EXITING,
   ENTER,
   EXIT,
-} frfom './actionTypes';
+} from './actionTypes';
 
 const reducer = createReducer('casts', {
   current: [],
@@ -15,7 +15,6 @@ const reducer = createReducer('casts', {
     return {
       ...state,
       current: state.current
-        .filter(cast => )
         .map(cast => ({
           ...cast,
           status: 'onStage',

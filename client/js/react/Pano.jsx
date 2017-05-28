@@ -25,7 +25,7 @@ function mapDisptachToProps(dispatch) {
     createAction(canvas) {
       if (canvas) {
         dispatch(panoActions.canvasCreated(canvas));
-        if (store.getState().hotspots.isPano) {
+        if (store.getState().hotspot.isPano) {
           momentum(dispatch);
         }
         dispatch(panoActions.display());

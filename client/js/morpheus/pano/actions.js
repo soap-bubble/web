@@ -35,6 +35,7 @@ import {
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
+  PANO_BEGIN_LOADING,
   PANO_CANVAS_CREATED,
   PANO_GEOMETRIES_CREATE,
   PANO_OBJECT_CREATE,
@@ -124,7 +125,11 @@ export function createMaterials(fileNames) {
   return (dispatch) => {
     const loader = new TextureLoader();
     const materials = [];
-    Promise.all(fileNames
+    dispatch({
+      type: PANO_MATERIALS_CREATE,
+      payload: materials,
+    });
+    return Promise.all(fileNames
       .map(f => new Promise(
         (resolve, reject) => materials.push(new MeshBasicMaterial({
           side: BackSide,
@@ -134,23 +139,18 @@ export function createMaterials(fileNames) {
             undefined,
             reject,
           ),
-        })
+        }),
       ))))
       .then(() => dispatch({
         type: PANO_TEXTURES_LOAD_SUCCESS,
-        payload: fileNames
+        payload: fileNames,
       }))
       .catch((err) => {
         dispatch({
           type: PANO_TEXTURES_LOAD_FAILURE,
           payload: err,
-        })
+        });
       });
-
-    dispatch({
-      type: PANO_MATERIALS_CREATE,
-      payload: materials,
-    });
   };
 }
 
@@ -174,7 +174,7 @@ function clamp({ x, y }) {
 export function rotateBy({ x: deltaX, y: deltaY }) {
 
   return (dispatch, getState) => {
-    const { hotspots, pano } = getState();
+    const { pano } = getState();
     let {
       x,
       y,
@@ -184,14 +184,13 @@ export function rotateBy({ x: deltaX, y: deltaY }) {
     y += deltaY;
 
     dispatch(rotate({ x, y }));
-  }
-
+  };
 }
 
 export function rotate({ x, y }) {
   return (dispatch, getState) => {
-    const { hotspots, pano } = getState();
-    const { theta } = hotspots;
+    const { hotspot, pano } = getState();
+    const { theta } = hotspot;
 
     const panoRot = clamp({
       x,
@@ -203,8 +202,8 @@ export function rotate({ x, y }) {
       y: y + theta,
     });
 
-    Object.assign(hotspots.hitObject3D.rotation, hotRot);
-    Object.assign(hotspots.visibleObject3D.rotation, hotRot);
+    Object.assign(hotspot.hitObject3D.rotation, hotRot);
+    Object.assign(hotspot.visibleObject3D.rotation, hotRot);
     Object.assign(pano.object3D.rotation, panoRot);
 
     dispatch({
@@ -224,12 +223,12 @@ export function setSensitivity(sensitivity) {
 
 export function buildScene() {
   return (dispatch, getState) => {
-    const { hotspots } = getState();
+    const { hotspot } = getState();
 
     let objects = [];
     objects.push(getState().pano.object3D);
-    if (hotspots.visible) {
-      objects = objects.concat(getState().hotspots.visibleObject3D);
+    if (hotspot.visible) {
+      objects = objects.concat(getState().hotspot.visibleObject3D);
     }
     dispatch(createScene(objects));
   }
@@ -237,7 +236,7 @@ export function buildScene() {
 
 export function buildRig() {
   return (dispatch, getState) => {
-    const { width, height } = getState().dimensions;
+    const { width, height } = getState().game;
     const { canvas } = getState().pano;
     dispatch(createCamera({ width, height }));
     dispatch(createRenderer({ canvas, width, height }));
@@ -268,8 +267,8 @@ export function addToPanoScene(...rest) {
 
 export function createCamera({ width, height }) {
   return (dispatch, getState) => {
-    const { hotspots } = getState();
-    const { cameraPosition: position } = hotspots;
+    const { hotspot } = getState();
+    const { cameraPosition: position } = hotspot;
 
     dispatch(createCameraForType({
       type: PANO_CAMERA_CREATE,
@@ -301,6 +300,12 @@ export function createRenderer({ canvas, width, height }) {
   });
 }
 
+export function beginLoading() {
+  return {
+    type: PANO_BEGIN_LOADING,
+  };
+}
+
 export function startRenderLoop() {
   return (dispatch, getState) => {
     const { pano } = getState();
@@ -320,19 +325,22 @@ export function startRenderLoop() {
 
 export function load() {
   return (dispatch, getState) => {
-    const { cache, loaded } = getState().scene;
-    const { casts } = cache[loaded];
+    const { scene } = getState();
+    const { currentScene: sceneData } = scene;
+    const { casts } = sceneData;
     // eslint-disable-next-line no-underscore-dangle
     const panoCastData = casts.find(c => c.__t === 'PanoCast');
     const { fileName } = panoCastData;
     const fileNames = generateFileNames(fileName);
 
+    dispatch(beginLoading());
     dispatch(createGeometries(fileNames));
-    dispatch(createMaterials(fileNames));
+    const allDonePromise = dispatch(createMaterials(fileNames));
     dispatch(createObject3D(getState().pano));
     dispatch(hotspotActions.load());
     dispatch(animActions.load());
     dispatch(buildScene());
+    return allDonePromise;
   };
 }
 

@@ -13,7 +13,7 @@ function mapStateToProps(state) {
     onTouchMove: onTouchMoveCallbacks,
     onTouchEnd: onTouchEndCallbacks,
     onTouchCancel: onTouchCancelCallbacks,
-  } = gameSelectors(state);
+  } = gameSelectors.allMouseEvents(state);
   const width = gameSelectors.width(state);
   const height = gameSelectors.height(state);
   const cursor = gameSelectors.cursor(state);

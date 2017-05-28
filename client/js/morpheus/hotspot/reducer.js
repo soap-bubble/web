@@ -33,10 +33,14 @@ const reducer = createReducer('hotspot', {
   hoverIndex: null,
   hitColorList: [],
 }, {
-  [HOTSPOTS_LOADED](hotspots, { payload: data }) {
+  [HOTSPOTS_LOADED](hotspots, { payload: sceneData }) {
+    const { casts } = sceneData;
+    const data = casts.filter(c => c.castId === 0);
+    const isPano = !!(casts.find(c => c.__t === 'PanoCast'));
     return {
       ...hotspots,
       data,
+      isPano,
     };
   },
   [HOTSPOTS_ACTIVATED](hotspots, { payload: activated }) {
@@ -179,16 +183,6 @@ const reducer = createReducer('hotspot', {
     return {
       ...hotspots,
       renderLoop,
-    };
-  },
-  [HOTSPOTS_ENTER](hotspots, { payload: sceneData }) {
-    const { casts } = sceneData;
-    const data = casts.filter(c => c.castId === 0);
-    const isPano = !!(casts.find(c => c.__t === 'PanoCast'));
-    return {
-      ...hotspots,
-      data,
-      isPano,
     };
   },
 });

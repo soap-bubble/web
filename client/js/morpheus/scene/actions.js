@@ -7,11 +7,15 @@ import {
   actions as gameActions,
 } from 'morpheus/game';
 import {
+  actions as hotspotActions,
+} from 'morpheus/hotspot';
+import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
+  SCENE_DO_ENTER,
   SCENE_DO_EXITING,
   SCENE_DO_ACTION,
 } from './actionTypes';
@@ -19,9 +23,12 @@ import {
 const sceneCache = {};
 
 export function sceneLoadComplete(responseData) {
-  return {
-    type: SCENE_LOAD_COMPLETE,
-    payload: responseData,
+  return (dispatch) => {
+    dispatch({
+      type: SCENE_SET_CURRENT_SCENE,
+      payload: responseData,
+    });
+    dispatch(hotspotActions.hotspotsLoaded(responseData));
   };
 }
 
@@ -49,18 +56,6 @@ export function fetchScene(id) {
   };
 }
 
-export function goToScene(id) {
-  return (dispatch, getState) => {
-    const { scene } = getState();
-    const { current } = scene;
-
-    if (id !== 0 && (!current || current !== id)) {
-      return dispatch(fetchScene(id))
-        .then(() => dispatch(gameActions.display()));
-    }
-  };
-}
-
 export function setBackgroundScene(scene) {
   return {
     type: SCENE_SET_BACKGROUND_SCENE,
@@ -75,16 +70,15 @@ export function setCurrentScene(scene) {
   };
 }
 
-export function doEntering(scene) {
-  defer(() => {
-    scene.casts
-      .filter(cast => cast.isEntering()
-        && cast.isEnabled())
-      .forEach(cast => cast.doEntering());
-  });
+export function doEntering() {
   return {
     type: SCENE_DO_ENTERING,
-    payload: scene,
+  };
+}
+
+export function doEnter() {
+  return {
+    type: SCENE_DO_ENTER,
   };
 }
 
@@ -112,5 +106,19 @@ export function doOnStageAction(scene) {
   return {
     type: SCENE_DO_ACTION,
     payload: scene,
+  };
+}
+
+export function goToScene(id) {
+  return (dispatch, getState) => {
+    const { scene } = getState();
+    const { current } = scene;
+
+    if (id !== 0 && (!current || current !== id)) {
+      return dispatch(fetchScene(id))
+        .then(() => dispatch(doEntering()))
+        .then(() => dispatch(gameActions.display()));
+    }
+    return Promise.resolve();
   };
 }

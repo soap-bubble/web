@@ -1,4 +1,3 @@
-import store from 'store';
 import { fetchInitial as fetchInitialGameState } from 'service/gameState';
 import {
   actions as specialActions,
@@ -91,8 +90,8 @@ export function handleHotspot(hotspot) {
   };
 }
 
-window.updateGameState = (gamestateId, value) => {
-  store.dispatch(updateGameState(gamestateId, value));
-  store.dispatch(specialActions.generateControlledFrames());
-  store.dispatch(specialActions.generateSpecialImages());
-};
+// window.updateGameState = (gamestateId, value) => {
+//   store.dispatch(updateGameState(gamestateId, value));
+//   store.dispatch(specialActions.generateControlledFrames());
+//   store.dispatch(specialActions.generateSpecialImages());
+// };

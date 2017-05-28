@@ -5,6 +5,7 @@ import {
   SCENE_DO_ENTERING,
   SCENE_DO_EXITING,
   SCENE_DO_ACTION,
+  SCENE_DO_ENTER,
 } from './actionTypes';
 
 const reducer = createReducer('scene', {
@@ -36,6 +37,12 @@ const reducer = createReducer('scene', {
     return {
       ...state,
       status: 'exiting',
+    };
+  },
+  [SCENE_DO_ENTER](state) {
+    return {
+      ...state,
+      status: 'live',
     };
   },
   [SCENE_DO_ACTION](state) {

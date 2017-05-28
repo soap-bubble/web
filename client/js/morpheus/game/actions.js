@@ -3,6 +3,7 @@ import {
 } from 'morpheus/pano';
 import {
   getSceneType,
+  actions as sceneActions,
 } from 'morpheus/scene';
 import {
   actions as specialActions,
@@ -47,7 +48,7 @@ export function resize({ width, height }) {
       },
     });
     setSize(getState().pano);
-    setSize(getState().hotspots);
+    setSize(getState().hotspot);
   };
 }
 
@@ -110,8 +111,7 @@ export function addTouchCancel(callback, sceneOnly = true) {
 export function display() {
   return (dispatch, getState) => {
     const { scene } = getState();
-    const { loaded, cache } = scene;
-    const sceneData = cache[loaded];
+    const { currentScene: sceneData } = scene;
     const sceneActionMap = {
       panorama: panoActions.load,
       special: specialActions.load,
@@ -124,7 +124,8 @@ export function display() {
         type: GAME_SCENE_LOADING,
         payload: sceneData,
       });
-      dispatch(sceneActionFunction(sceneData));
+      dispatch(sceneActionFunction(sceneData))
+        .then(() => dispatch(sceneActions.doEnter()));
     }
   };
 }

@@ -96,12 +96,13 @@ function createObject3D(geometry, material, frame) {
 
 export function load() {
   return (dispatch, getState) => {
-    const { cache, loaded } = getState().scene;
-    const { casts } = cache[loaded];
+    const { scene } = getState();
+    const { currentScene: sceneData } = scene;
+    const { casts } = sceneData;
     // eslint-disable-next-line no-underscore-dangle
     casts
       .filter(c => c.__t === 'PanoAnim')
-      .forEach(panoAnimCastData => {
+      .forEach((panoAnimCastData) => {
         const fileName = getPanoAnimUrl(panoAnimCastData.fileName);
         dispatch(videoActions.load(fileName, panoAnimCastData, true));
       });

@@ -3,6 +3,7 @@ import {
 } from 'lodash';
 import createReducer from 'utils/createReducer';
 import {
+  PANO_BEGIN_LOADING,
   PANO_CANVAS_CREATED,
   PANO_GEOMETRIES_CREATE,
   PANO_OBJECT_CREATE,
@@ -15,6 +16,7 @@ import {
   PANO_RENDER_LOOP,
   PANO_RENDERER_CREATE,
   PANO_ENTER,
+  PANO_TEXTURES_LOAD_SUCCESS,
 } from './actionTypes';
 
 const reducer = createReducer('pano', {
@@ -112,6 +114,20 @@ const reducer = createReducer('pano', {
         ...rotation,
         y: startAngle,
       },
+    };
+  },
+  [PANO_BEGIN_LOADING](pano) {
+    return {
+      ...pano,
+      isLoading: true,
+      isLoaded: false,
+    };
+  },
+  [PANO_TEXTURES_LOAD_SUCCESS](pano) {
+    return {
+      ...pano,
+      isLoading: false,
+      isLoaded: true,
     };
   },
 });

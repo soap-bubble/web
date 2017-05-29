@@ -1,7 +1,7 @@
 import uasParser from 'user-agent-parser';
 import { endsWith } from 'lodash';
 
-const userAgentString = navigator && navigator.userAgent || '';
+const userAgentString = global.navigator && global.navigator.userAgent || '';
 const uas = uasParser(userAgentString);
 
 export const url = process.env.NODE_ENV === 'production' ?

@@ -39,7 +39,6 @@ function mapDisptachToProps(dispatch) {
     },
     videoEnded(name) {
       dispatch(transitionActions.ended());
-      dispatch(videoActions.videoPlayDone(name));
     },
   };
 }

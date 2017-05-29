@@ -24,10 +24,12 @@ function mapStateToProps(state) {
 function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
-      dispatch(hotspotActions.canvasCreated(canvas));
-      if (store.getState().hotspot.isPano) {
-        hotspots({ dispatch, canvas });
-        dispatch(hotspotActions.display());
+      if (canvas) {
+        dispatch(hotspotActions.canvasCreated(canvas));
+        if (store.getState().hotspot.isPano) {
+          hotspots({ dispatch, canvas });
+          dispatch(hotspotActions.display());
+        }
       }
     },
   };

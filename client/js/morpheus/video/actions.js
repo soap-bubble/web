@@ -5,6 +5,26 @@ import {
   VIDEO_PLAY_DONE,
 } from './actionTypes';
 
+
+
+export function load(videoEl) {
+  return (dispatch) => {
+    return new Promise((resolve, reject) => {
+      function videoCanPlayThrough() {
+        resolve(videoEl);
+      }
+
+      function videoError(err) {
+        reject(err);
+      }
+
+      videoEl.addEventListener('canplaythrough', videoCanPlayThrough);
+      videoEl.addEventListener('error', videoError);
+    });
+  };
+}
+
+/* The functions below are deprecated for external users.  Use `load` above */
 export function videoLoadComplete(name, video) {
   return {
     type: VIDEO_LOAD_COMPLETE,

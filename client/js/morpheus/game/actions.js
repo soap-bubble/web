@@ -15,6 +15,7 @@ import {
   DIMENSIONS_RESIZE,
   GAME_SCENE_LOADING,
   GAME_SET_VOLUME,
+  GAME_SET_CURSOR,
   ADD_ONMOUSEUP,
   ADD_ONMOUSEMOVE,
   ADD_ONMOUSEDOWN,
@@ -28,6 +29,13 @@ export function setVolume(volume) {
   return {
     type: GAME_SET_VOLUME,
     payload: volume,
+  };
+}
+
+export function setCursor(cursor) {
+  return {
+    type: GAME_SET_CURSOR,
+    payload: cursor,
   };
 }
 

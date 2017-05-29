@@ -2,7 +2,7 @@ import {
   actions as gameActions,
 } from 'morpheus/game';
 import {
-  action as videoActions,
+  actions as videoActions,
 } from 'morpheus/video';
 import {
   actions as sceneActions,
@@ -29,7 +29,8 @@ export function display(sceneData) {
       type: TRANSITION_START,
       payload: transitionCast,
     });
-    dispatch(videoActions.videoLoad(fileName, transitionCast, true));
+    // Figure out how to return async promise when video is loaded
+    return Promise.resolve(dispatch(videoActions.videoLoad(fileName, transitionCast, true)));
   };
 }
 

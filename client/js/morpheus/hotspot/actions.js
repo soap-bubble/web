@@ -13,12 +13,14 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import {
+  actions as gameActions,
+} from 'morpheus/game';
+import {
   createCameraForType,
   positionCameraForType,
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
-  GAME_SET_CURSOR,
   HOTSPOTS_LOADED,
   HOTSPOTS_VISIBLE_POSITIONS_CREATE,
   HOTSPOTS_VISIBLE_UVS_CREATE,
@@ -364,16 +366,13 @@ export function setHoverIndex(index) {
   return (dispatch, getState) => {
     const { hotspot } = getState();
     const { hoverIndex, data } = hotspot;
-    if (hoverIndex !== index) {
+    if (index !== null && hoverIndex !== index) {
       dispatch({
         type: HOTSPOTS_HOVER_INDEX,
         payload: index,
       });
-      const { cursorShapeWhenActive: morpheusCursor  } = data[index];
-      dispatch({
-        type: GAME_SET_CURSOR,
-        payload: morpheusCursor,
-      });
+      const { cursorShapeWhenActive: morpheusCursor } = data[index];
+      dispatch(gameActions.setCursor(morpheusCursor));
     }
   }
 }

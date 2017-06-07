@@ -13,5 +13,8 @@
         "root": ["./client/js"]
       }
     }
+  },
+  "env": {
+    "jest": true
   }
 }

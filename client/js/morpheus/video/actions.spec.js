@@ -1,7 +1,9 @@
-import * as actions from './actions';
 import store from 'store';
+import * as actions from './actions';
 
-test('sanity', function () {
+jest.mock('store/logger');
+
+test('sanity', () => {
   const cast = {
     __t: 'Foo',
     looping: false,

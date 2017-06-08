@@ -8,6 +8,7 @@ import {
 import {
   actions as gameActions,
 } from 'morpheus/game';
+import input from 'morpheus/input';
 import store from 'store';
 import loggerFactory from 'utils/logger';
 
@@ -19,7 +20,7 @@ const {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} = gameActions;
+} = input.actions;
 const {
   handleMouseEvent,
 } = specialActions;

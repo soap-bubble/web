@@ -3,11 +3,16 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import qs from 'query-string';
+
+// Loads all modules
+import 'morpheus';
+
+// Then pull out the stuff we need
 import { actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
 import { actions as gameActions } from 'morpheus/game';
 import store from 'store';
-import World from 'react/World';
+import Game from 'react/Game';
 
 const qp = qs.parse(location.search);
 
@@ -21,7 +26,7 @@ function resizeToWindow() {
 window.onload = () => {
   render(
     <Provider store={store}>
-      <World />
+      <Game />
     </Provider>,
     document.getElementById('root'),
   );

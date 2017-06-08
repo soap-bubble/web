@@ -1,29 +1,19 @@
-import { connect } from 'react-redux';
 import React from 'react';
-import Special from 'react/Special';
-import Scene3D from 'react/Scene3D';
-import Transition from 'react/Transition';
 import { createSelector } from 'reselect';
 import {
   selectors as sceneSelectors,
   getSceneType,
 } from 'morpheus/scene';
-// import Tools from './Tools';
-import Mouse from './Mouse';
 
-const {
-  currentSceneData,
-  previousSceneData,
-  isEntering,
-  isLive,
-  isExiting,
-} = sceneSelectors;
+import Special from './components/Special';
+import Pano from './components/Pano';
+import Transition from './components/Transition';
 
 function createSceneMapper(map) {
   return sceneData => map[getSceneType(sceneData)];
 }
 export const createLiveSceneSelector = createSceneMapper({
-  panorama: [<Scene3D key="scene:pano" />],
+  panorama: [<Pano key="scene:pano" />],
   special: [<Special key="scene:special" />],
   transition: [<Transition key="scene:video" />],
 });
@@ -34,18 +24,17 @@ export const createEnteringSceneSelector = createSceneMapper({
 });
 
 export const createExitingSceneSelector = createSceneMapper({
-  panorama: [<Scene3D key="scene:pano" />],
+  panorama: [<Pano key="scene:pano" />],
   special: [<Special key="scene:special" />],
   transition: [<Transition key="scene:video" />],
 });
 
-
-export const _currentScenes = createSelector(
-  currentSceneData,
-  previousSceneData,
-  isEntering,
-  isLive,
-  isExiting,
+export default createSelector(
+  sceneSelectors.currentSceneData,
+  sceneSelectors.previousSceneData,
+  sceneSelectors.isEntering,
+  sceneSelectors.isLive,
+  sceneSelectors.isExiting,
   (current, previous, _isEntering, _isLive, _isExiting) => {
     const scenes = [];
     // console.log(getSceneType(current));
@@ -67,27 +56,3 @@ export const _currentScenes = createSelector(
     return scenes;
   },
 );
-
-function mapStateToProps(state) {
-  return {
-    currentScenes: _currentScenes(state),
-  };
-}
-
-const World = ({
-  currentScenes,
-}) => {
-  return (
-    <div>
-      {currentScenes}
-      <Mouse />
-      { /* process.env.NODE_ENV !== 'production' ? <Tools /> : null */ }
-    </div>
-  );
-};
-
-World.displayName = 'World';
-
-export default connect(
-  mapStateToProps,
-)(World);

@@ -1,5 +1,6 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
+import input from 'morpheus/input';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
@@ -13,7 +14,7 @@ function mapStateToProps(state) {
     onTouchMove: onTouchMoveCallbacks,
     onTouchEnd: onTouchEndCallbacks,
     onTouchCancel: onTouchCancelCallbacks,
-  } = gameSelectors.allMouseEvents(state);
+  } = input.selectors.allMouseEvents(state);
   const width = gameSelectors.width(state);
   const height = gameSelectors.height(state);
   const cursor = gameSelectors.cursor(state);

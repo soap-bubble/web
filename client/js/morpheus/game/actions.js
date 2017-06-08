@@ -60,62 +60,6 @@ export function resize({ width, height }) {
   };
 }
 
-export function addMouseUp(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONMOUSEUP,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
-export function addMouseMove(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONMOUSEMOVE,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
-export function addMouseDown(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONMOUSEDOWN,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
-export function addTouchStart(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONTOUCHSTART,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
-export function addTouchMove(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONTOUCHMOVE,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
-export function addTouchEnd(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONTOUCHEND,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
-export function addTouchCancel(callback, sceneOnly = true) {
-  return {
-    type: ADD_ONTOUCHCANCEL,
-    payload: callback,
-    meta: { sceneOnly }
-  };
-}
-
 export function display() {
   return (dispatch, getState) => {
     const { scene } = getState();

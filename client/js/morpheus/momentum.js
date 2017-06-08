@@ -3,9 +3,7 @@ import {
   actions as panoActions,
 } from 'morpheus/pano';
 import store from 'store';
-import {
-  actions as gameActions,
-} from 'morpheus/game';
+import input from 'morpheus/input';
 
 const {
   addMouseUp,
@@ -15,7 +13,7 @@ const {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} = gameActions;
+} = input.actions;
 
 export default function (dispatch) {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked

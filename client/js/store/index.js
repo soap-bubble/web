@@ -2,16 +2,6 @@ import thunkMiddleware from 'redux-thunk';
 import promiseMiddleware from 'redux-promise';
 import { createStore, applyMiddleware } from 'redux';
 
-import 'morpheus/casts';
-import 'morpheus/game';
-import 'morpheus/gamestate';
-import 'morpheus/hotspot';
-import 'morpheus/pano';
-import 'morpheus/panoAnim';
-import 'morpheus/scene';
-import 'morpheus/transition';
-import 'morpheus/video';
-
 import { reducer } from 'utils/createReducer';
 import loggingMiddleware from './logger';
 

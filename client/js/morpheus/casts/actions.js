@@ -5,13 +5,14 @@ import {
   EXIT,
 } from './actionTypes';
 
-export function doEnter() {
+export function doEnter(scene) {
   return {
     type: ENTER,
+    payload: scene,
   };
 }
 
-export function doEntering() {
+export function doEntering(scene) {
   return {
     type: ENTERING,
   };

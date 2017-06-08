@@ -18,8 +18,8 @@ const reducer = createReducer('casts', {
         .map(cast => ({
           ...cast,
           status: 'onStage',
-        }))
-    }
+        })),
+    };
   },
   [ENTER](state) {
     return {
@@ -29,8 +29,8 @@ const reducer = createReducer('casts', {
         mouseWithin: false,
         mouseDownOnCast: false,
         status: 'entering',
-      }))
-    }
+      })),
+    };
   },
   [EXIT](state) {
     return {
@@ -39,8 +39,8 @@ const reducer = createReducer('casts', {
         ...cast,
         mouseDownOnCast: false,
         status: 'exiting',
-      }))
-    }
+      })),
+    };
   },
   [EXITING](state) {
     return {
@@ -48,8 +48,8 @@ const reducer = createReducer('casts', {
       current: state.current.map(cast => ({
         ...cast,
         status: 'offStage',
-      }))
-    }
+      })),
+    };
   },
 });
 

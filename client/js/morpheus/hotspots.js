@@ -2,11 +2,9 @@ import {
   each,
 } from 'lodash';
 import {
-  actions as gameActions,
-} from 'morpheus/game';
-import {
   actions as hotspotActions,
 } from 'morpheus/hotspot';
+import input from 'morpheus/input';
 import store from 'store';
 import renderEvents from 'utils/render';
 
@@ -18,7 +16,7 @@ const {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} = gameActions;
+} = input.actions;
 const {
   setHoverIndex,
   activateHotspotIndex,

@@ -1,5 +1,8 @@
 import createReducer from 'utils/createReducer';
 import {
+  merge,
+} from 'lodash';
+import {
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,

@@ -12,6 +12,9 @@ import {
   actions as transitionActions,
 } from 'morpheus/transition';
 import {
+  selectors as castSelectors,
+} from 'morpheus/casts';
+import {
   DIMENSIONS_RESIZE,
   GAME_SCENE_LOADING,
   GAME_SET_VOLUME,
@@ -55,8 +58,9 @@ export function resize({ width, height }) {
         height,
       },
     });
-    setSize(getState().pano);
-    setSize(getState().hotspot);
+
+    setSize(castSelectors.pano.renderElements(getState()));
+    setSize(castSelectors.hotspot.renderElements(getState()));
   };
 }
 
@@ -81,3 +85,15 @@ export function display() {
     }
   };
 }
+
+// export function nextScene(id) {
+//   return dispatch => {
+//     dispatch(sceneActions.fetch(id))
+//       .then(sceneData => {
+//         return sceneActions.doEntering(id)
+//           .doEnter(id)
+//
+//
+//       })
+//   };
+// }

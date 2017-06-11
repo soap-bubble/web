@@ -1,14 +1,18 @@
 import { connect } from 'react-redux';
 import momentum from 'morpheus/momentum';
 import {
-  actions as panoActions,
-} from 'morpheus/pano';
+  actions as castActions,
+} from 'morpheus/casts';
+import {
+  hotspot as hotspotSelectors,
+} from 'morpheus/casts/selectors';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
+
 import store from 'store';
 import Canvas from 'react/Canvas';
 
@@ -24,11 +28,10 @@ function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
       if (canvas) {
-        dispatch(panoActions.canvasCreated(canvas));
-        if (store.getState().hotspot.isPano) {
+        dispatch(castActions.pano.canvasRef(canvas));
+        if (hotspotSelectors.isPano(store.getState())) {
           momentum(dispatch);
         }
-        dispatch(panoActions.display());
       }
     },
   };

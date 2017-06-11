@@ -6,7 +6,6 @@ import {
 } from './actionTypes';
 
 
-
 export function load(videoEl) {
   return (dispatch) => {
     return new Promise((resolve, reject) => {

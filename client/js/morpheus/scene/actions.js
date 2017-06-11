@@ -6,9 +6,14 @@ import { bySceneId } from 'service/scene';
 import {
   actions as gameActions,
 } from 'morpheus/game';
+// import {
+//   actions as hotspotActions,
+// } from 'morpheus/hotspot';
+
 import {
-  actions as hotspotActions,
-} from 'morpheus/hotspot';
+  actions as castActions,
+} from 'morpheus/casts';
+
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
@@ -20,6 +25,7 @@ import {
   SCENE_DO_ACTION,
 } from './actionTypes';
 
+
 const sceneCache = {};
 
 export function sceneLoadComplete(responseData) {
@@ -28,7 +34,7 @@ export function sceneLoadComplete(responseData) {
       type: SCENE_SET_CURRENT_SCENE,
       payload: responseData,
     });
-    dispatch(hotspotActions.hotspotsLoaded(responseData));
+    // dispatch(hotspotActions.hotspotsLoaded(responseData));
   };
 }
 
@@ -40,20 +46,24 @@ export function sceneLoadStarted(id, fetch) {
   };
 }
 
-export function fetchScene(id) {
+export function fetch(id) {
   return (dispatch) => {
     if (sceneCache[id]) {
       return sceneCache[id];
     }
-    const fetch = bySceneId(id)
+    const fetchPromise = bySceneId(id)
       .then(response => response.data)
       .then((sceneData) => {
         dispatch(sceneLoadComplete(sceneData));
         return sceneData;
       });
     dispatch(sceneLoadStarted(id, fetch));
-    return fetch;
+    return fetchPromise;
   };
+}
+
+export function fetchScene(id) {
+  return fetch(id);
 }
 
 export function setBackgroundScene(scene) {
@@ -76,9 +86,26 @@ export function doEntering() {
   };
 }
 
-export function doEnter() {
-  return {
-    type: SCENE_DO_ENTER,
+function doEnterForCast(type, doEnterAction, scene) {
+  return dispatch => dispatch(doEnterAction(scene))
+    .then(castState => dispatch({
+      type: CAST_DO_ENTER,
+      payload: castState,
+      meta: type,
+    }));
+}
+
+export function doEnter(scene) {
+  return (dispatch) => {
+    // dispatch({
+    //   type: SCENE_DO_ENTER,
+    // });
+
+    return Promise.all([
+      dispatch(doEnterForCast('pano', panoActions.doEnter, scene)),
+      dispatch(doEnterForCast('panoAnim', panoAnimActions.doEnter, scene)),
+      dispatch(doEnterForCast('hotspot', hotspotActions.doEnter, scene)),
+    ]);
   };
 }
 
@@ -109,16 +136,54 @@ export function doOnStageAction(scene) {
   };
 }
 
-export function goToScene(id) {
-  return (dispatch, getState) => {
-    const { scene } = getState();
-    const { current } = scene;
-
-    if (id !== 0 && (!current || current !== id)) {
-      return dispatch(fetchScene(id))
-        .then(() => dispatch(doEntering()))
-        .then(() => dispatch(gameActions.display()));
+function onStageForCast(type, onStageAction) {
+  return (dispatch) => {
+    const promise = dispatch(onStageAction());
+    if (!(promise && promise.then)) {
+      throw new Error(`${type} onStage failed to return a promise`);
     }
-    return Promise.resolve();
+    return promise
+      .then(castState => dispatch({
+        type: CAST_ON_STAGE,
+        payload: castState,
+        meta: type,
+      }));
   };
+}
+
+function onStage() {
+  return (dispatch) => {
+    dispatch({
+      type: SCENE_DO_ENTER,
+    });
+
+    return Promise.all([
+      dispatch(onStageForCast('pano', panoActions.onStage)),
+      dispatch(onStageForCast('panoAnim', panoAnimActions.onStage)),
+      dispatch(onStageForCast('hotspot', hotspotActions.onStage)),
+    ]);
+  };
+}
+
+export function goToScene(id) {
+  return dispatch => dispatch(fetchScene(id))
+    .then(scene => dispatch(castActions.doEnter(scene)))
+    .then((scene) => {
+      dispatch({
+        type: SCENE_DO_ENTERING,
+      });
+      dispatch({
+        type: SCENE_DO_ENTER,
+      });
+      return scene;
+    })
+    .then(scene => dispatch(castActions.onStage(scene)))
+    .then((scene) => {
+      dispatch(gameActions.resize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }));
+      return scene;
+    })
+;
 }

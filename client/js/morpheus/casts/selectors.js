@@ -83,3 +83,7 @@ export const isCastEnabled = createSelector(
     return result;
   }
 );
+
+export { selectors as pano } from 'morpheus/casts/pano';
+export { selectors as panoAnim } from 'morpheus/casts/panoAnim';
+export { selectors as hotspot } from 'morpheus/casts/hotspot';

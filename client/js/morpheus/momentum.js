@@ -1,7 +1,7 @@
 import { last } from 'lodash';
 import {
-  actions as panoActions,
-} from 'morpheus/pano';
+  actions as castActions,
+} from 'morpheus/casts';
 import store from 'store';
 import input from 'morpheus/input';
 
@@ -73,7 +73,7 @@ export default function (dispatch) {
       clearInterval(momentum.intervalId);
     }
 
-    dispatch(panoActions.rotateBy(momentum.speed));
+    dispatch(castActions.pano.rotateBy(momentum.speed));
   }
 
   function onInteractionStart({ left, top }) {
@@ -105,7 +105,7 @@ export default function (dispatch) {
         interaction.positions.shift();
       }
 
-      dispatch(panoActions.rotateBy({
+      dispatch(castActions.pano.rotateBy({
         x: delta.vertical,
         y: delta.horizontal,
       }));

@@ -17,3 +17,11 @@ export const height = createSelector(
   game,
   _game => _game.height,
 );
+export const dimensions = createSelector(
+  width,
+  height,
+  (_width, _height) => ({
+    width: _width,
+    height: _height,
+  }),
+);

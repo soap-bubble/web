@@ -6,6 +6,9 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
+  actions as castActions,
+} from 'morpheus/casts';
+import {
   actions as videoActions,
   selectors as videoSelectors,
 } from 'morpheus/video';
@@ -31,13 +34,12 @@ function mapDisptachToProps(dispatch) {
       // dispatch(videoActions.videoLoad(name, videoEl));
     },
     videoCanPlay(name, { currentTarget: videoEl }) {
-      dispatch(videoActions.videoLoadComplete(name, videoEl));
-      dispatch(panoAnimActions.panoAnimLoaded(name, videoEl));
+      dispatch(castActions.panoAnim.videlElRef(name, videoEl));
     },
     videoPlaying() {
     },
     videoEnded(name, { currentTarget: videoEl }) {
-      dispatch(videoActions.videoPlayDone(name, videoEl));
+      // dispatch(videoActions.videoPlayDone(name, videoEl));
     },
   };
 }
@@ -68,7 +70,7 @@ export default connect(
       offscreen
       muted
       playsInline
-    />
+    />,
   ));
 
   loaded.forEach(v => videos.push(

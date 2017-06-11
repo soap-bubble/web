@@ -3,7 +3,7 @@ import {
   WebGLRenderer,
 } from 'three';
 
-export function createCameraForType({ type, width, height, position }) {
+export function createCamera({ width, height, position }) {
   const camera = new PerspectiveCamera(55, width / height, 0.01, 1000);
   if (position) {
     ['x', 'y', 'z'].forEach((axis) => {
@@ -12,30 +12,42 @@ export function createCameraForType({ type, width, height, position }) {
       }
     });
   }
+  return camera;
+}
+
+export function createCameraForType({ type, width, height, position }) {
   return {
     type,
-    payload: camera,
+    payload: createCamera({ width, height, position }),
   };
 }
 
-export function positionCameraForType({ camera, type, vector3 }) {
-  ['x', 'y', 'z'].forEach(axis => {
+export function positionCamera({ camera, vector3 }) {
+  ['x', 'y', 'z'].forEach((axis) => {
     if (vector3[axis]) {
       camera.position[axis] = vector3[axis];
     }
   });
+  return vector3;
+}
+
+export function positionCameraForType({ camera, type, vector3 }) {
   return {
     type,
-    payload: vector3,
+    payload: positionCamera({ camera, vector3 }),
   };
 }
 
-export function createRendererForType({ type, canvas, width, height }) {
-  const renderer = new WebGLRenderer({ canvas, alpha: true });
+export function createRenderer({ canvas, width, height, alpha = true }) {
+  const renderer = new WebGLRenderer({ canvas, alpha });
   renderer.setSize(width, height);
   renderer.setClearColor(0x000000, 0);
+  return renderer;
+}
+
+export function createRendererForType({ type, canvas, width, height }) {
   return {
     type,
-    payload: renderer,
+    payload: createRenderer({ canvas, width, height }),
   };
 }

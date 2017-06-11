@@ -7,7 +7,7 @@ function v1(Class) {
         versionKey: 1,
       });
     }
-  }
+  };
 }
 
 export const Morpheus = v0.Morpheus;
@@ -25,7 +25,15 @@ export const ControlledMovieCast = v1(class extends v0.ControlledMovieCast {
     });
   }
 });
-export const PanoAnim = v0.PanoAnim;
+export const PanoAnim = v1(class extends v0.PanoAnim {
+  constructor(opts) {
+    super(opts);
+    this.add({
+      width: Number,
+      height: Number,
+    });
+  }
+});
 export const MovieSpecialCast = v0.MovieSpecialCast;
 export const PanoCast = v0.MovieCast;
 export const PreloadCast = v0.PreloadCast;

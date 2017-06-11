@@ -7,6 +7,7 @@ import {
 } from 'morpheus/game';
 import {
   actions as castActions,
+  selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   actions as videoActions,
@@ -19,10 +20,7 @@ import Video from 'react/Video';
 
 function mapStateToProps(state) {
   return {
-    playing: videoSelectors.playing(state),
-    loaded: videoSelectors.loaded(state),
-    loading: videoSelectors.loading(state),
-    done: videoSelectors.loading(state),
+    filenames: castSelectors.panoAnim.filenames(state),
     width: gameSelectors.width(state),
     height: gameSelectors.height(state),
   };
@@ -34,7 +32,7 @@ function mapDisptachToProps(dispatch) {
       // dispatch(videoActions.videoLoad(name, videoEl));
     },
     videoCanPlay(name, { currentTarget: videoEl }) {
-      dispatch(castActions.panoAnim.videlElRef(name, videoEl));
+      dispatch(castActions.panoAnim.videoElRef(name, videoEl));
     },
     videoPlaying() {
     },
@@ -48,74 +46,26 @@ export default connect(
   mapStateToProps,
   mapDisptachToProps,
 )(({
-  loading,
-  loaded,
-  playing,
-  done,
+  filenames,
   videoCreated,
   videoCanPlay,
   videoPlaying,
   videoEnded,
 }) => {
   const videos = [];
-  loading.forEach(v => videos.push(
+  filenames.forEach(v => videos.push(
     <Video
-      key={`fullscreenvideo:${v.url}`}
-      videoCreated={curry(videoCreated, v.url)}
-      src={v.url}
-      onLoadedMetadata={curry(videoCanPlay, v.url)}
-      onPlaying={curry(videoPlaying, v.url)}
-      onEnded={curry(videoEnded, v.url)}
-      loop={v.looping}
+      key={`fullscreenvideo:${v}`}
+      videoCreated={curry(videoCreated, v)}
+      src={v}
+      onLoadedMetadata={e => videoCanPlay(v, e)}
+      onPlaying={e => videoCanPlay(v, e)}
+      onEnded={curry(videoEnded, v)}
+      loop
       offscreen
       muted
       playsInline
-    />,
-  ));
-
-  loaded.forEach(v => videos.push(
-    <Video
-      key={`fullscreenvideo:${v.url}`}
-      videoCreated={(videoEl) => {
-        if (videoEl) videoEl.play();
-        videoCreated(v.url);
-      }}
-      src={v.url}
-      onLoadedMetadata={curry(videoCanPlay, v.url)}
-      onPlaying={curry(videoPlaying, v.url)}
-      onEnded={curry(videoEnded, v.url)}
-      loop={v.looping}
-      offscreen
-      muted
-      playsInline
-    />,
-  ));
-
-  playing.forEach(v => videos.push(
-    <Video
-      key={`fullscreenvideo:${v.url}`}
-      videoCreated={curry(videoCreated, v.url)}
-      src={v.url}
-      onLoadedMetadata={curry(videoCanPlay, v.url)}
-      onPlaying={curry(videoPlaying, v.url)}
-      onEnded={curry(videoEnded, v.url)}
-      loop={v.looping}
-      offscreen
-      muted
-      playsInline
-    />,
-  ));
-
-  done.forEach(v => videos.push(
-    <Video
-      key={`fullscreenvideo:${v.url}`}
-      videoCreated={curry(videoCreated, v.url)}
-      src={v.url}
-      loop={v.looping}
       autoPlay
-      offscreen
-      muted
-      playsInline
     />,
   ));
 

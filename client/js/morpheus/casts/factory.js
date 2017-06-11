@@ -19,6 +19,7 @@ export const createLiveSceneSelector = createSceneMapper({
 });
 
 export const createEnteringSceneSelector = createSceneMapper({
+  panorama: [<Pano key="scene:pano" />],
   special: [<Special key="scene:special" />],
   transition: [<Transition key="scene:video" />],
 });

@@ -2,9 +2,9 @@ import React from 'react';
 import { connect } from 'react-redux';
 import store from 'store';
 import {
-  actions as hotspotActions,
-  selectors as hotspotSelectors,
-} from 'morpheus/hotspot';
+  actions as castActions,
+  selectors as castSelectors,
+} from 'morpheus/casts';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
@@ -16,8 +16,7 @@ function mapStateToProps(state) {
     id: 'hotspots-hit',
     width: gameSelectors.width(state),
     height: gameSelectors.height(state),
-    hotspotsData: hotspotSelectors.data(state),
-    isPano: hotspotSelectors.isPano(state),
+    isPano: castSelectors.hotspot.isPano(state),
   };
 }
 
@@ -25,10 +24,9 @@ function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
       if (canvas) {
-        dispatch(hotspotActions.canvasCreated(canvas));
+        dispatch(castActions.hotspot.canvasRef(canvas));
         if (store.getState().hotspot.isPano) {
           hotspots({ dispatch, canvas });
-          dispatch(hotspotActions.display());
         }
       }
     },
@@ -43,10 +41,9 @@ export default connect(
   width,
   height,
   createAction,
-  hotspotsData,
   isPano,
 }) => {
-  if(hotspotsData.length && isPano) {
+  if (isPano) {
     return (<Canvas
       id={id}
       width={width}

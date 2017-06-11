@@ -454,6 +454,7 @@ function onStage() {
           renderer,
         };
       }
+      return {};
     });
   };
 }

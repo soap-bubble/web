@@ -15,6 +15,9 @@ import {
   values,
 } from 'lodash';
 import {
+  createSelector,
+} from 'reselect';
+import {
   getPanoAnimUrl,
 } from 'service/gamedb';
 import {
@@ -28,8 +31,19 @@ import {
   defer,
 } from 'utils/promise';
 
-const selectPanoAnimFilenames = state => get(state, 'casts.panoAnim.filenames', '');
-const selectPanoAnimCastMap = state => get(state, 'casts.panoAnim.panoAnimCastMap', {});
+const selectPanoAnim = state => get(state, 'casts.panoAnim');
+const selectPanoAnimFilenames = createSelector(
+  selectPanoAnim,
+  panoAnim => panoAnim.filenames,
+);
+const selectPanoAnimCastMap = createSelector(
+  selectPanoAnim,
+  panoAnim => panoAnim.panoAnimCastMap,
+);
+const selectIsPanoAnim = createSelector(
+  selectPanoAnimFilenames,
+  filenames => !!filenames.length,
+);
 
 const ONE_TWENTYFOURTH_RAD = Math.PI / 12;
 const SLICE_WIDTH = 0.1325;
@@ -41,18 +55,15 @@ const SLICE_PIX_WIDTH = 128;
 const SLICE_PIX_HEIGHT = 512;
 
 function createPositions(panoAnimData) {
-  const { location } = panoAnimData;
-  const { width, height } = panoAnimData;
-  const { x, y } = location;
+  const { location, frame } = panoAnimData;
+  let { width, height  } = panoAnimData;
+  let { x, y } = location;
 
-  const right = -(DBL_SLICE_WIDTH *
-    ((x / SLICE_PIX_WIDTH) - SLICE_WIDTH));
-  const left = -(DBL_SLICE_WIDTH *
-    (((x + width) / SLICE_PIX_WIDTH) - SLICE_WIDTH));
-  const bottom = -(DBL_SLICE_HEIGHT *
-    ((y / SLICE_PIX_HEIGHT) - SLICE_HEIGHT));
-  const top = -(DBL_SLICE_HEIGHT *
-    (((y + height) / SLICE_PIX_HEIGHT) - SLICE_HEIGHT));
+  let right = -((2 * SLICE_WIDTH) * (x / SLICE_PIX_WIDTH) - SLICE_WIDTH);
+  let left = -((2 * SLICE_WIDTH) * ((x + width) / SLICE_PIX_WIDTH) - SLICE_WIDTH);
+  let bottom = -((2 * SLICE_HEIGHT) * (y / SLICE_PIX_HEIGHT) - SLICE_HEIGHT);
+  let top = -((2 * SLICE_HEIGHT) * ((y + height) / SLICE_PIX_HEIGHT) - SLICE_HEIGHT);
+
 
   const panoAnimPositions = new BufferAttribute(new Float32Array([
     left, top, SLICE_DEPTH,
@@ -133,10 +144,15 @@ function doEnter(scene) {
 }
 
 function videoElRef(name, videoEl) {
-  if (!videoElDefers[name]) {
-    throw new Error(`Don't know anything about ${name}`);
-  }
-  videoElDefers[name].resolve(videoEl);
+  return () => {
+    if (!videoElDefers[name]) {
+      throw new Error(`Don't know anything about ${name}`);
+    }
+    videoElDefers[name].resolve({
+      name,
+      videoEl,
+    });
+  };
 }
 
 function onStage() {
@@ -149,24 +165,21 @@ function onStage() {
     const panoScene3D = panoSelectors.panoScene3D(getState());
     const panoAnimCastMap = selectPanoAnimCastMap(getState());
     return Promise.all(values(map(videoElDefers, 'promise')))
-      .then(() => {
-        filenames.forEach((name) => {
+      .then((videoEls) => {
+        videoEls.forEach(({ name, videoEl }) => {
           const panoAnimCast = panoAnimCastMap[name];
-          const videoEl = videoSelectors.forCast(panoAnimCast).videoEl(getState);
-          if (panoAnimCast) {
-            const { frame } = panoAnimCast;
-            const postions = createPositions(panoAnimCast);
-            const uvs = createUvs();
-            const index = createIndex();
-            const geometry = createGeometry(
-              postions,
-              uvs,
-              index,
-            );
-            const material = createMaterial(videoEl);
-            const object3D = createObject3D(geometry, material, frame);
-            panoScene3D.add(object3D);
-          }
+          // const { videoWidth: width, videoHeight: height } = videoEl;
+          const { frame } = panoAnimCast;
+          const postions = createPositions(panoAnimCast);
+          const uvs = createUvs();
+          const geometry = createGeometry(
+            postions,
+            uvs,
+            createIndex(),
+          );
+          const material = createMaterial(videoEl);
+          const object3D = createObject3D(geometry, material, frame);
+          panoScene3D.add(object3D);
         });
       });
   };
@@ -175,9 +188,11 @@ function onStage() {
 export const actions = {
   doEnter,
   onStage,
+  videoElRef,
 };
 
 export const selectors = {
   filenames: selectPanoAnimFilenames,
   castMap: selectPanoAnimCastMap,
+  isPanoAnim: selectIsPanoAnim,
 };

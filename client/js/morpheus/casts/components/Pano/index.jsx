@@ -1,19 +1,16 @@
 import { connect } from 'react-redux';
 import React from 'react';
 import {
-  selectors as hotspotSelectors,
-} from 'morpheus/hotspot';
-import {
-  selectors as panoAnimSelectors,
-} from 'morpheus/panoAnim';
+  selectors as castSelectors,
+} from 'morpheus/casts';
 import Hotspots3D from './Hotspots3D';
 import Scene3D from './Scene3D';
 import PanoAnim from './PanoAnim';
 
 function mapStateToProps(state) {
   return {
-    isPano: hotspotSelectors.isPano(state),
-    isPanoAnim: panoAnimSelectors.isPanoAnim(state),
+    isPano: castSelectors.hotspot.isPano(state),
+    isPanoAnim: castSelectors.panoAnim.isPanoAnim(state),
   };
 }
 

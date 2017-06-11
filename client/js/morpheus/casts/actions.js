@@ -7,7 +7,7 @@ import {
 } from './actionTypes';
 
 import * as Pano from './pano';
-import * as Hotspot from './hotspot'
+import * as Hotspot from './hotspot';
 import * as PanoAnim from './panoAnim';
 
 function doEnterForCast(type, doEnterAction, scene) {

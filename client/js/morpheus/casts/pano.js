@@ -148,7 +148,7 @@ export function rotate({ x, y }) {
   return (dispatch, getState) => {
     const hitObject3D = hotspotSelectors.hitObject3D(getState());
     const visibleObject3D = hotspotSelectors.visibleObject3D(getState());
-    const panoObject3D = selectPanoObject3D(getState());
+    const panoObject3D = panoScene3D(getState());
     const panoRot = clamp({
       x,
       y,
@@ -166,7 +166,7 @@ export function rotate({ x, y }) {
 
 function rotateBy({ x: deltaX, y: deltaY }) {
   return (dispatch, getState) => {
-    const panoObject3D = selectPanoObject3D(getState());
+    const panoObject3D = panoScene3D(getState());
     let {
       x,
       y,

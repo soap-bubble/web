@@ -1,6 +1,7 @@
 import THREE, {
+  DoubleSide,
   BufferAttribute,
-  Uint16Attribute,
+  Uint16BufferAttribute,
   MeshBasicMaterial,
   BufferGeometry,
   Mesh,
@@ -163,7 +164,7 @@ function createIndex(count) {
       0, 1, 2,
       0, 2, 3,
     );
-    indicesList.push(new Uint16Attribute(indices, 1));
+    indicesList.push(new Uint16BufferAttribute(indices, 1));
   }
   return indicesList;
 }
@@ -218,11 +219,11 @@ function createMaterials(count) {
       transparent: true,
       opacity: 0.3,
       color: 0x00ff00,
-      side: THREE.DoubleSide,
+      side: DoubleSide,
     }));
     hitMaterialList.push(new MeshBasicMaterial({
       color: hitColor,
-      side: THREE.DoubleSide,
+      side: DoubleSide,
     }));
   }
 
@@ -334,7 +335,7 @@ function startRenderLoop({ scene3D, camera, renderer }) {
   const render = () => {
     renderer.render(scene3D, camera);
   };
-  renderEvents.on('render', render);
+  renderEvents.onRender(render);
 }
 
 export function activateHotspotIndex(index) {

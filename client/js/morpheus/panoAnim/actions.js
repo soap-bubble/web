@@ -1,7 +1,7 @@
 import {
   BufferGeometry,
   BufferAttribute,
-  Uint16Attribute,
+  Uint16BufferAttribute,
   MeshBasicMaterial,
   LinearFilter,
   RGBFormat,
@@ -63,7 +63,7 @@ function createUvs() {
 }
 
 function createIndex() {
-  return new Uint16Attribute([
+  return new Uint16BufferAttribute([
     0, 1, 2,
     0, 2, 3,
   ], 1);

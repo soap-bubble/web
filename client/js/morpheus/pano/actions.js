@@ -4,7 +4,7 @@ import {
   BufferGeometry,
   Object3D,
   BufferAttribute,
-  Uint16Attribute,
+  Uint16BufferAttribute,
   MeshBasicMaterial,
   Mesh,
   Scene,
@@ -82,7 +82,7 @@ export function createGeometries(fileNames) {
       1.0, 1.0,
     ]), 2);
 
-    const indices = new Uint16Attribute([
+    const indices = new Uint16BufferAttribute([
       0, 1, 2,
       0, 2, 3,
     ], 1);
@@ -314,7 +314,7 @@ export function startRenderLoop() {
       //orientation.update();
       renderer.render(scene3D, camera);
     };
-    renderEvents.on('render', render);
+    renderEvents.onRender(render);
     dispatch({
       type: PANO_RENDER_LOOP,
       payload: () => renderEvents.off('render', render),

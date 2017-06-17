@@ -28,16 +28,8 @@ function mapStateToProps(state) {
 
 function mapDisptachToProps(dispatch) {
   return {
-    videoCreated() {
-      // dispatch(videoActions.videoLoad(name, videoEl));
-    },
     videoCanPlay(name, { currentTarget: videoEl }) {
       dispatch(castActions.panoAnim.videoElRef(name, videoEl));
-    },
-    videoPlaying() {
-    },
-    videoEnded(name, { currentTarget: videoEl }) {
-      // dispatch(videoActions.videoPlayDone(name, videoEl));
     },
   };
 }
@@ -47,26 +39,32 @@ export default connect(
   mapDisptachToProps,
 )(({
   filenames,
-  videoCreated,
   videoCanPlay,
-  videoPlaying,
-  videoEnded,
 }) => {
   const videos = [];
-  filenames.forEach(v => videos.push(
-    <Video
-      key={`fullscreenvideo:${v}`}
-      videoCreated={curry(videoCreated, v)}
-      src={v}
-      onLoadedMetadata={e => videoCanPlay(v, e)}
-      onPlaying={e => videoCanPlay(v, e)}
-      onEnded={curry(videoEnded, v)}
+  filenames.forEach(src => videos.push(
+    <video
+      key={`fullscreenvideo:${src}`}
+      style={{
+        visibility: 'hidden',
+      }}
+      autoPlay
+      controls={false}
+      onCanPlayThrough={event => videoCanPlay(src, event)}
+      crossOrigin="anonymous"
       loop
-      offscreen
       muted
       playsInline
-      autoPlay
-    />,
+    >
+      <source
+        src={`${src}.webm`}
+        type="video/webm"
+      />
+      <source
+        src={`${src}.mp4`}
+        type="video/mp4"
+      />
+    </video>,
   ));
 
   return (

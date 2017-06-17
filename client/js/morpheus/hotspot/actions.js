@@ -1,6 +1,6 @@
 import THREE, {
   BufferAttribute,
-  Uint16Attribute,
+  Uint16BufferAttribute,
   MeshBasicMaterial,
   BufferGeometry,
   Mesh,
@@ -178,7 +178,7 @@ export function createIndex(count) {
         0, 1, 2,
         0, 2, 3,
       );
-      indicesList.push(new Uint16Attribute(indices, 1));
+      indicesList.push(new Uint16BufferAttribute(indices, 1));
     }
     dispatch({
       type: HOTSPOTS_VISIBLE_INDEX_CREATE,
@@ -442,9 +442,9 @@ export function createRenderer({ canvas, width, height }) {
 export function startRenderLoop() {
   return (dispatch, getState) => {
     const { hotspot } = getState();
-    const { scene3D, camera, renderer, canvas } = hotspot;
+    const { scene3D, camera, renderer } = hotspot;
     const render = () => renderer.render(scene3D, camera);
-    renderEvents.on('render', render);
+    renderEvents.onRender(render);
     dispatch({
       type: HOTSPOTS_RENDER_LOOP,
       payload: () => renderEvents.off('render', render),

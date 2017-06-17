@@ -7345,9 +7345,9 @@
       "dev": true
     },
     "three": {
-      "version": "0.79.0",
-      "from": "three@>=0.79.0 <0.80.0",
-      "resolved": "https://registry.npmjs.org/three/-/three-0.79.0.tgz"
+      "version": "0.85.2",
+      "from": "three@>=0.85.0 <0.86.0",
+      "resolved": "https://registry.npmjs.org/three/-/three-0.85.2.tgz"
     },
     "throat": {
       "version": "3.0.0",

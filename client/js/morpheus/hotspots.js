@@ -38,8 +38,8 @@ export default function ({
   //  reading pixel data is only valid immediately after a render.  We therefor
   //  delay checking pixel data until the next render
   let coordsToCheck;
-  renderEvents.removeAllListeners('after');
-  renderEvents.on('after', () => {
+
+  renderEvents.onAfter(() => {
     if (coordsToCheck) {
       const { left: x, top } = coordsToCheck;
       const { hotspot } = store.getState();

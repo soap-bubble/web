@@ -114,7 +114,7 @@
     "redux-thunk": "^2.1.0",
     "reselect": "https://registry.npmjs.org/reselect/-/reselect-3.0.1.tgz",
     "service-builder": "^0.2.2",
-    "three": "^0.79.0",
+    "three": "^0.85.2",
     "user-agent-parser": "^0.6.0",
     "wagner-core": "^0.2.0"
   }

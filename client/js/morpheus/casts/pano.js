@@ -3,7 +3,7 @@ import {
   BufferGeometry,
   Object3D,
   BufferAttribute,
-  Uint16Attribute,
+  Uint16BufferAttribute,
   MeshBasicMaterial,
   Mesh,
   Scene,
@@ -74,7 +74,7 @@ function createGeometries(fileNames) {
       1.0, 1.0,
     ]), 2);
 
-    const indices = new Uint16Attribute([
+    const indices = new Uint16BufferAttribute([
       0, 1, 2,
       0, 2, 3,
     ], 1);
@@ -199,7 +199,7 @@ function startRenderLoop({ scene3D, camera, renderer }) {
     //orientation.update();
     renderer.render(scene3D, camera);
   };
-  renderEvents.on('render', render);
+  renderEvents.onRender(render);
 }
 
 let canvasDefer;

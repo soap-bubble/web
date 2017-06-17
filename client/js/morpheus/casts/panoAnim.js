@@ -13,6 +13,7 @@ import {
   get,
   map,
   values,
+  uniq,
 } from 'lodash';
 import {
   createSelector,
@@ -34,7 +35,7 @@ import {
 const selectPanoAnim = state => get(state, 'casts.panoAnim');
 const selectPanoAnimFilenames = createSelector(
   selectPanoAnim,
-  panoAnim => panoAnim.filenames,
+  panoAnim => uniq(panoAnim.filenames),
 );
 const selectPanoAnimCastMap = createSelector(
   selectPanoAnim,
@@ -48,21 +49,20 @@ const selectIsPanoAnim = createSelector(
 const ONE_TWENTYFOURTH_RAD = Math.PI / 12;
 const SLICE_WIDTH = 0.1325;
 const SLICE_HEIGHT = 0.55;
-const DBL_SLICE_WIDTH = SLICE_WIDTH * 2;
-const DBL_SLICE_HEIGHT = SLICE_HEIGHT * 2;
 const SLICE_DEPTH = 0.999;
 const SLICE_PIX_WIDTH = 128;
 const SLICE_PIX_HEIGHT = 512;
 
 function createPositions(panoAnimData) {
-  const { location, frame } = panoAnimData;
-  let { width, height  } = panoAnimData;
-  let { x, y } = location;
+  const { location } = panoAnimData;
+  const { width, height } = panoAnimData;
+  const { x, y } = location;
 
-  let right = -((2 * SLICE_WIDTH) * (x / SLICE_PIX_WIDTH) - SLICE_WIDTH);
-  let left = -((2 * SLICE_WIDTH) * ((x + width) / SLICE_PIX_WIDTH) - SLICE_WIDTH);
-  let bottom = -((2 * SLICE_HEIGHT) * (y / SLICE_PIX_HEIGHT) - SLICE_HEIGHT);
-  let top = -((2 * SLICE_HEIGHT) * ((y + height) / SLICE_PIX_HEIGHT) - SLICE_HEIGHT);
+  /* eslint-disable no-mixed-operators */
+  const right = -((2 * SLICE_WIDTH) * (x / SLICE_PIX_WIDTH) - SLICE_WIDTH);
+  const left = -((2 * SLICE_WIDTH) * ((x + width) / SLICE_PIX_WIDTH) - SLICE_WIDTH);
+  const bottom = -((2 * SLICE_HEIGHT) * (y / SLICE_PIX_HEIGHT) - SLICE_HEIGHT);
+  const top = -((2 * SLICE_HEIGHT) * ((y + height) / SLICE_PIX_HEIGHT) - SLICE_HEIGHT);
 
 
   const panoAnimPositions = new BufferAttribute(new Float32Array([

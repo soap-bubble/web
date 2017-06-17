@@ -3,28 +3,33 @@ import React from 'react';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
+import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
 import Hotspots3D from './Hotspots3D';
 import Scene3D from './Scene3D';
-import PanoAnim from './PanoAnim';
 
 function mapStateToProps(state) {
   return {
+    isLive: sceneSelectors.isLive(state),
     isPano: castSelectors.hotspot.isPano(state),
-    isPanoAnim: castSelectors.panoAnim.isPanoAnim(state),
   };
 }
 
 const Pano = ({
   children,
   isPano,
-  isPanoAnim,
+  isLive,
 }) => {
   let elements = Array.isArray(children) ? children.slice(0) : [];
   elements.push(<Scene3D key="scene:pano" />);
   if (isPano) elements = [<Hotspots3D key="scene:hotspots" />].concat(elements);
-  if (isPanoAnim) elements.push(<PanoAnim key="scene:panoAnim" />);
   return (
-    <div>
+    <div
+      style={{
+        visibility: isLive ? null : 'hidden',
+      }}
+    >
       { elements }
     </div>
   );

@@ -105,7 +105,7 @@ function createMaterial(videoEl) {
   const texture = new VideoTexture(videoEl);
   texture.minFilter = LinearFilter;
   texture.magFilter = LinearFilter;
-  texture.format = RGBFormat;
+  // texture.format = RGBFormat;
   return new MeshBasicMaterial({
     map: texture,
     side: DoubleSide,
@@ -120,8 +120,31 @@ function createObject3D(geometry, material, frame) {
 
 let videoElDefers;
 
+function addSourceToVideo(element, src, type) {
+  const source = document.createElement('source');
+
+  source.src = src;
+  source.type = type;
+
+  element.appendChild(source);
+}
+
+function createVideo(name) {
+  const video = document.createElement('video');
+  video.loop = true;
+  addSourceToVideo(video, `${name}.webm`, 'video/webm');
+  addSourceToVideo(video, `${name}.mp4`, 'video/mp4');
+  video.oncanplaythrough = () => {
+    videoElDefers[name].resolve({
+      name,
+      videoEl: video,
+    });
+  };
+  video.play();
+}
+
 function doEnter(scene) {
-  return (dispatch) => {
+  return () => {
     const { casts } = scene;
     const panoAnimCasts = casts
       // eslint-disable-next-line no-underscore-dangle
@@ -133,6 +156,7 @@ function doEnter(scene) {
         const name = getPanoAnimUrl(panoAnimCastData.fileName);
         videoElDefers[name] = defer();
         panoAnimCastMap[name] = panoAnimCastData;
+        createVideo(name);
         return name;
       }))
       .then(filenames => ({
@@ -168,7 +192,6 @@ function onStage() {
       .then((videoEls) => {
         videoEls.forEach(({ name, videoEl }) => {
           const panoAnimCast = panoAnimCastMap[name];
-          // const { videoWidth: width, videoHeight: height } = videoEl;
           const { frame } = panoAnimCast;
           const postions = createPositions(panoAnimCast);
           const uvs = createUvs();

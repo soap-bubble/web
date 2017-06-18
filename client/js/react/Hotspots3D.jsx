@@ -46,7 +46,7 @@ export default connect(
   hotspotsData,
   isPano,
 }) => {
-  if(hotspotsData.length && isPano) {
+  if (hotspotsData.length && isPano) {
     return (<Canvas
       id={id}
       width={width}

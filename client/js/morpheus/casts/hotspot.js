@@ -23,14 +23,17 @@ import {
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
+  actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
 import * as sceneSelectors from 'morpheus/scene/selectors';
-import {
-  selectors as hotspotSelectors,
-} from 'morpheus/hotspot';
 
 const selectHotspot = state => get(state, 'casts.hotspot', {});
+
+const selectHitColorList = createSelector(
+  selectHotspot,
+  hotspot => hotspot.hitColorList,
+);
 
 const selectHotspotHitObject3D = createSelector(
   selectHotspot,
@@ -203,18 +206,21 @@ function createGeometry({
   };
 }
 
-function createMaterials(count) {
+function createMaterials(hotspotData) {
   const visibleMaterialList = [];
   const hitMaterialList = [];
   const hitColorList = [];
-  for (let i = 0; i < count; i++) {
+  hotspotData.forEach((hotspot) => {
     // A random color for the hotspot
     let hitColor;
     // On the highly unlikely occurence of picking two 24-bit numbers in a hotspot set
     while (!hitColor || hitColorList.indexOf(hitColor) !== -1) {
       hitColor = Math.floor(Math.random() * 0xFFFFFF);
     }
-    hitColorList.push(hitColor);
+    hitColorList.push({
+      color: hitColor,
+      data: hotspot,
+    });
     visibleMaterialList.push(new MeshBasicMaterial({
       transparent: true,
       opacity: 0.3,
@@ -225,7 +231,7 @@ function createMaterials(count) {
       color: hitColor,
       side: DoubleSide,
     }));
-  }
+  });
 
   return {
     hitColorList,
@@ -388,7 +394,7 @@ function doEnter(scene) {
         hitColorList,
         hitMaterialList,
         visibleMaterialList,
-      } = createMaterials(hotspotsData.length);
+      } = createMaterials(hotspotsData);
 
       const {
         visibleObject: visibleObject3D,
@@ -460,6 +466,40 @@ function onStage() {
   };
 }
 
+const HOTSPOT_TYPE = {
+  0: 'CHANGE_SCENE',
+  1: 'DISSOLVE_TO',
+  2: 'INCREMENT_STATE',
+  3: 'DECREMENT_STATE',
+  4: 'GO_BACK',
+  5: 'ROTATE',
+  6: 'HORIZONTAL_SLIDER',
+  7: 'VERTICAL_SLIDER',
+  8: 'TWO_AXIS_SLIDER',
+  9: 'SET_STATE_TO',
+  10: 'EXCHANGE_STATE',
+  11: 'COPY_STATE',
+  12: 'CHANGE_CURSOR',
+  13: 'RETURN_FROM_HELP',
+  14: 'NO_ACTION',
+  99: 'DO_ACTION',
+};
+
+function hovered(hoveredHotspots) {
+  return (dispatch) => {
+    hoveredHotspots.every(hotspot => {
+      // TODO: check if really currently enabled
+      // See CHotspot::GetCursor
+      if (hotspot.initiallyEnabled) {
+        if (HOTSPOT_TYPE[hotspot.type] === 'CHANGE_SCENE') {
+          const { cursorShapeWhenActive: morpheusCursor } = hotspot;
+          dispatch(gameActions.setCursor(morpheusCursor))
+        }
+      }
+    });
+  };
+}
+
 export const actions = {
   doEnter,
   onStage,
@@ -471,5 +511,6 @@ export const selectors = {
   scene3D: selectScene3D,
   visibleObject3D: selectHotspotVisibleObject3D,
   hitObject3D: selectHotspotHitObject3D,
+  hitColorList: selectHitColorList,
   renderElements: selectRenderElements,
 };

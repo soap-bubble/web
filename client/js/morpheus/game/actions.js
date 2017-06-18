@@ -19,13 +19,6 @@ import {
   GAME_SCENE_LOADING,
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
-  ADD_ONMOUSEUP,
-  ADD_ONMOUSEMOVE,
-  ADD_ONMOUSEDOWN,
-  ADD_ONTOUCHSTART,
-  ADD_ONTOUCHMOVE,
-  ADD_ONTOUCHEND,
-  ADD_ONTOUCHCANCEL,
 } from './actionTypes';
 
 export function setVolume(volume) {
@@ -43,10 +36,10 @@ export function setCursor(cursor) {
 }
 
 export function resize({ width, height }) {
-  function setSize({ camera, renderer}) {
+  function setSize({ camera, renderer }) {
     if (camera && renderer) {
       renderer.setSize(width, height);
-      camera.aspect	= width / height;
+      camera.aspect = width / height;
       camera.updateProjectionMatrix();
     }
   }

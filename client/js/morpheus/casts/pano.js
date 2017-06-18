@@ -29,9 +29,6 @@ import {
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
-  actions as gameActions,
-} from 'morpheus/game';
-import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
@@ -47,8 +44,8 @@ const selectPanoObject3D = state => get(state, 'casts.pano.object3D');
 const selectRenderElements = createSelector(
   selectPano,
   pano => ({
-    camera: pano.camera,
-    renderer: pano.renderer,
+    camera: get(pano, 'camera'),
+    renderer: get(pano, 'renderer'),
   }),
 );
 

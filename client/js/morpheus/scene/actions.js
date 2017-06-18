@@ -105,6 +105,13 @@ export function goToScene(id) {
         type: SCENE_DO_ENTER,
       });
       return scene;
-    })
-;
+    });
+}
+
+export function hoverHotspot(hotspotData) {
+
+}
+
+export function hotspotActivated(hotspotData) {
+
 }

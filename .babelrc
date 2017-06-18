@@ -2,6 +2,7 @@
   "presets": ["stage-0", "react", "es2015"],
   "plugins": [
     "transform-decorators-legacy",
+    ["inline-json-import", {}],
     ["module-resolver", {
       "root": ["./client/js"]
     }]

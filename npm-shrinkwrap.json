@@ -469,6 +469,12 @@
       "resolved": "https://registry.npmjs.org/babel-plugin-check-es2015-constants/-/babel-plugin-check-es2015-constants-6.22.0.tgz",
       "dev": true
     },
+    "babel-plugin-inline-json-import": {
+      "version": "0.2.1",
+      "from": "babel-plugin-inline-json-import@latest",
+      "resolved": "https://registry.npmjs.org/babel-plugin-inline-json-import/-/babel-plugin-inline-json-import-0.2.1.tgz",
+      "dev": true
+    },
     "babel-plugin-istanbul": {
       "version": "4.1.4",
       "from": "babel-plugin-istanbul@>=4.0.0 <5.0.0",
@@ -1600,6 +1606,12 @@
       "version": "2.6.0",
       "from": "debug@>=2.2.0 <3.0.0",
       "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.0.tgz"
+    },
+    "decache": {
+      "version": "4.1.0",
+      "from": "decache@>=4.1.0 <5.0.0",
+      "resolved": "https://registry.npmjs.org/decache/-/decache-4.1.0.tgz",
+      "dev": true
     },
     "decamelize": {
       "version": "1.2.0",

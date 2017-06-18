@@ -53,7 +53,7 @@ export default function ({
 
       gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
 
-      let hoveredHotspots;
+      let hoveredHotspots = [];
       every(hitColorList, ({ color, data: hotspotData }) => {
         // Extract 8-bit color components from 24-bit integer
         // eslint-disable-next-line no-bitwise

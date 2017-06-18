@@ -46,7 +46,7 @@ const reducer = createReducer(
   'game',
   {
     volume: 1,
-    cursor: 'crosshair',
+    cursor: 10001,
     width: 800,
     height: 480,
     removeOnSceneEnd: {},
@@ -93,27 +93,9 @@ const reducer = createReducer(
       };
     },
     [GAME_SET_CURSOR](game, { payload: morpheusCursor }) {
-      let cursor;
-      switch (morpheusCursor) {
-        case 10002:
-          cursor = 'pointer';
-          break;
-        case 10005:
-          cursor = 'alias';
-          break;
-        case 10008:
-          cursor = 'grab';
-          break;
-        case 10009:
-          cursor = 'grabbing';
-          break;
-        default:
-          cursor = 'move';
-      }
-
       return {
         ...game,
-        cursor,
+        cursor: morpheusCursor,
       };
     },
   },

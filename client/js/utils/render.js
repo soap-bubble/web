@@ -1,4 +1,7 @@
 import raf from 'raf';
+import loggerFactory from 'utils/logger';
+
+const logger = loggerFactory(__filename);
 
 let onBefores = [];
 let onRenders = [];
@@ -6,11 +9,16 @@ let onAfters = [];
 let isActive = false;
 
 export function render() {
-  onBefores.forEach(r => r());
-  onRenders.forEach(r => r());
-  onAfters.forEach(r => r());
-  if (isActive) {
-    raf(render);
+  try {
+    onBefores.forEach(r => r());
+    onRenders.forEach(r => r());
+    onAfters.forEach(r => r());
+  } catch(err) {
+    logger.error(err);
+  } finally {
+    if (isActive) {
+      raf(render);
+    }
   }
 }
 

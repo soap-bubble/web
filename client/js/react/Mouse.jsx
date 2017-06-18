@@ -17,7 +17,7 @@ function mapStateToProps(state) {
   } = input.selectors.allMouseEvents(state);
   const width = gameSelectors.width(state);
   const height = gameSelectors.height(state);
-  const cursor = gameSelectors.cursor(state);
+  const cursor = gameSelectors.htmlCursor(state);
 
   return {
     onMouseUp(mouseEvent) {

@@ -15,6 +15,9 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
+import {
   DIMENSIONS_RESIZE,
   GAME_SCENE_LOADING,
   GAME_SET_VOLUME,
@@ -29,9 +32,14 @@ export function setVolume(volume) {
 }
 
 export function setCursor(cursor) {
-  return {
-    type: GAME_SET_CURSOR,
-    payload: cursor,
+  return (dispatch, getState) => {
+    const currentCursor = gameSelectors.morpheusCursor(getState());
+    if (currentCursor !== cursor) {
+      dispatch({
+        type: GAME_SET_CURSOR,
+        payload: cursor,
+      });
+    }
   };
 }
 

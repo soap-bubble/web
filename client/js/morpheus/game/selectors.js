@@ -1,9 +1,21 @@
 import { createSelector } from 'reselect';
 
+const MORPHEUS_TO_HTML_CURSOR = {
+  [10001]: 'auto',
+  [10002]: 'pointer',
+  [10005]: 'alias',
+  [10008]: 'grab',
+  [10009]: 'grabbing'
+};
+
 export const game = state => state.game;
-export const cursor = createSelector(
+export const morpheusCursor = createSelector(
   game,
   _game => _game.cursor,
+);
+export const htmlCursor = createSelector(
+  morpheusCursor,
+  _cursor => MORPHEUS_TO_HTML_CURSOR[_cursor] || 'move',
 );
 export const volume = createSelector(
   game,

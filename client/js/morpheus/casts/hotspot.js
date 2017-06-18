@@ -497,13 +497,23 @@ function hovered(hoveredHotspots) {
         }
       }
     });
+
+    if (hoveredHotspots.length === 0) {
+      dispatch(gameActions.setCursor(0));
+    }
   };
+}
+
+function activated(activatedHotspots) {
+
 }
 
 export const actions = {
   doEnter,
   onStage,
   canvasRef,
+  hovered,
+  activated,
 };
 
 export const selectors = {

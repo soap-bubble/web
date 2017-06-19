@@ -368,11 +368,15 @@ export function activateHotspotIndex(index) {
 
 let canvasDefer;
 
-function doEnter(scene) {
+function applies(state) {
+  return selectHotspotsData(state).length;
+}
+
+function doEnter() {
   return (dispatch, getState) => {
     const hotspotsData = selectHotspotsData(getState());
     const isPano = selectIsPano(getState());
-    if (hotspotsData && isPano) {
+    if (hotspotsData.length && isPano) {
       // 3D hotspots
       const {
         visiblePositionsList,
@@ -419,12 +423,8 @@ function doEnter(scene) {
         hitObject3D,
         visibleObject3D,
         hitColorList,
-        isPano,
       });
     }
-    return Promise.resolve({
-      isPano,
-    });
   };
 }
 
@@ -536,10 +536,17 @@ export const actions = {
 };
 
 export const selectors = {
+  applies,
   isPano: selectIsPano,
   scene3D: selectScene3D,
   visibleObject3D: selectHotspotVisibleObject3D,
   hitObject3D: selectHotspotHitObject3D,
   hitColorList: selectHitColorList,
   renderElements: selectRenderElements,
+};
+
+export const delegate = {
+  applies,
+  doEnter,
+  onStage,
 };

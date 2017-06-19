@@ -209,7 +209,7 @@ function startRenderLoop({ scene3D, camera, renderer }) {
 
 let canvasDefer;
 
-function doEnter(scene) {
+function doEnter() {
   return (dispatch, getState) => {
     const panoCastData = selectPanoCastData(getState());
     if (panoCastData) {
@@ -248,30 +248,31 @@ function canvasRef(canvas) {
   };
 }
 
+function applies(state) {
+  return selectPanoCastData(state)
+}
+
 function onStage() {
   return (dispatch, getState) => {
-    const panoCastData = selectPanoCastData(getState());
-    if (panoCastData) {
-      const scene3D = panoScene3D(getState());
-      const { width, height } = gameSelectors.dimensions(getState());
-      return canvasDefer.promise.then((canvas) => {
-        const camera = createCamera({ width, height });
-        const renderer = createRenderer({ canvas, width, height });
-        positionCamera({
-          camera,
-          vector3: { z: -0.325 },
-        });
-        startRenderLoop({
-          scene3D,
-          camera,
-          renderer,
-        });
-        return {
-          camera,
-          renderer,
-        };
+    const scene3D = panoScene3D(getState());
+    const { width, height } = gameSelectors.dimensions(getState());
+    return canvasDefer.promise.then((canvas) => {
+      const camera = createCamera({ width, height });
+      const renderer = createRenderer({ canvas, width, height });
+      positionCamera({
+        camera,
+        vector3: { z: -0.325 },
       });
-    }
+      startRenderLoop({
+        scene3D,
+        camera,
+        renderer,
+      });
+      return {
+        camera,
+        renderer,
+      };
+    });
     return Promise.resolve();
   };
 }
@@ -285,6 +286,13 @@ export const actions = {
 };
 
 export const selectors = {
+  applies,
   panoScene3D,
   renderElements: selectRenderElements,
+};
+
+export const delegate = {
+  applies,
+  doEnter,
+  onStage,
 };

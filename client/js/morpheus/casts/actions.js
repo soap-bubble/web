@@ -6,12 +6,12 @@ import {
   EXIT,
 } from './actionTypes';
 
-import * as Pano from './pano';
-import * as Hotspot from './hotspot';
-import * as PanoAnim from './panoAnim';
+import {
+  delegates,
+} from './index';
 
-function doEnterForCast(type, doEnterAction, scene) {
-  return dispatch => dispatch(doEnterAction(scene))
+function doEnterForCast(type, doEnterAction) {
+  return dispatch => dispatch(doEnterAction())
     .then(castState => dispatch({
       type: ENTERING,
       payload: castState,
@@ -20,24 +20,18 @@ function doEnterForCast(type, doEnterAction, scene) {
 }
 
 export function doEnter(scene) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     dispatch({
       type: ENTER,
       payload: scene,
     });
-    return Promise.all([
-      dispatch(doEnterForCast('pano', Pano.actions.doEnter, scene)),
-      dispatch(doEnterForCast('panoAnim', PanoAnim.actions.doEnter, scene)),
-      dispatch(doEnterForCast('hotspot', Hotspot.actions.doEnter, scene)),
-    ]);
-    // return Promise.all(castTypes.reduce((promises, type) => {
-    //   const casts = type.selectors.casts(scene);
-    //   return promises.concat(casts.map(cast => type.actions.doEnter(cast)));
-    // }, []))
-    //   .then(() => dispatch({
-    //     type: ENTER,
-    //     payload: scene,
-    //   }));
+    return Promise.all(Object.keys(delegates).map((cast) => {
+      const delegate = delegates[cast];
+      if (delegate.applies(getState())) {
+        return dispatch(doEnterForCast(cast, delegate.doEnter));
+      }
+      return Promise.resolve();
+    }));
   };
 }
 
@@ -57,11 +51,13 @@ function onStageForCast(type, onStageAction) {
 }
 
 export function onStage() {
-  return dispatch => Promise.all([
-    dispatch(onStageForCast('pano', Pano.actions.onStage)),
-    dispatch(onStageForCast('panoAnim', PanoAnim.actions.onStage)),
-    dispatch(onStageForCast('hotspot', Hotspot.actions.onStage)),
-  ]);
+  return (dispatch, getState) => Promise.all(Object.keys(delegates).map((cast) => {
+    const delegate = delegates[cast];
+    if (delegate.applies(getState())) {
+      return dispatch(onStageForCast(cast, delegate.onStage));
+    }
+    return Promise.resolve();
+  }));
 }
 
 export function doExit() {

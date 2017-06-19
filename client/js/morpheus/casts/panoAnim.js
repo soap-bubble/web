@@ -22,6 +22,9 @@ import {
   getPanoAnimUrl,
 } from 'service/gamedb';
 import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
+import {
   actions as videoActions,
   selectors as videoSelectors,
 } from 'morpheus/video';
@@ -32,6 +35,10 @@ import {
   defer,
 } from 'utils/promise';
 
+const selectPanoAnimData = createSelector(
+  sceneSelectors.currentSceneData,
+  scene => get(scene, 'casts', []).filter(c => c.__t === 'PanoAnim'),
+);
 const selectPanoAnim = state => get(state, 'casts.panoAnim');
 const selectPanoAnimFilenames = createSelector(
   selectPanoAnim,
@@ -143,12 +150,13 @@ function createVideo(name) {
   video.play();
 }
 
-function doEnter(scene) {
-  return () => {
-    const { casts } = scene;
-    const panoAnimCasts = casts
-      // eslint-disable-next-line no-underscore-dangle
-      .filter(c => c.__t === 'PanoAnim');
+function applies(state) {
+  return selectPanoAnimData(state).length;
+}
+
+function doEnter() {
+  return (dispatch, getState) => {
+    const panoAnimCasts = selectPanoAnimData(getState());
     const panoAnimCastMap = {};
     videoElDefers = {};
     return Promise.all(
@@ -215,7 +223,14 @@ export const actions = {
 };
 
 export const selectors = {
+  applies,
   filenames: selectPanoAnimFilenames,
   castMap: selectPanoAnimCastMap,
   isPanoAnim: selectIsPanoAnim,
+};
+
+export const delegate = {
+  applies,
+  doEnter,
+  onStage,
 };

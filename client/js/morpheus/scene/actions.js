@@ -2,14 +2,14 @@ import {
   defer,
 } from 'lodash';
 
+import renderEvents from 'utils/render';
 import { bySceneId } from 'service/scene';
 import {
   actions as gameActions,
 } from 'morpheus/game';
-// import {
-//   actions as hotspotActions,
-// } from 'morpheus/hotspot';
-
+import {
+  actions as inputActions,
+} from 'morpheus/input';
 import {
   actions as castActions,
 } from 'morpheus/casts';
@@ -87,7 +87,10 @@ export function doEntering() {
 }
 
 export function goToScene(id) {
-  return dispatch => dispatch(fetchScene(id))
+  return dispatch => {
+    dispatch(inputActions.disableControl());
+    renderEvents.reset();
+    return dispatch(fetchScene(id))
     .then(scene => dispatch(castActions.doEnter(scene)))
     .then((scene) => {
       dispatch({
@@ -106,12 +109,5 @@ export function goToScene(id) {
       });
       return scene;
     });
-}
-
-export function hoverHotspot(hotspotData) {
-
-}
-
-export function hotspotActivated(hotspotData) {
-
+  };
 }

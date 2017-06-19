@@ -38,6 +38,14 @@ import {
   selectors as hotspotSelectors,
 } from './hotspot';
 
+const selectPanoCastData = createSelector(
+  sceneSelectors.currentSceneData,
+  scene => get(scene, 'casts', []).find(c => c.__t === 'PanoCast'),
+);
+const selectPanoFilename = createSelector(
+  selectPanoCastData,
+  panoCast => get(panoCast, 'fileName'),
+);
 const selectPano = state => get(state, 'casts.pano');
 const panoScene3D = state => get(state, 'casts.pano.scene3D');
 const selectPanoObject3D = state => get(state, 'casts.pano.object3D');
@@ -202,23 +210,26 @@ function startRenderLoop({ scene3D, camera, renderer }) {
 let canvasDefer;
 
 function doEnter(scene) {
-  return () => {
-    const panoCastData = sceneSelectors.forScene().panoCasts(scene);
-    const { fileName } = panoCastData;
-    const fileNames = generateFileNames(fileName);
-    const geometries = createGeometries(fileNames);
-    const { materials, promise: promiseMaterials } = createMaterials(fileNames);
-    const object3D = createObject3D({
-      materials,
-      geometries,
-    });
-    const scene3D = createScene(object3D);
-    canvasDefer = defer();
-    return promiseMaterials
-      .then(() => ({
-        object3D,
-        scene3D,
-      }));
+  return (dispatch, getState) => {
+    const panoCastData = selectPanoCastData(getState());
+    if (panoCastData) {
+      const { fileName } = panoCastData;
+      const fileNames = generateFileNames(fileName);
+      const geometries = createGeometries(fileNames);
+      const { materials, promise: promiseMaterials } = createMaterials(fileNames);
+      const object3D = createObject3D({
+        materials,
+        geometries,
+      });
+      const scene3D = createScene(object3D);
+      canvasDefer = defer();
+      return promiseMaterials
+        .then(() => ({
+          object3D,
+          scene3D,
+        }));
+    }
+    return Promise.resolve();
   };
 }
 
@@ -239,25 +250,29 @@ function canvasRef(canvas) {
 
 function onStage() {
   return (dispatch, getState) => {
-    const scene3D = panoScene3D(getState());
-    const { width, height } = gameSelectors.dimensions(getState());
-    return canvasDefer.promise.then((canvas) => {
-      const camera = createCamera({ width, height });
-      const renderer = createRenderer({ canvas, width, height });
-      positionCamera({
-        camera,
-        vector3: { z: -0.325 },
+    const panoCastData = selectPanoCastData(getState());
+    if (panoCastData) {
+      const scene3D = panoScene3D(getState());
+      const { width, height } = gameSelectors.dimensions(getState());
+      return canvasDefer.promise.then((canvas) => {
+        const camera = createCamera({ width, height });
+        const renderer = createRenderer({ canvas, width, height });
+        positionCamera({
+          camera,
+          vector3: { z: -0.325 },
+        });
+        startRenderLoop({
+          scene3D,
+          camera,
+          renderer,
+        });
+        return {
+          camera,
+          renderer,
+        };
       });
-      startRenderLoop({
-        scene3D,
-        camera,
-        renderer,
-      });
-      return {
-        camera,
-        renderer,
-      };
-    });
+    }
+    return Promise.resolve();
   };
 }
 

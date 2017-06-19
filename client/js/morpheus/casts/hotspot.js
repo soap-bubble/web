@@ -26,10 +26,16 @@ import {
   actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
-import * as sceneSelectors from 'morpheus/scene/selectors';
+import {
+  actions as sceneActions,
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
 
 const selectHotspot = state => get(state, 'casts.hotspot', {});
-
+const selectHotspotsData = createSelector(
+  sceneSelectors.currentSceneData,
+  scene => get(scene, 'casts', []).filter(c => c.castId === 0),
+);
 const selectHitColorList = createSelector(
   selectHotspot,
   hotspot => hotspot.hitColorList,
@@ -364,7 +370,7 @@ let canvasDefer;
 
 function doEnter(scene) {
   return (dispatch, getState) => {
-    const hotspotsData = sceneSelectors.forScene().hotspots(scene);
+    const hotspotsData = selectHotspotsData(getState());
     const isPano = selectIsPano(getState());
     if (hotspotsData && isPano) {
       // 3D hotspots
@@ -505,7 +511,20 @@ function hovered(hoveredHotspots) {
 }
 
 function activated(activatedHotspots) {
-
+  return (dispatch) => {
+    activatedHotspots.every(hotspot => {
+      switch (HOTSPOT_TYPE[hotspot.type]) {
+        case 'CHANGE_SCENE':
+        case 'DISSOLVE_TO':
+        case 'GO_BACK':
+        case 'RETURN_FROM_HELP':
+          dispatch(sceneActions.goToScene(hotspot.param1));
+          return false;
+        default:
+          return true;
+      }
+    });
+  };
 }
 
 export const actions = {

@@ -7,3 +7,9 @@ export default {
   reducer,
   selectors,
 };
+
+export {
+  actions,
+  reducer,
+  selectors,
+};

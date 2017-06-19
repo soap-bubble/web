@@ -11,6 +11,7 @@ import {
   ADD_ONTOUCHMOVE,
   ADD_ONTOUCHEND,
   ADD_ONTOUCHCANCEL,
+  DISABLE_CONTROL,
 } from './actionTypes';
 
 function reducerForType(type) {
@@ -38,17 +39,20 @@ function reducerForType(type) {
   };
 }
 
+const inputDefaults = {
+  onMouseUp: [],
+  onMouseMove: [],
+  onMouseDown: [],
+  onTouchStart: [],
+  onTouchMove: [],
+  onTouchEnd: [],
+  onTouchCancel: [],
+};
+
 const reducer = createReducer(
   'input',
+  inputDefaults,
   {
-    onMouseUp: [],
-    onMouseMove: [],
-    onMouseDown: [],
-    onTouchStart: [],
-    onTouchMove: [],
-    onTouchEnd: [],
-    onTouchCancel: [],
-  }, {
     [ADD_ONMOUSEUP]: reducerForType('onMouseUp'),
     [ADD_ONMOUSEMOVE]: reducerForType('onMouseMove'),
     [ADD_ONMOUSEDOWN]: reducerForType('onMouseDown'),
@@ -56,6 +60,12 @@ const reducer = createReducer(
     [ADD_ONTOUCHMOVE]: reducerForType('onTouchMove'),
     [ADD_ONTOUCHEND]: reducerForType('onTouchEnd'),
     [ADD_ONTOUCHCANCEL]: reducerForType('onTouchCancel'),
+    [DISABLE_CONTROL](state) {
+      return {
+        ...state,
+        ...inputDefaults,
+      };
+    },
   },
 );
 

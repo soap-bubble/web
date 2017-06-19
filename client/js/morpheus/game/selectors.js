@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 
 const MORPHEUS_TO_HTML_CURSOR = {
-  [10001]: 'auto',
+  [10001]: 'alias',
   [10002]: 'pointer',
   [10005]: 'alias',
   [10008]: 'grab',

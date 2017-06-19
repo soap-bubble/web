@@ -11,11 +11,15 @@ import {
 import {
   delegate as panoAnimDelegate,
 } from './panoAnim';
+import {
+  delegate as transitionDelegate,
+} from './transition';
 
 const delegates = {
   hotspot: hotspotDelegate,
   pano: panoDelegate,
   panoAnim: panoAnimDelegate,
+  transition: transitionDelegate,
 };
 
 export {

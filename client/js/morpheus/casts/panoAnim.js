@@ -19,6 +19,9 @@ import {
   createSelector,
 } from 'reselect';
 import {
+  createVideo,
+} from 'utils/video';
+import {
   getPanoAnimUrl,
 } from 'service/gamedb';
 import {
@@ -127,29 +130,6 @@ function createObject3D(geometry, material, frame) {
 
 let videoElDefers;
 
-function addSourceToVideo(element, src, type) {
-  const source = document.createElement('source');
-
-  source.src = src;
-  source.type = type;
-
-  element.appendChild(source);
-}
-
-function createVideo(name) {
-  const video = document.createElement('video');
-  video.loop = true;
-  addSourceToVideo(video, `${name}.webm`, 'video/webm');
-  addSourceToVideo(video, `${name}.mp4`, 'video/mp4');
-  video.oncanplaythrough = () => {
-    videoElDefers[name].resolve({
-      name,
-      videoEl: video,
-    });
-  };
-  video.play();
-}
-
 function applies(state) {
   return selectPanoAnimData(state).length;
 }
@@ -164,12 +144,27 @@ function doEnter() {
         const name = getPanoAnimUrl(panoAnimCastData.fileName);
         videoElDefers[name] = defer();
         panoAnimCastMap[name] = panoAnimCastData;
-        createVideo(name);
+        let video;
+        return new Promise((resolve, reject) => {
+          video = createVideo(name, {
+            loop: true,
+            oncanplaythrough() {
+              resolve(video);
+            },
+            onerror: reject,
+          });
+        })
+          .then((video) => {
+            video.play();
+            videoElDefers[name].resolve({
+              videoEl: video,
+              name,
+            })
+          });
         return name;
       }))
       .then(filenames => ({
         filenames,
-        scene,
         panoAnimCastMap,
       }));
   };

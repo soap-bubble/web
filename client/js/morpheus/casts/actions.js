@@ -75,3 +75,4 @@ export function doExiting() {
 export { actions as pano } from './pano';
 export { actions as panoAnim } from './panoAnim';
 export { actions as hotspot } from './hotspot';
+export { actions as transition } from './transition';

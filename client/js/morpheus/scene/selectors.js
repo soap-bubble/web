@@ -13,3 +13,7 @@ export const currentSceneId = createSelector(
   currentSceneData,
   cs => cs.sceneId,
 );
+export const currentSceneType = createSelector(
+  currentSceneData,
+  cs => cs.sceneType,
+);

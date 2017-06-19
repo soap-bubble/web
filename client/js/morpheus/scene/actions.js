@@ -88,6 +88,9 @@ export function doEntering() {
 
 export function goToScene(id) {
   return dispatch => {
+    dispatch({
+      type: SCENE_DO_EXITING,
+    });
     dispatch(inputActions.disableControl());
     renderEvents.reset();
     return dispatch(fetchScene(id))

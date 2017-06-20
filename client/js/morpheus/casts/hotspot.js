@@ -427,6 +427,7 @@ function doEnter() {
         hitColorList,
       });
     }
+    return Promise.resolve();
   };
 }
 

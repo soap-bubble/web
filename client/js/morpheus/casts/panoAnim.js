@@ -122,7 +122,7 @@ function createMaterial(videoEl) {
   });
 }
 
-function createObject3D(geometry, material, frame) {
+function createObject3D({ geometry, material, frame }) {
   const mesh = new Mesh(geometry, material);
   mesh.rotation.y =  -(frame * ONE_TWENTYFOURTH_RAD);
   return mesh;
@@ -204,7 +204,7 @@ function onStage() {
             createIndex(),
           );
           const material = createMaterial(videoEl);
-          const object3D = createObject3D(geometry, material, frame);
+          const object3D = createObject3D({ geometry, material, frame });
           panoScene3D.add(object3D);
         });
       });

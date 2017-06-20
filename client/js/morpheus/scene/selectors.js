@@ -11,9 +11,14 @@ export const isExiting = state => state.scene.status === 'exiting';
 export const isLive = state => state.scene.status === 'live';
 export const currentSceneId = createSelector(
   currentSceneData,
-  cs => cs.sceneId,
+  cs => get(cs, 'sceneId'),
 );
 export const currentSceneType = createSelector(
   currentSceneData,
-  cs => cs.sceneType,
+  cs => get(cs, 'sceneType'),
 );
+export const previousSceneType = createSelector(
+  previousSceneData,
+  ps => get(ps, 'sceneType'),
+);
+export const nextSceneStartAngle = state => state.scene.nextStartAngle;

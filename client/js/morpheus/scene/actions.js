@@ -23,6 +23,7 @@ import {
   SCENE_DO_ENTER,
   SCENE_DO_EXITING,
   SCENE_DO_ACTION,
+  SET_NEXT_START_ANGLE,
 } from './actionTypes';
 
 
@@ -86,22 +87,30 @@ export function doEntering() {
   };
 }
 
+export function setNextStartAngle(angle) {
+  return {
+    type: SET_NEXT_START_ANGLE,
+    payload: angle,
+  };
+}
+
 export function goToScene(id) {
   return dispatch => {
+    dispatch(castActions.doExit());
     dispatch({
       type: SCENE_DO_EXITING,
     });
     dispatch(inputActions.disableControl());
     renderEvents.reset();
     return dispatch(fetchScene(id))
-    .then(scene => dispatch(castActions.doEnter(scene)))
+    .then(scene => dispatch(castActions.doEnter()))
     .then((scene) => {
       dispatch({
         type: SCENE_DO_ENTERING,
       });
       return scene;
     })
-    .then(scene => dispatch(castActions.onStage(scene)))
+    .then(scene => dispatch(castActions.onStage()))
     .then((scene) => {
       dispatch(gameActions.resize({
         width: window.innerWidth,

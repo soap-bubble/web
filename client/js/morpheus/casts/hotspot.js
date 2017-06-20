@@ -388,6 +388,7 @@ function doEnter() {
         hitUvsList,
       } = createUvs(hotspotsData.length);
       const indexList = createIndex(hotspotsData.length);
+      const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
       const {
         visibleGeometryList,
         hitGeometryList,
@@ -415,6 +416,7 @@ function doEnter() {
         visibleMaterialList,
         hitGeometryList,
         hitMaterialList,
+        startAngle: nextStartAngle,
       });
       const scene3D = createScene(hitObject3D);
       canvasDefer = defer();

@@ -15,7 +15,6 @@ import { createSelector } from 'reselect';
 import {
   defer,
 } from 'utils/promise';
-
 import {
   getAssetUrl,
 } from 'service/gamedb';
@@ -136,7 +135,6 @@ function generateFileNames(fileName) {
     .map(digit => getAssetUrl(`${fileName}.${pad(digit, 2)}.png`));
 }
 
-
 const UP_DOWN_LIMIT = 7.5 * (Math.PI / 180);
 
 function clamp({ x, y }) {
@@ -153,25 +151,21 @@ export function rotate({ x, y }) {
   return (dispatch, getState) => {
     const hitObject3D = hotspotSelectors.hitObject3D(getState());
     const visibleObject3D = hotspotSelectors.visibleObject3D(getState());
-    const panoObject3D = panoScene3D(getState());
-    const panoRot = clamp({
+    const panoObject3D = selectPanoObject3D(getState());
+    const rot = clamp({
       x,
       y,
     });
 
-    const hotRot = clamp({
-      x,
-      y,
-    });
-    Object.assign(hitObject3D.rotation, hotRot);
-    Object.assign(visibleObject3D.rotation, hotRot);
-    Object.assign(panoObject3D.rotation, panoRot);
+    Object.assign(hitObject3D.rotation, rot);
+    Object.assign(visibleObject3D.rotation, rot);
+    Object.assign(panoObject3D.rotation, rot);
   };
 }
 
 function rotateBy({ x: deltaX, y: deltaY }) {
   return (dispatch, getState) => {
-    const panoObject3D = panoScene3D(getState());
+    const panoObject3D = selectPanoObject3D(getState());
     let {
       x,
       y,
@@ -213,6 +207,7 @@ function doEnter() {
   return (dispatch, getState) => {
     const panoCastData = selectPanoCastData(getState());
     if (panoCastData) {
+      const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
       const { fileName } = panoCastData;
       const fileNames = generateFileNames(fileName);
       const geometries = createGeometries(fileNames);
@@ -220,6 +215,7 @@ function doEnter() {
       const object3D = createObject3D({
         materials,
         geometries,
+        startAngle: nextStartAngle,
       });
       const scene3D = createScene(object3D);
       canvasDefer = defer();
@@ -280,8 +276,6 @@ function onStage() {
 export const actions = {
   rotateBy,
   rotate,
-  doEnter,
-  onStage,
   canvasRef,
 };
 

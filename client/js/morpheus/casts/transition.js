@@ -1,5 +1,6 @@
 import {
   get,
+  isUndefined,
 } from 'lodash';
 import {
   createSelector,
@@ -25,15 +26,17 @@ import {
   defer,
 } from 'utils/promise';
 
+const selectTransitionCastDataFromSceneAndType = (scene, sceneType) => {
+  if (sceneType === 3) {
+    return get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
+  }
+  return null;
+};
+
 const selectTransitionCastData = createSelector(
   sceneSelectors.currentSceneData,
   sceneSelectors.currentSceneType,
-  (scene, sceneType) => {
-    if (sceneType === 3) {
-      return get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
-    }
-    return null;
-  },
+  selectTransitionCastDataFromSceneAndType,
 );
 
 const selectNextSceneId = createSelector(
@@ -49,6 +52,23 @@ const selectTransitionFileName = createSelector(
 const selectAssetUrl = createSelector(
   selectTransitionFileName,
   getAssetUrl,
+);
+
+const selecAngleAtEnd = createSelector(
+  selectTransitionCastData,
+  transitionCast => get(transitionCast, 'angleAtEnd'),
+);
+
+const selectAngleAtEndRadians = createSelector(
+  selecAngleAtEnd,
+  (angleAtEnd) => {
+    let startAngle = 0;
+    if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+      startAngle = (angleAtEnd * Math.PI) / 1800;
+      startAngle -= Math.PI - (Math.PI / 6);
+    }
+    return startAngle;
+  },
 );
 
 const selectTransition = state => get(state, 'casts.transition');
@@ -97,10 +117,19 @@ function onStage() {
   };
 }
 
+function doExit() {
+  return (dispatch, getState) => {
+    const angleAtEnd = selectAngleAtEndRadians(getState());
+    dispatch(sceneActions.setNextStartAngle(angleAtEnd));
+    return Promise.resolve();
+  };
+}
+
 export const delegate = {
   applies,
   doEnter,
   onStage,
+  doExit,
 };
 
 export const selectors = {

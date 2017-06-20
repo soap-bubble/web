@@ -9,6 +9,7 @@ import {
   SCENE_DO_EXITING,
   SCENE_DO_ACTION,
   SCENE_DO_ENTER,
+  SET_NEXT_START_ANGLE,
 } from './actionTypes';
 
 const reducer = createReducer('scene', {
@@ -16,7 +17,14 @@ const reducer = createReducer('scene', {
   currentScene: null,
   previousScene: null,
   status: 'null',
+  nextStartAngle: 0,
 }, {
+  [SET_NEXT_START_ANGLE](state, { payload: nextStartAngle }) {
+    return {
+      ...state,
+      nextStartAngle,
+    };
+  },
   [SCENE_SET_BACKGROUND_SCENE](state, { payload: scene }) {
     return {
       ...state,

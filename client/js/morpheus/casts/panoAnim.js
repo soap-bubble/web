@@ -28,10 +28,6 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
-  actions as videoActions,
-  selectors as videoSelectors,
-} from 'morpheus/video';
-import {
   selectors as panoSelectors,
 } from 'morpheus/casts/pano';
 import {

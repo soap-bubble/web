@@ -1,7 +1,11 @@
 import { last } from 'lodash';
 import {
   actions as castActions,
+  selectors as castSelectors,
 } from 'morpheus/casts';
+import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
 import store from 'store';
 import input from 'morpheus/input';
 
@@ -48,11 +52,8 @@ export default function (dispatch) {
   }
 
   function updateMomentum() {
-    const { pano } = store.getState();
-    const {
-      sensitivity,
-      rotation,
-    } = pano;
+    const rotation = castSelectors.pano.rotation(store.getState());
+    const sensitivity = gameSelectors.sensitivity(store.getState());
     let yFine = false;
 
     if (momentum.speed.y > MAX_MOMENTUM) {
@@ -86,11 +87,8 @@ export default function (dispatch) {
 
   function onInteractionMove({ left, top }) {
     if (interaction.active) {
-      const { pano } = store.getState();
-      const {
-        controlType,
-        sensitivity,
-      } = pano;
+      const controlType = gameSelectors.controlType(store.getState());
+      const sensitivity = gameSelectors.sensitivity(store.getState());
       const interactionLastPos = last(interaction.positions);
       const speed = {
         horizontal: left - interactionLastPos.left,
@@ -113,10 +111,8 @@ export default function (dispatch) {
   }
 
   function onInteractionEnd({ left, top }) {
-    const {
-      interactionDebounce,
-      sensitivity,
-    } = store.getState().pano;
+    const sensitivity = gameSelectors.sensitivity(store.getState());
+    const interactionDebounce = gameSelectors.interactionDebounce(store.getState());
     let interactionMomemtum = { x: 0, y: 0 };
     const interactionDistance = Math.sqrt(
       Math.pow(interaction.startPos.left - left, 2)

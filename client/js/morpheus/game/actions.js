@@ -1,16 +1,7 @@
 import {
-  actions as panoActions,
-} from 'morpheus/pano';
-import {
   getSceneType,
   actions as sceneActions,
 } from 'morpheus/scene';
-import {
-  actions as specialActions,
-} from 'morpheus/special';
-import {
-  actions as transitionActions,
-} from 'morpheus/transition';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';

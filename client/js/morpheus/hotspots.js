@@ -5,9 +5,6 @@ import {
   selectors as castSelectors,
   actions as castActions,
 } from 'morpheus/casts';
-import {
-  actions as hotspotActions,
-} from 'morpheus/hotspot';
 import input from 'morpheus/input';
 import store from 'store';
 import renderEvents from 'utils/render';
@@ -21,10 +18,6 @@ const {
   addTouchEnd,
   addTouchCancel,
 } = input.actions;
-const {
-  setHoverIndex,
-  activateHotspotIndex,
-} = hotspotActions;
 
 export default function ({
   dispatch,

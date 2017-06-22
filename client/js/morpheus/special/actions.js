@@ -178,9 +178,6 @@ export function generateSpecialImages() {
         const op = canvasDrawOps[i];
         ctx.drawImage(...op);
       }
-      // canvasDrawOps.forEach(op =>
-      //   ctx.drawImage(...op),
-      // );
     }
   };
 }

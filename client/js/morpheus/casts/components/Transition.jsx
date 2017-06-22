@@ -7,9 +7,6 @@ import {
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
-import {
-  actions as transitionActions,
-} from 'morpheus/transition';
 import Video from 'react/Video';
 
 function mapStateToProps(state) {

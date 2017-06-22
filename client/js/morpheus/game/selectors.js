@@ -29,6 +29,18 @@ export const height = createSelector(
   game,
   _game => _game.height,
 );
+export const sensitivity = createSelector(
+  game,
+  _game => _game.sensitivity,
+);
+export const controlType = createSelector(
+  game,
+  _game => _game.controlType,
+);
+export const interactionDebounce = createSelector(
+  game,
+  _game => _game.interactionDebounce,
+);
 export const dimensions = createSelector(
   width,
   height,

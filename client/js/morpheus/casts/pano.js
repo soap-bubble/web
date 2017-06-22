@@ -55,6 +55,10 @@ const selectRenderElements = createSelector(
     renderer: get(pano, 'renderer'),
   }),
 );
+const selectRotation = createSelector(
+  selectPanoObject3D,
+  panoObject3D => panoObject3D.rotation,
+);
 
 const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
@@ -283,6 +287,7 @@ export const selectors = {
   applies,
   panoScene3D,
   renderElements: selectRenderElements,
+  rotation: selectRotation,
 };
 
 export const delegate = {

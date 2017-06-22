@@ -20,15 +20,15 @@ import {
   getAssetUrl,
 } from 'service/gamedb';
 import {
-  actions as videoActions,
-} from 'morpheus/video';
-import {
   defer,
 } from 'utils/promise';
 
 const selectTransitionCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
-    return get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
+    const rootCast get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
+    if (rootCast && rootCast.nextSceneId) {
+      return rootCast;
+    }
   }
   return null;
 };

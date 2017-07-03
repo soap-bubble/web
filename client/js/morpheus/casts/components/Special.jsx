@@ -4,15 +4,16 @@ import flatspot from 'morpheus/flatspot';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
-import {
-  selectors as gameSelectors,
-} from 'morpheus/game';
 
 function mapStateToProps(state) {
   return {
-    width: gameSelectors.width(state),
-    height: gameSelectors.height(state),
     canvas: castSelectors.special.canvas(state),
+  };
+}
+
+function mapDispatchToProps(dispatch) {
+  return {
+    dispatch,
   };
 }
 
@@ -20,12 +21,12 @@ const Special = connect(
   mapStateToProps,
 )(({
   canvas,
-  width,
-  height,
+  dispatch,
 }) => (
   <div ref={(el) => {
     if (el && canvas) {
       el.appendChild(canvas);
+      flatspot(dispatch);
     }
   }} style={{
     width: '100%',

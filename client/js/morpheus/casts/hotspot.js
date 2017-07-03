@@ -369,7 +369,7 @@ export function activateHotspotIndex(index) {
 let canvasDefer;
 
 function applies(state) {
-  return selectIsPano(state) && selectHotspotsData(state).length;
+  return selectHotspotsData(state).length;
 }
 
 function doEnter() {
@@ -452,26 +452,29 @@ function onStage() {
     const { width, height } = gameSelectors.dimensions(getState());
     const isPano = selectIsPano(getState());
     const scene3D = selectScene3D(getState());
-    return canvasDefer.promise.then((canvas) => {
-      if (isPano) {
-        const camera = createCamera({ width, height });
-        const renderer = createRenderer({ canvas, width, height });
-        positionCamera({
-          camera,
-          vector3: { z: -0.325 },
-        });
-        startRenderLoop({
-          scene3D,
-          camera,
-          renderer,
-        });
-        return {
-          camera,
-          renderer,
-        };
-      }
-      return {};
-    });
+    if (isPano) {
+      return canvasDefer.promise.then((canvas) => {
+        if (isPano) {
+          const camera = createCamera({ width, height });
+          const renderer = createRenderer({ canvas, width, height });
+          positionCamera({
+            camera,
+            vector3: { z: -0.325 },
+          });
+          startRenderLoop({
+            scene3D,
+            camera,
+            renderer,
+          });
+          return {
+            camera,
+            renderer,
+          };
+        }
+        return {};
+      });
+    }
+    return Promise.resolve();
   };
 }
 
@@ -546,6 +549,7 @@ export const selectors = {
   hitObject3D: selectHotspotHitObject3D,
   hitColorList: selectHitColorList,
   renderElements: selectRenderElements,
+  hotspotsData: selectHotspotsData,
 };
 
 export const delegate = {

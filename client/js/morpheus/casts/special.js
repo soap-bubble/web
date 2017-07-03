@@ -190,6 +190,10 @@ function createCanvas({ width, height }) {
   return canvas;
 }
 
+function handleMouseEvent({ type, hotspot }) {
+  return (dispatch) => {};
+}
+
 function applies(state) {
   return selectSpecialCastData(state)
 }
@@ -240,4 +244,6 @@ export const selectors = {
   canvas: selectCanvas,
 };
 
-export const actions = {};
+export const actions = {
+  handleMouseEvent,
+};

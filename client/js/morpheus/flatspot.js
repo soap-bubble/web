@@ -3,10 +3,12 @@ import {
   difference,
 } from 'lodash';
 import {
-  actions as specialActions,
-} from 'morpheus/special';
+  actions as castActions,
+  selectors as castSelectors,
+} from 'morpheus/casts';
 import {
   actions as gameActions,
+  selectors as gameSelectors,
 } from 'morpheus/game';
 import input from 'morpheus/input';
 import store from 'store';
@@ -21,13 +23,10 @@ const {
   addTouchEnd,
   addTouchCancel,
 } = input.actions;
-const {
-  handleMouseEvent,
-} = specialActions;
 
 const logger = loggerFactory('flatspot');
 
-const ORIGINAL_HEIGHT = 480;
+const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
@@ -56,7 +55,7 @@ export default function (dispatch) {
     hotspots,
   }) {
     hotspots.some(hotspot => {
-      dispatch(handleMouseEvent({
+      dispatch(castActions.special.handleMouseEvent({
         type,
         top,
         left,
@@ -67,10 +66,12 @@ export default function (dispatch) {
   }
 
   function updateState({ top, left }) {
-    const { hotspots } = store.getState().special;
+    const hotspots = castSelectors.hotspot.hotspotsData(store.getState());
     const nowActiveHotspots = [];
-    const { dimensions } = store.getState();
-    const { width: newWidth, height: newHeight } = dimensions;
+
+    const newWidth = gameSelectors.width(store.getState());
+    const newHeight = gameSelectors.height(store.getState());
+
     if (width !== newWidth || height !== newHeight) {
       width = newWidth;
       height = newHeight;
@@ -91,20 +92,9 @@ export default function (dispatch) {
     }
 
     const adjustedClickPos = {
-      top: (top / heightScaler) + (clipHeight / 2),
-      left: (left / widthScaler) + (clipWidth / 2),
+      top: (top + (clipHeight / 2)) / heightScaler,
+      left: (left + (clipWidth / 2)) / widthScaler,
     };
-
-    logger.info('Handling mouse event', JSON.stringify({
-      wasMouseUpped,
-      wasMouseMoved,
-      wasMouseDowned,
-      adjustedClickPos,
-      originalClickPos: {
-        top,
-        left,
-      },
-    }, null, 2));
 
     each(hotspots, (hotspot, index) => {
       const {
@@ -121,7 +111,17 @@ export default function (dispatch) {
       }
     });
     // Update our state
-
+    logger.info('Handling mouse event', JSON.stringify({
+      nowActiveHotspots,
+      wasMouseUpped,
+      wasMouseMoved,
+      wasMouseDowned,
+      adjustedClickPos,
+      originalClickPos: {
+        top,
+        left,
+      },
+    }, null, 2));
     // Events for hotspots we have left
     handleHotspotDispatches({
       type: 'MouseLeave',

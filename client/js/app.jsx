@@ -30,9 +30,12 @@ window.onload = () => {
     </Provider>,
     document.getElementById('root'),
   );
-
-  store.dispatch(sceneActions.goToScene(qp.scene || 8010));
-  store.dispatch(gamestateActions.fetchInitial());
+  store.dispatch(gameActions.resize({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }))
+  store.dispatch(gamestateActions.fetchInitial())
+    .then(() => store.dispatch(sceneActions.goToScene(qp.scene || 8010)));
 
   window.addEventListener('resize', () => {
     resizeToWindow();

@@ -129,7 +129,8 @@ function clipRect({ width, height, top, left, right, bottom, clip = false }) {
 }
 
 function calculateControlledFrameLocation({ cast, img, gameStates, rect }) {
-  const { controlledMovieCallbacks, width, height } = cast;
+  const { controlledMovieCallbacks } = cast;
+  const { width, height } = img;
   const gameStateId = get(controlledMovieCallbacks, '[0].gameStateId', null);
   const value = get(gameStates, `[${gameStateId}].value`, 0);
 
@@ -168,8 +169,8 @@ function generateControlledFrames({
       rect: clipRect({
         left: location.x,
         top: location.y,
-        right: location.x + cast.width,
-        bottom: location.y + cast.height,
+        right: location.x + img.width,
+        bottom: location.y + img.height,
         width,
         height,
       }),

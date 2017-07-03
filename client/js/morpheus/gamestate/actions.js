@@ -25,11 +25,9 @@ export function gameStateLoadComplete(responseData) {
 }
 
 export function fetchInitial() {
-  return (dispatch) => {
-    fetchInitialGameState()
-      .then(responseData => dispatch(gameStateLoadComplete(responseData.data)))
-      .catch(err => dispatch({ payload: err, type: API_ERROR }));
-  };
+  return (dispatch) => fetchInitialGameState()
+    .then(responseData => dispatch(gameStateLoadComplete(responseData.data)))
+    .catch(err => dispatch({ payload: err, type: API_ERROR }));
 }
 
 export function updateGameState(gamestateId, value) {

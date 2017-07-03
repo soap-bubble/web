@@ -65,8 +65,9 @@ const sliceWidth = 0.1325;
 const sliceHeight = 0.55;
 const sliceDepth = 1.0;
 
-function createGeometries(fileNames) {
-  const geometries = fileNames.map(() => {
+function createGeometries() {
+  const geometries = [];
+  for (let i = 0; i < 24; i++) {
     const geometry = new BufferGeometry();
 
     const positions = new BufferAttribute(new Float32Array([
@@ -75,11 +76,15 @@ function createGeometries(fileNames) {
       sliceWidth, sliceHeight, sliceDepth,
       -sliceWidth, sliceHeight, sliceDepth,
     ]), 3);
+
+    const right = ((i + 1) / 24);
+    const left = i / 24;
+
     const uvs = new BufferAttribute(new Float32Array([
-      1.0, 0.0,
-      0.0, 0.0,
-      0.0, 1.0,
-      1.0, 1.0,
+      right, 0.0,
+      left, 0.0,
+      left, 1.0,
+      right, 1.0,
     ]), 2);
 
     const indices = new Uint16BufferAttribute([
@@ -91,17 +96,14 @@ function createGeometries(fileNames) {
     geometry.setIndex(indices);
     geometry.addAttribute('uv', uvs);
     geometry.addAttribute('position', positions);
-
-    return geometry;
-  });
-
+    geometries.push(geometry);
+  }
   return geometries;
 }
 
-function createObject3D({ theta = 0, geometries, materials, startAngle = 0 }) {
+function createObject3D({ theta = 0, geometries, material, startAngle = 0 }) {
   const meshes = geometries.map((g, i) => {
-    const m = materials[i];
-    const mesh = new Mesh(g, m);
+    const mesh = new Mesh(g, material);
     mesh.rotation.y = -(i * twentyFourthRad) + theta;
     return mesh;
   });
@@ -113,24 +115,24 @@ function createObject3D({ theta = 0, geometries, materials, startAngle = 0 }) {
   return object3D;
 }
 
-function createMaterials(fileNames) {
+function createMaterial(asset) {
   const loader = new TextureLoader();
-  const materials = [];
+  let material;
+  const promise = new Promise(
+    (resolve, reject) => material = new MeshBasicMaterial({
+      side: BackSide,
+      map: loader.load(
+        asset,
+        resolve,
+        undefined,
+        reject,
+      ),
+    })
+  )
+    .then(() => material);
   return {
-    materials,
-    promise: Promise.all(fileNames
-      .map(f => new Promise(
-        (resolve, reject) => materials.push(new MeshBasicMaterial({
-          side: BackSide,
-          map: loader.load(
-            f,
-            resolve,
-            undefined,
-            reject,
-          ),
-        }),
-      ))))
-      .then(() => materials),
+    material,
+    promise,
   };
 }
 
@@ -213,17 +215,17 @@ function doEnter() {
     if (panoCastData) {
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
       const { fileName } = panoCastData;
-      const fileNames = generateFileNames(fileName);
-      const geometries = createGeometries(fileNames);
-      const { materials, promise: promiseMaterials } = createMaterials(fileNames);
+      const asset = getAssetUrl(`${fileName}.atlas.png`);
+      const geometries = createGeometries();
+      const { material, promise: promiseMaterial } = createMaterial(asset);
       const object3D = createObject3D({
-        materials,
+        material,
         geometries,
         startAngle: nextStartAngle,
       });
       const scene3D = createScene(object3D);
       canvasDefer = defer();
-      return promiseMaterials
+      return promiseMaterial
         .then(() => ({
           object3D,
           scene3D,

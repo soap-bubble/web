@@ -1,9 +1,7 @@
 import { createSelector } from 'reselect';
 import { TEST_TYPES } from '../constants';
 
-export const gamestates = createSelector(
-  state => state.gamestate.idMap,
-);
+export const gamestates = state => state.gamestate.idMap;
 
 export function castEnabled({ comparators }) {
   return createSelector(

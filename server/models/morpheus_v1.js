@@ -22,6 +22,8 @@ export const ControlledMovieCast = v1(class extends v0.ControlledMovieCast {
       atlas: Boolean,
       width: Number,
       height: Number,
+      audio: Boolean,
+      video: Boolean,
     });
   }
 });

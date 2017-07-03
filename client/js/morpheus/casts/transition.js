@@ -25,7 +25,7 @@ import {
 
 const selectTransitionCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
-    const rootCast get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
+    const rootCast = get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
     if (rootCast && rootCast.nextSceneId) {
       return rootCast;
     }

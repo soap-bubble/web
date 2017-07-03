@@ -10,7 +10,7 @@ import {
 } from 'morpheus/scene';
 import {
   selectors as gameStateSelectors,
-} from 'momrpheus/gamestate';
+} from 'morpheus/gamestate';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
@@ -45,7 +45,7 @@ const selectExtraCasts = createSelector(
 
 const selectControlledCasts = createSelector(
   selectExtraCasts,
-  extraCasts => const controlledCasts = extrasCasts.filter(c => c.__t === 'ControlledMovieCast'),
+  extraCasts => extraCasts.filter(c => c.__t === 'ControlledMovieCast'),
 );
 
 const selectControlledCastImgUrl = createSelector(
@@ -58,41 +58,128 @@ const selectHotspotsData = createSelector(
   scene => get(scene, 'casts', []).filter(c => c.castId === 0),
 );
 
+const selectCanvas = state => get(state, 'casts.special.canvas');
+
+const ORIGINAL_HEIGHT = 400;
+const ORIGINAL_WIDTH = 640;
+const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+
+function clipRect({ width, height, top, left, right, bottom, clip = false }) {
+  if (width / height > ORIGINAL_ASPECT_RATIO) {
+    const adjustedHeight = width / ORIGINAL_ASPECT_RATIO;
+    const clipHeight = adjustedHeight - height;
+    const widthScaler = width / ORIGINAL_WIDTH;
+    const heightScaler = adjustedHeight / ORIGINAL_HEIGHT;
+    const x = left * widthScaler;
+    const sizeX = (right * widthScaler) - x;
+
+    let y = (top * heightScaler) - (clipHeight / 2);
+    let sizeY = (bottom - top) * heightScaler;
+
+    if (clip) {
+      if (y < 0) {
+        sizeY += y;
+        y = 0;
+      } else if (y > height) {
+        sizeY -= (y - height);
+        y = height;
+      }
+      if (y + sizeY > height) {
+        sizeY = height - y;
+      }
+    }
+
+
+    return {
+      x,
+      y,
+      sizeX,
+      sizeY,
+    };
+  }
+  const adjustedWidth = height * ORIGINAL_ASPECT_RATIO;
+  const clipWidth = adjustedWidth - width;
+  const widthScaler = adjustedWidth / ORIGINAL_WIDTH;
+  const heightScaler = height / ORIGINAL_HEIGHT;
+  const y = top * heightScaler;
+  const sizeY = (bottom * heightScaler) - y;
+
+  let x = (left * widthScaler) - (clipWidth / 2);
+  let sizeX = (right - left) * widthScaler;
+
+  if (clip) {
+    if (x < 0) {
+      sizeX += x;
+      x = 0;
+    } else if (x > width) {
+      sizeX -= (y - width);
+      x = width;
+    }
+    if (x + sizeX > width) {
+      sizeX = width - x;
+    }
+  }
+
+  return {
+    x,
+    y,
+    sizeX,
+    sizeY,
+  };
+}
+
+function calculateControlledFrameLocation({ cast, img, gameStates, rect }) {
+  const { controlledMovieCallbacks, width, height } = cast;
+  const gameStateId = get(controlledMovieCallbacks, '[0].gameStateId', null);
+  const value = get(gameStates, `[${gameStateId}].value`, 0);
+
+  const source = {
+    x: value * width,
+    y: 0,
+    sizeX: width,
+    sizeY: height,
+  };
+
+  return [
+    img,
+    source.x,
+    source.y,
+    source.sizeX,
+    source.sizeY,
+    rect.x,
+    rect.y,
+    rect.sizeX,
+    rect.sizeY,
+  ];
+}
+
 function generateControlledFrames({
-  gameStates,
   controlledCasts,
   dimensions,
+  gameStates,
 }) {
   const { width, height } = dimensions;
-  return controlledCasts.reduce((memo, cast) => {
-    const { castId, location: controlledLocation } = cast;
-    const rect = clipRect({
-      left: controlledLocation.x,
-      top: controlledLocation.y,
-      right: controlledLocation.x + cast.width,
-      bottom: controlledLocation.y + cast.height,
-      width,
-      height,
-    });
-    memo[castId] = calculateControlledFrameLocation({
+  return controlledCasts.map(({ data: cast, img }) => {
+    const { location } = cast;
+    return calculateControlledFrameLocation({
       cast,
+      img,
       gameStates,
-      rect,
+      rect: clipRect({
+        left: location.x,
+        top: location.y,
+        right: location.x + cast.width,
+        bottom: location.y + cast.height,
+        width,
+        height,
+      }),
     });
-    return memo;
   }, {});
 }
 
-function generateSpecialImages({ specialCasts, canvas }) {
+function generateSpecialImages({ specials, canvas }) {
   const ctx = canvas.getContext('2d');
-
-  const canvasDrawOps = map(controlledFrames,
-    (op, castId) => [images[castId], ...op],
-  );
-  for (let i = 0; i < canvasDrawOps.length; i += 1) {
-    const op = canvasDrawOps[i];
-    ctx.drawImage(...op);
-  }
+  specials.forEach(op => ctx.drawImage(...op));
 }
 
 function createCanvas({ width, height }) {
@@ -102,49 +189,54 @@ function createCanvas({ width, height }) {
   return canvas;
 }
 
+function applies(state) {
+  return selectSpecialCastData(state)
+}
+
 function doEnter() {
   return (dispatch, getState) => {
     const leadCast = selectSpecialCastData(getState());
     const controlledCastsData = selectControlledCasts(getState());
+    const gameStates = gameStateSelectors.gamestates(getState());
+    const dimensions = gameSelectors.dimensions(getState());
+
     return Promise.all(
       [
         loadAsImage(selectControlledCastImgUrl(getState()))
           .then(img => ({
             img,
-            castId: leadCast.castId,
+            data: leadCast,
           })),
       ].concat(controlledCastsData
         .map(cast => loadAsImage(cast.fileName)
           .then(img => ({
             img,
-            castId: cast.castId,
+            data: cast,
           }))
         ),
-    )
-      .then((controlledCasts) => {
-        const root = controlledCasts.shift();
+    ))
+      .then(controlledCasts => generateControlledFrames({
+        gameStates,
+        controlledCasts,
+        dimensions,
+      }))
+      .then((specials) => {
+        const canvas = createCanvas(dimensions);
+        generateSpecialImages({ specials, canvas });
         return {
-          root,
-          extras: controlledCasts,
+          canvas,
         };
-      })
-      .then((specialCasts) => {
-        const controlledFrames = generateControlledFrames({
-          gameStates,
-          specialCasts,
-          dimensions,
-        });
       });
   };
 }
 
-function onStage() {
-  return (dispatch, getState) => {
-    const hotspotData = selectHotspotsData(getState());
-    const gameStates = gameStateSelectors.gamestates(getState());
-    const controlledCasts = selectControlledCasts(getState());
-    const dimensions = gameSelectors.dimensions(getState());
-
-    const canvas = createCanvas(dimensions);
-  };
+export const delegate = {
+  applies,
+  doEnter,
 }
+
+export const selectors = {
+  canvas: selectCanvas,
+};
+
+export const actions = {};

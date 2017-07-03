@@ -369,7 +369,7 @@ export function activateHotspotIndex(index) {
 let canvasDefer;
 
 function applies(state) {
-  return selectHotspotsData(state).length;
+  return selectIsPano(state) && selectHotspotsData(state).length;
 }
 
 function doEnter() {

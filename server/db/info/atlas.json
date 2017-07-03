@@ -1,1597 +1,3222 @@
 {
-  "GameDB/Deck1/cannonSPC": {
+  "GameDB\\carnival\\803030SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\803071SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\803072SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\806066SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\billrtrnSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\carouselSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\carnival\\lightdimSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\carnival\\oncarselSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\carnival\\opensuitSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\qclubSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\CargoH\\airdoorSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\ctrlIIISPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\ctrlIISPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\ctrlISPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\malnoteSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\CargoH\\malsuicSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\openuboxSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\CargoH\\suicide2SPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\suicide3SPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\suicideSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck1\\BMcrd1dsSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\canisterSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\cannonSPC": {
     "width": 176,
     "height": 196,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
   },
-  "GameDB/Deck1/carglverSPC": {
+  "GameDB\\Deck1\\cargcrakSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\carglverSPC": {
     "width": 136,
     "height": 152,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck1/crabSPC": {
+  "GameDB\\Deck1\\cig1dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig2dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig3dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig4dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig5dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig6dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig7dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\cig8dslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\crabSPC": {
     "width": 240,
     "height": 192,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 9
   },
-  "GameDB/Deck1/rangeNBSPC": {
+  "GameDB\\Deck1\\flare110SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flare45SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flare60SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flare90SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flarNB45SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flarNB60SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flarNB90SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flrNB110SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\matchesSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\montdslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck1\\rangeNBSPC": {
     "width": 184,
     "height": 168,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 9
   },
-  "GameDB/Deck1/rangeSPC": {
+  "GameDB\\Deck1\\rangeSPC": {
     "width": 172,
     "height": 156,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 9
   },
-  "GameDB/Deck1/rcktlverSPC": {
+  "GameDB\\Deck1\\rcktlverSPC": {
     "width": 128,
     "height": 136,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck2Bth/disglassSPC": {
+  "GameDB\\Deck2Bth\\balloonSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2Bth\\canclseSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck2Bth\\canopenSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck2Bth\\disglassSPC": {
     "width": 232,
     "height": 156,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/Deck2Bth/lockbuttSPC": {
+  "GameDB\\Deck2Bth\\lockbuttSPC": {
     "width": 220,
     "height": 148,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/Deck3Aft/tempgageSPC": {
+  "GameDB\\Deck2Bth\\lpbaloonSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck2\\jitterSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2\\rowSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\dimlightSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3For\\DrmDeadSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\ecki1aSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3For\\ecki2aSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3For\\eckinoteSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3For\\eckiobvsSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3For\\herculanSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\JCPpodSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\litthetrSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3For\\NeuroNarSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\newelSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\nwlstillSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3For\\projrunSPC": {
+    "width": 340,
+    "height": 108,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck3For\\projstilSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\bible2SPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\bibleSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\BMboxopSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\BMdrawopSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\BMtrashSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\bscrddlvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\BSscrapOSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\BSscrpClSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\carodslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\cigdslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMdiaryOSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMdiryO1SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMghostSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMlttrUpSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMturn2SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMturn3SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\CMturn4SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\crnstkdsSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\dicedslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\flshcardSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\fountSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\gttowelSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\hatboxCSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\hatboxOSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\honsdslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\invitedsSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\journalSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\journrvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\jp1dislvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\jp2dislvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\jp3dislvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\jp4dislvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\jp5dislvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\lcktdslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\leopostSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\lockopenSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\masherSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\mrkddslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\opsketchSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\psalm244SPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbclseSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbLGSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\stmpdslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\stmphndlSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\tempgageSPC": {
     "width": 474,
     "height": 124,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Elevator/elevindSPC": {
+  "GameDB\\Deck3Aft\\toiletSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\trnkopenSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\trnkstilSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\vapstm1SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck4\\atriumSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\callgondSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\cntl2rtnSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Deck4\\engSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\inject1SPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\inject2SPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\openfurnSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\pushgondSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\ventSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Elevator\\elevindSPC": {
     "width": 192,
     "height": 188,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/neuro/staticSPC": {
-    "width": 284,
-    "height": 300,
-    "atlas": true
+  "GameDB\\iceNchat\\endseqSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/sanitory/podbut1SPC": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\iceNchat\\exjourSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
   },
-  "GameDB/Deck3For/projrunSPC": {
-    "width": 340,
-    "height": 108,
-    "atlas": true
+  "GameDB\\iceNchat\\exjrlttrSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
   },
-  "GameDB/h2oFront/dartSPC": {
-    "width": 168,
-    "height": 156,
-    "atlas": true
+  "GameDB\\iceNchat\\icebreakSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Harem/tapestrSPC": {
+  "GameDB\\iceNchat\\upjourSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Harem\\bellrtrnSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\bird1dslSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Harem\\bird1SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\bird2dslSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Harem\\bird2SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\bird3SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\snakchrmSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\Harem\\snakdslvSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Harem\\snakeSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\tapestrSPC": {
     "width": 118,
     "height": 162,
-    "atlas": true
-  },
-  "GameDB/All/hiresbutANI": {
-    "width": 72,
-    "height": 48,
-    "atlas": true
-  },
-  "GameDB/All/onbutANI": {
-    "width": 36,
-    "height": 36,
-    "atlas": false
-  },
-  "GameDB/All/transbutANI": {
-    "width": 72,
-    "height": 56,
-    "atlas": true
-  },
-  "GameDB/All/volbutANI": {
-    "width": 92,
-    "height": 56,
-    "atlas": true
-  },
-  "GameDB/All/winsizeANI": {
-    "width": 84,
-    "height": 56,
-    "atlas": true
-  },
-  "GameDB/CargoH/airdoorANI": {
-    "width": 80,
-    "height": 136,
-    "atlas": false
-  },
-  "GameDB/CargoH/airengANI": {
-    "width": 60,
-    "height": 88,
-    "atlas": true
-  },
-  "GameDB/CargoH/airhndlANI": {
-    "width": 192,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/CargoH/doorwhlANI": {
-    "width": 164,
-    "height": 72,
-    "atlas": true
-  },
-  "GameDB/CargoH/dwnlevIANI": {
-    "width": 80,
-    "height": 208,
-    "atlas": true
-  },
-  "GameDB/CargoH/dwnlevIIANI": {
-    "width": 84,
-    "height": 204,
-    "atlas": true
-  },
-  "GameDB/CargoH/holdII13ANI": {
-    "width": 120,
-    "height": 192,
-    "atlas": false
-  },
-  "GameDB/CargoH/holdIIE10ANI": {
-    "width": 100,
-    "height": 160,
-    "atlas": false
-  },
-  "GameDB/CargoH/holdIIIEANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/CargoH/holdIIS13ANI": {
-    "width": 80,
-    "height": 104,
-    "atlas": false
-  },
-  "GameDB/CargoH/holdIIW16ANI": {
-    "width": 96,
-    "height": 180,
-    "atlas": false
-  },
-  "GameDB/CargoH/uplevIANI": {
-    "width": 80,
-    "height": 208,
-    "atlas": true
-  },
-  "GameDB/CargoH/uplevIIANI": {
-    "width": 80,
-    "height": 212,
-    "atlas": true
-  },
-  "GameDB/CargoH/uplevIIIANI": {
-    "width": 84,
-    "height": 224,
-    "atlas": true
-  },
-  "GameDB/Deck2/MBtubeANI": {
-    "width": 36,
-    "height": 48,
-    "atlas": true
-  },
-  "GameDB/Deck2/gymuranANI": {
-    "width": 196,
-    "height": 196,
-    "atlas": true
-  },
-  "GameDB/Deck2/jandescANI": {
-    "width": 196,
-    "height": 224,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbdisksANI": {
-    "width": 196,
-    "height": 108,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbinst1ANI": {
-    "width": 88,
-    "height": 72,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbinst2ANI": {
-    "width": 88,
-    "height": 72,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbinst3ANI": {
-    "width": 72,
-    "height": 68,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbplayANI": {
-    "width": 176,
-    "height": 88,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbsongsANI": {
-    "width": 180,
-    "height": 56,
-    "atlas": true
-  },
-  "GameDB/Deck2/mbtubeupANI": {
-    "width": 40,
-    "height": 48,
-    "atlas": true
-  },
-  "GameDB/Deck2/runpumpANI": {
-    "width": 176,
-    "height": 76,
-    "atlas": true
-  },
-  "GameDB/Deck1/balloonANI": {
-    "width": 60,
-    "height": 64,
-    "atlas": true
-  },
-  "GameDB/Deck1/carglev2ANI": {
-    "width": 136,
-    "height": 152,
-    "atlas": true
-  },
-  "GameDB/Deck1/carglv17ANI": {
-    "width": 96,
-    "height": 88,
-    "atlas": false
-  },
-  "GameDB/Deck1/cigslideANI": {
-    "width": 144,
-    "height": 100,
-    "atlas": true
-  },
-  "GameDB/Deck1/corridorANI": {
-    "width": 124,
-    "height": 208,
-    "atlas": false
-  },
-  "GameDB/Deck1/corrlockANI": {
-    "width": 124,
-    "height": 208,
-    "atlas": true
-  },
-  "GameDB/Deck1/corrunlkANI": {
-    "width": 128,
-    "height": 212,
-    "atlas": true
-  },
-  "GameDB/Deck1/flybrdg1ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck1/flybrdg2ANI": {
-    "width": 68,
-    "height": 64,
-    "atlas": false
-  },
-  "GameDB/Deck1/globeNEANI": {
-    "width": 112,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/Deck1/globeNWANI": {
-    "width": 112,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/Deck1/globeSANI": {
-    "width": 124,
-    "height": 120,
-    "atlas": true
-  },
-  "GameDB/Deck1/logrecLtANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck1/radarANI": {
-    "width": 168,
-    "height": 148,
-    "atlas": true
-  },
-  "GameDB/Deck1/rcktlev2ANI": {
-    "width": 128,
-    "height": 140,
-    "atlas": true
-  },
-  "GameDB/Deck1/wind16ANI": {
-    "width": 92,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck1/windmillANI": {
-    "width": 128,
-    "height": 52,
-    "atlas": true
-  },
-  "GameDB/Deck2Bth/canisterANI": {
-    "width": 76,
-    "height": 92,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/canloopANI": {
-    "width": 180,
-    "height": 100,
-    "atlas": true
-  },
-  "GameDB/Deck2Bth/dckEfb11ANI": {
-    "width": 64,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckEfb12ANI": {
-    "width": 128,
-    "height": 64,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckEfb13ANI": {
-    "width": 108,
-    "height": 108,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckWfb15ANI": {
-    "width": 128,
-    "height": 96,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckair13ANI": {
-    "width": 84,
-    "height": 72,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckair14ANI": {
-    "width": 88,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckair19ANI": {
-    "width": 108,
-    "height": 260,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/dckair20ANI": {
-    "width": 60,
-    "height": 260,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/scrblockANI": {
-    "width": 72,
-    "height": 132,
-    "atlas": false
-  },
-  "GameDB/Deck2Bth/suncastANI": {
-    "width": 240,
-    "height": 224,
-    "atlas": true
-  },
-  "GameDB/Deck2Bth/sunshdwANI": {
-    "width": 212,
-    "height": 84,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/BMserumANI": {
-    "width": 88,
-    "height": 106,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/BSserumANI": {
-    "width": 60,
-    "height": 84,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/GTserumANI": {
-    "width": 88,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/IFneedleANI": {
-    "width": 172,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/LGserumANI": {
-    "width": 88,
-    "height": 88,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/MBcrankBANI": {
-    "width": 88,
-    "height": 84,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/MBcrankFANI": {
-    "width": 96,
-    "height": 80,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/MBturnANI": {
-    "width": 116,
-    "height": 260,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/atomspryANI": {
-    "width": 76,
-    "height": 84,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/fntbutcANI": {
-    "width": 60,
-    "height": 140,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/fntbutlANI": {
-    "width": 48,
-    "height": 136,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/fntbutrANI": {
-    "width": 52,
-    "height": 132,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/fntwaterANI": {
-    "width": 300,
-    "height": 136,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/fountcANI": {
-    "width": 60,
-    "height": 136,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/fountlrANI": {
-    "width": 300,
-    "height": 140,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/glwSRbutANI": {
-    "width": 68,
-    "height": 68,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/herblANI": {
-    "width": 32,
-    "height": 28,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/herbrANI": {
-    "width": 32,
-    "height": 32,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/influx#1ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/influx#2ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/influx#3ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/influx3ANI": {
-    "width": 272,
-    "height": 252,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/scrbBMANI": {
-    "width": 160,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/scrbBSANI": {
-    "width": 160,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/scrbCMANI": {
-    "width": 160,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/scrbGTANI": {
-    "width": 160,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/scrbJMANI": {
-    "width": 160,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck3Aft/scrbopenANI": {
-    "width": 172,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/trnkhookANI": {
-    "width": 120,
-    "height": 116,
-    "atlas": true
-  },
-  "GameDB/Deck3Aft/uranindANI": {
-    "width": 200,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Harem\\tapwonSPC": {
+    "width": 320,
     "height": 200,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/Elevator/florind1ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\neuro\\2carnivlSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Elevator/florind2ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\neuro\\2h2ofrntSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Elevator/florind3ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\neuro\\2haremSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Elevator/florind4ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\neuro\\2voodooSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Deck4/AliteANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/AondkANI": {
-    "width": 60,
-    "height": 60,
+  "GameDB\\neuro\\claireSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck4/Aunlit5ANI": {
-    "width": 60,
-    "height": 60,
+  "GameDB\\neuro\\clsNRpodSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\neuro\\janswoonSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\neuro\\necklaceSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck4/IliteANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/InjectD1ANI": {
-    "width": 216,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Deck4/InjectD2ANI": {
-    "width": 216,
-    "height": 100,
-    "atlas": true
-  },
-  "GameDB/Deck4/IondkANI": {
-    "width": 60,
-    "height": 60,
+  "GameDB\\neuro\\NRpodstlSPC": {
+    "width": 640,
+    "height": 400,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck4/Iunlit5ANI": {
+  "GameDB\\neuro\\staticSPC": {
+    "width": 284,
+    "height": 300,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\h2oFront\\bodyroseSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\brooklynSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\dartSPC": {
+    "width": 168,
+    "height": 156,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\egyptSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\fireplacSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\hongkongSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\leortrnSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\londonSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\parisSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\phoneSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\romeSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\h2oFront\\tapsSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\sanitory\\podbut1SPC": {
     "width": 60,
     "height": 60,
-    "atlas": false
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck4/LbuttonUANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\sanitory\\poddescSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Deck4/RbuttonDANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
+  "GameDB\\Voodoo\\gracrtrnSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Deck4/SRliteBMANI": {
-    "width": 36,
-    "height": 40,
-    "atlas": true
+  "GameDB\\Voodoo\\h2ofall1SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Deck4/SRliteBSANI": {
-    "width": 32,
+  "GameDB\\Voodoo\\h2ofall2SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\h2ofall3SPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\monkleapSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\spinSPC": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\All\\hiresbutANI": {
+    "width": 72,
     "height": 48,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/Deck4/SRliteCMANI": {
+  "GameDB\\All\\onbutANI": {
     "width": 36,
     "height": 36,
-    "atlas": true
-  },
-  "GameDB/Deck4/SRliteGTANI": {
-    "width": 36,
-    "height": 48,
-    "atlas": true
-  },
-  "GameDB/Deck4/SRliteJMANI": {
-    "width": 36,
-    "height": 48,
-    "atlas": true
-  },
-  "GameDB/Deck4/SRliteLGANI": {
-    "width": 32,
-    "height": 40,
-    "atlas": true
-  },
-  "GameDB/Deck4/SRswitchANI": {
-    "width": 136,
-    "height": 216,
-    "atlas": true
-  },
-  "GameDB/Deck4/ScallbutANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/SguageANI": {
-    "width": 132,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/Deck4/SguageofANI": {
-    "width": 132,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/Deck4/StoggleANI": {
-    "width": 112,
-    "height": 96,
-    "atlas": true
-  },
-  "GameDB/Deck4/UPlever1ANI": {
-    "width": 60,
-    "height": 60,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck4/UPlever2ANI": {
+  "GameDB\\All\\transbutANI": {
+    "width": 72,
+    "height": 56,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\All\\volbutANI": {
+    "width": 92,
+    "height": 56,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\All\\winsizeANI": {
+    "width": 84,
+    "height": 56,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\carnival\\800004ANI": {
     "width": 60,
     "height": 60,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck4/UPlightANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/UcallbutANI": {
-    "width": 60,
-    "height": 64,
-    "atlas": true
-  },
-  "GameDB/Deck4/UguageOnANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck4/UtoggleANI": {
-    "width": 124,
-    "height": 96,
-    "atlas": true
-  },
-  "GameDB/Deck4/VliteANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/VondkANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck4/Vunlit5ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck4/aoffANI": {
-    "width": 64,
-    "height": 64,
-    "atlas": false
-  },
-  "GameDB/Deck4/baclevANI": {
-    "width": 136,
-    "height": 176,
-    "atlas": true
-  },
-  "GameDB/Deck4/dkStogglANI": {
-    "width": 108,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/Deck4/dkUPliteANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/forlevANI": {
-    "width": 124,
-    "height": 184,
-    "atlas": true
-  },
-  "GameDB/Deck4/gondladdANI": {
-    "width": 280,
-    "height": 232,
-    "atlas": true
-  },
-  "GameDB/Deck4/injectU1ANI": {
-    "width": 216,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Deck4/injectU2ANI": {
-    "width": 216,
-    "height": 100,
-    "atlas": true
-  },
-  "GameDB/Deck4/ioffANI": {
-    "width": 68,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/Deck4/rodsDANI": {
-    "width": 216,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Deck4/rodsUANI": {
-    "width": 216,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Deck4/scramlitANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/Deck4/stageE1ANI": {
-    "width": 60,
-    "height": 180,
-    "atlas": true
-  },
-  "GameDB/Deck4/stageE5ANI": {
-    "width": 32,
-    "height": 88,
-    "atlas": true
-  },
-  "GameDB/Deck4/stageN21ANI": {
-    "width": 60,
-    "height": 180,
-    "atlas": true
-  },
-  "GameDB/Deck4/stageN5ANI": {
-    "width": 60,
-    "height": 180,
-    "atlas": true
-  },
-  "GameDB/Deck4/stageW21ANI": {
-    "width": 60,
-    "height": 120,
-    "atlas": true
-  },
-  "GameDB/Deck4/ufripplANI": {
-    "width": 404,
-    "height": 156,
-    "atlas": true
-  },
-  "GameDB/Deck4/urangageANI": {
-    "width": 160,
-    "height": 152,
-    "atlas": true
-  },
-  "GameDB/Deck4/valveDANI": {
-    "width": 164,
-    "height": 188,
-    "atlas": true
-  },
-  "GameDB/Deck4/valveUANI": {
-    "width": 164,
-    "height": 188,
-    "atlas": true
-  },
-  "GameDB/Deck4/valvetrnANI": {
-    "width": 240,
-    "height": 188,
-    "atlas": true
-  },
-  "GameDB/Deck4/voffANI": {
-    "width": 68,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/carnival/800004ANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/carnival/800052ANI": {
+  "GameDB\\carnival\\800052ANI": {
     "width": 184,
     "height": 132,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
   },
-  "GameDB/carnival/801051ANI": {
+  "GameDB\\carnival\\800053ANI": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\801051ANI": {
     "width": 136,
     "height": 84,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/803031ANI": {
+  "GameDB\\carnival\\801052ANI": {
+    "width": 320,
+    "height": 200,
+    "audio": false,
+    "video": true
+  },
+  "GameDB\\carnival\\803031ANI": {
     "width": 368,
     "height": 172,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/carnival/803051ANI": {
+  "GameDB\\carnival\\803051ANI": {
     "width": 64,
     "height": 176,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/803052ANI": {
+  "GameDB\\carnival\\803052ANI": {
     "width": 56,
     "height": 176,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/803053ANI": {
+  "GameDB\\carnival\\803053ANI": {
     "width": 60,
     "height": 176,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/803054ANI": {
+  "GameDB\\carnival\\803054ANI": {
     "width": 56,
     "height": 176,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/803055ANI": {
+  "GameDB\\carnival\\803055ANI": {
     "width": 56,
     "height": 176,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/803056ANI": {
+  "GameDB\\carnival\\803056ANI": {
     "width": 68,
     "height": 176,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/803057ANI": {
+  "GameDB\\carnival\\803057ANI": {
     "width": 136,
     "height": 160,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/804009ANI": {
+  "GameDB\\carnival\\804009ANI": {
     "width": 60,
     "height": 60,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/804051ANI": {
+  "GameDB\\carnival\\804051ANI": {
     "width": 128,
     "height": 396,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/805009ANI": {
+  "GameDB\\carnival\\805009ANI": {
     "width": 128,
     "height": 80,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/806004ANI": {
+  "GameDB\\carnival\\806004ANI": {
     "width": 60,
     "height": 60,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/806005ANI": {
+  "GameDB\\carnival\\806005ANI": {
     "width": 128,
     "height": 80,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/806006ANI": {
+  "GameDB\\carnival\\806006ANI": {
     "width": 56,
     "height": 108,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/806026ANI": {
+  "GameDB\\carnival\\806026ANI": {
     "width": 60,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/carnival/806027ANI": {
+  "GameDB\\carnival\\806027ANI": {
     "width": 132,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/806028ANI": {
+  "GameDB\\carnival\\806028ANI": {
     "width": 156,
     "height": 72,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/806036ANI": {
+  "GameDB\\carnival\\806036ANI": {
     "width": 60,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/carnival/806037ANI": {
+  "GameDB\\carnival\\806037ANI": {
     "width": 124,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/806038ANI": {
+  "GameDB\\carnival\\806038ANI": {
     "width": 152,
     "height": 76,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/806046ANI": {
+  "GameDB\\carnival\\806046ANI": {
     "width": 60,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/carnival/806047ANI": {
+  "GameDB\\carnival\\806047ANI": {
     "width": 120,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/806048ANI": {
+  "GameDB\\carnival\\806048ANI": {
     "width": 148,
     "height": 80,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/806055ANI": {
+  "GameDB\\carnival\\806055ANI": {
     "width": 268,
     "height": 220,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/806056ANI": {
+  "GameDB\\carnival\\806056ANI": {
     "width": 220,
     "height": 184,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
   },
-  "GameDB/carnival/806060ANI": {
+  "GameDB\\carnival\\806060ANI": {
     "width": 92,
     "height": 120,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/806062ANI": {
+  "GameDB\\carnival\\806062ANI": {
     "width": 56,
     "height": 260,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/806063ANI": {
+  "GameDB\\carnival\\806063ANI": {
     "width": 60,
     "height": 260,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/806065ANI": {
+  "GameDB\\carnival\\806065ANI": {
     "width": 104,
     "height": 60,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/807004ANI": {
+  "GameDB\\carnival\\807004ANI": {
     "width": 92,
     "height": 68,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/807005ANI": {
+  "GameDB\\carnival\\807005ANI": {
     "width": 60,
     "height": 60,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/carnival/807025ANI": {
+  "GameDB\\carnival\\807025ANI": {
     "width": 160,
     "height": 216,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   },
-  "GameDB/carnival/807052ANI": {
+  "GameDB\\carnival\\807052ANI": {
     "width": 216,
     "height": 120,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/carnival/807058ANI": {
+  "GameDB\\carnival\\807058ANI": {
     "width": 264,
     "height": 112,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
   },
-  "GameDB/carnival/807062ANI": {
+  "GameDB\\carnival\\807062ANI": {
     "width": 256,
     "height": 140,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
   },
-  "GameDB/carnival/807064ANI": {
+  "GameDB\\carnival\\807064ANI": {
     "width": 280,
     "height": 228,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/carnival/807066ANI": {
+  "GameDB\\carnival\\807065ANI": {
+    "width": 320,
+    "height": 168,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\carnival\\807066ANI": {
     "width": 196,
     "height": 145,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/carnival/807072ANI": {
+  "GameDB\\carnival\\807072ANI": {
     "width": 188,
     "height": 120,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/carnival/bloomersANI": {
+  "GameDB\\carnival\\bloomersANI": {
     "width": 112,
     "height": 100,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
   },
-  "GameDB/carnival/cardsANI": {
+  "GameDB\\carnival\\cardsANI": {
     "width": 52,
     "height": 72,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/carnival/dimlightANI": {
+  "GameDB\\carnival\\circusANI": {
+    "width": 336,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\dimlightANI": {
     "width": 80,
     "height": 80,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/carnival/knot1ANI": {
+  "GameDB\\carnival\\knot1ANI": {
     "width": 60,
     "height": 320,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/carnival/knot2ANI": {
+  "GameDB\\carnival\\knot2ANI": {
     "width": 48,
     "height": 320,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/carnival/knot3ANI": {
+  "GameDB\\carnival\\knot3ANI": {
     "width": 44,
     "height": 320,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/carnival/knot4ANI": {
+  "GameDB\\carnival\\knot4ANI": {
     "width": 36,
     "height": 320,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/carnival/knot5ANI": {
+  "GameDB\\carnival\\knot5ANI": {
     "width": 36,
     "height": 320,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/carnival/suitclseANI": {
+  "GameDB\\carnival\\scene1bkANI": {
+    "width": 336,
+    "height": 376,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\scene2bkANI": {
+    "width": 336,
+    "height": 372,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\scene3bkANI": {
+    "width": 336,
+    "height": 368,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\scene4bkANI": {
+    "width": 336,
+    "height": 376,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\scene5bkANI": {
+    "width": 320,
+    "height": 356,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\carnival\\suitclseANI": {
     "width": 176,
     "height": 120,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/carnival/suitoutANI": {
+  "GameDB\\carnival\\suitoutANI": {
     "width": 160,
     "height": 100,
-    "atlas": true
+    "audio": true,
+    "video": true
   },
-  "GameDB/iceNchat/icepickANI": {
-    "width": 220,
-    "height": 280,
-    "atlas": true
-  },
-  "GameDB/iceNchat/pickpanoANI": {
-    "width": 72,
-    "height": 112,
-    "atlas": false
-  },
-  "GameDB/neuro/galteANI": {
-    "width": 180,
-    "height": 144,
-    "atlas": true
-  },
-  "GameDB/neuro/mexlerANI": {
-    "width": 176,
-    "height": 148,
-    "atlas": true
-  },
-  "GameDB/neuro/swanANI": {
-    "width": 168,
-    "height": 144,
-    "atlas": true
-  },
-  "GameDB/neuro/thermonANI": {
-    "width": 172,
-    "height": 144,
-    "atlas": true
-  },
-  "GameDB/sanitory/BMwcButtANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/sanitory/BSwcButtANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/sanitory/LGwcButtANI": {
-    "width": 60,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/sanitory/podknob1ANI": {
+  "GameDB\\CargoH\\airdoorANI": {
     "width": 80,
-    "height": 72,
-    "atlas": true
-  },
-  "GameDB/sanitory/podknob2ANI": {
-    "width": 76,
-    "height": 72,
-    "atlas": true
-  },
-  "GameDB/sanitory/podknob3ANI": {
-    "width": 76,
-    "height": 72,
-    "atlas": true
-  },
-  "GameDB/sanitory/podrtswANI": {
-    "width": 108,
-    "height": 144,
-    "atlas": true
-  },
-  "GameDB/sanitory/podrtwl1ANI": {
-    "width": 60,
-    "height": 252,
-    "atlas": true
-  },
-  "GameDB/sanitory/podrtwl2ANI": {
-    "width": 56,
-    "height": 252,
-    "atlas": true
-  },
-  "GameDB/sanitory/podrtwl3ANI": {
-    "width": 60,
-    "height": 252,
-    "atlas": true
-  },
-  "GameDB/sanitory/saniN23ANI": {
-    "width": 128,
-    "height": 216,
+    "height": 136,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/sanitory/saniN24ANI": {
-    "width": 128,
-    "height": 132,
+  "GameDB\\CargoH\\airengANI": {
+    "width": 60,
+    "height": 88,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\CargoH\\airhndlANI": {
+    "width": 192,
+    "height": 160,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\CargoH\\doorwhlANI": {
+    "width": 164,
+    "height": 72,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\CargoH\\dwnlevIANI": {
+    "width": 80,
+    "height": 208,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\CargoH\\dwnlevIIANI": {
+    "width": 84,
+    "height": 204,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\CargoH\\holdII13ANI": {
+    "width": 120,
+    "height": 192,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/sanitory/wcButtANI": {
+  "GameDB\\CargoH\\holdIIE10ANI": {
+    "width": 100,
+    "height": 160,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\holdIIIEANI": {
     "width": 60,
     "height": 60,
-    "atlas": true
+    "audio": false,
+    "atlas": false
   },
-  "GameDB/Deck3For/JCwalks2ANI": {
+  "GameDB\\CargoH\\holdIIS13ANI": {
+    "width": 80,
+    "height": 104,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\holdIIW16ANI": {
+    "width": 96,
+    "height": 180,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\CargoH\\uplevIANI": {
+    "width": 80,
+    "height": 208,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\CargoH\\uplevIIANI": {
+    "width": 80,
+    "height": 212,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\CargoH\\uplevIIIANI": {
+    "width": 84,
+    "height": 224,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\balloonANI": {
+    "width": 60,
+    "height": 64,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck1\\carglev2ANI": {
+    "width": 136,
+    "height": 152,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\carglv17ANI": {
+    "width": 96,
+    "height": 88,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck1\\cigslideANI": {
     "width": 144,
-    "height": 148,
-    "atlas": true
+    "height": 100,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
   },
-  "GameDB/Deck3For/JCwalksANI": {
-    "width": 144,
-    "height": 148,
-    "atlas": true
+  "GameDB\\Deck1\\corridorANI": {
+    "width": 124,
+    "height": 208,
+    "audio": false,
+    "atlas": false
   },
-  "GameDB/Deck3For/janbed7ANI": {
+  "GameDB\\Deck1\\corrlockANI": {
+    "width": 124,
+    "height": 208,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\corrunlkANI": {
+    "width": 128,
+    "height": 212,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\flybrdg1ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck1\\flybrdg2ANI": {
+    "width": 68,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck1\\globeNEANI": {
+    "width": 112,
+    "height": 124,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\Deck1\\globeNWANI": {
+    "width": 112,
+    "height": 124,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\Deck1\\globeSANI": {
+    "width": 124,
+    "height": 120,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\Deck1\\logANI": {
+    "width": 32,
+    "height": 84,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 28
+  },
+  "GameDB\\Deck1\\logrecLtANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck1\\pharswhlANI": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\radarANI": {
+    "width": 168,
+    "height": 148,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\rcktlev2ANI": {
+    "width": 128,
+    "height": 140,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck1\\wheelANI": {
+    "width": 320,
+    "height": 320,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Deck1\\wind16ANI": {
+    "width": 92,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck1\\windmillANI": {
+    "width": 128,
+    "height": 52,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck2Bth\\canisterANI": {
+    "width": 76,
+    "height": 92,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\canloopANI": {
+    "width": 180,
+    "height": 100,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck2Bth\\dckair13ANI": {
+    "width": 84,
+    "height": 72,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckair14ANI": {
+    "width": 88,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckair19ANI": {
+    "width": 108,
+    "height": 260,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckair20ANI": {
+    "width": 60,
+    "height": 260,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckEfb11ANI": {
+    "width": 64,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckEfb12ANI": {
+    "width": 128,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckEfb13ANI": {
+    "width": 108,
+    "height": 108,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\dckWfb15ANI": {
+    "width": 128,
+    "height": 96,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\lockliteANI": {
+    "width": 60,
+    "height": 136,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2Bth\\malhungANI": {
+    "width": 128,
+    "height": 184,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2Bth\\scrblockANI": {
+    "width": 72,
+    "height": 132,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck2Bth\\suncastANI": {
+    "width": 240,
+    "height": 224,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\Deck2Bth\\sunshdwANI": {
+    "width": 212,
+    "height": 84,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 9
+  },
+  "GameDB\\Deck2\\clairsi2ANI": {
+    "width": 92,
+    "height": 132,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2\\clairsitANI": {
+    "width": 96,
+    "height": 140,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2\\gymuranANI": {
+    "width": 196,
+    "height": 196,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck2\\jandescANI": {
+    "width": 196,
+    "height": 224,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck2\\mbdisksANI": {
+    "width": 196,
+    "height": 108,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck2\\mbinst1ANI": {
+    "width": 88,
+    "height": 72,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck2\\mbinst2ANI": {
+    "width": 88,
+    "height": 72,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck2\\mbinst3ANI": {
+    "width": 72,
+    "height": 68,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck2\\mbplayANI": {
+    "width": 176,
+    "height": 88,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck2\\mbsongsANI": {
+    "width": 180,
+    "height": 56,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck2\\MBtubeANI": {
+    "width": 36,
+    "height": 48,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck2\\mbtubeupANI": {
+    "width": 40,
+    "height": 48,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck2\\runpumpANI": {
+    "width": 176,
+    "height": 76,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck3For\\bellstrtANI": {
+    "width": 320,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3For\\janbed7ANI": {
     "width": 128,
     "height": 171,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck3For/jandoor7ANI": {
+  "GameDB\\Deck3For\\jandoor7ANI": {
     "width": 80,
     "height": 88,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/Deck3For/kinepl1aANI": {
+  "GameDB\\Deck3For\\JCwalks2ANI": {
+    "width": 144,
+    "height": 148,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Deck3For\\JCwalksANI": {
+    "width": 144,
+    "height": 148,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\Deck3For\\kinepl1aANI": {
     "width": 84,
     "height": 144,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck3For/kinepl1bANI": {
+  "GameDB\\Deck3For\\kinepl1bANI": {
     "width": 84,
     "height": 144,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck3For/kinepl2aANI": {
+  "GameDB\\Deck3For\\kinepl2aANI": {
     "width": 84,
     "height": 140,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck3For/kinepl2bANI": {
+  "GameDB\\Deck3For\\kinepl2bANI": {
     "width": 84,
     "height": 140,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
   },
-  "GameDB/Deck3For/phardiagANI": {
+  "GameDB\\Deck3For\\phardiagANI": {
     "width": 44,
     "height": 44,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/h2oFront/barpoleANI": {
+  "GameDB\\Deck3For\\thrcineANI": {
+    "width": 260,
+    "height": 160,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\atomspryANI": {
+    "width": 76,
+    "height": 84,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\BMserumANI": {
+    "width": 88,
+    "height": 106,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck3Aft\\BSserumANI": {
     "width": 60,
-    "height": 60,
-    "atlas": true
+    "height": 84,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/h2oFront/box2missANI": {
-    "width": 292,
-    "height": 60,
-    "atlas": false
-  },
-  "GameDB/h2oFront/box3missANI": {
-    "width": 376,
-    "height": 80,
-    "atlas": false
-  },
-  "GameDB/h2oFront/box4missANI": {
-    "width": 312,
-    "height": 64,
-    "atlas": false
-  },
-  "GameDB/h2oFront/box5missANI": {
-    "width": 312,
-    "height": 64,
-    "atlas": false
-  },
-  "GameDB/h2oFront/box6missANI": {
-    "width": 316,
-    "height": 72,
-    "atlas": false
-  },
-  "GameDB/h2oFront/cartfl2ANI": {
-    "width": 360,
-    "height": 248,
-    "atlas": true
-  },
-  "GameDB/h2oFront/cartfl3ANI": {
-    "width": 360,
-    "height": 248,
-    "atlas": true
-  },
-  "GameDB/h2oFront/cartop0ANI": {
-    "width": 340,
-    "height": 268,
-    "atlas": true
-  },
-  "GameDB/h2oFront/cartop1ANI": {
-    "width": 348,
-    "height": 264,
-    "atlas": true
-  },
-  "GameDB/h2oFront/cartop2ANI": {
-    "width": 348,
-    "height": 264,
-    "atlas": true
-  },
-  "GameDB/h2oFront/ffroseANI": {
+  "GameDB\\Deck3Aft\\fntbutcANI": {
     "width": 60,
-    "height": 60,
+    "height": 140,
+    "audio": false,
     "atlas": false
   },
-  "GameDB/h2oFront/fireANI": {
-    "width": 96,
-    "height": 80,
-    "atlas": true
+  "GameDB\\Deck3Aft\\fntbutlANI": {
+    "width": 48,
+    "height": 136,
+    "audio": false,
+    "atlas": false
   },
-  "GameDB/h2oFront/maChinaANI": {
-    "width": 108,
-    "height": 128,
-    "atlas": true
+  "GameDB\\Deck3Aft\\fntbutrANI": {
+    "width": 52,
+    "height": 132,
+    "audio": false,
+    "atlas": false
   },
-  "GameDB/h2oFront/maEgyptANI": {
-    "width": 116,
-    "height": 128,
-    "atlas": true
+  "GameDB\\Deck3Aft\\fntwaterANI": {
+    "width": 300,
+    "height": 136,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/h2oFront/maEnglanANI": {
-    "width": 96,
-    "height": 128,
-    "atlas": true
-  },
-  "GameDB/h2oFront/maFranceANI": {
-    "width": 104,
-    "height": 124,
-    "atlas": true
-  },
-  "GameDB/h2oFront/maNYANI": {
-    "width": 92,
-    "height": 104,
-    "atlas": true
-  },
-  "GameDB/h2oFront/maRomeANI": {
-    "width": 96,
-    "height": 96,
-    "atlas": true
-  },
-  "GameDB/h2oFront/mufftagANI": {
-    "width": 180,
-    "height": 184,
-    "atlas": true
-  },
-  "GameDB/h2oFront/noroseFFANI": {
-    "width": 96,
-    "height": 60,
-    "atlas": true
-  },
-  "GameDB/h2oFront/noroseWHANI": {
+  "GameDB\\Deck3Aft\\fountcANI": {
     "width": 60,
-    "height": 60,
-    "atlas": true
+    "height": 136,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/h2oFront/pinAANI": {
+  "GameDB\\Deck3Aft\\fountlrANI": {
+    "width": 300,
+    "height": 140,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Deck3Aft\\glwSRbutANI": {
     "width": 68,
     "height": 68,
-    "atlas": false
+    "audio": true,
+    "video": true
   },
-  "GameDB/h2oFront/pinBANI": {
-    "width": 64,
-    "height": 64,
-    "atlas": false
+  "GameDB\\Deck3Aft\\GTserumANI": {
+    "width": 88,
+    "height": 124,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/h2oFront/pinFANI": {
-    "width": 60,
-    "height": 68,
-    "atlas": false
+  "GameDB\\Deck3Aft\\herblANI": {
+    "width": 32,
+    "height": 28,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/h2oFront/pinGANI": {
-    "width": 72,
-    "height": 72,
-    "atlas": false
+  "GameDB\\Deck3Aft\\herbrANI": {
+    "width": 32,
+    "height": 32,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/h2oFront/pinRANI": {
-    "width": 64,
-    "height": 68,
-    "atlas": false
-  },
-  "GameDB/h2oFront/pinYANI": {
-    "width": 64,
-    "height": 64,
-    "atlas": false
-  },
-  "GameDB/h2oFront/pub24ANI": {
-    "width": 44,
-    "height": 100,
-    "atlas": false
-  },
-  "GameDB/h2oFront/pull1ANI": {
-    "width": 284,
-    "height": 328,
-    "atlas": true
-  },
-  "GameDB/h2oFront/pull2ANI": {
-    "width": 220,
-    "height": 332,
-    "atlas": true
-  },
-  "GameDB/h2oFront/pull4ANI": {
-    "width": 100,
-    "height": 336,
-    "atlas": true
-  },
-  "GameDB/h2oFront/pull5ANI": {
-    "width": 220,
-    "height": 332,
-    "atlas": true
-  },
-  "GameDB/h2oFront/sween18ANI": {
-    "width": 116,
-    "height": 260,
-    "atlas": false
-  },
-  "GameDB/h2oFront/tap1dartANI": {
-    "width": 200,
+  "GameDB\\Deck3Aft\\IFneedleANI": {
+    "width": 172,
     "height": 60,
-    "atlas": false
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/h2oFront/tap2dartANI": {
-    "width": 216,
+  "GameDB\\Deck3Aft\\influx#1ANI": {
+    "width": 60,
     "height": 60,
-    "atlas": false
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/h2oFront/tap3dartANI": {
-    "width": 184,
+  "GameDB\\Deck3Aft\\influx#2ANI": {
+    "width": 60,
     "height": 60,
-    "atlas": false
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/h2oFront/tap4dartANI": {
-    "width": 252,
-    "height": 88,
-    "atlas": false
-  },
-  "GameDB/h2oFront/tap5dartANI": {
-    "width": 200,
-    "height": 72,
-    "atlas": false
-  },
-  "GameDB/h2oFront/tap6dartANI": {
-    "width": 228,
+  "GameDB\\Deck3Aft\\influx#3ANI": {
+    "width": 60,
     "height": 60,
-    "atlas": false
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
   },
-  "GameDB/Harem/pyramidaANI": {
-    "width": 240,
-    "height": 320,
-    "atlas": true
+  "GameDB\\Deck3Aft\\influx1ANI": {
+    "width": 276,
+    "height": 252,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Harem/symbol1ANI": {
-    "width": 132,
-    "height": 204,
-    "atlas": true
+  "GameDB\\Deck3Aft\\influx2ANI": {
+    "width": 272,
+    "height": 252,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Harem/symbol2ANI": {
-    "width": 184,
-    "height": 192,
-    "atlas": true
+  "GameDB\\Deck3Aft\\influx3ANI": {
+    "width": 272,
+    "height": 252,
+    "audio": true,
+    "video": true
   },
-  "GameDB/Harem/symbol3ANI": {
-    "width": 168,
-    "height": 196,
-    "atlas": true
-  },
-  "GameDB/Harem/symbol4ANI": {
-    "width": 164,
-    "height": 200,
-    "atlas": true
-  },
-  "GameDB/Harem/symbol5ANI": {
-    "width": 168,
-    "height": 196,
-    "atlas": true
-  },
-  "GameDB/Voodoo/EUpANI": {
-    "width": 128,
-    "height": 260,
-    "atlas": true
-  },
-  "GameDB/Voodoo/beach23ANI": {
-    "width": 44,
-    "height": 224,
-    "atlas": true
-  },
-  "GameDB/Voodoo/beach3ANI": {
-    "width": 36,
-    "height": 200,
-    "atlas": true
-  },
-  "GameDB/Voodoo/bridge4aANI": {
-    "width": 56,
-    "height": 288,
-    "atlas": true
-  },
-  "GameDB/Voodoo/bridge4bANI": {
-    "width": 60,
-    "height": 36,
-    "atlas": true
-  },
-  "GameDB/Voodoo/cemetaryANI": {
-    "width": 48,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Voodoo/cerewf23ANI": {
-    "width": 40,
-    "height": 164,
-    "atlas": true
-  },
-  "GameDB/Voodoo/cerewf2ANI": {
-    "width": 48,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Voodoo/firedol1ANI": {
-    "width": 92,
-    "height": 204,
-    "atlas": true
-  },
-  "GameDB/Voodoo/firedol2ANI": {
-    "width": 152,
-    "height": 208,
-    "atlas": true
-  },
-  "GameDB/Voodoo/firedol3ANI": {
-    "width": 264,
-    "height": 208,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave2ANI": {
-    "width": 64,
-    "height": 120,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave3ANI": {
-    "width": 60,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave4ANI": {
-    "width": 60,
-    "height": 164,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave6ANI": {
-    "width": 60,
-    "height": 160,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave7ANI": {
-    "width": 60,
-    "height": 80,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave8ANI": {
-    "width": 64,
-    "height": 140,
-    "atlas": true
-  },
-  "GameDB/Voodoo/grave9ANI": {
-    "width": 60,
-    "height": 148,
-    "atlas": true
-  },
-  "GameDB/Voodoo/meltdol1ANI": {
-    "width": 108,
-    "height": 200,
-    "atlas": true
-  },
-  "GameDB/Voodoo/meltdol2ANI": {
-    "width": 196,
-    "height": 208,
-    "atlas": true
-  },
-  "GameDB/Voodoo/meltdol3ANI": {
-    "width": 132,
-    "height": 204,
-    "atlas": true
-  },
-  "GameDB/Voodoo/monkey1ANI": {
-    "width": 108,
-    "height": 88,
-    "atlas": true
-  },
-  "GameDB/Voodoo/monkey2ANI": {
-    "width": 96,
-    "height": 84,
-    "atlas": true
-  },
-  "GameDB/Voodoo/monkey3ANI": {
-    "width": 92,
-    "height": 80,
-    "atlas": true
-  },
-  "GameDB/Voodoo/monkey4ANI": {
-    "width": 84,
-    "height": 76,
-    "atlas": true
-  },
-  "GameDB/Voodoo/monkey5ANI": {
+  "GameDB\\Deck3Aft\\LGserumANI": {
     "width": 88,
     "height": 88,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
   },
-  "GameDB/Voodoo/monkey6ANI": {
+  "GameDB\\Deck3Aft\\MBcrankBANI": {
+    "width": 88,
+    "height": 84,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck3Aft\\MBcrankFANI": {
+    "width": 96,
+    "height": 80,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\MBturnANI": {
+    "width": 116,
+    "height": 260,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck3Aft\\scrbBMANI": {
+    "width": 160,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbBSANI": {
+    "width": 160,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbCMANI": {
+    "width": 160,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbGTANI": {
+    "width": 160,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbJMANI": {
+    "width": 160,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck3Aft\\scrbopenANI": {
+    "width": 172,
+    "height": 60,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\scrbshtrANI": {
+    "width": 56,
+    "height": 56,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\trnkhookANI": {
+    "width": 120,
+    "height": 116,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck3Aft\\uranindANI": {
+    "width": 200,
+    "height": 200,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck4\\AliteANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\aoffANI": {
+    "width": 64,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\AondkANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\Aunlit5ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\baclevANI": {
+    "width": 136,
+    "height": 176,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\dkStogglANI": {
+    "width": 108,
+    "height": 124,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Deck4\\dkUPliteANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\forlevANI": {
+    "width": 124,
+    "height": 184,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\gondladdANI": {
+    "width": 280,
+    "height": 232,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\IliteANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\InjectD1ANI": {
+    "width": 216,
+    "height": 160,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\InjectD2ANI": {
+    "width": 216,
+    "height": 100,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\injectU1ANI": {
+    "width": 216,
+    "height": 160,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\injectU2ANI": {
+    "width": 216,
+    "height": 100,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\ioffANI": {
+    "width": 68,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\IondkANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\Iunlit5ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\LbuttonUANI": {
+    "width": 60,
+    "height": 60,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\RbuttonDANI": {
+    "width": 60,
+    "height": 60,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\rodsDANI": {
+    "width": 216,
+    "height": 160,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\rodsUANI": {
+    "width": 216,
+    "height": 160,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\ScallbutANI": {
+    "width": 60,
+    "height": 60,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\scramlitANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SguageANI": {
+    "width": 132,
+    "height": 124,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\SguageofANI": {
+    "width": 132,
+    "height": 124,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\SRliteBMANI": {
+    "width": 36,
+    "height": 40,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SRliteBSANI": {
+    "width": 32,
+    "height": 48,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SRliteCMANI": {
+    "width": 36,
+    "height": 36,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SRliteGTANI": {
+    "width": 36,
+    "height": 48,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SRliteJMANI": {
+    "width": 36,
+    "height": 48,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SRliteLGANI": {
+    "width": 32,
+    "height": 40,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\SRswitchANI": {
+    "width": 136,
+    "height": 216,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck4\\stageE1ANI": {
+    "width": 60,
+    "height": 180,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck4\\stageE5ANI": {
+    "width": 32,
+    "height": 88,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck4\\stageN21ANI": {
+    "width": 60,
+    "height": 180,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck4\\stageN5ANI": {
+    "width": 60,
+    "height": 180,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck4\\stageW21ANI": {
+    "width": 60,
+    "height": 120,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck4\\StoggleANI": {
+    "width": 112,
+    "height": 96,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Deck4\\UcallbutANI": {
+    "width": 60,
+    "height": 64,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\ufripplANI": {
+    "width": 404,
+    "height": 156,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Deck4\\UguageOnANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\UPlever1ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\UPlever2ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\UPlightANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\urangageANI": {
+    "width": 160,
+    "height": 152,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\UtoggleANI": {
+    "width": 124,
+    "height": 96,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Deck4\\valveDANI": {
+    "width": 164,
+    "height": 188,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\valvetrnANI": {
+    "width": 240,
+    "height": 188,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Deck4\\valveUANI": {
+    "width": 164,
+    "height": 188,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Deck4\\VliteANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 2
+  },
+  "GameDB\\Deck4\\voffANI": {
+    "width": 68,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\VondkANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Deck4\\Vunlit5ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Elevator\\florind1ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Elevator\\florind2ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Elevator\\florind3ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\Elevator\\florind4ANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\iceNchat\\icepickANI": {
+    "width": 220,
+    "height": 280,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\iceNchat\\pickpanoANI": {
+    "width": 72,
+    "height": 112,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\Harem\\pyramidaANI": {
+    "width": 240,
+    "height": 320,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\Harem\\symbol1ANI": {
+    "width": 132,
+    "height": 204,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\symbol2ANI": {
+    "width": 184,
+    "height": 192,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\symbol3ANI": {
+    "width": 168,
+    "height": 196,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\symbol4ANI": {
+    "width": 164,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Harem\\symbol5ANI": {
+    "width": 168,
+    "height": 196,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\neuro\\galteANI": {
+    "width": 180,
+    "height": 144,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\neuro\\mexlerANI": {
+    "width": 176,
+    "height": 148,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\neuro\\swanANI": {
+    "width": 168,
+    "height": 144,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\neuro\\thermonANI": {
+    "width": 172,
+    "height": 144,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\h2oFront\\barpoleANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\box1missANI": {
+    "width": 320,
+    "height": 88,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\box2missANI": {
+    "width": 292,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\box3missANI": {
+    "width": 376,
+    "height": 80,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\box4missANI": {
+    "width": 312,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\box5missANI": {
+    "width": 312,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\box6missANI": {
+    "width": 316,
+    "height": 72,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\cartfl1ANI": {
+    "width": 320,
+    "height": 208,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\cartfl2ANI": {
+    "width": 360,
+    "height": 248,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\cartfl3ANI": {
+    "width": 360,
+    "height": 248,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\cartop0ANI": {
+    "width": 340,
+    "height": 268,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\cartop1ANI": {
+    "width": 348,
+    "height": 264,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\cartop2ANI": {
+    "width": 348,
+    "height": 264,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\ffroseANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\fireANI": {
+    "width": 96,
+    "height": 80,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 9
+  },
+  "GameDB\\h2oFront\\maChinaANI": {
+    "width": 108,
+    "height": 128,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\h2oFront\\maEgyptANI": {
+    "width": 116,
+    "height": 128,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\maEnglanANI": {
+    "width": 96,
+    "height": 128,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\maFranceANI": {
+    "width": 104,
+    "height": 124,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\maNYANI": {
+    "width": 92,
+    "height": 104,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\maRomeANI": {
+    "width": 96,
+    "height": 96,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\mufftagANI": {
+    "width": 180,
+    "height": 184,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\h2oFront\\noroseFFANI": {
+    "width": 96,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\noroseWHANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\h2oFront\\pinAANI": {
+    "width": 68,
+    "height": 68,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pinBANI": {
+    "width": 64,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pinFANI": {
+    "width": 60,
+    "height": 68,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pinGANI": {
+    "width": 72,
+    "height": 72,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pinRANI": {
+    "width": 64,
+    "height": 68,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pinYANI": {
+    "width": 64,
+    "height": 64,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pub24ANI": {
+    "width": 44,
+    "height": 100,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\pull1ANI": {
+    "width": 284,
+    "height": 328,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\pull2ANI": {
+    "width": 220,
+    "height": 332,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\pull3ANI": {
+    "width": 132,
+    "height": 336,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\pull4ANI": {
+    "width": 100,
+    "height": 336,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\pull5ANI": {
+    "width": 220,
+    "height": 332,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\pull6ANI": {
+    "width": 284,
+    "height": 336,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\h2oFront\\sween18ANI": {
+    "width": 116,
+    "height": 260,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\tap1dartANI": {
+    "width": 200,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\tap2dartANI": {
+    "width": 216,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\tap3dartANI": {
+    "width": 184,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\tap4dartANI": {
+    "width": 252,
+    "height": 88,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\tap5dartANI": {
+    "width": 200,
+    "height": 72,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\h2oFront\\tap6dartANI": {
+    "width": 228,
+    "height": 60,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\sanitory\\BMwcANI": {
+    "width": 260,
+    "height": 240,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\sanitory\\BMwcButtANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\sanitory\\BSwcANI": {
+    "width": 260,
+    "height": 240,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\sanitory\\BSwcButtANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\sanitory\\GTwcANI": {
+    "width": 260,
+    "height": 240,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\sanitory\\LGwcANI": {
+    "width": 260,
+    "height": 240,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\sanitory\\LGwcButtANI": {
+    "width": 60,
+    "height": 60,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 3
+  },
+  "GameDB\\sanitory\\podknob1ANI": {
+    "width": 80,
+    "height": 72,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\sanitory\\podknob2ANI": {
+    "width": 76,
+    "height": 72,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\sanitory\\podknob3ANI": {
+    "width": 76,
+    "height": 72,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\sanitory\\podrtswANI": {
+    "width": 108,
+    "height": 144,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 4
+  },
+  "GameDB\\sanitory\\podrtwl1ANI": {
+    "width": 60,
+    "height": 252,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\sanitory\\podrtwl2ANI": {
+    "width": 56,
+    "height": 252,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\sanitory\\podrtwl3ANI": {
+    "width": 60,
+    "height": 252,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 8
+  },
+  "GameDB\\sanitory\\saniN23ANI": {
+    "width": 128,
+    "height": 216,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\sanitory\\saniN24ANI": {
+    "width": 128,
+    "height": 132,
+    "audio": false,
+    "atlas": false
+  },
+  "GameDB\\sanitory\\wcButtANI": {
+    "width": 60,
+    "height": 60,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\beach23ANI": {
+    "width": 44,
+    "height": 224,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\beach3ANI": {
+    "width": 36,
+    "height": 200,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\bridge4aANI": {
+    "width": 56,
+    "height": 288,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\bridge4bANI": {
+    "width": 60,
+    "height": 36,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\cemetaryANI": {
+    "width": 48,
+    "height": 160,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\cerewf23ANI": {
+    "width": 40,
+    "height": 164,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\cerewf2ANI": {
+    "width": 48,
+    "height": 160,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\EUpANI": {
+    "width": 128,
+    "height": 260,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 5
+  },
+  "GameDB\\Voodoo\\firedol1ANI": {
+    "width": 92,
+    "height": 204,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 10
+  },
+  "GameDB\\Voodoo\\firedol2ANI": {
+    "width": 152,
+    "height": 208,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 10
+  },
+  "GameDB\\Voodoo\\firedol3ANI": {
+    "width": 264,
+    "height": 208,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 10
+  },
+  "GameDB\\Voodoo\\grave2ANI": {
+    "width": 64,
+    "height": 120,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\grave3ANI": {
+    "width": 60,
+    "height": 160,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\grave4ANI": {
+    "width": 60,
+    "height": 164,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\grave6ANI": {
+    "width": 60,
+    "height": 160,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\grave7ANI": {
+    "width": 60,
+    "height": 80,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\grave8ANI": {
+    "width": 64,
+    "height": 140,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\grave9ANI": {
+    "width": 60,
+    "height": 148,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 6
+  },
+  "GameDB\\Voodoo\\meltdol1ANI": {
+    "width": 108,
+    "height": 200,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\meltdol2ANI": {
+    "width": 196,
+    "height": 208,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\meltdol3ANI": {
+    "width": 132,
+    "height": 204,
+    "audio": true,
+    "video": true
+  },
+  "GameDB\\Voodoo\\monkey1ANI": {
+    "width": 108,
+    "height": 88,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\monkey2ANI": {
+    "width": 96,
+    "height": 84,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\monkey3ANI": {
+    "width": 92,
+    "height": 80,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\monkey4ANI": {
+    "width": 84,
+    "height": 76,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\monkey5ANI": {
+    "width": 88,
+    "height": 88,
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
+  },
+  "GameDB\\Voodoo\\monkey6ANI": {
     "width": 84,
     "height": 80,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   },
-  "GameDB/Voodoo/monkey7ANI": {
+  "GameDB\\Voodoo\\monkey7ANI": {
     "width": 100,
     "height": 76,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   },
-  "GameDB/Voodoo/monkey8ANI": {
+  "GameDB\\Voodoo\\monkey8ANI": {
     "width": 112,
     "height": 92,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   },
-  "GameDB/Voodoo/monkey9ANI": {
+  "GameDB\\Voodoo\\monkey9ANI": {
     "width": 92,
     "height": 84,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   },
-  "GameDB/Voodoo/monktoyANI": {
+  "GameDB\\Voodoo\\monktoyANI": {
     "width": 260,
     "height": 284,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   },
-  "GameDB/Voodoo/obolisk4ANI": {
+  "GameDB\\Voodoo\\obolisk4ANI": {
     "width": 36,
     "height": 108,
-    "atlas": true
+    "audio": false,
+    "atlas": true,
+    "atlasWidth": 7
   }
 }

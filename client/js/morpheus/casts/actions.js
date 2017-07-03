@@ -26,7 +26,7 @@ export function doEnter() {
     });
     return Promise.all(Object.keys(delegates).map((cast) => {
       const delegate = delegates[cast];
-      if (delegate.applies(getState())) {
+      if (delegate.doEnter && delegate.applies(getState())) {
         return dispatch(doEnterForCast(cast, delegate.doEnter));
       }
       return Promise.resolve();
@@ -52,7 +52,7 @@ function onStageForCast(type, onStageAction) {
 export function onStage() {
   return (dispatch, getState) => Promise.all(Object.keys(delegates).map((cast) => {
     const delegate = delegates[cast];
-    if (delegate.applies(getState())) {
+    if (delegate.onStage && delegate.applies(getState())) {
       return dispatch(onStageForCast(cast, delegate.onStage));
     }
     return Promise.resolve();
@@ -87,3 +87,4 @@ export { actions as pano } from './pano';
 export { actions as panoAnim } from './panoAnim';
 export { actions as hotspot } from './hotspot';
 export { actions as transition } from './transition';
+export { actions as special } from './special';

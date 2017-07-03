@@ -14,12 +14,16 @@ import {
 import {
   delegate as transitionDelegate,
 } from './transition';
+import {
+  delegate as specialDelegate,
+} from './special';
 
 const delegates = {
   hotspot: hotspotDelegate,
   pano: panoDelegate,
   panoAnim: panoAnimDelegate,
   transition: transitionDelegate,
+  special: specialDelegate,
 };
 
 export {

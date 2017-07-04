@@ -26,7 +26,7 @@ const Special = connect(
   dispatch,
 }) => (
   <div ref={(el) => {
-    if (el && canvas) {
+    if (el) {
       el.appendChild(canvas);
       videos.forEach(video => el.appendChild(video));
       flatspot(dispatch);

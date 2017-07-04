@@ -185,7 +185,7 @@ function onStage() {
       return Promise.resolve();
     }
 
-    const panoScene3D = panoSelectors.panoScene3D(getState());
+    const panoObject3D = panoSelectors.panoObject3D(getState());
     const panoAnimCastMap = selectPanoAnimCastMap(getState());
     return Promise.all(values(map(videoElDefers, 'promise')))
       .then((videoEls) => {
@@ -201,7 +201,7 @@ function onStage() {
           );
           const material = createMaterial(videoEl);
           const object3D = createObject3D({ geometry, material, frame });
-          panoScene3D.add(object3D);
+          panoObject3D.add(object3D);
         });
       });
   };

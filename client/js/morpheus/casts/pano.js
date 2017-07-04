@@ -215,7 +215,7 @@ function doEnter() {
     if (panoCastData) {
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
       const { fileName } = panoCastData;
-      const asset = getAssetUrl(`${fileName}.atlas.png`);
+      const asset = getAssetUrl(`${fileName}.png`);
       const geometries = createGeometries();
       const { material, promise: promiseMaterial } = createMaterial(asset);
       const object3D = createObject3D({
@@ -288,6 +288,7 @@ export const actions = {
 export const selectors = {
   applies,
   panoScene3D,
+  panoObject3D: selectPanoObject3D,
   renderElements: selectRenderElements,
   rotation: selectRotation,
 };

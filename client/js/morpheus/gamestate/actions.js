@@ -5,6 +5,9 @@ import {
 import {
   actions as sceneActions,
 } from 'morpheus/scene';
+import {
+  selectors as gameStateSelectors,
+} from 'morpheus/gamestate';
 import store from 'store';
 
 import {
@@ -41,12 +44,7 @@ export function updateGameState(gamestateId, value) {
 
 export function handleHotspot(hotspot) {
   return (dispatch, getState) => {
-    const {
-      gameState,
-    } = getState();
-    const {
-      idMap,
-    } = gameState;
+    const gameStates = gameStateSelectors.gamestates(getState());
     const {
       comparators,
       type,
@@ -57,7 +55,7 @@ export function handleHotspot(hotspot) {
       testType,
       value,
     }) => {
-      const gs = idMap[gameStateId];
+      const gs = gameStates[gameStateId];
 
       switch(TEST_TYPES[testType]) {
         case 'EqualTo':
@@ -76,12 +74,11 @@ export function handleHotspot(hotspot) {
     if (isActive) {
       const actionType = ACTION_TYPES[type];
       switch(actionType) {
+        case 'DissolveTo':
         case 'ChangeScene':
           const { param1: nextSceneId } = hotspot;
-          dispatch({
-            type: SCENE_END,
-          });
           dispatch(sceneActions.goToScene(nextSceneId));
+          return true;
           break;
       }
     }

@@ -55,13 +55,12 @@ export default function (dispatch) {
     hotspots,
   }) {
     hotspots.some(hotspot => {
-      dispatch(castActions.special.handleMouseEvent({
+      return dispatch(castActions.special.handleMouseEvent({
         type,
         top,
         left,
         hotspot,
       }));
-      return hotspot.defaultPass;
     });
   }
 
@@ -111,17 +110,17 @@ export default function (dispatch) {
       }
     });
     // Update our state
-    logger.info('Handling mouse event', JSON.stringify({
-      nowActiveHotspots,
-      wasMouseUpped,
-      wasMouseMoved,
-      wasMouseDowned,
-      adjustedClickPos,
-      originalClickPos: {
-        top,
-        left,
-      },
-    }, null, 2));
+    // logger.info('Handling mouse event', JSON.stringify({
+    //   nowActiveHotspots,
+    //   wasMouseUpped,
+    //   wasMouseMoved,
+    //   wasMouseDowned,
+    //   adjustedClickPos,
+    //   originalClickPos: {
+    //     top,
+    //     left,
+    //   },
+    // }, null, 2));
     // Events for hotspots we have left
     handleHotspotDispatches({
       type: 'MouseLeave',

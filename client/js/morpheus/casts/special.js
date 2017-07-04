@@ -9,6 +9,7 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
+  actions as gamestateActions,
   selectors as gameStateSelectors,
 } from 'morpheus/gamestate';
 import {
@@ -23,6 +24,9 @@ import {
 import {
   createVideo,
 } from 'utils/video';
+import {
+  GESTURES,
+} from 'morpheus/constants';
 
 const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
@@ -74,7 +78,7 @@ const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
-function clipRect({ width, height, top, left, right, bottom, clip = false }) {
+function resizeToScreen({ width, height, top, left, right, bottom, clip = false }) {
   if (width / height > ORIGINAL_ASPECT_RATIO) {
     const adjustedHeight = width / ORIGINAL_ASPECT_RATIO;
     const clipHeight = adjustedHeight - height;
@@ -143,7 +147,7 @@ function generateMovieTransform({ cast, video, dimensions }) {
   const { y: top, x: left } = cast.location;
   const bottom = top + cast.height;
   const right = left + cast.width;
-  const { x, y, sizeX, sizeY } = clipRect({ top, left, bottom, right, width, height });
+  const { x, y, sizeX, sizeY } = resizeToScreen({ top, left, bottom, right, width, height });
   return {
     left: x,
     top: y,
@@ -198,7 +202,7 @@ function generateControlledFrames({
       cast,
       img,
       gameStates,
-      rect: clipRect({
+      rect: resizeToScreen({
         left: location.x,
         top: location.y,
         right: location.x + cast.width,
@@ -240,8 +244,16 @@ function createCanvas({ width, height }) {
   return canvas;
 }
 
-function handleMouseEvent({ type, hotspot }) {
-  return (dispatch) => {};
+export function handleMouseEvent({ type, hotspot }) {
+  return (dispatch) => {
+    const {
+      gesture,
+    } = hotspot;
+    const gestureType = GESTURES[gesture];
+    if (type === gestureType) {
+      return dispatch(gamestateActions.handleHotspot(hotspot));
+    }
+  };
 }
 
 function applies(state) {

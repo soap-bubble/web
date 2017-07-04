@@ -61,7 +61,9 @@ export class MovieCast extends Cast {
   constructor(opts) {
     super(opts);
     this.add({
-      fileName: String
+      fileName: String,
+      width: Number,
+      height: Number,
     });
   }
 }

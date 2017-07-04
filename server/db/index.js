@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import config from 'config';
 import Promise from 'bluebird';
 
-import * as morpheusV1 from '../models/morpheus_v1';
+import * as morpheus from '../models/morpheus';
 import install from './install';
 
 mongoose.Promise = Promise;
@@ -17,6 +17,6 @@ export default function () {
       auto_reconnect: true,
     },
   })
-    .then(() => install(mongoose, morpheusV1))
+    .then(() => install(mongoose, morpheus))
     .then(() => mongoose);
 }

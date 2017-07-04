@@ -8,6 +8,7 @@ import {
 function mapStateToProps(state) {
   return {
     canvas: castSelectors.special.canvas(state),
+    videos: castSelectors.special.videos(state),
   };
 }
 
@@ -21,11 +22,13 @@ const Special = connect(
   mapStateToProps,
 )(({
   canvas,
+  videos,
   dispatch,
 }) => (
   <div ref={(el) => {
     if (el && canvas) {
       el.appendChild(canvas);
+      videos.forEach(video => el.appendChild(video));
       flatspot(dispatch);
     }
   }} style={{

@@ -1,10 +1,11 @@
 import { fetchInitial as fetchInitialGameState } from 'service/gameState';
 import {
-  actions as specialActions,
-} from 'morpheus/special';
+  actions as castActions,
+} from 'morpheus/casts';
 import {
   actions as sceneActions,
 } from 'morpheus/scene';
+import store from 'store';
 
 import {
   API_ERROR,
@@ -88,8 +89,7 @@ export function handleHotspot(hotspot) {
   };
 }
 
-// window.updateGameState = (gamestateId, value) => {
-//   store.dispatch(updateGameState(gamestateId, value));
-//   store.dispatch(specialActions.generateControlledFrames());
-//   store.dispatch(specialActions.generateSpecialImages());
-// };
+window.updateGameState = (gamestateId, value) => {
+  store.dispatch(updateGameState(gamestateId, value));
+  store.dispatch(castActions.special.update());
+};

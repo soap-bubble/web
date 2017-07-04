@@ -9,3 +9,7 @@ canvas {
 div#mouse {
   position: absolute;
 }
+
+video.MovieSpecialCast {
+  position: absolute;
+}

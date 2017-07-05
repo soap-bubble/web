@@ -77,14 +77,17 @@ function createGeometries() {
       -sliceWidth, sliceHeight, sliceDepth,
     ]), 3);
 
-    const right = ((i + 1) / 24);
-    const left = i / 24;
+    const left = (i % 16) / 16;
+    const right = left + 0.0625;
+    const top = Math.floor(i / 16) === 0 ? 0.5 : 0.0;
+    const bottom = top + 0.5
+
 
     const uvs = new BufferAttribute(new Float32Array([
-      right, 0.0,
-      left, 0.0,
-      left, 1.0,
-      right, 1.0,
+      right, top,
+      left, top,
+      left, bottom,
+      right, bottom,
     ]), 2);
 
     const indices = new Uint16BufferAttribute([

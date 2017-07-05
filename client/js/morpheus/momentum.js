@@ -69,7 +69,6 @@ export default function (dispatch) {
 
       if (momentum.speed.y > MAX_MOMENTUM || momentum.speed.y < -MAX_MOMENTUM) {
         momentum.speed.y *= DAMPER;
-        console.log(momentum.speed.y)
       } else {
         momentum.speed.y = 0;
         yFine = true;

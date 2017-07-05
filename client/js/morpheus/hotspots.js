@@ -38,7 +38,7 @@ export default function ({
   let coordsToCheck;
 
   renderEvents.onAfter(() => {
-    if (coordsToCheck) {
+    if (coordsToCheck && !document.hidden) {
       const { left: x, top } = coordsToCheck;
       const gl = canvas.getContext('webgl');
       // readPixels reads from lower left so need to inverse top (y) coordinate

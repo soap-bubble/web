@@ -166,7 +166,7 @@ function applyTransformToVideo({ transform, video }) {
 function calculateControlledFrameLocation({ cast, img, gameStates, rect }) {
   const { controlledMovieCallbacks, width, height } = cast;
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
-  const value = get(gameStates, `[${gameStateId}].value`, 0);
+  const value = Math.round(get(gameStates, `[${gameStateId}].value`, 0));
 
   const source = {
     x: value * width,
@@ -244,15 +244,22 @@ function createCanvas({ width, height }) {
   return canvas;
 }
 
-export function handleMouseEvent({ type, hotspot }) {
+export function handleMouseEvent({ type, hotspot, top, left }) {
   return (dispatch) => {
     const {
       gesture,
     } = hotspot;
     const gestureType = GESTURES[gesture];
     if (type === gestureType) {
-      return dispatch(gamestateActions.handleHotspot(hotspot));
+      return dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
+    } else if (type === 'MouseDown') {
+      return dispatch(gamestateActions.handleMouseDown({ hotspot, top, left }));
+    } else if (type === 'MouseStillDown') {
+      return dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
+    } else if (type === 'MouseEnter') {
+      return dispatch(gamestateActions.handleMouseOver({ hotspot, top, left }));
     }
+    return true;
   };
 }
 

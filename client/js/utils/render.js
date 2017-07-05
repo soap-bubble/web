@@ -6,18 +6,23 @@ const logger = loggerFactory(__filename);
 let onBefores = [];
 let onRenders = [];
 let onAfters = [];
+let onDestroy = [];
 let isActive = false;
 
 export function render() {
-  try {
-    onBefores.forEach(r => r());
-    onRenders.forEach(r => r());
-    onAfters.forEach(r => r());
-  } catch(err) {
-    logger.error(err);
-  } finally {
-    if (isActive) {
-      raf(render);
+  if (isActive) {
+    try {
+      if (!document.hidden) {
+        onBefores.forEach(r => r());
+        onRenders.forEach(r => r());
+        onAfters.forEach(r => r());
+      }
+    } catch(err) {
+      logger.error(err);
+    } finally {
+      if (isActive) {
+        raf(render);
+      }
     }
   }
 }
@@ -27,9 +32,14 @@ export function reset() {
   onRenders = [];
   onAfters = [];
   isActive = false;
+  onDestroy.forEach(r => r());
+  onDestroy = [];
 }
 
 const renderEvents = {
+  onDestroy(handler) {
+    onDestroy.push(handler);
+  },
   onBefore(handler) {
     onBefores.push(handler);
   },

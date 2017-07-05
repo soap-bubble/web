@@ -208,6 +208,9 @@ function startRenderLoop({ scene3D, camera, renderer }) {
     renderer.render(scene3D, camera);
   };
   renderEvents.onRender(render);
+  renderEvents.onDestroy(() => {
+    renderer.dispose();
+  });
 }
 
 let canvasDefer;

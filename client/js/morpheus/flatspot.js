@@ -37,6 +37,7 @@ export default function (dispatch) {
   let wasMouseDowned = false;
   let wasMouseMoved = false;
   let wasMouseUpped = false;
+  let mouseDown = false;
   let width;
   let height;
   let clipWidth;
@@ -54,7 +55,7 @@ export default function (dispatch) {
     left,
     hotspots,
   }) {
-    hotspots.some(hotspot => {
+    hotspots.every(hotspot => {
       return dispatch(castActions.special.handleMouseEvent({
         type,
         top,
@@ -138,7 +139,8 @@ export default function (dispatch) {
     });
 
     // User initiated event inside a hotspot so could be valid
-    if (wasMouseDowned && nowActiveHotspots.length) {
+    if (!mouseDown && wasMouseDowned && nowActiveHotspots.length) {
+      mouseDown = true;
       handleHotspotDispatches({
         type: 'MouseDown',
         top: adjustedClickPos.top,
@@ -147,7 +149,6 @@ export default function (dispatch) {
       });
     }
 
-    // We were a possible valid click, but user left the hotspot so invalidate
     if (wasMouseMoved) {
       handleHotspotDispatches({
         type: 'MouseMove',
@@ -157,9 +158,19 @@ export default function (dispatch) {
       });
     }
 
+    if (wasMouseMoved && mouseDown) {
+      handleHotspotDispatches({
+        type: 'MouseStillDown',
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots
+      });
+    }
+
     // User pressed and released mouse button inside a valid hotspot
     // TODO: debounce??
     if (wasMouseUpped && nowActiveHotspots.length) {
+      mouseDown = false;
       handleHotspotDispatches({
         type: 'MouseUp',
         top: adjustedClickPos.top,
@@ -185,6 +196,7 @@ export default function (dispatch) {
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
+    dispatch(castActions.special.update());
   }
 
   function onMouseDown({ clientX: left, clientY: top }) {

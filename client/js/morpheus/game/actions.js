@@ -15,6 +15,39 @@ import {
   GAME_SET_CURSOR,
 } from './actionTypes';
 
+const MORPHEUS_TO_HTML_CURSOR = {
+  [10001]: 'alias',
+  [10002]: 'pointer',
+  [10005]: 'alias',
+  [10008]: '-webkit-grab',
+  [10009]: '-webkit-grabbing'
+};
+
+export function setPointerCursor() {
+  return {
+    type: GAME_SET_CURSOR,
+    payload: 10002,
+  };
+}
+
+export function setOpenHandCursor() {
+  return {
+    type: GAME_SET_CURSOR,
+    payload: 10008,
+  };
+}
+
+export function setCloseHandCursor() {
+  return (dispatch) => {
+    setTimeout(() => {
+      dispatch({
+        type: GAME_SET_CURSOR,
+        payload: 10009,
+      });
+    })
+  }
+}
+
 export function setVolume(volume) {
   return {
     type: GAME_SET_VOLUME,

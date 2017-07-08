@@ -120,6 +120,7 @@ function createObject3D({ theta = 0, geometries, material, startAngle = 0 }) {
 
 function createMaterial(asset) {
   const loader = new TextureLoader();
+  loader.crossOrigin = 'anonymous';
   let material;
   const promise = new Promise(
     (resolve, reject) => material = new MeshBasicMaterial({

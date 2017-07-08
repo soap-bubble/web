@@ -3,7 +3,7 @@ import express from 'express';
 import bunyan from 'bunyan';
 import config from 'config';
 import routes from './routes';
-import { getModel } from './db/install';
+import { get as getModel } from './db/install';
 import db, { prime } from './db';
 
 const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
@@ -23,16 +23,17 @@ app.use('/GameDB', express.static(gameDbPath));
 app.use(express.static('public'));
 app.use('/api', routes);
 
-app.db = db(() => {
-  getModel('Scene').find().exec().then((scenes) => {
-    if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
-      logger.info('Attempting to prime DB');
-      prime()
-        .then(() => logger.info('db primed'))
-        .catch(err => logger.error('Failed to prime db', err));
-    }
+app.db = db()
+  .then(() => {
+    getModel('Scene').find().exec().then((scenes) => {
+      if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
+        logger.info('Attempting to prime DB');
+        prime()
+          .then(() => logger.info('db primed'))
+          .catch(err => logger.error('Failed to prime db', err));
+      }
+    });
   });
-});
 
 app.listen(8050, () => {
   logger.info('server up and running on 8050');

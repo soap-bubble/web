@@ -1,15 +1,59 @@
 import raf from 'raf';
-import EventEmitter from 'events';
+import loggerFactory from 'utils/logger';
 
-const renderEvents = new EventEmitter();
-renderEvents.once('newListener', () => {
-  function render() {
-    raf(render);
-    renderEvents.emit('before');
-    renderEvents.emit('render');
-    renderEvents.emit('after');
+const logger = loggerFactory(__filename);
+
+let onBefores = [];
+let onRenders = [];
+let onAfters = [];
+let onDestroy = [];
+let isActive = false;
+
+export function render() {
+  if (isActive) {
+    try {
+      if (!document.hidden) {
+        onBefores.forEach(r => r());
+        onRenders.forEach(r => r());
+        onAfters.forEach(r => r());
+      }
+    } catch(err) {
+      logger.error(err);
+    } finally {
+      if (isActive) {
+        raf(render);
+      }
+    }
   }
-  raf(render);
-});
+}
+
+export function reset() {
+  onBefores = [];
+  onRenders = [];
+  onAfters = [];
+  isActive = false;
+  onDestroy.forEach(r => r());
+  onDestroy = [];
+}
+
+const renderEvents = {
+  onDestroy(handler) {
+    onDestroy.push(handler);
+  },
+  onBefore(handler) {
+    onBefores.push(handler);
+  },
+  onAfter(handler) {
+    onAfters.push(handler);
+  },
+  onRender(handler) {
+    onRenders.push(handler);
+    if (!isActive) {
+      isActive = true;
+      raf(render);
+    }
+  },
+  reset,
+};
 
 export default renderEvents;

@@ -15,6 +15,7 @@ const Scene = ({
 );
 
 Scene.propTypes = {
+  id: PropTypes.string,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
   createAction: PropTypes.func.isRequired,

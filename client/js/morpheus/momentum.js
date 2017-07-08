@@ -1,10 +1,16 @@
 import { last } from 'lodash';
 import {
-  rotateBy,
-  rotate,
-} from '../actions/pano';
-import store from '../store';
+  actions as castActions,
+  selectors as castSelectors,
+} from 'morpheus/casts';
 import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
+import raf from 'raf';
+import store from 'store';
+import input from 'morpheus/input';
+
+const {
   addMouseUp,
   addMouseMove,
   addMouseDown,
@@ -12,7 +18,7 @@ import {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} from '../actions/ui';
+} = input.actions;
 
 export default function (dispatch) {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
@@ -29,13 +35,15 @@ export default function (dispatch) {
 
   // Momentum is a sense of continued be deaccelerating user interaction that continues after the user event ends
   const momentum = {
-    intervalId: 0,
+    enabled: false,
+    abort: false,
     speed: { x: 0, y: 0}
   };
 
   const SWING_DELTA = 0.25;
   const DEG_TO_RAD = Math.PI / 180;
-  const MAX_MOMENTUM = 0.5 * DEG_TO_RAD;
+  const MAX_MOMENTUM = 0.0125 * DEG_TO_RAD;
+  const DAMPER = 0.90;
 
   function convertFromHorizontalSpeed(delta, sensitivity) {
     const speed =  (delta * DEG_TO_RAD) / (10.0 * ((19 - sensitivity) / 18.0 ));
@@ -46,33 +54,39 @@ export default function (dispatch) {
     return (delta * DEG_TO_RAD) / (7.0 * ((19 - sensitivity) / 18.0 ));
   }
 
+  function startMomentum() {
+    if (!momentum.enabled) {
+      momentum.enabled = true;
+      updateMomentum();
+    }
+  }
+
   function updateMomentum() {
-    const { pano } = store.getState();
-    const {
-      sensitivity,
-      rotation,
-    } = pano;
-    let yFine = false;
+    if (!momentum.abort) {
+      const rotation = castSelectors.pano.rotation(store.getState());
+      const sensitivity = gameSelectors.sensitivity(store.getState());
+      let yFine = false;
 
-    if (momentum.speed.y > MAX_MOMENTUM) {
-      momentum.speed.y -= MAX_MOMENTUM;
-    } else if (momentum.speed.y < -MAX_MOMENTUM) {
-      momentum.speed.y += MAX_MOMENTUM;
-    } else {
-      momentum.speed.y = 0;
-      yFine = true;
+      if (momentum.speed.y > MAX_MOMENTUM || momentum.speed.y < -MAX_MOMENTUM) {
+        momentum.speed.y *= DAMPER;
+      } else {
+        momentum.speed.y = 0;
+        yFine = true;
+      }
+
+      if (momentum.speed.x > MAX_MOMENTUM || momentum.speed.x < -MAX_MOMENTUM) {
+        momentum.speed.x *= DAMPER;
+      } else if (yFine){
+        momentum.speed.x = 0;
+        momentum.enabled = false;
+      }
+
+      dispatch(castActions.pano.rotateBy(momentum.speed));
     }
-
-    if (momentum.speed.x > MAX_MOMENTUM ) {
-      momentum.speed.x -= MAX_MOMENTUM;
-    } else if (momentum.speed.x < -MAX_MOMENTUM) {
-      momentum.speed.x += MAX_MOMENTUM;
-    } else if (yFine){
-      momentum.speed.x = 0;
-      clearInterval(momentum.intervalId);
+    momentum.abort = false;
+    if (momentum.enabled) {
+      raf(updateMomentum);
     }
-
-    dispatch(rotateBy(momentum.speed));
   }
 
   function onInteractionStart({ left, top }) {
@@ -80,16 +94,13 @@ export default function (dispatch) {
     interaction.active = true;
     interaction.positions = [{ top, left, time: interaction.startTime }];
     interaction.startPos = interaction.positions[0];
-    clearInterval(interaction.intervalId);
+    momentum.abort = true;
   }
 
   function onInteractionMove({ left, top }) {
     if (interaction.active) {
-      const { pano } = store.getState();
-      const {
-        controlType,
-        sensitivity,
-      } = pano;
+      const controlType = gameSelectors.controlType(store.getState());
+      const sensitivity = gameSelectors.sensitivity(store.getState());
       const interactionLastPos = last(interaction.positions);
       const speed = {
         horizontal: left - interactionLastPos.left,
@@ -99,12 +110,15 @@ export default function (dispatch) {
         horizontal: convertFromHorizontalSpeed(speed.horizontal, sensitivity),
         vertical: convertFromVerticalSpeed(speed.vertical, sensitivity),
       };
-      interaction.positions.push({ top, left, time: Date.now() });
+      const time = Date.now();
+      if (!interaction.positions.length || last(interaction.positions).time !== time) {
+        interaction.positions.push({ time: Date.now(), left, top, ...delta });
+      }
       if (interaction.positions.length > 5) {
         interaction.positions.shift();
       }
 
-      dispatch(rotateBy({
+      dispatch(castActions.pano.rotateBy({
         x: delta.vertical,
         y: delta.horizontal,
       }));
@@ -112,42 +126,18 @@ export default function (dispatch) {
   }
 
   function onInteractionEnd({ left, top }) {
-    const {
-      interactionDebounce,
-      sensitivity,
-    } = store.getState().pano;
+    const sensitivity = gameSelectors.sensitivity(store.getState());
+    const interactionDebounce = gameSelectors.interactionDebounce(store.getState());
     let interactionMomemtum = { x: 0, y: 0 };
     const interactionDistance = Math.sqrt(
       Math.pow(interaction.startPos.left - left, 2)
        + Math.pow(interaction.startPos.top - top, 2)
     );
     if (interactionDistance > interactionDebounce) {
-      const averageSpeed = interaction.positions.reduce((memo, speed, index) => {
-        if (index === 0) {
-          return memo;
-        }
-        const previous = interaction.positions[index - 1];
-        const deltaTime = speed.time - previous.time;
-        const deltaX = speed.left - previous.left;
-        const deltaY = speed.top - previous.top;
-        const speedX = deltaX / deltaTime;
-        const speedY = deltaY / deltaTime;
-        return {
-          left: (memo.left + speedX) / 2,
-          top: (memo.top + speedY) / 2,
-        };
-      }, {
-        top: 0,
-        left: 0,
-      });
-      averageSpeed.left *= 20;
-      averageSpeed.top *= 10;
-      momentum.speed = {
-        x: convertFromHorizontalSpeed(averageSpeed.top, sensitivity),
-        y: convertFromVerticalSpeed(averageSpeed.left, sensitivity),
-      };
-      clearInterval(momentum.intervalId);
-      momentum.intervalId = setInterval(updateMomentum, 50);
+      const lastPosition = last(interaction.positions);
+      momentum.speed.x = lastPosition.vertical;
+      momentum.speed.y = lastPosition.horizontal;
+      startMomentum();
     }
     interaction.active = false;
   }

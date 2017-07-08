@@ -1,58 +1,70 @@
 import _ from 'lodash';
 import bunyan from 'bunyan';
 import express from 'express';
-import morpheus from './models/morpheus';
 import https from 'https';
 
-const logger = bunyan.createLogger({name: 'webgl-pano-server'});
+import { getModel } from './db';
+
+const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
 const router = express.Router();
 
 router
-  .get('/scenes', function (req, res) {
-    morpheus.get('Scene').find().exec().then((scenes) => {
+  .get('/scenes', (req, res) => {
+    getModel('Scene').find().exec().then((scenes) => {
       res.json(scenes);
-    }, err => {
-      res.send(500, err);
+    }, (err) => {
+      res.status(500).send(err);
+    });
+  })
+  .get('/gamestate', (req, res) => {
+    getModel('GameState').find().exec().then((gamestates) => {
+      res.json(gamestates);
+    }, (err) => {
+      res.status(500).send(err);
     });
   })
   .get('/scene/:sceneId', (req, res) => {
     const sceneId = Number(req.params.sceneId);
     logger.info({ req: `/scene/${sceneId}` });
-    morpheus.get('Scene').findOne({ sceneId }).exec().then(scene => {
-      logger.info({ req: `/scene/${sceneId}`, scene })
-      if (!scene) {
-        throw new Error(`${sceneId} not found`);
-      }
-      const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
-      logger.info({ req: `/scene/${sceneId}`, castsToLoad });
-      if (castsToLoad.length) {
-        morpheus.get('Cast').find({ castId: { $in: castsToLoad } }).exec().then(casts => {
-          logger.info({ req: `/scene/${sceneId}`, casts: casts });
-          scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
+    getModel('Scene').findOne({ sceneId }).exec().then((scene) => {
+      logger.info({ req: `/scene/${sceneId}`, sceneId });
+      if (scene) {
+        const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
+        logger.info({ req: `/scene/${sceneId}`, castsToLoad });
+        if (castsToLoad.length) {
+          getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then((casts) => {
+            logger.info({ req: `/scene/${sceneId}`, casts });
+            scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
+            res.json(scene);
+          }, (err) => {
+            res.status(500).send(err);
+          });
+        } else {
           res.json(scene);
-        }, err => {
-          res.send(500).send(err);
-        });
+        }
       } else {
-        res.json(scene);
+        logger.error('not found', { sceneId });
+        res.status(404).send('Not found');
       }
-    }, err => {
+    }, (err) => {
       logger.error({ req: `/scene/${sceneId}`, error: err });
-      res.send(500).send(err);
+      res.status(500).send(err);
     });
   })
   .get('/cast/:castId', (req, res) => {
     const castId = Number(req.params.castId);
     logger.info({ req: `/cast/${castId}` });
-    morpheus.get('Cast').findOne({ castId }).exec().then(cast => {
-      logger.info({ req: `/cast/${castId}`, cast })
-      if (!cast) {
-        throw new Error(`${castId} not found`);
+    getModel('Cast').findOne({ castId }).exec().then((cast) => {
+      logger.info({ req: `/cast/${castId}`, cast });
+      if (cast) {
+        res.json(cast);
+      } else {
+        logger.error(`${castId} not found`);
+        res.status(404).send('Not found');
       }
-      res.json(cast);
-    }, err => {
+    }, (err) => {
       logger.error({ req: `/cast/${castId}`, error: err });
-      res.send(500).send(err);
+      res.status(500).send(err);
     });
   })
   .get('/brokeniOSProxy/*', (req, res) => {

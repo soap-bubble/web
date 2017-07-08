@@ -1,6 +1,7 @@
 import uasParser from 'user-agent-parser';
+import { endsWith } from 'lodash';
 
-const userAgentString = navigator && navigator.userAgent || '';
+const userAgentString = global.navigator && global.navigator.userAgent || '';
 const uas = uasParser(userAgentString);
 
 export const url = process.env.NODE_ENV === 'production' ?
@@ -14,7 +15,7 @@ export function getPanoAnimUrl(assetPath) {
   return getAssetUrl(assetPath);
 }
 
-export function getAssetUrl(assetPath) {
+export function getAssetUrl(assetPath, type) {
   const path = assetPath.replace('deck', 'Deck');
-  return `${url}${path}`;
+  return `${url}${path}${type && !endsWith(assetPath, type) ? `.${type}` : ''}`;
 }

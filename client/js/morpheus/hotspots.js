@@ -1,7 +1,15 @@
 import {
-  each,
+  every,
 } from 'lodash';
 import {
+  selectors as castSelectors,
+  actions as castActions,
+} from 'morpheus/casts';
+import input from 'morpheus/input';
+import store from 'store';
+import renderEvents from 'utils/render';
+
+const {
   addMouseUp,
   addMouseMove,
   addMouseDown,
@@ -9,15 +17,7 @@ import {
   addTouchMove,
   addTouchEnd,
   addTouchCancel,
-} from '../actions/ui';
-import {
-  setHoverIndex,
-  activateHotspotIndex,
-} from '../actions/hotspots';
-import store from '../store';
-import renderEvents from '../utils/render';
-
-
+} = input.actions;
 
 export default function ({
   dispatch,
@@ -25,6 +25,7 @@ export default function ({
 }) {
   const pixel = new Uint8Array(4);
   const clickStartPos = { left: 0, top: 0 };
+  const hitColorList = castSelectors.hotspot.hitColorList(store.getState());
   let possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -35,61 +36,63 @@ export default function ({
   //  reading pixel data is only valid immediately after a render.  We therefor
   //  delay checking pixel data until the next render
   let coordsToCheck;
-  renderEvents.removeAllListeners('after');
-  renderEvents.on('after', () => {
-    if (coordsToCheck) {
+
+  renderEvents.onAfter(() => {
+    if (coordsToCheck && !document.hidden) {
       const { left: x, top } = coordsToCheck;
-      const { hotspots } = store.getState();
-      const { hitColorList } = hotspots;
       const gl = canvas.getContext('webgl');
       // readPixels reads from lower left so need to inverse top (y) coordinate
       const y = canvas.height - top;
 
       gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
 
-      let hotspotIndex = null;
-      each(hitColorList, (color, index) => {
+      let hoveredHotspots = [];
+      every(hitColorList, ({ color, data: hotspotData }) => {
         // Extract 8-bit color components from 24-bit integer
+        // eslint-disable-next-line no-bitwise
         const red = color >>> 16;
+        // eslint-disable-next-line
         const green = color >>> 8 & 0xFF;
+        // eslint-disable-next-line no-bitwise
         const blue = color & 0xFF;
+
         // Compare with pixel array
         if (
           red === pixel[0]
           && green === pixel[1]
           && blue === pixel[2]
         ) {
-          hotspotIndex = index;
+          hoveredHotspots.push(hotspotData);
           return false;
         }
+        return true;
       });
-      dispatch(setHoverIndex(hotspotIndex));
+      const hovering = !!hoveredHotspots.length;
 
       // Update our state
 
       // User initiated event inside a hotspot so could be valid
-      if (!possibleValidClick && wasMouseDowned && (hotspotIndex !== null)) {
+      if (!possibleValidClick && wasMouseDowned && hovering) {
         possibleValidClick = true;
         clickStartPos.left = coordsToCheck.left;
         clickStartPos.top = coordsToCheck.top;
       }
 
       // We were a possible valid click, but user left the hotspot so invalidate
-      if (wasMouseMoved && possibleValidClick && hotspotIndex === null) {
+      if (wasMouseMoved && possibleValidClick && !hovering) {
         possibleValidClick = false;
       }
 
       // User pressed and released mouse button inside a valid hotspot
       // TODO: debounce??
-      if (wasMouseUpped && possibleValidClick && hotspotIndex !== null) {
-        const interactionDistance = Math.sqrt(
-          Math.pow(clickStartPos.left - coordsToCheck.left, 2)
-           + Math.pow(clickStartPos.top - coordsToCheck.top, 2)
-        );
-        // Only allow taps, not drag-n-release
-        if (interactionDistance < 20) {
-          dispatch(activateHotspotIndex(hotspotIndex));
-        }
+      const interactionDistance = Math.sqrt(
+        Math.pow(clickStartPos.left - coordsToCheck.left, 2)
+         + Math.pow(clickStartPos.top - coordsToCheck.top, 2)
+      );
+      if (wasMouseUpped && possibleValidClick && hovering && interactionDistance < 20) {
+        dispatch(castActions.hotspot.activated(hoveredHotspots));
+      } else {
+        dispatch(castActions.hotspot.hovered(hoveredHotspots));
       }
 
       // Reset for next time

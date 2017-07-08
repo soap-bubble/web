@@ -1,8 +1,11 @@
 import React, { PropTypes } from 'react';
-import cn from 'classnames';
 import { connect } from 'react-redux';
+import input from 'morpheus/input';
+import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
 
-function mapStateToProps({ ui, dimensions, hotspots }) {
+function mapStateToProps(state) {
   const {
     onMouseUp: onMouseUpCallbacks,
     onMouseMove: onMouseMoveCallbacks,
@@ -11,14 +14,10 @@ function mapStateToProps({ ui, dimensions, hotspots }) {
     onTouchMove: onTouchMoveCallbacks,
     onTouchEnd: onTouchEndCallbacks,
     onTouchCancel: onTouchCancelCallbacks,
-  } = ui;
-  const {
-    width,
-    height,
-  } = dimensions;
-  const {
-    hoverIndex
-  } = hotspots;
+  } = input.selectors.allMouseEvents(state);
+  const width = gameSelectors.width(state);
+  const height = gameSelectors.height(state);
+  const cursor = gameSelectors.htmlCursor(state);
 
   return {
     onMouseUp(mouseEvent) {
@@ -41,11 +40,11 @@ function mapStateToProps({ ui, dimensions, hotspots }) {
       onTouchEndCallbacks.forEach(c => c(touchEvent));
     },
     onTouchCancel(touchEvent) {
-      onTouchCancel.forEach(c => c(touchEvent));
+      onTouchCancelCallbacks.forEach(c => c(touchEvent));
     },
     width,
     height,
-    hoverIndex,
+    cursor,
   };
 }
 
@@ -59,13 +58,14 @@ const MousePresentation = ({
   onTouchCancel,
   width,
   height,
-  hoverIndex,
+  cursor,
 }) => (
-  <div id="mouse"
+  <div
+    id="mouse"
     style={{
       width,
       height,
-      cursor: hoverIndex !== null ? 'pointer' : hoverIndex,
+      cursor,
     }}
     onMouseUp={onMouseUp}
     onMouseMove={onMouseMove}
@@ -75,7 +75,7 @@ const MousePresentation = ({
     onTouchEnd={onTouchEnd}
     onTouchCancel={onTouchCancel}
   />
-)
+);
 
 MousePresentation.propTypes = {
   onMouseUp: PropTypes.func,
@@ -87,6 +87,7 @@ MousePresentation.propTypes = {
   onTouchCancel: PropTypes.func,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
+  cursor: PropTypes.string,
 };
 
 export default connect(

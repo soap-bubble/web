@@ -1,34 +1,35 @@
 import React from 'react';
 import { connect } from 'react-redux';
-
-import store from '../store';
-import Canvas from './Canvas';
+import store from 'store';
 import {
-  canvasCreated,
-  sceneCreate,
-  display as displayHotspots,
-} from '../actions/hotspots';
-import hotspots from '../morpheus/hotspots';
+  actions as hotspotActions,
+  selectors as hotspotSelectors,
+} from 'morpheus/hotspot';
+import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
+import hotspots from 'morpheus/hotspots';
+import Canvas from './Canvas';
 
-function mapStateToProps({ hotspots, dimensions }) {
-  const { width, height } = dimensions;
-  const { data: hotspotsData, isPano } = hotspots;
+function mapStateToProps(state) {
   return {
     id: 'hotspots-hit',
-    width,
-    height,
-    hotspotsData,
-    isPano,
+    width: gameSelectors.width(state),
+    height: gameSelectors.height(state),
+    hotspotsData: hotspotSelectors.data(state),
+    isPano: hotspotSelectors.isPano(state),
   };
 }
 
 function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
-      dispatch(canvasCreated(canvas));
-      if (store.getState().hotspots.isPano) {
-        hotspots({ dispatch, canvas });
-        dispatch(displayHotspots());
+      if (canvas) {
+        dispatch(hotspotActions.canvasCreated(canvas));
+        if (store.getState().hotspot.isPano) {
+          hotspots({ dispatch, canvas });
+          dispatch(hotspotActions.display());
+        }
       }
     },
   };
@@ -45,7 +46,7 @@ export default connect(
   hotspotsData,
   isPano,
 }) => {
-  if(hotspotsData.length && isPano) {
+  if (hotspotsData.length && isPano) {
     return (<Canvas
       id={id}
       width={width}

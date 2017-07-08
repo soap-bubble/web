@@ -2,18 +2,18 @@ import path from 'path';
 import express from 'express';
 import bunyan from 'bunyan';
 import config from 'config';
-import mongoose from 'mongoose';
 import routes from './routes';
-import morpheus from './models/morpheus';
-import prime from './prime';
+import { getModel } from './db/install';
+import db, { prime } from './db';
 
-mongoose.Promise = Promise;
-const logger = bunyan.createLogger({name: 'webgl-pano-server'});
+const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
 const app = express();
 
 if (app.get('env') !== 'production') {
-  var browserSync = require('browser-sync');
-  var bs = browserSync({ logSnippet: false });
+  // eslint-disable-next-line import/no-extraneous-dependencies, global-require
+  const browserSync = require('browser-sync');
+  const bs = browserSync({ logSnippet: false });
+  // eslint-disable-next-line import/no-extraneous-dependencies, global-require
   app.use(require('connect-browser-sync')(bs));
 }
 
@@ -23,19 +23,17 @@ app.use('/GameDB', express.static(gameDbPath));
 app.use(express.static('public'));
 app.use('/api', routes);
 
-app.db = mongoose.connect(config.mongodb.uri, {server:{auto_reconnect:true}});
-morpheus.install(app.db);
-mongoose.connection.once('open', function () {
-  morpheus.get('Scene').find().exec().then((scenes) => {
+app.db = db(() => {
+  getModel('Scene').find().exec().then((scenes) => {
     if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
       logger.info('Attempting to prime DB');
-      prime((err) => {
-        if (err) return logger.error('Failed to prime db', err);
-        logger.info('db primed');
-      })
+      prime()
+        .then(() => logger.info('db primed'))
+        .catch(err => logger.error('Failed to prime db', err));
     }
   });
 });
+
 app.listen(8050, () => {
   logger.info('server up and running on 8050');
 });

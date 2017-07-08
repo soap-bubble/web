@@ -1,27 +1,22 @@
-import React from 'react';
 import { connect } from 'react-redux';
-
+import momentum from 'morpheus/momentum';
 import {
-  fetchScene,
-} from '../actions/scene';
+  actions as panoActions,
+} from 'morpheus/pano';
 import {
-  canvasCreated,
-  sceneCreate,
-  display,
-} from '../actions/pano';
-import store from '../store';
+  selectors as gameSelectors,
+} from 'morpheus/game';
+import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
+import store from 'store';
 import Canvas from './Canvas';
-import momentum from '../morpheus/momentum';
 
-function mapStateToProps({ scene, dimensions }) {
-  const {
-    current: id,
-  } = scene || {};
-  const { width, height } = dimensions;
+function mapStateToProps(state) {
   return {
-    id,
-    width,
-    height,
+    id: sceneSelectors.currentSceneId(state),
+    width: gameSelectors.width(state),
+    height: gameSelectors.height(state),
   };
 }
 
@@ -29,13 +24,13 @@ function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
       if (canvas) {
-        dispatch(canvasCreated(canvas));
-        if (store.getState().hotspots.isPano) {
+        dispatch(panoActions.canvasCreated(canvas));
+        if (store.getState().hotspot.isPano) {
           momentum(dispatch);
         }
-        dispatch(display());
+        dispatch(panoActions.display());
       }
-    }
+    },
   };
 }
 

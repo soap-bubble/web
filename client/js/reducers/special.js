@@ -1,8 +1,10 @@
 import {
+  SPECIAL_CONTROLLED_FRAMES,
+  SPECIAL_IMAGES_LOADED,
   SCENE_LOAD_COMPLETE,
   SPECIAL_START,
   SPECIAL_END,
-  SPECIAL_HOTSPOTS_COLORLIST,
+  SPECIAL_HOTSPOTS_LIST,
   SPECIAL_CANVAS,
 } from '../actions/types';
 import createReducer from './createReducer';
@@ -10,25 +12,43 @@ import createReducer from './createReducer';
 const reducer = createReducer({
   data: {},
   hotspots: [],
+  images: {},
   url: '',
   canvas: null,
-  hitColorList: [],
+  hotspots: [],
+  controlledFrames: {},
 }, {
-  [SPECIAL_HOTSPOTS_COLORLIST](special, { payload: hitColorList }) {
+  [SPECIAL_HOTSPOTS_LIST](special, { payload: hotspots }) {
     return {
       ...special,
-      hitColorList,
-    }
+      hotspots,
+    };
+  },
+  [SPECIAL_IMAGES_LOADED](special, { payload: images }) {
+    return {
+      ...special,
+      images: images.reduce((memo, curr) => {
+        memo[curr.castId] = curr.img;
+        return memo;
+      }, {}),
+    };
+  },
+  [SPECIAL_CONTROLLED_FRAMES](special, { payload: controlledFrames }) {
+    return {
+      ...special,
+      controlledFrames,
+    };
   },
   [SCENE_LOAD_COMPLETE](special, { payload: sceneData }) {
     const { casts } = sceneData;
     const hotspotsData = casts.filter(c => c.castId === 0);
     return {
       ...special,
+      data: sceneData,
       hotspots: hotspotsData,
     };
   },
-  [SPECIAL_START](special, { payload: sceneData, meta }) {
+  [SPECIAL_START](special, { meta }) {
     const {
       url,
     } = meta;
@@ -41,7 +61,7 @@ const reducer = createReducer({
     return {
       ...special,
       canvas,
-    }
+    };
   },
   [SPECIAL_END](special) {
     return {

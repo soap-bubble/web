@@ -1,33 +1,27 @@
-import { values } from 'lodash';
+import { curry } from 'lodash';
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-
-import store from '../store';
 import {
-  videoLoadComplete,
-  videoIsPlaying,
-  videoPlayDone,
-} from '../actions/video';
+  selectors as gameSelectors,
+} from 'morpheus/game';
 import {
-  fetchScene,
-} from '../actions/scene';
+  actions as videoActions,
+  selectors as videoSelectors,
+} from 'morpheus/video';
 import {
-  load as loadPano,
-} from '../actions/pano';
-import {
-  ended as transitionEnded,
-} from '../actions/transition';
+  actions as transitionActions,
+} from 'morpheus/transition';
 import Video from './Video';
 
-function mapStateToProps({ game, video, dimensions }) {
-  const { volume } = game;
-  const { width, height } = dimensions;
-
+function mapStateToProps(state) {
   return {
-    video,
-    width,
-    height,
-    volume,
+    playing: videoSelectors.playing(state),
+    loaded: videoSelectors.loaded(state),
+    loading: videoSelectors.loading(state),
+    done: videoSelectors.loading(state),
+    width: gameSelectors.width(state),
+    height: gameSelectors.height(state),
+    volume: gameSelectors.volume(state),
   };
 }
 
@@ -38,14 +32,13 @@ function mapDisptachToProps(dispatch) {
       videoEl = _videoEl;
     },
     videoCanPlay(name) {
-      dispatch(videoLoadComplete(name, videoEl));
+      dispatch(videoActions.videoLoadComplete(name, videoEl));
     },
     videoPlaying(name) {
-      dispatch(videoIsPlaying(name));
+      dispatch(videoActions.videoIsPlaying(name));
     },
     videoEnded(name) {
-      dispatch(transitionEnded());
-      dispatch(videoPlayDone(name));
+      dispatch(transitionActions.ended());
     },
   };
 }
@@ -54,7 +47,10 @@ export default connect(
   mapStateToProps,
   mapDisptachToProps,
 )(({
-  video,
+  loading,
+  loaded,
+  playing,
+  done,
   width,
   height,
   videoCreated,
@@ -62,60 +58,53 @@ export default connect(
   videoPlaying,
   videoEnded,
 }) => {
-  const videos = Object.keys(video).map(url => {
-    const v = video[url];
-    if (v.state === 'loading') {
-      return (<Video
-        key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
-        src={url}
-        width={width}
-        height={height}
-        onCanPlayThrough={videoCanPlay.bind(null, url)}
-        onPlaying={videoPlaying.bind(null, url)}
-        onEnded={videoEnded.bind(null, url)}
-        autoPlay
-        offscreen
-        fullscreen
-      />);
-    } else if (v.state === 'loaded') {
-      return (<Video
-        key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
-        src={url}
-        width={width}
-        height={height}
-        onCanPlayThrough={videoCanPlay.bind(null, url)}
-        onPlaying={videoPlaying.bind(null, url)}
-        onEnded={videoEnded.bind(null, url)}
-        autoPlay
-        fullscreen
-      />);
-    } else if (v.state === 'playing') {
-      return (<Video
-        key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
-        src={url}
-        width={width}
-        height={height}
-        onCanPlayThrough={videoCanPlay.bind(null, url)}
-        onPlaying={videoPlaying.bind(null, url)}
-        onEnded={videoEnded.bind(null, url)}
-        autoPlay
-        fullscreen
-      />);
-    } else if (v.state === 'done') {
-      return (<Video
-        key={`fullscreenvideo:${url}`}
-        videoCreated={videoCreated}
-        src={url}
-        width={width}
-        height={height}
-        autoPlay
-        fullscreen
-      />);
-    }
-  });
+  const videos = [];
+  loading.forEach(v => videos.push(<Video
+    key={`fullscreenvideo:${v.url}`}
+    videoCreated={videoCreated}
+    src={v.url}
+    width={width}
+    height={height}
+    onCanPlayThrough={curry(videoCanPlay, v.url)}
+    onPlaying={curry(videoPlaying, v.url)}
+    onEnded={curry(videoEnded, v.url)}
+    autoPlay
+    offscreen
+    fullscreen
+  />));
+  loaded.forEach(v => videos.push(<Video
+    key={`fullscreenvideo:${v.url}`}
+    videoCreated={videoCreated}
+    src={v.url}
+    width={width}
+    height={height}
+    onCanPlayThrough={curry(videoCanPlay, v.url)}
+    onPlaying={curry(videoPlaying, v.url)}
+    onEnded={curry(videoEnded, v.url)}
+    autoPlay
+    fullscreen
+  />));
+  playing.forEach(v => videos.push(<Video
+    key={`fullscreenvideo:${v.url}`}
+    videoCreated={videoCreated}
+    src={v.url}
+    width={width}
+    height={height}
+    onCanPlayThrough={curry(videoCanPlay, v.url)}
+    onPlaying={curry(videoPlaying, v.url)}
+    onEnded={curry(videoEnded, v.url)}
+    autoPlay
+    fullscreen
+  />));
+  done.forEach(v => videos.push(<Video
+    key={`fullscreenvideo:${v.url}`}
+    videoCreated={videoCreated}
+    src={v.url}
+    width={width}
+    height={height}
+    autoPlay
+    fullscreen
+  />));
 
   return (
     <div>

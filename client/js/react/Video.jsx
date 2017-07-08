@@ -1,4 +1,4 @@
-import React, { PropTypes } from 'react';
+import React, { Component, PropTypes } from 'react';
 
 const Video = ({
   src,
@@ -45,7 +45,7 @@ const Video = ({
       type="video/mp4"
     />
   </video>
-)
+);
 
 Video.displayName = 'Video';
 

@@ -2,17 +2,22 @@
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
-import { Vector3 } from 'three';
 import qs from 'query-string';
 
-import store from './store';
-import World from './react/World';
-import { goToScene } from './actions/scene';
-import { resize } from './actions/dimensions';
+// Loads all modules
+import 'morpheus';
+
+// Then pull out the stuff we need
+import { actions as sceneActions } from 'morpheus/scene';
+import { actions as gamestateActions } from 'morpheus/gamestate';
+import { actions as gameActions } from 'morpheus/game';
+import store from 'store';
+import Game from 'react/Game';
+
 const qp = qs.parse(location.search);
 
 function resizeToWindow() {
-  store.dispatch(resize({
+  store.dispatch(gameActions.resize({
     width: window.innerWidth,
     height: window.innerHeight,
   }));
@@ -21,12 +26,16 @@ function resizeToWindow() {
 window.onload = () => {
   render(
     <Provider store={store}>
-      <World />
+      <Game />
     </Provider>,
     document.getElementById('root'),
   );
-  
-  store.dispatch(goToScene(qp.scene || 8010));
+  store.dispatch(gameActions.resize({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }))
+  store.dispatch(gamestateActions.fetchInitial())
+    .then(() => store.dispatch(sceneActions.goToScene(qp.scene || 8010)));
 
   window.addEventListener('resize', () => {
     resizeToWindow();

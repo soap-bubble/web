@@ -13,20 +13,15 @@ import Canvas from 'react/Canvas';
 
 function mapStateToProps(state) {
   return {
-    id: 'hotspots-hit',
-    width: gameSelectors.width(state),
-    height: gameSelectors.height(state),
     isPano: castSelectors.hotspot.isPano(state),
+    canvas: castSelectors.hotspot.canvas(state),
   };
 }
 
 function mapDisptachToProps(dispatch) {
   return {
     createAction(canvas) {
-      if (canvas) {
-        dispatch(castActions.hotspot.canvasRef(canvas));
-        hotspots({ dispatch, canvas });
-      }
+      hotspots({ dispatch, canvas })
     },
   };
 }
@@ -35,19 +30,17 @@ export default connect(
   mapStateToProps,
   mapDisptachToProps,
 )(({
-  id,
-  width,
-  height,
-  createAction,
   isPano,
+  createAction,
+  canvas,
 }) => {
-  if (isPano) {
-    return (<Canvas
-      id={id}
-      width={width}
-      height={height}
-      createAction={createAction}
-    />);
+  if (isPano && canvas) {
+    return (<div ref={(el) => {
+      if (el) {
+        el.appendChild(canvas);
+        createAction(canvas);
+      }
+    }}></div>);
   }
   return null;
 });

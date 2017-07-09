@@ -16,6 +16,7 @@ import {
   defer,
 } from 'utils/promise';
 import { createSelector } from 'reselect';
+import createCanvas from 'utils/canvas';
 import {
   createCamera,
   positionCamera,
@@ -32,6 +33,7 @@ import {
 } from 'morpheus/scene';
 
 const selectHotspot = state => get(state, 'casts.hotspot', {});
+const selectCanvas = state => get(state, 'casts.hotspot.canvas');
 const selectHotspotsData = createSelector(
   sceneSelectors.currentSceneData,
   scene => get(scene, 'casts', []).filter(c => c.castId === 0),
@@ -367,6 +369,13 @@ export function activateHotspotIndex(index) {
   // }
 }
 
+function createHotspotCanvas({ width, height }) {
+  const canvas = createCanvas();
+  canvas.width = width;
+  canvas.height = height;
+  return canvas;
+}
+
 let canvasDefer;
 
 function applies(state) {
@@ -383,7 +392,7 @@ function doEnter() {
         visiblePositionsList,
         hitPositionsList,
       } = createPositions(hotspotsData);
-
+      const { width, height } = gameSelectors.dimensions(getState());
       const {
         visibleUvsList,
         hitUvsList,
@@ -420,8 +429,9 @@ function doEnter() {
         startAngle: nextStartAngle,
       });
       const scene3D = createScene(hitObject3D);
-      canvasDefer = defer();
+      const canvas = createCanvas({ width, height });
       return Promise.resolve({
+        canvas,
         scene3D,
         hitObject3D,
         visibleObject3D,
@@ -452,27 +462,23 @@ function onStage() {
   return (dispatch, getState) => {
     const { width, height } = gameSelectors.dimensions(getState());
     const isPano = selectIsPano(getState());
-    const scene3D = selectScene3D(getState());
     if (isPano) {
-      return canvasDefer.promise.then((canvas) => {
-        if (isPano) {
-          const camera = createCamera({ width, height });
-          const renderer = createRenderer({ canvas, width, height });
-          positionCamera({
-            camera,
-            vector3: { z: -0.325 },
-          });
-          startRenderLoop({
-            scene3D,
-            camera,
-            renderer,
-          });
-          return {
-            camera,
-            renderer,
-          };
-        }
-        return {};
+      const scene3D = selectScene3D(getState());
+      const canvas = selectCanvas(getState());
+      const camera = createCamera({ width, height });
+      const renderer = createRenderer({ canvas, width, height });
+      positionCamera({
+        camera,
+        vector3: { z: -0.325 },
+      });
+      startRenderLoop({
+        scene3D,
+        camera,
+        renderer,
+      });
+      return Promise.resolve({
+        camera,
+        renderer,
       });
     }
     return Promise.resolve();
@@ -551,6 +557,7 @@ export const selectors = {
   hitColorList: selectHitColorList,
   renderElements: selectRenderElements,
   hotspotsData: selectHotspotsData,
+  canvas: selectCanvas,
 };
 
 export const delegate = {

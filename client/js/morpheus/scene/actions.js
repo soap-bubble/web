@@ -74,13 +74,6 @@ export function setBackgroundScene(scene) {
   };
 }
 
-export function setCurrentScene(scene) {
-  return {
-    type: SCENE_SET_CURRENT_SCENE,
-    payload: scene,
-  };
-}
-
 export function doEntering() {
   return {
     type: SCENE_DO_ENTERING,
@@ -94,6 +87,30 @@ export function setNextStartAngle(angle) {
   };
 }
 
+export function startAtScene(id) {
+  return (dispatch) => {
+    return dispatch(fetchScene(id))
+      .then(scene => {
+        dispatch(castActions.doEnter(scene))
+          .then(() => dispatch({
+            type: SCENE_DO_ENTERING,
+            payload: scene,
+          }))
+          .then(() => dispatch(castActions.onStage(scene)))
+          .then(() => {
+            dispatch(gameActions.resize({
+              width: window.innerWidth,
+              height: window.innerHeight,
+            }));
+            dispatch({
+              type: SCENE_DO_ENTER,
+            });
+            return scene;
+          });
+      });
+  }
+}
+
 export function goToScene(id) {
   return dispatch => {
     dispatch(castActions.doExit());
@@ -102,24 +119,6 @@ export function goToScene(id) {
     });
     dispatch(inputActions.disableControl());
     renderEvents.reset();
-    return dispatch(fetchScene(id))
-    .then(scene => dispatch(castActions.doEnter()))
-    .then((scene) => {
-      dispatch({
-        type: SCENE_DO_ENTERING,
-      });
-      return scene;
-    })
-    .then(scene => dispatch(castActions.onStage()))
-    .then((scene) => {
-      dispatch(gameActions.resize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      }));
-      dispatch({
-        type: SCENE_DO_ENTER,
-      });
-      return scene;
-    });
+    return dispatch(startAtScene(id));
   };
 }

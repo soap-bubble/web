@@ -7,6 +7,9 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
+import {
   actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
@@ -31,6 +34,7 @@ const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
 export default function (dispatch) {
+  const scene = sceneSelectors.currentSceneData(store.getState());
   const clickStartPos = { left: 0, top: 0 };
   let wasActiveHotspots = [];
   let possibleValidClick = false;
@@ -196,7 +200,7 @@ export default function (dispatch) {
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
-    dispatch(castActions.special.update());
+    dispatch(castActions.special.update(scene));
   }
 
   function onMouseDown({ clientX: left, clientY: top }) {

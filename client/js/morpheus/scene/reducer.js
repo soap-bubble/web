@@ -13,6 +13,7 @@ import {
 } from './actionTypes';
 
 const reducer = createReducer('scene', {
+  loadedScenes: [],
   backgroundScene: null,
   currentScene: null,
   previousScene: null,
@@ -34,14 +35,15 @@ const reducer = createReducer('scene', {
   [SCENE_SET_CURRENT_SCENE](state, { payload: scene }) {
     return {
       ...state,
-      previousScene: state.currentScene,
-      currentScene: scene,
+      loadedScenes: state.loadedScenes.concat([ scene ]),
     };
   },
-  [SCENE_DO_ENTERING](state) {
+  [SCENE_DO_ENTERING](state, { payload: scene }) {
     return {
       ...state,
       status: 'entering',
+      previousScene: state.currentScene,
+      currentScene: scene,
     };
   },
   [SCENE_DO_EXITING](state) {

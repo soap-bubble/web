@@ -1,11 +1,25 @@
+import {
+  get,
+} from 'lodash';
 import { createSelector } from 'reselect';
-import { selectors as gameStateSelectors } from '../gamestate';
+import { selectors as gameStateSelectors } from 'morpheus/gamestate';
+import { selectors as sceneSelectors } from 'morpheus/scene';
 
 const { gamestates } = gameStateSelectors;
 
-const selectCastsCurrent = state => state.casts.current;
-const selectCastsBackground = state => state.casts.background;
-const selectCastsPrevious = state => state.casts.previous;
+const selectCastsFromScene = scene => get(scene, 'casts', []);
+const selectCastsCurrent = createSelector(
+  sceneSelectors.currentSceneData,
+  selectCastsFromScene,
+);
+const selectCastsBackground = createSelector(
+  sceneSelectors.backgroundSceneData,
+  selectCastsFromScene,
+);
+const selectCastsPrevious = createSelector(
+  sceneSelectors.previousSceneData,
+  selectCastsFromScene,
+);
 const selectCastIsEntering = cast => casts.status === 'entering';
 const selectCastIsExiting = cast => casts.status === 'exiting';
 const selectCastIsOnStage = cast => casts.status === 'onStage';

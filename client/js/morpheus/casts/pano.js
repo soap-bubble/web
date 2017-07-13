@@ -256,7 +256,7 @@ function canvasRef(canvas) {
   };
 }
 
-function applies(state) {
+function applies(scene, state) {
   return selectPanoCastData(state)
 }
 

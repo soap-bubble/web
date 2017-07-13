@@ -38,41 +38,66 @@ const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
   return null;
 };
 
-const selectSpecialCastData = createSelector(
-  sceneSelectors.currentSceneData,
-  sceneSelectors.currentSceneType,
-  selectSpecialCastDataFromSceneAndType,
-);
+function selectForScene(scene) {
+  const selectSpecialCastData = createSelector(
+    () => scene,
+    () => get(scene, 'sceneType'),
+    selectSpecialCastDataFromSceneAndType,
+  );
 
-const selectExtraCasts = createSelector(
-  sceneSelectors.currentSceneData,
-  scene => get(scene, 'casts', [])
-    .filter(c => c.castId && c.castId !== scene.sceneId),
-);
+  const selectExtraCasts = createSelector(
+    () => scene,
+    scene => get(scene, 'casts', [])
+      .filter(c => c.castId && c.castId !== scene.sceneId),
+  );
 
-const selectControlledCastsData = createSelector(
-  selectExtraCasts,
-  extraCasts => extraCasts.filter(c => c.__t === 'ControlledMovieCast'),
-);
+  const selectControlledCastsData = createSelector(
+    selectExtraCasts,
+    extraCasts => extraCasts.filter(c => c.__t === 'ControlledMovieCast'),
+  );
 
-const selectMovieCasts = createSelector(
-  selectExtraCasts,
-  extraCasts => extraCasts.filter(c => c.__t === 'MovieSpecialCast'),
-);
+  const selectMovieCasts = createSelector(
+    selectExtraCasts,
+    extraCasts => extraCasts.filter(c => c.__t === 'MovieSpecialCast'),
+  );
 
-const selectControlledCastImgUrl = createSelector(
-  selectSpecialCastData,
-  cast => getAssetUrl(get(cast, 'fileName'), 'png'),
-);
+  const selectControlledCastImgUrl = createSelector(
+    selectSpecialCastData,
+    cast => getAssetUrl(get(cast, 'fileName'), 'png'),
+  );
 
-const selectHotspotsData = createSelector(
-  sceneSelectors.currentSceneData,
-  scene => get(scene, 'casts', []).filter(c => c.castId === 0),
-);
+  const selectHotspotsData = createSelector(
+    () => scene,
+    scene => get(scene, 'casts', []).filter(c => c.castId === 0),
+  );
 
-const selectCanvas = state => get(state, 'casts.special.canvas');
-const selectVideos = state => get(state, 'casts.special.videos');
-const selectControlledCasts = state => get(state, 'casts.special.controlledCasts');
+  const selectSpecial = state => get(state, `casts.cache[${scene.sceneId}].special`)
+  const selectCanvas = createSelector(
+    selectSpecial,
+    special => get(special, 'canvas'),
+  );
+  const selectVideos = createSelector(
+    selectSpecial,
+    special => get(special, 'videos'),
+  );
+  const selectControlledCasts = createSelector(
+    selectSpecial,
+    special => get(special, 'controlledCasts'),
+  );
+
+  return {
+    specialCastData: selectSpecialCastData,
+    controlledCastsData: selectControlledCastsData,
+    extraCasts: selectExtraCasts,
+    controlledCasts: selectControlledCasts,
+    movieCasts: selectMovieCasts,
+    controlledCastImgUrl: selectControlledCastImgUrl,
+    hotspotData: selectHotspotsData,
+    canvas: selectCanvas,
+    videos: selectVideos,
+    controlledCasts: selectControlledCasts,
+  };
+}
 
 const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
@@ -219,12 +244,13 @@ function generateSpecialImages({ specials, canvas }) {
   specials.forEach(op => ctx.drawImage(...op));
 }
 
-function update() {
+function update(scene) {
   return (dispatch, getState) => {
+    const castSelector = selectForScene(scene);
     const gameStates = gameStateSelectors.gamestates(getState());
     const dimensions = gameSelectors.dimensions(getState());
-    const canvas = selectCanvas(getState());
-    const controlledCasts = selectControlledCasts(getState());
+    const canvas = castSelector.canvas(getState());
+    const controlledCasts = castSelector.controlledCasts(getState());
 
     generateSpecialImages({
       specials: generateControlledFrames({
@@ -263,15 +289,16 @@ export function handleMouseEvent({ type, hotspot, top, left }) {
   };
 }
 
-function applies(state) {
-  return selectSpecialCastData(state)
+function applies(scene, state) {
+  return selectForScene(scene).specialCastData(state);
 }
 
-function doEnter() {
+function doEnter(scene) {
   return (dispatch, getState) => {
-    const leadCast = selectSpecialCastData(getState());
-    const controlledCastsData = selectControlledCastsData(getState());
-    const movieCasts = selectMovieCasts(getState());
+    const castSelector = selectForScene(scene);
+    const leadCast = castSelector.specialCastData(getState());
+    const controlledCastsData = castSelector.controlledCastsData(getState());
+    const movieCasts = castSelector.movieCasts(getState());
     const gameStates = gameStateSelectors.gamestates(getState());
     const dimensions = gameSelectors.dimensions(getState());
 
@@ -305,7 +332,7 @@ function doEnter() {
         }),
       Promise.all(
         [
-          loadAsImage(selectControlledCastImgUrl(getState()))
+          loadAsImage(castSelector.controlledCastImgUrl(getState()))
             .then(img => ({
               img,
               data: leadCast,
@@ -348,8 +375,7 @@ export const delegate = {
 }
 
 export const selectors = {
-  canvas: selectCanvas,
-  videos: selectVideos,
+  forScene: selectForScene,
 };
 
 export const actions = {

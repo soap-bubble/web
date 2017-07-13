@@ -4,11 +4,15 @@ import flatspot from 'morpheus/flatspot';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
+import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
 
-function mapStateToProps(state) {
+function mapStateToProps(state, { scene }) {
   return {
-    canvas: castSelectors.special.canvas(state),
-    videos: castSelectors.special.videos(state),
+    canvas: castSelectors.special.forScene(scene).canvas(state),
+    videos: castSelectors.special.forScene(scene).videos(state),
+    isCurrent: sceneSelectors.currentSceneData(state) === scene,
   };
 }
 
@@ -23,13 +27,15 @@ const Special = connect(
 )(({
   canvas,
   videos,
+  isCurrent,
   dispatch,
 }) => (
   <div ref={(el) => {
     if (el) {
       el.appendChild(canvas);
       videos.forEach(video => el.appendChild(video));
-      flatspot(dispatch);
+      if (isCurrent)
+        flatspot(dispatch);
     }
   }} style={{
     width: '100%',

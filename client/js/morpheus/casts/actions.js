@@ -5,38 +5,42 @@ import {
   ENTER,
   EXIT,
 } from './actionTypes';
-
+import createLogger from 'utils/logger';
 import {
   delegates,
 } from './index';
 
-function doEnterForCast(type, doEnterAction) {
-  return dispatch => dispatch(doEnterAction())
+const logger = createLogger('casts:actions');
+
+function doEnterForCast(scene, type, doEnterAction) {
+  return dispatch => dispatch(doEnterAction(scene))
     .then(castState => dispatch({
       type: ENTERING,
       payload: castState,
-      meta: type,
+      meta: { type, scene },
     }));
 }
 
-export function doEnter() {
+export function doEnter(scene) {
   return (dispatch, getState) => {
     dispatch({
       type: ENTER,
+      payload: scene,
     });
     return Promise.all(Object.keys(delegates).map((cast) => {
       const delegate = delegates[cast];
-      if (delegate.doEnter && delegate.applies(getState())) {
-        return dispatch(doEnterForCast(cast, delegate.doEnter));
+      if (delegate.doEnter && delegate.applies(scene, getState())) {
+        return dispatch(doEnterForCast(scene, cast, delegate.doEnter));
       }
       return Promise.resolve();
-    }));
+    }))
+      .then(() => scene);
   };
 }
 
-function onStageForCast(type, onStageAction) {
+function onStageForCast(scene, type, onStageAction) {
   return (dispatch) => {
-    const promise = dispatch(onStageAction());
+    const promise = dispatch(onStageAction(scene));
     if (!(promise && promise.then)) {
       throw new Error(`${type} onStage failed to return a promise`);
     }
@@ -44,42 +48,42 @@ function onStageForCast(type, onStageAction) {
       .then(castState => dispatch({
         type: ON_STAGE,
         payload: castState,
-        meta: type,
-      }));
+        meta: { type, scene },
+      }))
+      .then(() => scene);
   };
 }
 
-export function onStage() {
+export function onStage(scene) {
   return (dispatch, getState) => Promise.all(Object.keys(delegates).map((cast) => {
     const delegate = delegates[cast];
-    if (delegate.onStage && delegate.applies(getState())) {
-      return dispatch(onStageForCast(cast, delegate.onStage));
+    if (delegate.onStage && delegate.applies(scene, getState())) {
+      return dispatch(onStageForCast(scene, cast, delegate.onStage));
     }
     return Promise.resolve();
-  }));
+  }))
+    .then(() => scene);
 }
 
-function doExitForCast(type, doExitAction) {
-  return dispatch => dispatch(doExitAction())
+function doExitForCast(scene, type, doExitAction) {
+  return dispatch => dispatch(doExitAction(scene))
     .then(castState => dispatch({
       type: EXIT,
       payload: castState,
-      meta: type,
+      meta: { type, scene },
     }));
 }
 
-export function doExit() {
+export function doExit(scene) {
   return (dispatch, getState) => {
-    dispatch({
-      type: ENTER,
-    });
     return Promise.all(Object.keys(delegates).map((cast) => {
       const delegate = delegates[cast];
-      if (delegate.doExit && delegate.applies(getState())) {
-        return dispatch(doExitForCast(cast, delegate.doExit));
+      if (delegate.doExit && delegate.applies(scene, getState())) {
+        return dispatch(doExitForCast(scene, cast, delegate.doExit));
       }
       return Promise.resolve();
-    }));
+    }))
+      .then(() => scene);
   };
 }
 

@@ -378,7 +378,7 @@ function createHotspotCanvas({ width, height }) {
 
 let canvasDefer;
 
-function applies(state) {
+function applies(scene, state) {
   return selectHotspotsData(state).length;
 }
 
@@ -441,22 +441,6 @@ function doEnter() {
     return Promise.resolve();
   };
 }
-
-function canvasRef(canvas) {
-  return () => {
-    if (!canvasDefer && canvas) {
-      throw new Error('Creating a canvas reference before we are ready');
-    }
-
-    if (canvas) {
-      return canvasDefer.resolve(canvas);
-    }
-
-    canvasDefer = null;
-    return canvasDefer;
-  };
-}
-
 
 function onStage() {
   return (dispatch, getState) => {
@@ -543,7 +527,6 @@ function activated(activatedHotspots) {
 export const actions = {
   doEnter,
   onStage,
-  canvasRef,
   hovered,
   activated,
 };

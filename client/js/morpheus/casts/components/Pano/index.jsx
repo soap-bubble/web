@@ -16,22 +16,31 @@ function mapStateToProps(state) {
   };
 }
 
+const Visibility = ({
+  children,
+  visible,
+}) => (
+  <div
+    style={{
+      visibility: visible ? null : 'hidden',
+    }}
+  >
+    { children }
+  </div>
+);
+
 const Pano = ({
   children,
   isPano,
   isLive,
 }) => {
   let elements = Array.isArray(children) ? children.slice(0) : [];
-  elements.push(<Scene3D key="scene:pano" />);
-  if (isPano) elements = [<Hotspots3D key="scene:hotspots" />].concat(elements);
+  elements.push(<Scene3D />);
+  if (isPano) elements = [<Hotspots3D />].concat(elements);
   return (
-    <div
-      style={{
-        visibility: isLive ? null : 'hidden',
-      }}
-    >
+    <Visibility visible={isLive}>
       { elements }
-    </div>
+    </Visibility>
   );
 };
 

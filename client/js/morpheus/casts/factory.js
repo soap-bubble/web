@@ -1,4 +1,5 @@
 import React from 'react';
+import { decorate as faderDecorator } from './components/Fader';
 import { createSelector } from 'reselect';
 import {
   selectors as sceneSelectors,
@@ -12,22 +13,23 @@ import Transition from './components/Transition';
 function createSceneMapper(map) {
   return sceneData => map[getSceneType(sceneData)];
 }
+
 export const createLiveSceneSelector = createSceneMapper({
-  panorama: [<Pano key="scene:pano" />],
-  special: [<Special key="scene:special" />],
-  transition: [<Transition key="scene:video" />],
+  panorama: Pano,
+  special: Special,
+  transition: Transition,
 });
 
 export const createEnteringSceneSelector = createSceneMapper({
-  panorama: [<Pano key="scene:pano" />],
-  // special: [<Special key="scene:special" />],
-  // transition: [<Transition key="scene:video" />],
+  panorama: Pano,
+  // special: Special,
+  transition: Transition,
 });
 
 export const createExitingSceneSelector = createSceneMapper({
-  panorama: [<Pano key="scene:pano" />],
-  // special: [<Special key="scene:special" />],
-  transition: [<Transition key="scene:video" />],
+  panorama: Pano,
+  special: Special,
+  transition: Transition,
 });
 
 export default createSelector(
@@ -39,20 +41,26 @@ export default createSelector(
   (current, previous, _isEntering, _isLive, _isExiting) => {
     const scenes = [];
     // console.log(getSceneType(current));
-    const currentLiveScene = createLiveSceneSelector(current);
-    const previousExitingScene = createExitingSceneSelector(previous);
-    const currentEnteringScene = createEnteringSceneSelector(current);
-    if (_isEntering && currentEnteringScene) {
-      scenes.push(currentEnteringScene);
-      if (previousExitingScene) {
-        scenes.push(previousExitingScene);
+    const CurrentScene = createLiveSceneSelector(current);
+    const EnteringScene = createEnteringSceneSelector(current);
+    const CurrentExitingScene = createExitingSceneSelector(current);
+    const PreviousScene = createExitingSceneSelector(previous);
+    if (_isLive && CurrentScene) {
+      if (PreviousScene) {
+        const Fader = faderDecorator(<PreviousScene scene={previous} />, <CurrentScene scene={current} />);
+        scenes.push(<Fader />);
+      } else {
+        scenes.push(<CurrentScene scene={current}/>);
       }
     }
-    if (_isLive && currentLiveScene) {
-      scenes.push(currentLiveScene);
+    if (_isEntering && EnteringScene) {
+      scenes.push(<EnteringScene scene={current}/>);
     }
-    if (_isExiting && previousExitingScene) {
-      scenes.push(previousExitingScene);
+    if (_isEntering && PreviousScene) {
+      scenes.push(<PreviousScene scene={previous}/>);
+    }
+    if (_isExiting && CurrentExitingScene) {
+      scenes.push(<CurrentExitingScene scene={current}/>);
     }
     return scenes;
   },

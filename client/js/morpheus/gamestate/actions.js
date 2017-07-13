@@ -182,7 +182,7 @@ export function handleHotspot({ hotspot, top, left }) {
   };
 }
 
-global.updateGameState = (gamestateId, value) => {
+window.updateGameState = (gamestateId, value) => {
   store.dispatch(updateGameState(gamestateId, value));
   store.dispatch(castActions.special.update());
 };

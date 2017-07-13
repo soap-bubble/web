@@ -77,7 +77,7 @@ const selectTransitionVideo = createSelector(
   transition => get(transition, 'video'),
 );
 
-function applies(state) {
+function applies(scene, state) {
   return selectTransitionCastData(state);
 }
 

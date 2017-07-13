@@ -126,7 +126,7 @@ function createObject3D({ geometry, material, frame }) {
 
 let videoElDefers;
 
-function applies(state) {
+function applies(scene, state) {
   return selectPanoAnimData(state).length;
 }
 

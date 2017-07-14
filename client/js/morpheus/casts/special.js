@@ -71,7 +71,11 @@ function selectForScene(scene) {
     scene => get(scene, 'casts', []).filter(c => c.castId === 0),
   );
 
-  const selectSpecial = state => get(state, `casts.cache[${scene.sceneId}].special`)
+  const selectCastCacheForThisScene = state=>  get(state, `casts.cache[${scene.sceneId}]`);
+  const selectSpecial = createSelector(
+    selectCastCacheForThisScene,
+    castCache => get(castCache, 'special'),
+  );
   const selectCanvas = createSelector(
     selectSpecial,
     special => get(special, 'canvas'),
@@ -84,7 +88,10 @@ function selectForScene(scene) {
     selectSpecial,
     special => get(special, 'controlledCasts'),
   );
-
+  const selectStatus = createSelector(
+    selectCastCacheForThisScene,
+    special => status,
+  );
   return {
     specialCastData: selectSpecialCastData,
     controlledCastsData: selectControlledCastsData,
@@ -96,6 +103,7 @@ function selectForScene(scene) {
     canvas: selectCanvas,
     videos: selectVideos,
     controlledCasts: selectControlledCasts,
+    status: selectStatus,
   };
 }
 

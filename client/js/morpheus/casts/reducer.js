@@ -18,7 +18,9 @@ const reducer = createReducer('casts', {
       ...state,
       cache: {
         ...state.cache,
-        [scene.sceneId]: {},
+        [scene.sceneId]: {
+          status: 'loaded',
+        },
       },
     };
   },
@@ -29,6 +31,7 @@ const reducer = createReducer('casts', {
         ...state.cache,
         [scene.sceneId]: {
           ...state.cache[scene.sceneId],
+          status: 'entering',
           [castType]: castData,
         },
       },
@@ -41,6 +44,7 @@ const reducer = createReducer('casts', {
         ...state.cache,
         [scene.sceneId]: {
           ...state.cache[scene.sceneId],
+          status: 'onStage',
           [castType]: merge({
             ...state.cache[scene.sceneId][castType],
           }, castData),
@@ -55,6 +59,7 @@ const reducer = createReducer('casts', {
         ...state.cache,
         [scene.sceneId]: {
           ...state.cache[scene.sceneId],
+          status: 'exiting',
           [castType]: merge({
             ...state.cache[scene.sceneId][castType],
           }, castData),

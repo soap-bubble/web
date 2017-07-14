@@ -8,14 +8,14 @@ function mapStateToProps(state) {
     casts: castFactory(state),
   };
 }
-
+// <Mouse />
 const World = ({
   casts,
 }) => {
   return (
     <div>
       {casts}
-      <Mouse />
+
       { /* process.env.NODE_ENV !== 'production' ? <Tools /> : null */ }
     </div>
   );

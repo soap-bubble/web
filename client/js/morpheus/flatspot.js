@@ -33,8 +33,7 @@ const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
-export default function (dispatch) {
-  const scene = sceneSelectors.currentSceneData(store.getState());
+export default function ({ dispatch, scene }) {
   const clickStartPos = { left: 0, top: 0 };
   let wasActiveHotspots = [];
   let possibleValidClick = false;
@@ -70,7 +69,15 @@ export default function (dispatch) {
   }
 
   function updateState({ top, left }) {
-    const hotspots = castSelectors.hotspot.hotspotsData(store.getState());
+    const state = store.getState();
+    const hotspots = castSelectors.hotspot.hotspotsData(state);
+    const isCurrent = sceneSelectors.currentSceneData(state) === scene;
+    const selector = castSelectors.special.forScene(scene);
+    const status = selector.status(state);
+    const acceptsMouseEvents = isCurrent && status !== 'exiting';
+    if (!acceptsMouseEvents) {
+      return;
+    }
     const nowActiveHotspots = [];
 
     const newWidth = gameSelectors.width(store.getState());
@@ -246,11 +253,13 @@ export default function (dispatch) {
     // TODO....
   }
 
-  dispatch(addMouseUp(onMouseUp));
-  dispatch(addMouseMove(onMouseMove));
-  dispatch(addMouseDown(onMouseDown));
-  dispatch(addTouchStart(onTouchStart));
-  dispatch(addTouchMove(onTouchMove));
-  dispatch(addTouchEnd(onTouchEnd));
-  dispatch(addTouchCancel(onTouchCancel));
+  return {
+    onMouseUp,
+    onMouseMove,
+    onMouseDown,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
+  };
 }

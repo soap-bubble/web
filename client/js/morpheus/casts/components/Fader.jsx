@@ -11,6 +11,7 @@ export const decorate = ((fromComponent, toComponent) => {
     }
 
     componentDidMount() {
+      const { fromFader, toFader } = this.refs;
       const onTransitionEnd = (event) => {
         if (event.propertyName === 'opacity') {
           this.refs.fromFader.removeEventListener('transitionend', onTransitionEnd);
@@ -19,14 +20,9 @@ export const decorate = ((fromComponent, toComponent) => {
           });
         }
       };
-      this.refs.fromFader.addEventListener('transitionend', onTransitionEnd);
-      console.log('mounted', fromComponent, toComponent)
+      fromFader.addEventListener('transitionend', onTransitionEnd);
       setTimeout(() => {
-        if (!this.refs.fromFader) {
-          console.log(fromComponent, toComponent);
-          debugger;
-        }
-        this.refs.fromFader.classList.add('fadeOut')
+        fromFader.classList.add('fadeOut')
       });
     }
 

@@ -13,6 +13,9 @@ import {
 import {
   actions as castActions,
 } from 'morpheus/casts';
+import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
 
 import {
   SCENE_LOAD_START,
@@ -26,8 +29,6 @@ import {
   SET_NEXT_START_ANGLE,
 } from './actionTypes';
 
-
-const sceneCache = {};
 
 export function sceneLoadComplete(responseData) {
   return (dispatch) => {
@@ -48,10 +49,12 @@ export function sceneLoadStarted(id, fetch) {
 }
 
 export function fetch(id) {
-  return (dispatch) => {
-    if (sceneCache[id]) {
-      return sceneCache[id];
-    }
+  return (dispatch, getState) => {
+    const loadedScenes = sceneSelectors.loadedScenes(getState());
+    const cachedScene = loadedScenes.find(scene => scene.sceneId === id);
+    if (cachedScene) {
+      return Promise.resolve(cachedScene);
+    };
     const fetchPromise = bySceneId(id)
       .then(response => response.data)
       .then((sceneData) => {

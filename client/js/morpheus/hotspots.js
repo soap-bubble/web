@@ -5,24 +5,14 @@ import {
   selectors as castSelectors,
   actions as castActions,
 } from 'morpheus/casts';
-import input from 'morpheus/input';
 import store from 'store';
 import renderEvents from 'utils/render';
 
-const {
-  addMouseUp,
-  addMouseMove,
-  addMouseDown,
-  addTouchStart,
-  addTouchMove,
-  addTouchEnd,
-  addTouchCancel,
-} = input.actions;
-
 export default function ({
   dispatch,
-  canvas,
+  scene,
 }) {
+  const canvas = castSelectors.forScene(scene).hotspot.canvas(store.getState());
   const pixel = new Uint8Array(4);
   const clickStartPos = { left: 0, top: 0 };
   const hitColorList = castSelectors.hotspot.hitColorList(store.getState());
@@ -154,11 +144,13 @@ export default function ({
     rememberEvent(mouseEvent);
   }
 
-  dispatch(addMouseUp(onMouseUp));
-  dispatch(addMouseMove(onMouseMove));
-  dispatch(addMouseDown(onMouseDown));
-  dispatch(addTouchStart(onTouchStart));
-  dispatch(addTouchMove(onTouchMove));
-  dispatch(addTouchEnd(onTouchEnd));
-  dispatch(addTouchCancel(onTouchCancel));
+  return {
+    onMouseUp,
+    onMouseMove,
+    onMouseDown,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
+  };
 }

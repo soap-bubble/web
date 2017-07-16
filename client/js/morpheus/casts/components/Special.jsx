@@ -12,11 +12,11 @@ import {
 } from 'morpheus/game';
 
 function mapStateToProps(state, { scene }) {
-  const selector = castSelectors.special.forScene(scene);
+  const selector = castSelectors.forScene(scene);
 
   return {
-    canvas: selector.canvas(state),
-    videos: selector.videos(state),
+    canvas: selector.special.canvas(state),
+    videos: selector.special.videos(state),
     width: gameSelectors.width(state),
     height: gameSelectors.height(state),
   };

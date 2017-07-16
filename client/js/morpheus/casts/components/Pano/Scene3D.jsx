@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import momentum from 'morpheus/momentum';
+
 import {
   actions as castActions,
 } from 'morpheus/casts';
@@ -17,29 +17,37 @@ import store from 'store';
 import Canvas from 'react/Canvas';
 
 function mapStateToProps(state) {
+  const selector = castSelectors.forScene(scene);
+
   return {
-    id: sceneSelectors.currentSceneId(state),
+    canvas: selector.pano.canvas(state),
     width: gameSelectors.width(state),
     height: gameSelectors.height(state),
   };
 }
 
 function mapDisptachToProps(dispatch) {
-  return {
-    createAction(canvas) {
-      if (canvas) {
-        dispatch(castActions.pano.canvasRef(canvas));
-        if (hotspotSelectors.isPano(store.getState())) {
-          momentum(dispatch);
-        }
-      }
-    },
-  };
+  return {};
+//  return momentum(dispatch);
+  // if (hotspotSelectors.isPano(store.getState())) {
+  //
+  // }
+  // return {};
 }
 
 const Pano = connect(
   mapStateToProps,
   mapDisptachToProps,
-)(Canvas);
+)(({
+  canvas,
+}) => {
+  <div
+    ref={(el) => {
+      if (el) {
+        el.appendChild(canvas)
+      }
+    }}
+  />
+});
 
 export default Pano;

@@ -6,42 +6,77 @@ import {
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
+import momentum from 'morpheus/momentum';
+import hotspots from 'morpheus/hotspots';
 import Hotspots3D from './Hotspots3D';
 import Scene3D from './Scene3D';
 
 function mapStateToProps(state) {
+  const selector = castSelectors.forScene(scene);
+
   return {
-    isLive: sceneSelectors.isLive(state),
-    isPano: castSelectors.hotspot.isPano(state),
+    canvas: selector.pano.canvas(state),
+    width: gameSelectors.width(state),
+    height: gameSelectors.height(state),
   };
 }
 
-const Visibility = ({
-  children,
-  visible,
-}) => (
-  <div
-    style={{
-      visibility: visible ? null : 'hidden',
-    }}
-  >
-    { children }
-  </div>
-);
+function mapDispatchToProps(dispatch, { scene }) {
+  const momentumHandler = momentum({ dispatch, scene });
+  const hotspotsHandler = hotspots({ dispatch, scene });
+
+  return [
+    'onMouseUp',
+    'onMouseMove',
+    'onMouseDown',
+    'onTouchStart',
+    'onTouchMove',
+    'onTouchEnd',
+    'onTouchCancel',
+  ].reduce((memo, handler) => {
+    memo[handler] = (event) => {
+      hotspotsHandler[handler](event);
+      momentumHandler[handler](event);
+    };
+    return memo;
+  }, {});
+}
 
 const Pano = ({
-  children,
-  isPano,
-  isLive,
+  canvas,
+  width,
+  height,
+  onMouseUp,
+  onMouseMove,
+  onMouseDown,
+  onTouchStart,
+  onTouchMove,
+  onTouchEnd,
+  onTouchCancel,
 }) => {
-  let elements = Array.isArray(children) ? children.slice(0) : [];
-  elements.push(<Scene3D />);
-  if (isPano) elements = [<Hotspots3D />].concat(elements);
   return (
-    <Visibility visible={isLive}>
-      { elements }
-    </Visibility>
+    <div
+      ref={(el) => {
+        if (el) {
+          el.appendChild(canvas)
+        }
+      }}
+      onMouseDown={onMouseDown}
+      onMouseMove={onMouseMove}
+      onMouseUp={onMouseUp}
+      onTouchStart={onTouchStart}
+      onTouchMove={onTouchMove}
+      onTouchEnd={onTouchEnd}
+      onTouchCancel={onTouchCancel}
+      style={{
+        width: `${width}px`,
+        height: `${height}px`,
+      }}
+    />
   );
 };
 
-export default connect(mapStateToProps)(Pano);
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps,
+)(Pano);

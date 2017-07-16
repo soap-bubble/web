@@ -1,8 +1,12 @@
 import createReducer from 'utils/createReducer';
+import * as castModules from './modules';
+import castSelectors from './selectors';
+
 import {
   merge,
 } from 'lodash';
 import {
+  LOADING,
   ENTERING,
   EXITING,
   ENTER,
@@ -13,12 +17,36 @@ import {
 const reducer = createReducer('casts', {
   cache: {},
 }, {
+  [LOADING](state, { payload: scene }) {
+    const sceneCacheItem = Object.keys(castModules).reduce((memo, castType) => {
+      const castSelectorsForScene = castSelectors.forScene(scene);
+      const castModule = castModules[castType]({ scene, castSelectors: castSelectorsForScene })
+      if (castModule.applies(scene, state)) {
+        memo[castType] = castModule;
+        Object.assign(castSelectorsForScene, castModule.selectors);
+      }
+      return memo;
+    }, {});
+
+    return {
+      ...state,
+      cache: {
+        ...state.cache,
+        [scene.sceneId]: {
+          ...castModule,
+          selectors: castSelectorsForScene,
+          status: 'loading',
+        },
+      },
+    };
+  },
   [ENTER](state, { payload: scene }) {
     return {
       ...state,
       cache: {
         ...state.cache,
         [scene.sceneId]: {
+          ...state.cache[scene.sceneId],
           status: 'loaded',
         },
       },

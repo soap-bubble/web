@@ -1,4 +1,5 @@
 import {
+  LOADING,
   ENTERING,
   EXITING,
   ON_STAGE,
@@ -11,6 +12,13 @@ import {
 } from './index';
 
 const logger = createLogger('casts:actions');
+
+export function doLoad(scene) {
+  return {
+    type: LOADING,
+    payload: scene,
+  };
+}
 
 function doEnterForCast(scene, type, doEnterAction) {
   return dispatch => dispatch(doEnterAction(scene))

@@ -94,7 +94,8 @@ export function startAtScene(id) {
   return (dispatch) => {
     return dispatch(fetchScene(id))
       .then(scene => {
-        dispatch(castActions.doEnter(scene))
+        dispatch(castActions.doLoad(scene))
+          .then(() => dispatch(castActions.doEnter(scene)))
           .then(() => dispatch({
             type: SCENE_DO_ENTERING,
             payload: scene,
@@ -115,8 +116,9 @@ export function startAtScene(id) {
 }
 
 export function goToScene(id) {
-  return dispatch => {
-    dispatch(castActions.doExit());
+  return (dispatch, getState) => {
+    const currentSceneData = sceneSelectors.currentSceneData(getState());
+    dispatch(castActions.doExit(currentSceneData));
     dispatch({
       type: SCENE_DO_EXITING,
     });

@@ -20,7 +20,7 @@ const {
   addTouchCancel,
 } = input.actions;
 
-export default function (dispatch) {
+export default function ({ dispatch, scene }) {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
   const interaction = {
     // If we are in a user interaction
@@ -186,11 +186,13 @@ export default function (dispatch) {
     onInteractionEnd({ left, top });
   }
 
-  dispatch(addMouseUp(onMouseUp));
-  dispatch(addMouseMove(onMouseMove));
-  dispatch(addMouseDown(onMouseDown));
-  dispatch(addTouchStart(onTouchStart));
-  dispatch(addTouchMove(onTouchMove));
-  dispatch(addTouchEnd(onTouchEnd));
-  dispatch(addTouchCancel(onTouchCancel));
+  return {
+    onMouseUp,
+    onMouseMove,
+    onMouseDown,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
+  };
 }

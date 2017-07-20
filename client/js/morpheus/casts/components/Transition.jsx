@@ -9,7 +9,7 @@ import {
 } from 'morpheus/casts';
 import Video from 'react/Video';
 
-function mapStateToProps(state, { scene, fading }) {
+function mapStateToProps(state, { scene }) {
   return {
     video: castSelectors.forScene(scene).transition.video(state),
   };
@@ -18,9 +18,6 @@ function mapStateToProps(state, { scene, fading }) {
 function insertVideo(video, fading, divEl) {
   if (divEl) {
     divEl.appendChild(video);
-    if (fading !== 'out') {
-      // video.play();
-    }
   }
 }
 
@@ -28,5 +25,4 @@ export default connect(
   mapStateToProps,
 )(({
   video,
-  fading,
 }) => (<div ref={curry(insertVideo)(video, fading)} />));

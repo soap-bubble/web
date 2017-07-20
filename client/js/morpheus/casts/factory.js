@@ -50,17 +50,17 @@ export default createSelector(
         const Fader = faderDecorator(<PreviousScene scene={previous} />, <CurrentScene scene={current} />);
         scenes.push(<Fader />);
       } else {
-        scenes.push(<CurrentScene fading={'out'} scene={current} fading={'in'}/>);
+        scenes.push(<CurrentScene scene={current} />);
       }
     }
     if (_isEntering && EnteringScene) {
-      scenes.push(<EnteringScene scene={current}/>);
+      scenes.push(<EnteringScene scene={current} />);
     }
     if (_isEntering && PreviousScene) {
-      scenes.push(<PreviousScene scene={previous}/>);
+      scenes.push(<PreviousScene scene={previous} />);
     }
     if (_isExiting && CurrentExitingScene) {
-      scenes.push(<CurrentExitingScene scene={current}/>);
+      scenes.push(<CurrentExitingScene scene={current} />);
     }
     return scenes;
   },

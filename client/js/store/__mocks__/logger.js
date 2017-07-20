@@ -1,4 +1,5 @@
 import {
+  get,
   last,
   map,
 } from 'lodash';
@@ -15,13 +16,14 @@ let _enabled = false;
 
 export default store => next => (action) => {
   dispatches.push(action);
+  // console.log(action);
   return _enabled ? logger(store)(() => {
     next(action);
   })(action) : next(action);
 };
 
 export function lastActionType() {
-  return last(dispatches).type;
+  return get(last(dispatches), 'type');
 }
 
 export function actions() {

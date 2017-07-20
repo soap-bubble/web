@@ -7,6 +7,9 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
+import {
   actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
@@ -30,8 +33,11 @@ const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
-export default function (dispatch) {
+export default function ({ dispatch, scene }) {
   const clickStartPos = { left: 0, top: 0 };
+  const castSelectorForScene = castSelectors.forScene(scene);
+  const castActionsForScene = castActions.forScene(scene);
+  
   let wasActiveHotspots = [];
   let possibleValidClick = false;
   let wasMouseDowned = false;
@@ -56,7 +62,7 @@ export default function (dispatch) {
     hotspots,
   }) {
     hotspots.every(hotspot => {
-      return dispatch(castActions.special.handleMouseEvent({
+      return dispatch(castActionsForScene.special.handleMouseEvent({
         type,
         top,
         left,
@@ -66,7 +72,14 @@ export default function (dispatch) {
   }
 
   function updateState({ top, left }) {
-    const hotspots = castSelectors.hotspot.hotspotsData(store.getState());
+    const state = store.getState();
+    const hotspots = castSelectorForScene.hotspot.hotspotsData(state);
+    const isCurrent = sceneSelectors.currentSceneData(state) === scene;
+    const isExiting = castSelectorForScene.isExiting(state);
+    const acceptsMouseEvents = isCurrent && !isExiting;
+    if (!acceptsMouseEvents) {
+      return;
+    }
     const nowActiveHotspots = [];
 
     const newWidth = gameSelectors.width(store.getState());
@@ -196,7 +209,7 @@ export default function (dispatch) {
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
-    dispatch(castActions.special.update());
+    dispatch(castActionsForScene.special.update(scene));
   }
 
   function onMouseDown({ clientX: left, clientY: top }) {
@@ -242,11 +255,13 @@ export default function (dispatch) {
     // TODO....
   }
 
-  dispatch(addMouseUp(onMouseUp));
-  dispatch(addMouseMove(onMouseMove));
-  dispatch(addMouseDown(onMouseDown));
-  dispatch(addTouchStart(onTouchStart));
-  dispatch(addTouchMove(onTouchMove));
-  dispatch(addTouchEnd(onTouchEnd));
-  dispatch(addTouchCancel(onTouchCancel));
+  return {
+    onMouseUp,
+    onMouseMove,
+    onMouseDown,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
+  };
 }

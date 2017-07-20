@@ -8,7 +8,6 @@ var webpackConfig = require('./webpack.config');
 var runSequence = require('run-sequence');
 var _ = require('lodash');
 var spawn = require('cross-spawn').spawn;
-var Server = require('karma').Server;
 var path = require('path');
 import bunyan from 'bunyan';
 import dbInit, { get as getDb, update as dbUpdate, prime as dbPrime } from './server/db';
@@ -142,22 +141,6 @@ function () {
     watch: 'server', // watch ES2015 code
     tasks: ['build:server'] // compile synchronously onChange
   })
-});
-
-/**
- * Run test once and exit
- */
-gulp.task('test:client', function (done) {
-  new Server({
-    configFile: __dirname + '/karma.conf.js',
-    singleRun: true
-  }, done).start();
-});
-
-gulp.task('test:client:watch', function (done) {
-  new Server({
-    configFile: __dirname + '/karma.conf.js'
-  }, done).start();
 });
 
 gulp.task('build:client',['copy:html', 'copy:css', 'webpack:client']);

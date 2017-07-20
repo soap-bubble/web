@@ -1,40 +1,57 @@
 import {
+  LOADING,
   ENTERING,
   EXITING,
   ON_STAGE,
   ENTER,
   EXIT,
 } from './actionTypes';
-
 import {
-  delegates,
-} from './index';
+  memoize,
+} from 'lodash';
+import createLogger from 'utils/logger';
+import * as modules from './modules';
 
-function doEnterForCast(type, doEnterAction) {
+const logger = createLogger('casts:actions');
+
+export function doLoad(scene) {
+  return (dispatch) => {
+    dispatch({
+      type: LOADING,
+      payload: scene,
+    });
+    return Promise.resolve();
+  };
+}
+
+function doEnterForCast(scene, type, doEnterAction) {
   return dispatch => dispatch(doEnterAction())
     .then(castState => dispatch({
       type: ENTERING,
       payload: castState,
-      meta: type,
+      meta: { type, scene },
     }));
 }
 
-export function doEnter() {
+export function doEnter(scene) {
   return (dispatch, getState) => {
     dispatch({
       type: ENTER,
+      payload: scene,
     });
-    return Promise.all(Object.keys(delegates).map((cast) => {
-      const delegate = delegates[cast];
-      if (delegate.doEnter && delegate.applies(getState())) {
-        return dispatch(doEnterForCast(cast, delegate.doEnter));
+    return Promise.all(Object.keys(modules).map((cast) => {
+      const module = modules[cast];
+      const delegate = module.delegate && module.delegate(scene);
+      if (delegate && delegate.doEnter && delegate.applies(getState())) {
+        return dispatch(doEnterForCast(scene, cast, delegate.doEnter));
       }
       return Promise.resolve();
-    }));
+    }))
+      .then(() => scene);
   };
 }
 
-function onStageForCast(type, onStageAction) {
+function onStageForCast(scene, type, onStageAction) {
   return (dispatch) => {
     const promise = dispatch(onStageAction());
     if (!(promise && promise.then)) {
@@ -44,47 +61,64 @@ function onStageForCast(type, onStageAction) {
       .then(castState => dispatch({
         type: ON_STAGE,
         payload: castState,
-        meta: type,
-      }));
+        meta: { type, scene },
+      }))
+      .then(() => scene);
   };
 }
 
-export function onStage() {
-  return (dispatch, getState) => Promise.all(Object.keys(delegates).map((cast) => {
-    const delegate = delegates[cast];
-    if (delegate.onStage && delegate.applies(getState())) {
-      return dispatch(onStageForCast(cast, delegate.onStage));
-    }
-    return Promise.resolve();
-  }));
+export function onStage(scene) {
+  return (dispatch, getState) => {
+    return Promise.all(Object.keys(modules).map((cast) => {
+      const module = modules[cast];
+      const delegate = module.delegate && module.delegate(scene);
+      if (delegate.onStage && delegate.applies(getState())) {
+        return dispatch(onStageForCast(scene, cast, delegate.onStage));
+      }
+      return Promise.resolve();
+    }))
+      .then(() => scene);
+  };
 }
 
-function doExitForCast(type, doExitAction) {
+function doExitForCast(scene, type, doExitAction) {
   return dispatch => dispatch(doExitAction())
     .then(castState => dispatch({
       type: EXIT,
       payload: castState,
-      meta: type,
+      meta: { type, scene },
     }));
 }
 
-export function doExit() {
+export function doExit(scene) {
   return (dispatch, getState) => {
-    dispatch({
-      type: ENTER,
-    });
-    return Promise.all(Object.keys(delegates).map((cast) => {
-      const delegate = delegates[cast];
+    return Promise.all(Object.keys(modules).map((cast) => {
+      const module = modules[cast];
+      const delegate = module.delegate && module.delegate(scene);
       if (delegate.doExit && delegate.applies(getState())) {
-        return dispatch(doExitForCast(cast, delegate.doExit));
+        return dispatch(doExitForCast(scene, cast, delegate.doExit));
       }
       return Promise.resolve();
-    }));
+    }))
+      .then(() => scene);
   };
 }
 
-export { actions as pano } from './pano';
-export { actions as panoAnim } from './panoAnim';
-export { actions as hotspot } from './hotspot';
-export { actions as transition } from './transition';
-export { actions as special } from './special';
+export const forScene = memoize(function forScene(scene) {
+  const moduleActions = Object.keys(modules).reduce((memo, name) => {
+    if (modules[name].actions) {
+      memo[name] = modules[name].actions;
+    }
+    return memo;
+  }, {});
+  return Object.defineProperties({}, Object.keys(moduleActions)
+    .reduce((memo, name) => {
+      return Object.assign(memo, {
+        [name]: {
+          get: function () {
+            return moduleActions[name](scene);
+          },
+        },
+      })
+    }, {}));
+});

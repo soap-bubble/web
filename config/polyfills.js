@@ -1,4 +1,4 @@
-'use strict';
+import { jsdom } from 'jsdom'
 
 if (typeof Promise === 'undefined') {
   // Rejection tracking prevents a common issue where React gets into an
@@ -14,3 +14,17 @@ require('whatwg-fetch');
 // Object.assign() is commonly used with React.
 // It will use the native implementation if it's present and isn't buggy.
 Object.assign = require('object-assign');
+
+global.document = jsdom('');
+global.window = document.defaultView;
+global.navigator = {
+  userAgent: 'node.js',
+};
+
+function copyProps(src, target) {
+  const props = Object.getOwnPropertyNames(src)
+    .filter(prop => typeof target[prop] === 'undefined')
+    .map(prop => Object.getOwnPropertyDescriptor(src, prop));
+  Object.defineProperties(target, props);
+}
+copyProps(document.defaultView, global);

@@ -5,27 +5,16 @@ import {
   selectors as castSelectors,
   actions as castActions,
 } from 'morpheus/casts';
-import input from 'morpheus/input';
 import store from 'store';
 import renderEvents from 'utils/render';
 
-const {
-  addMouseUp,
-  addMouseMove,
-  addMouseDown,
-  addTouchStart,
-  addTouchMove,
-  addTouchEnd,
-  addTouchCancel,
-} = input.actions;
-
 export default function ({
   dispatch,
-  canvas,
+  scene,
 }) {
   const pixel = new Uint8Array(4);
   const clickStartPos = { left: 0, top: 0 };
-  const hitColorList = castSelectors.hotspot.hitColorList(store.getState());
+  const hitColorList = castSelectors.forScene(scene).hotspot.hitColorList(store.getState());
   let possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -40,6 +29,7 @@ export default function ({
   renderEvents.onAfter(() => {
     if (coordsToCheck && !document.hidden) {
       const { left: x, top } = coordsToCheck;
+      const canvas = castSelectors.forScene(scene).hotspot.canvas(store.getState());
       const gl = canvas.getContext('webgl');
       // readPixels reads from lower left so need to inverse top (y) coordinate
       const y = canvas.height - top;
@@ -90,9 +80,9 @@ export default function ({
          + Math.pow(clickStartPos.top - coordsToCheck.top, 2)
       );
       if (wasMouseUpped && possibleValidClick && hovering && interactionDistance < 20) {
-        dispatch(castActions.hotspot.activated(hoveredHotspots));
+        dispatch(castActions.forScene(scene).hotspot.activated(hoveredHotspots));
       } else {
-        dispatch(castActions.hotspot.hovered(hoveredHotspots));
+        dispatch(castActions.forScene(scene).hotspot.hovered(hoveredHotspots));
       }
 
       // Reset for next time
@@ -154,11 +144,13 @@ export default function ({
     rememberEvent(mouseEvent);
   }
 
-  dispatch(addMouseUp(onMouseUp));
-  dispatch(addMouseMove(onMouseMove));
-  dispatch(addMouseDown(onMouseDown));
-  dispatch(addTouchStart(onTouchStart));
-  dispatch(addTouchMove(onTouchMove));
-  dispatch(addTouchEnd(onTouchEnd));
-  dispatch(addTouchCancel(onTouchCancel));
+  return {
+    onMouseUp,
+    onMouseMove,
+    onMouseDown,
+    onTouchStart,
+    onTouchMove,
+    onTouchEnd,
+    onTouchCancel,
+  };
 }

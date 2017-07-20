@@ -23,7 +23,7 @@ export const createLiveSceneSelector = createSceneMapper({
 export const createEnteringSceneSelector = createSceneMapper({
   panorama: Pano,
   // special: Special,
-  transition: Transition,
+  // transition: Transition,
 });
 
 export const createExitingSceneSelector = createSceneMapper({
@@ -50,7 +50,7 @@ export default createSelector(
         const Fader = faderDecorator(<PreviousScene scene={previous} />, <CurrentScene scene={current} />);
         scenes.push(<Fader />);
       } else {
-        scenes.push(<CurrentScene scene={current}/>);
+        scenes.push(<CurrentScene fading={'out'} scene={current} fading={'in'}/>);
       }
     }
     if (_isEntering && EnteringScene) {

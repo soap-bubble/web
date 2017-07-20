@@ -9,7 +9,7 @@ export const previousSceneData = state => state.scene.previousScene;
 export const isEntering = state => state.scene.status === 'entering';
 export const isExiting = state => state.scene.status === 'exiting';
 export const isLive = state => state.scene.status === 'live';
-export const loadedScenes = state => state.scene.loadedScenes;
+export const loadedScenes = state => get(state, 'scene.loadedScenes', []);
 export const currentSceneId = createSelector(
   currentSceneData,
   cs => get(cs, 'sceneId'),

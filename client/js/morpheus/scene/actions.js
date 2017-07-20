@@ -77,12 +77,6 @@ export function setBackgroundScene(scene) {
   };
 }
 
-export function doEntering() {
-  return {
-    type: SCENE_DO_ENTERING,
-  };
-}
-
 export function setNextStartAngle(angle) {
   return {
     type: SET_NEXT_START_ANGLE,
@@ -108,6 +102,7 @@ export function startAtScene(id) {
             }));
             dispatch({
               type: SCENE_DO_ENTER,
+              payload: scene.sceneId,
             });
             return scene;
           });
@@ -118,12 +113,15 @@ export function startAtScene(id) {
 export function goToScene(id) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
-    dispatch(castActions.doExit(currentSceneData));
-    dispatch({
-      type: SCENE_DO_EXITING,
-    });
-    dispatch(inputActions.disableControl());
-    renderEvents.reset();
-    return dispatch(startAtScene(id));
+    dispatch(castActions.doExit(currentSceneData))
+      .then(() => {
+        dispatch({
+          type: SCENE_DO_EXITING,
+          payload: currentSceneData.sceneId,
+        });
+        dispatch(inputActions.disableControl());
+        renderEvents.reset();
+        return dispatch(startAtScene(id));
+      });
   };
 }

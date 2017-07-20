@@ -18,23 +18,11 @@ const reducer = createReducer('casts', {
   cache: {},
 }, {
   [LOADING](state, { payload: scene }) {
-    const sceneCacheItem = Object.keys(castModules).reduce((memo, castType) => {
-      const castSelectorsForScene = castSelectors.forScene(scene);
-      const castModule = castModules[castType]({ scene, castSelectors: castSelectorsForScene })
-      if (castModule.applies(scene, state)) {
-        memo[castType] = castModule;
-        Object.assign(castSelectorsForScene, castModule.selectors);
-      }
-      return memo;
-    }, {});
-
     return {
       ...state,
       cache: {
         ...state.cache,
         [scene.sceneId]: {
-          ...castModule,
-          selectors: castSelectorsForScene,
           status: 'loading',
         },
       },

@@ -81,7 +81,7 @@ export default function ({ dispatch, scene }) {
         momentum.enabled = false;
       }
 
-      dispatch(castActions.pano.rotateBy(momentum.speed));
+      dispatch(castActions.forScene(scene).pano.rotateBy(momentum.speed));
     }
     momentum.abort = false;
     if (momentum.enabled) {
@@ -118,7 +118,7 @@ export default function ({ dispatch, scene }) {
         interaction.positions.shift();
       }
 
-      dispatch(castActions.pano.rotateBy({
+      dispatch(castActions.forScene(scene).pano.rotateBy({
         x: delta.vertical,
         y: delta.horizontal,
       }));

@@ -1,6 +1,7 @@
 import {
   getSceneType,
   actions as sceneActions,
+  selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
   selectors as castSelectors,
@@ -83,9 +84,11 @@ export function resize({ width, height }) {
         height,
       },
     });
-
-    setSize(castSelectors.pano.renderElements(getState()));
-    setSize(castSelectors.hotspot.renderElements(getState()));
+    const scene = sceneSelectors.currentSceneData(getState());
+    if (scene) {
+      setSize(castSelectors.forScene(scene).pano.renderElements(getState()));
+      setSize(castSelectors.forScene(scene).hotspot.renderElements(getState()));
+    }
   };
 }
 

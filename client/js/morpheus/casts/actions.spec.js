@@ -7,13 +7,12 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 
-//jest.mock('store/logger');
+jest.mock('store/logger');
 jest.mock('service/scene');
 jest.mock('utils/video');
 
 describe('sanity', () => {
   it('enter scenes', () => {
-    console.log(store.getState())
     return store.dispatch(sceneActions.fetchScene(1010))
       .then(scene => {
         store.dispatch({

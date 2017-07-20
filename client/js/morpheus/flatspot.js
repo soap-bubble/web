@@ -35,6 +35,9 @@ const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
 export default function ({ dispatch, scene }) {
   const clickStartPos = { left: 0, top: 0 };
+  const castSelectorForScene = castSelectors.forScene(scene);
+  const castActionsForScene = castActions.forScene(scene);
+  
   let wasActiveHotspots = [];
   let possibleValidClick = false;
   let wasMouseDowned = false;
@@ -59,7 +62,7 @@ export default function ({ dispatch, scene }) {
     hotspots,
   }) {
     hotspots.every(hotspot => {
-      return dispatch(castActions.special.handleMouseEvent({
+      return dispatch(castActionsForScene.special.handleMouseEvent({
         type,
         top,
         left,
@@ -70,11 +73,10 @@ export default function ({ dispatch, scene }) {
 
   function updateState({ top, left }) {
     const state = store.getState();
-    const hotspots = castSelectors.hotspot.hotspotsData(state);
+    const hotspots = castSelectorForScene.hotspot.hotspotsData(state);
     const isCurrent = sceneSelectors.currentSceneData(state) === scene;
-    const selector = castSelectors.special.forScene(scene);
-    const status = selector.status(state);
-    const acceptsMouseEvents = isCurrent && status !== 'exiting';
+    const isExiting = castSelectorForScene.isExiting(state);
+    const acceptsMouseEvents = isCurrent && !isExiting;
     if (!acceptsMouseEvents) {
       return;
     }
@@ -207,7 +209,7 @@ export default function ({ dispatch, scene }) {
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
-    dispatch(castActions.special.update(scene));
+    dispatch(castActionsForScene.special.update(scene));
   }
 
   function onMouseDown({ clientX: left, clientY: top }) {

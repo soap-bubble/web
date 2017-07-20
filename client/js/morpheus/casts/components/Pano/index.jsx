@@ -4,14 +4,14 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
-  selectors as sceneSelectors,
-} from 'morpheus/scene';
+  selectors as gameSelectors,
+} from 'morpheus/game';
 import momentum from 'morpheus/momentum';
 import hotspots from 'morpheus/hotspots';
 import Hotspots3D from './Hotspots3D';
 import Scene3D from './Scene3D';
 
-function mapStateToProps(state) {
+function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
 
   return {

@@ -29,8 +29,11 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
+  selectors as castSelectors,
+} from 'morpheus/casts';
+import {
   selectors as panoSelectors,
-} from 'morpheus/casts/pano';
+} from './pano';
 import {
   defer,
 } from 'utils/promise';
@@ -108,12 +111,14 @@ function createObject3D({ geometry, material, frame }) {
 }
 
 export const selectors = memoize(function selectors(scene) {
+  const selectSceneCache = castSelectors.forScene(scene).cache;
+
   const selectPanoAnimData = createSelector(
-    sceneSelectors.currentSceneData,
+    () => scene,
     scene => get(scene, 'casts', []).filter(c => c.__t === 'PanoAnim'),
   );
   const selectPanoAnim = createSelector(
-    castSelectors.cache,
+    selectSceneCache,
     cache => get(cache, 'panoAnim'),
   );
   const selectPanoAnimFilenames = createSelector(
@@ -129,6 +134,7 @@ export const selectors = memoize(function selectors(scene) {
     filenames => !!filenames.length,
   );
   return {
+    panoAnimData: selectPanoAnimData,
     filenames: selectPanoAnimFilenames,
     castMap: selectPanoAnimCastMap,
     isPanoAnim: selectIsPanoAnim,
@@ -139,8 +145,8 @@ export const delegate = memoize(function delegate(scene) {
   let videoElDefers;
   const panoAnimSelectors = selectors(scene);
 
-  function applies(scene, state) {
-    return selectPanoAnimData(state).length;
+  function applies(state) {
+    return panoAnimSelectors.panoAnimData(state).length;
   }
 
   function doEnter() {
@@ -181,13 +187,13 @@ export const delegate = memoize(function delegate(scene) {
 
   function onStage() {
     return (dispatch, getState) => {
-      const filenames = panoAnimSelectors.panoAnimFilenames(getState());
+      const filenames = panoAnimSelectors.filenames(getState());
       if (!filenames.length) {
         return Promise.resolve();
       }
 
-      const panoObject3D = panoSelectors.panoObject3D(getState());
-      const panoAnimCastMap = panoAnimSelectors.panoAnimCastMap(getState());
+      const panoObject3D = panoSelectors(scene).panoObject3D(getState());
+      const panoAnimCastMap = panoAnimSelectors.castMap(getState());
       return Promise.all(values(map(videoElDefers, 'promise')))
         .then((videoEls) => {
           videoEls.forEach(({ name, videoEl }) => {

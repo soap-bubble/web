@@ -13,7 +13,6 @@ import {
 
 function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
-
   return {
     canvas: selector.special.canvas(state),
     videos: selector.special.videos(state),

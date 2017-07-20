@@ -12,10 +12,9 @@ export default function ({
   dispatch,
   scene,
 }) {
-  const canvas = castSelectors.forScene(scene).hotspot.canvas(store.getState());
   const pixel = new Uint8Array(4);
   const clickStartPos = { left: 0, top: 0 };
-  const hitColorList = castSelectors.hotspot.hitColorList(store.getState());
+  const hitColorList = castSelectors.forScene(scene).hotspot.hitColorList(store.getState());
   let possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -30,6 +29,7 @@ export default function ({
   renderEvents.onAfter(() => {
     if (coordsToCheck && !document.hidden) {
       const { left: x, top } = coordsToCheck;
+      const canvas = castSelectors.forScene(scene).hotspot.canvas(store.getState());
       const gl = canvas.getContext('webgl');
       // readPixels reads from lower left so need to inverse top (y) coordinate
       const y = canvas.height - top;
@@ -80,9 +80,9 @@ export default function ({
          + Math.pow(clickStartPos.top - coordsToCheck.top, 2)
       );
       if (wasMouseUpped && possibleValidClick && hovering && interactionDistance < 20) {
-        dispatch(castActions.hotspot.activated(hoveredHotspots));
+        dispatch(castActions.forScene(scene).hotspot.activated(hoveredHotspots));
       } else {
-        dispatch(castActions.hotspot.hovered(hoveredHotspots));
+        dispatch(castActions.forScene(scene).hotspot.hovered(hoveredHotspots));
       }
 
       // Reset for next time

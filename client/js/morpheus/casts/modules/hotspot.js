@@ -11,6 +11,7 @@ import THREE, {
 } from 'three';
 import {
   get,
+  memoize,
 } from 'lodash';
 import {
   defer,
@@ -31,48 +32,73 @@ import {
   actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
+import {
+  selectors as castSelectors,
+} from 'morpheus/casts';
 
-const selectHotspot = state => get(state, 'casts.hotspot', {});
-const selectCanvas = state => get(state, 'casts.hotspot.canvas');
-const selectHotspotsData = createSelector(
-  sceneSelectors.currentSceneData,
-  scene => get(scene, 'casts', []).filter(c => c.castId === 0),
-);
-const selectHitColorList = createSelector(
-  selectHotspot,
-  hotspot => hotspot.hitColorList,
-);
+export const selectors = memoize(function selectors(scene) {
+  const selectSceneCache = castSelectors.forScene(scene).cache;
+  const selectHotspot = createSelector(
+    selectSceneCache,
+    cache => get(cache, 'hotspot'),
+  );
 
-const selectHotspotHitObject3D = createSelector(
-  selectHotspot,
-  hotspot => hotspot.hitObject3D,
-);
+  const selectCanvas = createSelector(
+    selectHotspot,
+    cache => get(cache, 'canvas'),
+  );
 
-const selectHotspotVisibleObject3D = createSelector(
-  selectHotspot,
-  hotspot => hotspot.visibleObject3D,
-);
+  const selectHotspotsData = createSelector(
+    () => scene,
+    scene => get(scene, 'casts', []).filter(c => c.castId === 0),
+  );
+  const selectHitColorList = createSelector(
+    selectHotspot,
+    hotspot => hotspot.hitColorList,
+  );
 
-const selectRenderElements = createSelector(
-  selectHotspot,
-  hotspot => ({
-    camera: hotspot.camera,
-    renderer: hotspot.renderer,
-  }),
-);
+  const selectHotspotHitObject3D = createSelector(
+    selectHotspot,
+    hotspot => hotspot.hitObject3D,
+  );
 
-const selectIsPano = createSelector(
-  sceneSelectors.currentSceneData,
-  (sceneData) => {
-    const { casts } = sceneData;
-    return !!(casts.find(c => c.__t === 'PanoCast'));
-  },
-);
+  const selectHotspotVisibleObject3D = createSelector(
+    selectHotspot,
+    hotspot => hotspot.visibleObject3D,
+  );
 
-const selectScene3D = createSelector(
-  selectHotspot,
-  hotspot => hotspot.scene3D,
-);
+  const selectRenderElements = createSelector(
+    selectHotspot,
+    hotspot => ({
+      camera: get(hotspot, 'camera'),
+      renderer: get(hotspot, 'renderer'),
+    }),
+  );
+
+  const selectIsPano = createSelector(
+    () => scene,
+    (sceneData) => {
+      const { casts } = sceneData;
+      return !!(casts.find(c => c.__t === 'PanoCast'));
+    },
+  );
+
+  const selectScene3D = createSelector(
+    selectHotspot,
+    hotspot => hotspot.scene3D,
+  );
+
+  return {
+    isPano: selectIsPano,
+    scene3D: selectScene3D,
+    visibleObject3D: selectHotspotVisibleObject3D,
+    hitObject3D: selectHotspotHitObject3D,
+    hitColorList: selectHitColorList,
+    renderElements: selectRenderElements,
+    hotspotsData: selectHotspotsData,
+    canvas: selectCanvas,
+  };
+});
 
 const HOTSPOT_VERTEX_SIZE = 4;
 const SCALE_FACTOR = 1.0;
@@ -376,98 +402,106 @@ function createHotspotCanvas({ width, height }) {
   return canvas;
 }
 
-let canvasDefer;
+export const delegate = memoize(function delegate(scene) {
+  const hotspotSelectors = selectors(scene);
 
-function applies(scene, state) {
-  return selectHotspotsData(state).length;
-}
+  function applies(state) {
+    return hotspotSelectors.hotspotsData(state).length;
+  }
 
-function doEnter() {
-  return (dispatch, getState) => {
-    const hotspotsData = selectHotspotsData(getState());
-    const isPano = selectIsPano(getState());
-    if (hotspotsData.length && isPano) {
-      // 3D hotspots
-      const {
-        visiblePositionsList,
-        hitPositionsList,
-      } = createPositions(hotspotsData);
+  function doEnter() {
+    return (dispatch, getState) => {
+      const hotspotsData = hotspotSelectors.hotspotsData(getState());
+      const isPano = hotspotSelectors.isPano(getState());
+      if (hotspotsData.length && isPano) {
+        // 3D hotspots
+        const {
+          visiblePositionsList,
+          hitPositionsList,
+        } = createPositions(hotspotsData);
+        const { width, height } = gameSelectors.dimensions(getState());
+        const {
+          visibleUvsList,
+          hitUvsList,
+        } = createUvs(hotspotsData.length);
+        const indexList = createIndex(hotspotsData.length);
+        const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
+        const {
+          visibleGeometryList,
+          hitGeometryList,
+        } = createGeometry({
+          count: hotspotsData.length,
+          visibleIndexList: indexList,
+          visibleUvsList,
+          visiblePositionsList,
+          hitIndexList: indexList,
+          hitUvsList,
+          hitPositionsList,
+        });
+        const {
+          hitColorList,
+          hitMaterialList,
+          visibleMaterialList,
+        } = createMaterials(hotspotsData);
+
+        const {
+          visibleObject: visibleObject3D,
+          hitObject: hitObject3D,
+        } = createObjects3D({
+          count: hotspotsData.length,
+          visibleGeometryList,
+          visibleMaterialList,
+          hitGeometryList,
+          hitMaterialList,
+          startAngle: nextStartAngle,
+        });
+        const scene3D = createScene(hitObject3D);
+        const canvas = createCanvas({ width, height });
+        return Promise.resolve({
+          canvas,
+          scene3D,
+          hitObject3D,
+          visibleObject3D,
+          hitColorList,
+        });
+      }
+      return Promise.resolve();
+    };
+  }
+
+  function onStage() {
+    return (dispatch, getState) => {
       const { width, height } = gameSelectors.dimensions(getState());
-      const {
-        visibleUvsList,
-        hitUvsList,
-      } = createUvs(hotspotsData.length);
-      const indexList = createIndex(hotspotsData.length);
-      const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-      const {
-        visibleGeometryList,
-        hitGeometryList,
-      } = createGeometry({
-        count: hotspotsData.length,
-        visibleIndexList: indexList,
-        visibleUvsList,
-        visiblePositionsList,
-        hitIndexList: indexList,
-        hitUvsList,
-        hitPositionsList,
-      });
-      const {
-        hitColorList,
-        hitMaterialList,
-        visibleMaterialList,
-      } = createMaterials(hotspotsData);
+      const isPano = hotspotSelectors.isPano(getState());
+      if (isPano) {
+        const scene3D = hotspotSelectors.scene3D(getState());
+        const canvas = hotspotSelectors.canvas(getState());
+        const camera = createCamera({ width, height });
+        const renderer = createRenderer({ canvas, width, height });
+        positionCamera({
+          camera,
+          vector3: { z: -0.325 },
+        });
+        startRenderLoop({
+          scene3D,
+          camera,
+          renderer,
+        });
+        return Promise.resolve({
+          camera,
+          renderer,
+        });
+      }
+      return Promise.resolve();
+    };
+  }
 
-      const {
-        visibleObject: visibleObject3D,
-        hitObject: hitObject3D,
-      } = createObjects3D({
-        count: hotspotsData.length,
-        visibleGeometryList,
-        visibleMaterialList,
-        hitGeometryList,
-        hitMaterialList,
-        startAngle: nextStartAngle,
-      });
-      const scene3D = createScene(hitObject3D);
-      const canvas = createCanvas({ width, height });
-      return Promise.resolve({
-        canvas,
-        scene3D,
-        hitObject3D,
-        visibleObject3D,
-        hitColorList,
-      });
-    }
-    return Promise.resolve();
+  return {
+    applies,
+    doEnter,
+    onStage,
   };
-}
-
-function onStage() {
-  return (dispatch, getState) => {
-    const { width, height } = gameSelectors.dimensions(getState());
-    const isPano = selectIsPano(getState());
-    if (isPano) {
-      const scene3D = selectScene3D(getState());
-      const canvas = selectCanvas(getState());
-      const camera = createCamera({ width, height });
-      const renderer = createRenderer({ canvas, width, height });
-      positionCamera({
-        camera,
-        vector3: { z: -0.325 },
-      });
-      startRenderLoop({
-        scene3D,
-        camera,
-        renderer,
-      });
-      return Promise.resolve({
-        camera,
-        renderer,
-      });
-    }
-    return Promise.resolve();
-  };
-}
+});
 
 const HOTSPOT_TYPE = {
   0: 'CHANGE_SCENE',
@@ -488,63 +522,45 @@ const HOTSPOT_TYPE = {
   99: 'DO_ACTION',
 };
 
-function hovered(hoveredHotspots) {
-  return (dispatch) => {
-    hoveredHotspots.every(hotspot => {
-      // TODO: check if really currently enabled
-      // See CHotspot::GetCursor
-      if (hotspot.initiallyEnabled) {
-        if (HOTSPOT_TYPE[hotspot.type] === 'CHANGE_SCENE') {
-          const { cursorShapeWhenActive: morpheusCursor } = hotspot;
-          dispatch(gameActions.setCursor(morpheusCursor))
+export const actions = memoize(function (scene) {
+  function hovered(hoveredHotspots) {
+    return (dispatch) => {
+      hoveredHotspots.every(hotspot => {
+        // TODO: check if really currently enabled
+        // See CHotspot::GetCursor
+        if (hotspot.initiallyEnabled) {
+          if (HOTSPOT_TYPE[hotspot.type] === 'CHANGE_SCENE') {
+            const { cursorShapeWhenActive: morpheusCursor } = hotspot;
+            dispatch(gameActions.setCursor(morpheusCursor))
+          }
         }
+      });
+
+      if (hoveredHotspots.length === 0) {
+        dispatch(gameActions.setCursor(0));
       }
-    });
+    };
+  }
 
-    if (hoveredHotspots.length === 0) {
-      dispatch(gameActions.setCursor(0));
-    }
+  function activated(activatedHotspots) {
+    return (dispatch) => {
+      activatedHotspots.every(hotspot => {
+        switch (HOTSPOT_TYPE[hotspot.type]) {
+          case 'CHANGE_SCENE':
+          case 'DISSOLVE_TO':
+          case 'GO_BACK':
+          case 'RETURN_FROM_HELP':
+            dispatch(sceneActions.goToScene(hotspot.param1));
+            return false;
+          default:
+            return true;
+        }
+      });
+    };
+  }
+
+  return {
+    hovered,
+    activated,
   };
-}
-
-function activated(activatedHotspots) {
-  return (dispatch) => {
-    activatedHotspots.every(hotspot => {
-      switch (HOTSPOT_TYPE[hotspot.type]) {
-        case 'CHANGE_SCENE':
-        case 'DISSOLVE_TO':
-        case 'GO_BACK':
-        case 'RETURN_FROM_HELP':
-          dispatch(sceneActions.goToScene(hotspot.param1));
-          return false;
-        default:
-          return true;
-      }
-    });
-  };
-}
-
-export const actions = {
-  doEnter,
-  onStage,
-  hovered,
-  activated,
-};
-
-export const selectors = {
-  applies,
-  isPano: selectIsPano,
-  scene3D: selectScene3D,
-  visibleObject3D: selectHotspotVisibleObject3D,
-  hitObject3D: selectHotspotHitObject3D,
-  hitColorList: selectHitColorList,
-  renderElements: selectRenderElements,
-  hotspotsData: selectHotspotsData,
-  canvas: selectCanvas,
-};
-
-export const delegate = {
-  applies,
-  doEnter,
-  onStage,
-};
+});

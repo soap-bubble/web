@@ -4,36 +4,41 @@ import {
 import { createSelector } from 'reselect';
 import { selectors as gameStateSelectors } from 'morpheus/gamestate';
 import { selectors as sceneSelectors } from 'morpheus/scene';
-
+import * as modules from './modules';
 const { gamestates } = gameStateSelectors;
 
-const selectCastsFromScene = scene => get(scene, 'casts', []);
-const selectCastsCurrent = createSelector(
-  sceneSelectors.currentSceneData,
-  selectCastsFromScene,
-);
-const selectCastsBackground = createSelector(
-  sceneSelectors.backgroundSceneData,
-  selectCastsFromScene,
-);
-const selectCastsPrevious = createSelector(
-  sceneSelectors.previousSceneData,
-  selectCastsFromScene,
-);
+// const selectCastsFromScene = scene => get(scene, 'casts', []);
+// const selectCastsCurrent = createSelector(
+//   sceneSelectors.currentSceneData,
+//   selectCastsFromScene,
+// );
+// const selectCastsBackground = createSelector(
+//   sceneSelectors.backgroundSceneData,
+//   selectCastsFromScene,
+// );
+// const selectCastsPrevious = createSelector(
+//   sceneSelectors.previousSceneData,
+//   selectCastsFromScene,
+// );
+
+const forSceneSelectorExtensions = {};
+export function extendForScene(name, selectorFactory) {
+  forSceneSelectorExtensions[name] = selectorFactory;
+}
 
 export function forScene(scene) {
   const selectCastCacheForThisScene = state => get(state, `casts.cache[${scene.sceneId}]`);
   const selectCastIsEntering = createSelector(
     selectCastCacheForThisScene,
-    cast => casts.status === 'entering',
+    cast => cast.status === 'entering',
   );
   const selectCastIsOnStage = createSelector(
     selectCastCacheForThisScene,
-    cast => casts.status === 'onStage',
+    cast => cast.status === 'onStage',
   );
   const selectCastIsExiting = createSelector(
     selectCastCacheForThisScene,
-    cast => casts.status === 'exiting',
+    cast => cast.status === 'exiting',
   );
 
   const castSelectors = {
@@ -43,6 +48,23 @@ export function forScene(scene) {
     isExiting: selectCastIsExiting,
     casts: () => selectCastsFromScene(scene),
   };
+  const moduleSelectors = Object.keys(modules).reduce((memo, name) => {
+    if (modules[name].selectors) {
+      memo[name] = modules[name].selectors;
+    }
+    return memo;
+  }, {});
+  Object.defineProperties(castSelectors, Object.keys(moduleSelectors)
+    .reduce((memo, name) => {
+      return Object.assign(memo, {
+        [name]: {
+          get: function () {
+            return moduleSelectors[name](scene);
+          },
+        },
+      })
+    }, {}),
+  );
 
   return castSelectors;
 }

@@ -1,5 +1,6 @@
 import {
   get,
+  memoize,
 } from 'lodash';
 import {
   createSelector,
@@ -190,7 +191,7 @@ function createCanvas({ width, height }) {
   return canvas;
 }
 
-expost const selectors = memoize(function selectors(scene) {
+export function selectors(scene) {
   const selectSpecialCastData = createSelector(
     () => scene,
     () => get(scene, 'sceneType'),
@@ -224,7 +225,7 @@ expost const selectors = memoize(function selectors(scene) {
   );
 
   const selectSpecial = createSelector(
-    castSelectors.cache,
+    castSelectors.forScene(scene).cache,
     castCache => get(castCache, 'special'),
   );
   const selectCanvas = createSelector(
@@ -252,7 +253,7 @@ expost const selectors = memoize(function selectors(scene) {
     videos: selectVideos,
     controlledCasts: selectControlledCasts,
   };
-});
+};
 
 export const delegate = memoize(function delegate(scene) {
   const specialSelectors = selectors(scene);
@@ -299,7 +300,7 @@ export const delegate = memoize(function delegate(scene) {
           }),
         Promise.all(
           [
-            loadAsImage(castSelector.controlledCastImgUrl(getState()))
+            loadAsImage(specialSelectors.controlledCastImgUrl(getState()))
               .then(img => ({
                 img,
                 data: leadCast,

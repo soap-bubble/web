@@ -10,7 +10,7 @@ import {
   TextureLoader,
 } from 'three';
 
-import { range, get, pick } from 'lodash';
+import { range, get, memoize, pick } from 'lodash';
 import { createSelector } from 'reselect';
 import {
   defer,
@@ -31,11 +31,15 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
+  selectors as castSelectors,
+} from 'morpheus/casts';
+import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
   selectors as hotspotSelectors,
 } from './hotspot';
+import createCanvas from 'utils/canvas';
 
 const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
@@ -133,7 +137,26 @@ function clamp({ x, y }) {
   return { x, y };
 }
 
-export default function({ scene, castSelectors }) {
+function createScene(...objects) {
+  const scene = new Scene();
+  objects.forEach(o => scene.add(o));
+  return scene;
+}
+
+function startRenderLoop({ scene3D, camera, renderer }) {
+  const render = () => {
+    //orientation.update();
+    renderer.render(scene3D, camera);
+  };
+  renderEvents.onRender(render);
+  renderEvents.onDestroy(() => {
+    renderer.dispose();
+  });
+}
+
+export const selectors = memoize(function (scene) {
+  const selectSceneCache = castSelectors.forScene(scene).cache;
+
   const selectPanoCastData = createSelector(
     () => scene,
     scene => get(scene, 'casts', []).find(c => c.__t === 'PanoCast'),
@@ -143,7 +166,7 @@ export default function({ scene, castSelectors }) {
     panoCast => get(panoCast, 'fileName'),
   );
   const selectPano = createSelector(
-    castSelectors.cache,
+    selectSceneCache,
     castCache => get(castCache, 'pano'),
   );
   const selectPanoScene3D = createSelector(
@@ -154,6 +177,10 @@ export default function({ scene, castSelectors }) {
     selectPano,
     pano => get(pano, 'object3D'),
   );
+  const selectCanvas = createSelector(
+    selectPano,
+    pano => get(pano, 'canvas'),
+  );
   const selectRenderElements = createSelector(
     selectPano,
     pano => pick(pano, ['camera', 'renderer']),
@@ -162,18 +189,23 @@ export default function({ scene, castSelectors }) {
     selectPanoObject3D,
     panoObject3D => get(panoObject3D, 'rotation'),
   );
-  const selectors = {
+  return {
+    panoCastData: selectPanoCastData,
     panoScene3D: selectPanoScene3D,
     panoObject3D: selectPanoObject3D,
     renderElements: selectRenderElements,
     rotation: selectRotation,
+    canvas: selectCanvas,
   };
+});
 
+export const actions = memoize(function (scene) {
+  const panoSelectors = selectors(scene);
   function rotate({ x, y }) {
     return (dispatch, getState) => {
-      const hitObject3D = hotspotSelectors.hitObject3D(getState());
-      const visibleObject3D = hotspotSelectors.visibleObject3D(getState());
-      const panoObject3D = selectors.panoObject3D(getState());
+      const hitObject3D = hotspotSelectors(scene).hitObject3D(getState());
+      const visibleObject3D = hotspotSelectors(scene).visibleObject3D(getState());
+      const panoObject3D = panoSelectors.panoObject3D(getState());
       const rot = clamp({
         x,
         y,
@@ -187,7 +219,7 @@ export default function({ scene, castSelectors }) {
 
   function rotateBy({ x: deltaX, y: deltaY }) {
     return (dispatch, getState) => {
-      const panoObject3D = selectors.panoObject3D(getState());
+      const panoObject3D = panoSelectors.panoObject3D(getState());
       let {
         x,
         y,
@@ -200,26 +232,18 @@ export default function({ scene, castSelectors }) {
     };
   }
 
-  function createScene(...objects) {
-    const scene = new Scene();
-    objects.forEach(o => scene.add(o));
-    return scene;
-  }
+  return {
+    rotate,
+    rotateBy,
+  };
+});
 
-  function startRenderLoop({ scene3D, camera, renderer }) {
-    const render = () => {
-      //orientation.update();
-      renderer.render(scene3D, camera);
-    };
-    renderEvents.onRender(render);
-    renderEvents.onDestroy(() => {
-      renderer.dispose();
-    });
-  }
+export const delegate = memoize(function (scene) {
+  const panoSelectors = selectors(scene);
 
   function doEnter() {
     return (dispatch, getState) => {
-      const panoCastData = selectors.panoCastData(getState());
+      const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {
         const { width, height } = gameSelectors.dimensions(getState());
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
@@ -233,7 +257,6 @@ export default function({ scene, castSelectors }) {
           startAngle: nextStartAngle,
         });
         const scene3D = createScene(object3D);
-        canvasDefer = defer();
         return promiseMaterial
           .then(() => ({
             object3D,
@@ -245,45 +268,36 @@ export default function({ scene, castSelectors }) {
     };
   }
 
-  function applies(scene, state) {
-    return selectPanoCastData(state)
+  function applies(state) {
+    return panoSelectors.panoCastData(state)
   }
 
   function onStage() {
     return (dispatch, getState) => {
-      const scene3D = selectors.panoScene3D(getState());
+      const scene3D = panoSelectors.panoScene3D(getState());
+      const canvas = panoSelectors.canvas(getState());
       const { width, height } = gameSelectors.dimensions(getState());
-      return canvasDefer.promise.then((canvas) => {
-        const camera = createCamera({ width, height });
-        const renderer = createRenderer({ canvas, width, height });
-        positionCamera({
-          camera,
-          vector3: { z: -0.325 },
-        });
-        startRenderLoop({
-          scene3D,
-          camera,
-          renderer,
-        });
-        return {
-          camera,
-          renderer,
-        };
+      const camera = createCamera({ width, height });
+      const renderer = createRenderer({ canvas, width, height });
+      positionCamera({
+        camera,
+        vector3: { z: -0.325 },
       });
-      return Promise.resolve();
+      startRenderLoop({
+        scene3D,
+        camera,
+        renderer,
+      });
+      return Promise.resolve({
+        camera,
+        renderer,
+      });
     };
   }
 
   return {
-    actions: {
-      rotateBy,
-      rotate,
-    },
-    scene: {
-      applies,
-      doEnter,
-      onStage,
-    },
-    selectors,
+    applies,
+    doEnter,
+    onStage,
   };
-}
+});

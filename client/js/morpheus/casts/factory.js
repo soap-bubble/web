@@ -9,6 +9,7 @@ import {
 import Special from './components/Special';
 import Pano from './components/Pano';
 import Transition from './components/Transition';
+import Sound from './components/Sound';
 
 function createSceneMapper(map) {
   return sceneData => map[getSceneType(sceneData)];
@@ -62,6 +63,7 @@ export default createSelector(
     if (_isExiting && CurrentExitingScene) {
       scenes.push(<CurrentExitingScene scene={current} />);
     }
+    scenes.push(<Sound key="sound" scene={current}/>);
     return scenes;
   },
 );

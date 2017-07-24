@@ -543,13 +543,15 @@ export const actions = memoize(function (scene) {
   }
 
   function activated(activatedHotspots) {
-    return (dispatch) => {
+    return (dispatch, getState) => {
       activatedHotspots.every(hotspot => {
         switch (HOTSPOT_TYPE[hotspot.type]) {
           case 'CHANGE_SCENE':
           case 'DISSOLVE_TO':
           case 'GO_BACK':
           case 'RETURN_FROM_HELP':
+            const hitObject3D = selectors(scene).hitObject3D(getState());
+            dispatch(sceneActions.setNextStartAngle(hitObject3D.rotation.y));
             dispatch(sceneActions.goToScene(hotspot.param1));
             return false;
           default:

@@ -173,7 +173,7 @@ export function handleHotspot({ hotspot, top, left }) {
         case 'DissolveTo':
         case 'ChangeScene':
           const { param1: nextSceneId } = hotspot;
-          dispatch(sceneActions.goToScene(nextSceneId));
+          nextSceneId && dispatch(sceneActions.goToScene(nextSceneId));
           return hotspot.defaultPass;
           break;
       }

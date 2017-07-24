@@ -1,4 +1,4 @@
-export function loadAsImage(url) {
+export function loadAsImage(url = '') {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.crossorigin = 'anonymous';

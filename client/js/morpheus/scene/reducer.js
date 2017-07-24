@@ -1,6 +1,7 @@
 import createReducer from 'utils/createReducer';
 import {
   merge,
+  isUndefined,
 } from 'lodash';
 import {
   SCENE_SET_BACKGROUND_SCENE,
@@ -21,10 +22,13 @@ const reducer = createReducer('scene', {
   nextStartAngle: 0,
 }, {
   [SET_NEXT_START_ANGLE](state, { payload: nextStartAngle }) {
-    return {
-      ...state,
-      nextStartAngle,
-    };
+    if (!isUndefined(nextStartAngle)) {
+      return {
+        ...state,
+        nextStartAngle,
+      };
+    }
+    return state;
   },
   [SCENE_SET_BACKGROUND_SCENE](state, { payload: scene }) {
     return {

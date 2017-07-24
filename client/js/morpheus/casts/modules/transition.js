@@ -67,7 +67,7 @@ export const selectors = memoize(function selectors(scene) {
   const selectAngleAtEndRadians = createSelector(
     selecAngleAtEnd,
     (angleAtEnd) => {
-      let startAngle = 0;
+      let startAngle;
       if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
         startAngle = (angleAtEnd * Math.PI) / 1800;
         startAngle -= Math.PI - (Math.PI / 6);

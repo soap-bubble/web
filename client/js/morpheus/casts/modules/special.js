@@ -180,8 +180,10 @@ function generateControlledFrames({
 }
 
 function generateSpecialImages({ specials, canvas }) {
-  const ctx = canvas.getContext('2d');
-  specials.forEach(op => ctx.drawImage(...op));
+  if (canvas) {
+    const ctx = canvas.getContext('2d');
+    specials.forEach(op => ctx.drawImage(...op));  
+  }
 }
 
 function createCanvas({ width, height }) {
@@ -206,7 +208,7 @@ export function selectors(scene) {
 
   const selectControlledCastsData = createSelector(
     selectExtraCasts,
-    extraCasts => extraCasts.filter(c => c.__t === 'ControlledMovieCast'),
+    extraCasts => extraCasts.filter(c => c.__t === 'ControlledMovieCast', []),
   );
 
   const selectMovieCasts = createSelector(
@@ -216,7 +218,12 @@ export function selectors(scene) {
 
   const selectControlledCastImgUrl = createSelector(
     selectSpecialCastData,
-    cast => getAssetUrl(get(cast, 'fileName'), 'png'),
+    cast => {
+      const asset = get(cast, 'fileName');
+      if (asset) {
+        return getAssetUrl(asset, 'png');
+      }
+    },
   );
 
   const selectHotspotsData = createSelector(
@@ -238,7 +245,7 @@ export function selectors(scene) {
   );
   const selectControlledCasts = createSelector(
     selectSpecial,
-    special => get(special, 'controlledCasts'),
+    special => get(special, 'controlledCasts', []),
   );
 
   return {

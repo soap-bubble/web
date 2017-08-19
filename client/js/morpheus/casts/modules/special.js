@@ -34,7 +34,7 @@ import {
 
 const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
-    const rootCast = get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
+    const rootCast = get(scene, 'casts', []).find(c => c.castId === scene.sceneId);
     if (rootCast && !rootCast.nextSceneId) {
       return rootCast;
     }
@@ -218,7 +218,7 @@ export function selectors(scene) {
 
   const selectControlledCastImgUrl = createSelector(
     selectSpecialCastData,
-    cast => {
+    (cast) => {
       const asset = get(cast, 'fileName');
       if (asset) {
         return getAssetUrl(asset, 'png');
@@ -260,9 +260,9 @@ export function selectors(scene) {
     videos: selectVideos,
     controlledCasts: selectControlledCasts,
   };
-};
+}
 
-export const delegate = memoize(function delegate(scene) {
+export const delegate = memoize((scene) => {
   const specialSelectors = selectors(scene);
 
   function applies(state) {
@@ -289,11 +289,11 @@ export const delegate = memoize(function delegate(scene) {
               onerror: reject,
             });
           })
-            .then(video => {
+            .then((video) => {
               video.classList.add('MovieSpecialCast');
               return video;
             })))
-          .then(videos => {
+          .then((videos) => {
             const transforms = videos.map((video, index) => generateMovieTransform({
               video,
               dimensions,
@@ -317,7 +317,7 @@ export const delegate = memoize(function delegate(scene) {
               .then(img => ({
                 img,
                 data: cast,
-              }))
+              })),
             ),
         ))
           .then((controlledCasts) => {
@@ -328,15 +328,15 @@ export const delegate = memoize(function delegate(scene) {
                 controlledCasts,
                 dimensions,
               }),
-              canvas
+              canvas,
             });
             return {
               canvas,
               controlledCasts,
             };
-          })
+          }),
       ])
-        .then(([ videos, { canvas, controlledCasts } ]) => ({
+        .then(([videos, { canvas, controlledCasts }]) => ({
           videos,
           canvas,
           controlledCasts,
@@ -350,7 +350,7 @@ export const delegate = memoize(function delegate(scene) {
   };
 });
 
-export const actions = memoize(function actions (scene) {
+export const actions = memoize((scene) => {
   const specialSelectors = selectors(scene);
   function update() {
     return (dispatch, getState) => {
@@ -365,7 +365,7 @@ export const actions = memoize(function actions (scene) {
           controlledCasts,
           dimensions,
         }),
-        canvas
+        canvas,
       });
     };
   }

@@ -43,7 +43,7 @@ import {
   GESTURES,
 } from 'morpheus/constants';
 
-export const selectors = memoize(function selectors(scene) {
+export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
   const selectHotspot = createSelector(
     selectSceneCache,
@@ -409,7 +409,7 @@ function createHotspotCanvas({ width, height }) {
   return canvas;
 }
 
-export const delegate = memoize(function delegate(scene) {
+export const delegate = memoize((scene) => {
   const hotspotSelectors = selectors(scene);
 
   function applies(state) {
@@ -507,7 +507,6 @@ export const delegate = memoize(function delegate(scene) {
             dispatch(gamestateActions.updateGameState(gamestateId, value));
           }
         }
-
       });
 
       return Promise.resolve();
@@ -521,16 +520,16 @@ export const delegate = memoize(function delegate(scene) {
   };
 });
 
-export const actions = memoize(function (scene) {
+export const actions = memoize((scene) => {
   function hovered(hoveredHotspots) {
     return (dispatch) => {
-      hoveredHotspots.every(hotspot => {
+      hoveredHotspots.every((hotspot) => {
         // TODO: check if really currently enabled
         // See CHotspot::GetCursor
         if (hotspot.initiallyEnabled) {
           if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
             const { cursorShapeWhenActive: morpheusCursor } = hotspot;
-            dispatch(gameActions.setCursor(morpheusCursor))
+            dispatch(gameActions.setCursor(morpheusCursor));
           }
         }
       });
@@ -543,7 +542,7 @@ export const actions = memoize(function (scene) {
 
   function activated(activatedHotspots) {
     return (dispatch, getState) => {
-      activatedHotspots.every(hotspot => {
+      activatedHotspots.every((hotspot) => {
         switch (ACTION_TYPES[hotspot.type]) {
           case 'ChangeScene':
           case 'DissolveTo':

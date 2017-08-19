@@ -25,7 +25,7 @@ import {
   defer,
 } from 'utils/promise';
 
-export const selectors = memoize(function selectors(scene) {
+export const selectors = memoize((scene) => {
   const selectCasts = createSelector(
     () => scene,
     scene => get(scene, 'casts', []),
@@ -47,7 +47,7 @@ export const selectors = memoize(function selectors(scene) {
   };
 });
 
-export const delegate = memoize(function actions(scene) {
+export const delegate = memoize((scene) => {
   const soundSelectors = selectors(scene);
   function applies(state) {
     return soundSelectors.soundCastsData(state).lenth;

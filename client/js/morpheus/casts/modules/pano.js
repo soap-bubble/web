@@ -61,7 +61,7 @@ function createGeometries() {
     const left = (i % 16) / 16;
     const right = left + 0.0625;
     const top = Math.floor(i / 16) === 0 ? 0.5 : 0.0;
-    const bottom = top + 0.5
+    const bottom = top + 0.5;
 
 
     const uvs = new BufferAttribute(new Float32Array([
@@ -112,7 +112,7 @@ function createMaterial(asset) {
         undefined,
         reject,
       ),
-    })
+    }),
   )
     .then(() => material);
   return {
@@ -146,7 +146,7 @@ function createScene(...objects) {
 
 function startRenderLoop({ scene3D, camera, renderer }) {
   const render = () => {
-    //orientation.update();
+    // orientation.update();
     renderer.render(scene3D, camera);
   };
   renderEvents.onRender(render);
@@ -155,7 +155,7 @@ function startRenderLoop({ scene3D, camera, renderer }) {
   });
 }
 
-export const selectors = memoize(function (scene) {
+export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
 
   const selectPanoCastData = createSelector(
@@ -200,7 +200,7 @@ export const selectors = memoize(function (scene) {
   };
 });
 
-export const actions = memoize(function (scene) {
+export const actions = memoize((scene) => {
   const panoSelectors = selectors(scene);
   function rotate({ x, y }) {
     return (dispatch, getState) => {
@@ -239,7 +239,7 @@ export const actions = memoize(function (scene) {
   };
 });
 
-export const delegate = memoize(function (scene) {
+export const delegate = memoize((scene) => {
   const panoSelectors = selectors(scene);
 
   function doEnter() {
@@ -262,7 +262,7 @@ export const delegate = memoize(function (scene) {
           .then(() => ({
             object3D,
             scene3D,
-            canvas: createCanvas({ width, height })
+            canvas: createCanvas({ width, height }),
           }));
       }
       return Promise.resolve();
@@ -270,7 +270,7 @@ export const delegate = memoize(function (scene) {
   }
 
   function applies(state) {
-    return panoSelectors.panoCastData(state)
+    return panoSelectors.panoCastData(state);
   }
 
   function onStage() {

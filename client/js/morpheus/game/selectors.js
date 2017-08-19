@@ -1,11 +1,11 @@
 import { createSelector } from 'reselect';
 
 const MORPHEUS_TO_HTML_CURSOR = {
-  [10001]: 'alias',
-  [10002]: 'pointer',
-  [10005]: 'alias',
-  [10008]: '-webkit-grab',
-  [10009]: '-webkit-grabbing'
+  10001: 'alias',
+  10002: 'pointer',
+  10005: 'alias',
+  10008: '-webkit-grab',
+  10009: '-webkit-grabbing',
 };
 
 export const game = state => state.game;

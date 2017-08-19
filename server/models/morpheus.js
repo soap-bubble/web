@@ -4,7 +4,7 @@ import util from 'util';
 
 export class Morpheus extends Schema {
   constructor(opts) {
-    super(opts)
+    super(opts);
   }
 }
 
@@ -27,7 +27,7 @@ export class GameState extends Morpheus {
       minValue: Number,
       maxValue: Number,
       stateWraps: Number,
-      value: Number
+      value: Number,
     });
   }
 }
@@ -36,10 +36,10 @@ export class HotSpot extends Cast {
   constructor(opts) {
     super(opts);
     this.add({
-      comparators: [ {
+      comparators: [{
         gameStateId: Number,
         testType: Number,
-        value: Number
+        value: Number,
       }],
       castId: Number,
       rectTop: Number,
@@ -52,7 +52,7 @@ export class HotSpot extends Cast {
       param3: Number,
       type: Number,
       gesture: Number,
-      defaultPass: Boolean
+      defaultPass: Boolean,
     });
   }
 }
@@ -73,17 +73,17 @@ export class ControlledMovieCast extends MovieCast {
     super(opts);
     this.add({
       controlledLocation: {
-        "x": Number,
-        "y": Number
+        x: Number,
+        y: Number,
       },
       companionMovieCastId: Number,
       scale: Number,
-      controlledMovieCallbacks: [ {
+      controlledMovieCallbacks: [{
         frames: Number,
         direction: Number,
         callbackWhen: Number,
-        gameState: Number
-      } ]
+        gameState: Number,
+      }],
     });
   }
 }
@@ -93,11 +93,11 @@ export class PanoAnim extends MovieCast {
     super(opts);
     this.add({
       location: {
-        "x": Number,
-        "y": Number
+        x: Number,
+        y: Number,
       },
-      "frame": Number,
-      "looping": Boolean
+      frame: Number,
+      looping: Boolean,
     });
   }
 }
@@ -107,22 +107,22 @@ export class MovieSpecialCast extends MovieCast {
     super(opts);
     this.add({
       location: {
-        "x": Number,
-        "y": Number
+        x: Number,
+        y: Number,
       },
-      "startFrame": Number,
-      "endFrame": Number,
-      "actionEnd": Number,
-      "scale": Number,
-      "looping": Boolean,
-      "dissolveToNextScene": Boolean,
-      "nextSceneId": Number,
-      "angleAtEnd": Number,
+      startFrame: Number,
+      endFrame: Number,
+      actionEnd: Number,
+      scale: Number,
+      looping: Boolean,
+      dissolveToNextScene: Boolean,
+      nextSceneId: Number,
+      angleAtEnd: Number,
       audioOnly: Boolean,
-      comparators: [ {
+      comparators: [{
         gameStateId: Number,
         testType: Number,
-        value: Number
+        value: Number,
       }],
     });
   }
@@ -140,7 +140,7 @@ export class Scene extends Morpheus {
       cdFlags: Number,
       sceneType: Number,
       palette: Number,
-      casts: [ Schema.Types.Mixed ]
+      casts: [Schema.Types.Mixed],
     });
   }
 }

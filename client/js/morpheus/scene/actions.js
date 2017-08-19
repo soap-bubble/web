@@ -54,7 +54,7 @@ export function fetch(id) {
     const cachedScene = loadedScenes.find(scene => scene.sceneId === id);
     if (cachedScene) {
       return Promise.resolve(cachedScene);
-    };
+    }
     const fetchPromise = bySceneId(id)
       .then(response => response.data)
       .then((sceneData) => {
@@ -85,9 +85,8 @@ export function setNextStartAngle(angle) {
 }
 
 export function startAtScene(id) {
-  return (dispatch) => {
-    return dispatch(fetchScene(id))
-      .then(scene => {
+  return dispatch => dispatch(fetchScene(id))
+      .then((scene) => {
         dispatch(castActions.doLoad(scene))
           .then(() => dispatch(castActions.doEnter(scene)))
           .then(() => dispatch({
@@ -107,7 +106,6 @@ export function startAtScene(id) {
             return scene;
           });
       });
-  }
 }
 
 export function goToScene(id) {

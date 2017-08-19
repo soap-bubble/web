@@ -39,7 +39,7 @@ const reducer = createReducer('scene', {
   [SCENE_SET_CURRENT_SCENE](state, { payload: scene }) {
     return {
       ...state,
-      loadedScenes: state.loadedScenes.concat([ scene ]),
+      loadedScenes: state.loadedScenes.concat([scene]),
     };
   },
   [SCENE_DO_ENTERING](state, { payload: scene }) {

@@ -18,4 +18,4 @@ const reducer = createReducer({
       }, { ...cache }),
     };
   },
-})
+});

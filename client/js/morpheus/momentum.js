@@ -37,7 +37,7 @@ export default function ({ dispatch, scene }) {
   const momentum = {
     enabled: false,
     abort: false,
-    speed: { x: 0, y: 0}
+    speed: { x: 0, y: 0 },
   };
 
   const SWING_DELTA = 0.25;
@@ -46,12 +46,12 @@ export default function ({ dispatch, scene }) {
   const DAMPER = 0.90;
 
   function convertFromHorizontalSpeed(delta, sensitivity) {
-    const speed =  (delta * DEG_TO_RAD) / (10.0 * ((19 - sensitivity) / 18.0 ));
+    const speed = (delta * DEG_TO_RAD) / (10.0 * ((19 - sensitivity) / 18.0));
     return speed;
   }
 
   function convertFromVerticalSpeed(delta, sensitivity) {
-    return (delta * DEG_TO_RAD) / (7.0 * ((19 - sensitivity) / 18.0 ));
+    return (delta * DEG_TO_RAD) / (7.0 * ((19 - sensitivity) / 18.0));
   }
 
   function startMomentum() {
@@ -76,7 +76,7 @@ export default function ({ dispatch, scene }) {
 
       if (momentum.speed.x > MAX_MOMENTUM || momentum.speed.x < -MAX_MOMENTUM) {
         momentum.speed.x *= DAMPER;
-      } else if (yFine){
+      } else if (yFine) {
         momentum.speed.x = 0;
         momentum.enabled = false;
       }
@@ -128,10 +128,10 @@ export default function ({ dispatch, scene }) {
   function onInteractionEnd({ left, top }) {
     const sensitivity = gameSelectors.sensitivity(store.getState());
     const interactionDebounce = gameSelectors.interactionDebounce(store.getState());
-    let interactionMomemtum = { x: 0, y: 0 };
+    const interactionMomemtum = { x: 0, y: 0 };
     const interactionDistance = Math.sqrt(
       Math.pow(interaction.startPos.left - left, 2)
-       + Math.pow(interaction.startPos.top - top, 2)
+       + Math.pow(interaction.startPos.top - top, 2),
     );
     if (interactionDistance > interactionDebounce) {
       const lastPosition = last(interaction.positions);

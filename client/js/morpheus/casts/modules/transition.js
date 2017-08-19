@@ -29,7 +29,7 @@ import {
 
 const selectTransitionCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
-    const rootCast = get(scene, 'casts', []).find(c => c.castId === scene.sceneId)
+    const rootCast = get(scene, 'casts', []).find(c => c.castId === scene.sceneId);
     if (rootCast && rootCast.nextSceneId) {
       return rootCast;
     }
@@ -37,7 +37,7 @@ const selectTransitionCastDataFromSceneAndType = (scene, sceneType) => {
   return null;
 };
 
-export const selectors = memoize(function selectors(scene) {
+export const selectors = memoize((scene) => {
   const selectTransitionCastData = createSelector(
     () => scene,
     () => get(scene, 'sceneType'),
@@ -96,7 +96,7 @@ export const selectors = memoize(function selectors(scene) {
   };
 });
 
-export const delegate = memoize(function actions(scene) {
+export const delegate = memoize((scene) => {
   const transitionSelectors = selectors(scene);
   function applies(state) {
     return transitionSelectors.transitionCastData(state);

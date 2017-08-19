@@ -63,7 +63,7 @@ export default createSelector(
     if (_isExiting && CurrentExitingScene) {
       scenes.push(<CurrentExitingScene scene={current} />);
     }
-    scenes.push(<Sound key="sound" scene={current}/>);
+    scenes.push(<Sound key="sound" scene={current} />);
     return scenes;
   },
 );

@@ -36,7 +36,7 @@ export default function ({
 
       gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
 
-      let hoveredHotspots = [];
+      const hoveredHotspots = [];
       every(hitColorList, ({ color, data: hotspotData }) => {
         // Extract 8-bit color components from 24-bit integer
         // eslint-disable-next-line no-bitwise
@@ -77,7 +77,7 @@ export default function ({
       // TODO: debounce??
       const interactionDistance = Math.sqrt(
         Math.pow(clickStartPos.left - coordsToCheck.left, 2)
-         + Math.pow(clickStartPos.top - coordsToCheck.top, 2)
+         + Math.pow(clickStartPos.top - coordsToCheck.top, 2),
       );
       if (wasMouseUpped && possibleValidClick && hovering && interactionDistance < 20) {
         dispatch(castActions.forScene(scene).hotspot.activated(hoveredHotspots));

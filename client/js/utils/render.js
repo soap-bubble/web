@@ -17,7 +17,7 @@ export function render() {
         onRenders.forEach(r => r());
         onAfters.forEach(r => r());
       }
-    } catch(err) {
+    } catch (err) {
       logger.error(err);
     } finally {
       if (isActive) {

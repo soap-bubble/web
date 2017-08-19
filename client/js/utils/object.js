@@ -8,10 +8,10 @@ export function logAccess(object, logger, level) {
         const value = object[key];
         logger[level]({
           key,
-          value
+          value,
         }, `GET ${key} = ${value}`);
         return value;
-      }
+      },
     };
     return memo;
   }, {}));
@@ -25,5 +25,5 @@ export function singleton(provider) {
       instance = provider();
     }
     return instance;
-  }
+  };
 }

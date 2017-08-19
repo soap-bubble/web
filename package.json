@@ -9,6 +9,7 @@
     "build:client": "gulp build:client",
     "build:client:watch": "gulp build:client:watch",
     "gulp": "gulp",
+    "lint": "eslint client config server",
     "db:update": "gulp db:update | bunyan",
     "webpack": "webpack",
     "db:prime": "gulp db:prime | bunyan",

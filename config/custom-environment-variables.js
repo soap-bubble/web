@@ -1,6 +1,6 @@
 module.exports = {
   mongodb: {
-    uri: 'MONGODB_URI'
+    uri: 'MONGODB_URI',
   },
-  gameDbPath: 'GAME_DB_PATH'
+  gameDbPath: 'GAME_DB_PATH',
 };

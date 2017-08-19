@@ -33,7 +33,7 @@ export function gameStateLoadComplete(responseData) {
 }
 
 export function fetchInitial() {
-  return (dispatch) => fetchInitialGameState()
+  return dispatch => fetchInitialGameState()
     .then(responseData => dispatch(gameStateLoadComplete(responseData.data)))
     .catch(err => dispatch({ payload: err, type: API_ERROR }));
 }
@@ -55,7 +55,7 @@ function isActive({ hotspot, comparators, gameStates }) {
   }) => {
     const gs = gameStates[gameStateId];
     let retValue;
-    switch(TEST_TYPES[testType]) {
+    switch (TEST_TYPES[testType]) {
       case 'EqualTo':
         retValue = value === gs.value;
         break;
@@ -73,7 +73,7 @@ function isActive({ hotspot, comparators, gameStates }) {
     }
     retValue = mInitiallyEnabled ? retValue : !retValue;
     return retValue;
-  })
+  });
 }
 
 export function handleMouseOver({ hotspot }) {
@@ -93,7 +93,7 @@ export function handleMouseOver({ hotspot }) {
   };
 }
 
-export function handleMouseDown({ hotspot, top, left}) {
+export function handleMouseDown({ hotspot, top, left }) {
   return (dispatch, getState) => {
     const gameStates = gameStateSelectors.gamestates(getState());
     const {
@@ -177,7 +177,7 @@ export function handleHotspot({ hotspot, top, left }) {
 
     if (isActive({ hotspot, comparators, gameStates })) {
       const actionType = ACTION_TYPES[type];
-      switch(actionType) {
+      switch (actionType) {
         case 'GoBack': {
           const prevSceneId = sceneSelectors.previousSceneId(getState());
           dispatch(sceneActions.goToScene(prevSceneId));
@@ -185,7 +185,7 @@ export function handleHotspot({ hotspot, top, left }) {
         }
         case 'DissolveTo':
         case 'ChangeScene': {
-          const { defaultPass,  param1: nextSceneId } = hotspot;
+          const { defaultPass, param1: nextSceneId } = hotspot;
           nextSceneId && dispatch(sceneActions.goToScene(nextSceneId));
           return defaultPass;
           break;
@@ -249,4 +249,4 @@ window.updategs = (gamestateId, value) => {
   store.dispatch(castActions.forScene(sceneSelectors.currentSceneId(store.getState())).special.update());
 };
 
-window.getgs = (gamestateId) => gameStateSelectors.gamestates(store.getState())[gamestateId];
+window.getgs = gamestateId => gameStateSelectors.gamestates(store.getState())[gamestateId];

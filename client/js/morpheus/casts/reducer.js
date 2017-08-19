@@ -40,7 +40,7 @@ const reducer = createReducer('casts', {
       },
     };
   },
-  [ENTERING](state, { payload: castData, meta: { type: castType, scene }}) {
+  [ENTERING](state, { payload: castData, meta: { type: castType, scene } }) {
     return {
       ...state,
       cache: {
@@ -53,7 +53,7 @@ const reducer = createReducer('casts', {
       },
     };
   },
-  [ON_STAGE](state, { payload: castData, meta: { type: castType, scene }}) {
+  [ON_STAGE](state, { payload: castData, meta: { type: castType, scene } }) {
     return {
       ...state,
       cache: {
@@ -68,7 +68,7 @@ const reducer = createReducer('casts', {
       },
     };
   },
-  [EXIT](state, { payload: castData, meta: { type: castType, scene }}) {
+  [EXIT](state, { payload: castData, meta: { type: castType, scene } }) {
     return {
       ...state,
       cache: {

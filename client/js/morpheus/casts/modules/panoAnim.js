@@ -106,11 +106,11 @@ function createMaterial(videoEl) {
 
 function createObject3D({ geometry, material, frame }) {
   const mesh = new Mesh(geometry, material);
-  mesh.rotation.y =  -(frame * ONE_TWENTYFOURTH_RAD);
+  mesh.rotation.y = -(frame * ONE_TWENTYFOURTH_RAD);
   return mesh;
 }
 
-export const selectors = memoize(function selectors(scene) {
+export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
 
   const selectPanoAnimData = createSelector(
@@ -141,7 +141,7 @@ export const selectors = memoize(function selectors(scene) {
   };
 });
 
-export const delegate = memoize(function delegate(scene) {
+export const delegate = memoize((scene) => {
   let videoElDefers;
   const panoAnimSelectors = selectors(scene);
 
@@ -174,7 +174,7 @@ export const delegate = memoize(function delegate(scene) {
               videoElDefers[name].resolve({
                 videoEl: video,
                 name,
-              })
+              });
             });
           return name;
         }))

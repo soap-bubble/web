@@ -4,7 +4,13 @@ pipeline:
     commands:
       - npm install
     when:
-      branch: master
+      event: push
+
+  test:
+    image: node:boron
+    commands:
+      - npm test
+    when:
       event: push
 
   publish:

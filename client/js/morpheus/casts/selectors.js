@@ -55,15 +55,13 @@ export function forScene(scene) {
     return memo;
   }, {});
   Object.defineProperties(castSelectors, Object.keys(moduleSelectors)
-    .reduce((memo, name) => {
-      return Object.assign(memo, {
-        [name]: {
-          get: function () {
-            return moduleSelectors[name](scene);
-          },
+    .reduce((memo, name) => Object.assign(memo, {
+      [name]: {
+        get() {
+          return moduleSelectors[name](scene);
         },
-      })
-    }, {}),
+      },
+    }), {}),
   );
 
   return castSelectors;

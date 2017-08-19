@@ -68,17 +68,15 @@ function onStageForCast(scene, type, onStageAction) {
 }
 
 export function onStage(scene) {
-  return (dispatch, getState) => {
-    return Promise.all(Object.keys(modules).map((cast) => {
-      const module = modules[cast];
-      const delegate = module.delegate && module.delegate(scene);
-      if (delegate.onStage && delegate.applies(getState())) {
-        return dispatch(onStageForCast(scene, cast, delegate.onStage));
-      }
-      return Promise.resolve();
-    }))
+  return (dispatch, getState) => Promise.all(Object.keys(modules).map((cast) => {
+    const module = modules[cast];
+    const delegate = module.delegate && module.delegate(scene);
+    if (delegate.onStage && delegate.applies(getState())) {
+      return dispatch(onStageForCast(scene, cast, delegate.onStage));
+    }
+    return Promise.resolve();
+  }))
       .then(() => scene);
-  };
 }
 
 function doExitForCast(scene, type, doExitAction) {
@@ -91,20 +89,18 @@ function doExitForCast(scene, type, doExitAction) {
 }
 
 export function doExit(scene) {
-  return (dispatch, getState) => {
-    return Promise.all(Object.keys(modules).map((cast) => {
-      const module = modules[cast];
-      const delegate = module.delegate && module.delegate(scene);
-      if (delegate.doExit && delegate.applies(getState())) {
-        return dispatch(doExitForCast(scene, cast, delegate.doExit));
-      }
-      return Promise.resolve();
-    }))
+  return (dispatch, getState) => Promise.all(Object.keys(modules).map((cast) => {
+    const module = modules[cast];
+    const delegate = module.delegate && module.delegate(scene);
+    if (delegate.doExit && delegate.applies(getState())) {
+      return dispatch(doExitForCast(scene, cast, delegate.doExit));
+    }
+    return Promise.resolve();
+  }))
       .then(() => scene);
-  };
 }
 
-export const forScene = memoize(function forScene(scene) {
+export const forScene = memoize((scene) => {
   const moduleActions = Object.keys(modules).reduce((memo, name) => {
     if (modules[name].actions) {
       memo[name] = modules[name].actions;
@@ -112,13 +108,11 @@ export const forScene = memoize(function forScene(scene) {
     return memo;
   }, {});
   return Object.defineProperties({}, Object.keys(moduleActions)
-    .reduce((memo, name) => {
-      return Object.assign(memo, {
-        [name]: {
-          get: function () {
-            return moduleActions[name](scene);
-          },
+    .reduce((memo, name) => Object.assign(memo, {
+      [name]: {
+        get() {
+          return moduleActions[name](scene);
         },
-      })
-    }, {}));
+      },
+    }), {}));
 });

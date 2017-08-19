@@ -1,4 +1,4 @@
-import { jsdom } from 'jsdom'
+import { jsdom } from 'jsdom';
 
 if (typeof Promise === 'undefined') {
   // Rejection tracking prevents a common issue where React gets into an

@@ -1,7 +1,7 @@
 export const TEST_TYPES = [
   'EqualTo',    // 0
   'NotEqualTo', // 1
-  'GreaterThan',// 2
+  'GreaterThan', // 2
   'LessThan',   // 3
 ];
 
@@ -18,20 +18,20 @@ export const GESTURES = [
 ];
 
 export const ACTION_TYPES = {
-  [0]: 'ChangeScene',
-  [1]: 'DissolveTo',
-  [2]: 'IncrementState',
-  [3]: 'DecrementState',
-  [4]: 'GoBack',
-  [5]: 'Rotate',
-  [6]: 'HorizSlider',
-  [7]: 'VertSlider',
-  [8]: 'TwoAxisSlider',
-  [9]: 'SetStateTo',
-  [10]: 'ExchangeState',
-  [11]: 'CopyState',
-  [12]: 'ChangeCursor',
-  [13]: 'ReturnFromHelp',
-  [14]: 'NoAction',
-  [99]: 'DoGameAction',
+  0: 'ChangeScene',
+  1: 'DissolveTo',
+  2: 'IncrementState',
+  3: 'DecrementState',
+  4: 'GoBack',
+  5: 'Rotate',
+  6: 'HorizSlider',
+  7: 'VertSlider',
+  8: 'TwoAxisSlider',
+  9: 'SetStateTo',
+  10: 'ExchangeState',
+  11: 'CopyState',
+  12: 'ChangeCursor',
+  13: 'ReturnFromHelp',
+  14: 'NoAction',
+  99: 'DoGameAction',
 };

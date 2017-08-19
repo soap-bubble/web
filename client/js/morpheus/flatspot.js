@@ -37,9 +37,9 @@ export default function ({ dispatch, scene }) {
   const clickStartPos = { left: 0, top: 0 };
   const castSelectorForScene = castSelectors.forScene(scene);
   const castActionsForScene = castActions.forScene(scene);
-  
+
   let wasActiveHotspots = [];
-  let possibleValidClick = false;
+  const possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
   let wasMouseUpped = false;
@@ -61,14 +61,12 @@ export default function ({ dispatch, scene }) {
     left,
     hotspots,
   }) {
-    hotspots.every(hotspot => {
-      return dispatch(castActionsForScene.special.handleMouseEvent({
-        type,
-        top,
-        left,
-        hotspot,
-      }));
-    });
+    hotspots.every(hotspot => dispatch(castActionsForScene.special.handleMouseEvent({
+      type,
+      top,
+      left,
+      hotspot,
+    })));
   }
 
   function updateState({ top, left }) {
@@ -167,7 +165,7 @@ export default function ({ dispatch, scene }) {
         type: 'MouseMove',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots
+        hotspots: nowActiveHotspots,
       });
     }
 
@@ -176,7 +174,7 @@ export default function ({ dispatch, scene }) {
         type: 'MouseStillDown',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots
+        hotspots: nowActiveHotspots,
       });
     }
 
@@ -214,17 +212,17 @@ export default function ({ dispatch, scene }) {
 
   function onMouseDown({ clientX: left, clientY: top }) {
     wasMouseDowned = true;
-    updateState({ top, left })
+    updateState({ top, left });
   }
 
   function onMouseMove({ clientX: left, clientY: top }) {
     wasMouseMoved = true;
-    updateState({ top, left })
+    updateState({ top, left });
   }
 
   function onMouseUp({ clientX: left, clientY: top }) {
     wasMouseUpped = true;
-    updateState({ top, left })
+    updateState({ top, left });
   }
 
   function onTouchStart({ touches }) {

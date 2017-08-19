@@ -44,8 +44,12 @@ const Special = connect(
   <div
     ref={(el) => {
       if (el) {
-        el.appendChild(canvas);
-        videos.forEach(video => el.appendChild(video));
+        if (canvas) {
+          el.appendChild(canvas);
+        }
+        if (videos) {
+          videos.forEach(video => el.appendChild(video));
+        }
       }
     }}
     onMouseDown={onMouseDown}

@@ -29,12 +29,19 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
+  actions as gamestateActions,
+} from 'morpheus/gamestate';
+import {
   actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
+import {
+  ACTION_TYPES,
+  GESTURES,
+} from 'morpheus/constants';
 
 export const selectors = memoize(function selectors(scene) {
   const selectSceneCache = castSelectors.forScene(scene).cache;
@@ -472,6 +479,7 @@ export const delegate = memoize(function delegate(scene) {
   function onStage() {
     return (dispatch, getState) => {
       const { width, height } = gameSelectors.dimensions(getState());
+      const hotspotsData = hotspotSelectors.hotspotsData(getState());
       const isPano = hotspotSelectors.isPano(getState());
       if (isPano) {
         const scene3D = hotspotSelectors.scene3D(getState());
@@ -492,6 +500,16 @@ export const delegate = memoize(function delegate(scene) {
           renderer,
         });
       }
+
+      hotspotsData.forEach(({ gesture, type, param1: gamestateId, param2: value }) => {
+        if (GESTURES[gesture] === 'Always') {
+          if (ACTION_TYPES[type] === 'SetStateTo') {
+            dispatch(gamestateActions.updateGameState(gamestateId, value));
+          }
+        }
+
+      });
+
       return Promise.resolve();
     };
   }
@@ -503,25 +521,6 @@ export const delegate = memoize(function delegate(scene) {
   };
 });
 
-const HOTSPOT_TYPE = {
-  0: 'CHANGE_SCENE',
-  1: 'DISSOLVE_TO',
-  2: 'INCREMENT_STATE',
-  3: 'DECREMENT_STATE',
-  4: 'GO_BACK',
-  5: 'ROTATE',
-  6: 'HORIZONTAL_SLIDER',
-  7: 'VERTICAL_SLIDER',
-  8: 'TWO_AXIS_SLIDER',
-  9: 'SET_STATE_TO',
-  10: 'EXCHANGE_STATE',
-  11: 'COPY_STATE',
-  12: 'CHANGE_CURSOR',
-  13: 'RETURN_FROM_HELP',
-  14: 'NO_ACTION',
-  99: 'DO_ACTION',
-};
-
 export const actions = memoize(function (scene) {
   function hovered(hoveredHotspots) {
     return (dispatch) => {
@@ -529,7 +528,7 @@ export const actions = memoize(function (scene) {
         // TODO: check if really currently enabled
         // See CHotspot::GetCursor
         if (hotspot.initiallyEnabled) {
-          if (HOTSPOT_TYPE[hotspot.type] === 'CHANGE_SCENE') {
+          if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
             const { cursorShapeWhenActive: morpheusCursor } = hotspot;
             dispatch(gameActions.setCursor(morpheusCursor))
           }
@@ -545,11 +544,11 @@ export const actions = memoize(function (scene) {
   function activated(activatedHotspots) {
     return (dispatch, getState) => {
       activatedHotspots.every(hotspot => {
-        switch (HOTSPOT_TYPE[hotspot.type]) {
-          case 'CHANGE_SCENE':
-          case 'DISSOLVE_TO':
-          case 'GO_BACK':
-          case 'RETURN_FROM_HELP':
+        switch (ACTION_TYPES[hotspot.type]) {
+          case 'ChangeScene':
+          case 'DissolveTo':
+          case 'GoBack':
+          case 'ReturnFromHelp':
             const hitObject3D = selectors(scene).hitObject3D(getState());
             dispatch(sceneActions.setNextStartAngle(hitObject3D.rotation.y));
             dispatch(sceneActions.goToScene(hotspot.param1));

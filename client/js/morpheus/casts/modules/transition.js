@@ -112,16 +112,20 @@ export const delegate = memoize(function actions(scene) {
           volume: gameSelectors.volume(getState()),
           width: gameSelectors.width(getState()),
           height: gameSelectors.height(getState()),
+          loop: transitionCast.looping,
           oncanplaythrough() {
             resolve(video);
           },
           onerror: reject,
         });
-        video.addEventListener('ended', function onVideoEnded() {
-          video.removeEventListener('ended', onVideoEnded);
-          const nextSceneId = transitionSelectors.nextSceneId(getState());
-          dispatch(sceneActions.goToScene(nextSceneId));
-        });
+        const nextSceneId = transitionSelectors.nextSceneId(getState());
+        if (nextSceneId !== 0x3FFFFFFF) {
+          video.addEventListener('ended', function onVideoEnded() {
+            video.removeEventListener('ended', onVideoEnded);
+
+            dispatch(sceneActions.goToScene(nextSceneId));
+          });
+        }
         video.style.objectFit = 'cover';
       })
         .then(video => ({

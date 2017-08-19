@@ -1,8 +1,4 @@
-import {
-  defer,
-} from 'lodash';
-
-import renderEvents from 'utils/render';
+import { reset } from 'utils/render';
 import { bySceneId } from 'service/scene';
 import {
   actions as gameActions,
@@ -19,13 +15,11 @@ import {
 
 import {
   SCENE_LOAD_START,
-  SCENE_LOAD_COMPLETE,
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
   SCENE_DO_ENTER,
   SCENE_DO_EXITING,
-  SCENE_DO_ACTION,
   SET_NEXT_START_ANGLE,
 } from './actionTypes';
 
@@ -40,11 +34,11 @@ export function sceneLoadComplete(responseData) {
   };
 }
 
-export function sceneLoadStarted(id, fetch) {
+export function sceneLoadStarted(id, fetchPromise) {
   return {
     type: SCENE_LOAD_START,
     payload: id,
-    meta: fetch,
+    meta: fetchPromise,
   };
 }
 
@@ -61,7 +55,7 @@ export function fetch(id) {
         dispatch(sceneLoadComplete(sceneData));
         return sceneData;
       });
-    dispatch(sceneLoadStarted(id, fetch));
+    dispatch(sceneLoadStarted(id, fetchPromise));
     return fetchPromise;
   };
 }
@@ -119,7 +113,7 @@ export function goToScene(id) {
           payload: currentSceneData.sceneId,
         });
         dispatch(inputActions.disableControl());
-        renderEvents.reset();
+        reset();
         return dispatch(startAtScene(id));
       });
   };

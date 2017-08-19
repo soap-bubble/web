@@ -236,9 +236,9 @@
       "dev": true
     },
     "asap": {
-      "version": "2.0.5",
+      "version": "2.0.6",
       "from": "asap@>=2.0.3 <2.1.0",
-      "resolved": "https://registry.npmjs.org/asap/-/asap-2.0.5.tgz"
+      "resolved": "https://registry.npmjs.org/asap/-/asap-2.0.6.tgz"
     },
     "asn1": {
       "version": "0.2.3",
@@ -5505,7 +5505,7 @@
     },
     "object-assign": {
       "version": "4.1.1",
-      "from": "object-assign@>=4.1.0 <5.0.0",
+      "from": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz",
       "resolved": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz"
     },
     "object-component": {
@@ -5948,7 +5948,7 @@
     },
     "promise": {
       "version": "7.1.1",
-      "from": "promise@>=7.1.1 <8.0.0",
+      "from": "https://registry.npmjs.org/promise/-/promise-7.1.1.tgz",
       "resolved": "https://registry.npmjs.org/promise/-/promise-7.1.1.tgz"
     },
     "proxy-addr": {
@@ -7548,7 +7548,7 @@
     },
     "wagner-core": {
       "version": "0.2.0",
-      "from": "wagner-core@>=0.2.0 <0.3.0",
+      "from": "https://registry.npmjs.org/wagner-core/-/wagner-core-0.2.0.tgz",
       "resolved": "https://registry.npmjs.org/wagner-core/-/wagner-core-0.2.0.tgz",
       "dependencies": {
         "get-parameter-names": {
@@ -7755,7 +7755,7 @@
     },
     "whatwg-fetch": {
       "version": "2.0.2",
-      "from": "whatwg-fetch@>=0.10.0",
+      "from": "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-2.0.2.tgz",
       "resolved": "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-2.0.2.tgz"
     },
     "whatwg-url": {

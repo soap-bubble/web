@@ -1,12 +1,6 @@
-import _ from 'lodash';
 import { Schema } from 'mongoose';
-import util from 'util';
 
-export class Morpheus extends Schema {
-  constructor(opts) {
-    super(opts);
-  }
-}
+export class Morpheus extends Schema {}
 
 export class Cast extends Morpheus {
   constructor(opts) {

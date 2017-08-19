@@ -1,7 +1,3 @@
-import {
-  without,
-  defaults,
-} from 'lodash';
 import createReducer from 'utils/createReducer';
 import {
   ADD_ONMOUSEUP,

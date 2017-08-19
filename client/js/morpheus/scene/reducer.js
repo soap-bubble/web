@@ -1,6 +1,5 @@
 import createReducer from 'utils/createReducer';
 import {
-  merge,
   isUndefined,
 } from 'lodash';
 import {
@@ -8,7 +7,6 @@ import {
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
   SCENE_DO_EXITING,
-  SCENE_DO_ACTION,
   SCENE_DO_ENTER,
   SET_NEXT_START_ANGLE,
 } from './actionTypes';
@@ -60,12 +58,6 @@ const reducer = createReducer('scene', {
     return {
       ...state,
       status: 'live',
-    };
-  },
-  [SCENE_DO_ACTION](state) {
-    return {
-      ...state,
-      status: 'action',
     };
   },
 });

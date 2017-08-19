@@ -72,13 +72,16 @@
     "mocha": "^2.5.3",
     "ng-annotate-loader": "^0.2.0",
     "nodemon": "^1.9.2",
+    "object-assign": "https://registry.npmjs.org/object-assign/-/object-assign-4.1.1.tgz",
+    "promise": "https://registry.npmjs.org/promise/-/promise-7.1.1.tgz",
     "react-dev-utils": "^3.0.0",
     "run-sequence": "^1.2.1",
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "sprintf": "^0.1.5",
     "webpack": "^1.13.1",
-    "webpack-dev-server": "^1.14.1"
+    "webpack-dev-server": "^1.14.1",
+    "whatwg-fetch": "https://registry.npmjs.org/whatwg-fetch/-/whatwg-fetch-2.0.2.tgz"
   },
   "dependencies": {
     "axios": "^0.12.0",
@@ -112,6 +115,6 @@
     "service-builder": "^0.2.2",
     "three": "^0.85.2",
     "user-agent-parser": "^0.6.0",
-    "wagner-core": "^0.2.0"
+    "wagner-core": "https://registry.npmjs.org/wagner-core/-/wagner-core-0.2.0.tgz"
   }
 }

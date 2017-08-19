@@ -1,3 +1,5 @@
+/* eslint-disable import/no-extraneous-dependencies, global-require */
+/* global window, document */
 import { jsdom } from 'jsdom';
 
 if (typeof Promise === 'undefined') {

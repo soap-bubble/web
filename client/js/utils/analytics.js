@@ -5,11 +5,11 @@ if (window.performance && window.ga) {
   const timeSincePageLoad = Math.round(performance.now());
 
   // Sends the timing hit to Google Analytics.
-  timing('JS Dependencies', 'load', timeSincePageLoad);
+  window.timing('JS Dependencies', 'load', timeSincePageLoad);
 }
 
-export function timing(category, type, value, label) {
+export default function timing(category, type, value, label) {
   if (window.ga) {
-    ga('send', 'timing', category, type, value, label);
+    window.ga('send', 'timing', category, type, value, label);
   }
 }

@@ -1,5 +1,3 @@
-import { map } from 'lodash';
-
 export function logAccess(object, logger, level) {
   const selfie = {};
   Object.defineProperties(selfie, Object.keys(object).reduce((memo, key) => {

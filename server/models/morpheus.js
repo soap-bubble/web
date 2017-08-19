@@ -118,6 +118,12 @@ export class MovieSpecialCast extends MovieCast {
       "dissolveToNextScene": Boolean,
       "nextSceneId": Number,
       "angleAtEnd": Number,
+      audioOnly: Boolean,
+      comparators: [ {
+        gameStateId: Number,
+        testType: Number,
+        value: Number
+      }],
     });
   }
 }

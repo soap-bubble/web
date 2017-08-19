@@ -113,6 +113,7 @@ export function startAtScene(id) {
 export function goToScene(id) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
+    if (currentSceneData.sceneId === id) return;
     dispatch(castActions.doExit(currentSceneData))
       .then(() => {
         dispatch({

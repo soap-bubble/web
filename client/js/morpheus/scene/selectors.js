@@ -22,4 +22,8 @@ export const previousSceneType = createSelector(
   previousSceneData,
   ps => get(ps, 'sceneType'),
 );
+export const previousSceneId = createSelector(
+  previousSceneData,
+  cs => get(cs, 'sceneId'),
+);
 export const nextSceneStartAngle = state => state.scene.nextStartAngle;

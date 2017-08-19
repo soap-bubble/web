@@ -4,6 +4,7 @@ import {
 } from 'morpheus/casts';
 import {
   actions as sceneActions,
+  selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
   selectors as gameStateSelectors,
@@ -45,26 +46,33 @@ export function updateGameState(gamestateId, value) {
   };
 }
 
-function isActive({ comparators, gameStates }) {
+function isActive({ hotspot, comparators, gameStates }) {
+  const { mInitiallyEnabled } = hotspot;
   return comparators.every(({
     gameStateId,
     testType,
     value,
   }) => {
     const gs = gameStates[gameStateId];
-
+    let retValue;
     switch(TEST_TYPES[testType]) {
       case 'EqualTo':
-        return value === gs.value;
+        retValue = value === gs.value;
+        break;
       case 'NotEqualTo':
-        return value !== gs.value;
+        retValue = value !== gs.value;
+        break;
       case 'GreaterThan':
-        return value > gs.value;
+        retValue = value > gs.value;
+        break;
       case 'LessThan':
-        return value < gs.value
+        retValue = value < gs.value;
+        break;
       default:
-        return false;
+        retValue = false;
     }
+    retValue = mInitiallyEnabled ? retValue : !retValue;
+    return retValue;
   })
 }
 
@@ -75,7 +83,7 @@ export function handleMouseOver({ hotspot }) {
       comparators,
       type,
     } = hotspot;
-    if (isActive({ comparators, gameStates })) {
+    if (isActive({ hotspot, comparators, gameStates })) {
       if (type >= 5 && type <= 8) {
         dispatch(gameActions.setOpenHandCursor());
         return false;
@@ -92,7 +100,7 @@ export function handleMouseDown({ hotspot, top, left}) {
       comparators,
       type,
     } = hotspot;
-    if (isActive({ comparators, gameStates })) {
+    if (isActive({ hotspot, comparators, gameStates })) {
       if (type >= 5 && type <= 8) {
         const gs = gameStates[hotspot.param1];
         if (gs) {
@@ -111,7 +119,7 @@ export function handleMouseStillDown({ hotspot, top, left }) {
       comparators,
       type,
     } = hotspot;
-    if (isActive({ comparators, gameStates })) {
+    if (isActive({ hotspot, comparators, gameStates })) {
       const actionType = ACTION_TYPES[type];
       if (actionType === 'VertSlider') {
         dispatch(gameActions.setCloseHandCursor());
@@ -167,22 +175,78 @@ export function handleHotspot({ hotspot, top, left }) {
       type,
     } = hotspot;
 
-    if (isActive({ comparators, gameStates })) {
+    if (isActive({ hotspot, comparators, gameStates })) {
       const actionType = ACTION_TYPES[type];
       switch(actionType) {
-        case 'DissolveTo':
-        case 'ChangeScene':
-          const { param1: nextSceneId } = hotspot;
-          nextSceneId && dispatch(sceneActions.goToScene(nextSceneId));
-          return hotspot.defaultPass;
+        case 'GoBack': {
+          const prevSceneId = sceneSelectors.previousSceneId(getState());
+          dispatch(sceneActions.goToScene(prevSceneId));
           break;
+        }
+        case 'DissolveTo':
+        case 'ChangeScene': {
+          const { defaultPass,  param1: nextSceneId } = hotspot;
+          nextSceneId && dispatch(sceneActions.goToScene(nextSceneId));
+          return defaultPass;
+          break;
+        }
+        case 'IncrementState': {
+          const { defaultPass, param1: gamestateId } = hotspot;
+          const gs = gameStateSelectors.gamestates(getState())[gamestateId];
+          const {
+            maxValue,
+            minValue,
+            stateWraps,
+          } = gs;
+          let { value } = gs;
+          value += 1;
+          if (value > maxValue) {
+            if (stateWraps) {
+              value = minValue;
+            } else {
+              value = maxValue;
+            }
+          }
+          dispatch(updateGameState(gamestateId, value));
+          return defaultPass;
+          break;
+        }
+        case 'DecrementState': {
+          const { defaultPass, param1: gamestateId } = hotspot;
+          const gs = gameStateSelectors.gamestates(getState())[gamestateId];
+          const {
+            maxValue,
+            minValue,
+            stateWraps,
+          } = gs;
+          let { value } = gs;
+          value -= 1;
+          if (value < minValue) {
+            if (stateWraps) {
+              value = maxValue;
+            } else {
+              value = minValue;
+            }
+          }
+          dispatch(updateGameState(gamestateId, value));
+          return defaultPass;
+          break;
+        }
+        case 'SetStateTo': {
+          const { defaultPass, param1: gamestateId, param2: value } = hotspot;
+          dispatch(updateGameState(gamestateId, value));
+          return defaultPass;
+          break;
+        }
       }
     }
     return true;
   };
 }
 
-window.updateGameState = (gamestateId, value) => {
+window.updategs = (gamestateId, value) => {
   store.dispatch(updateGameState(gamestateId, value));
-  store.dispatch(castActions.special.update());
+  store.dispatch(castActions.forScene(sceneSelectors.currentSceneId(store.getState())).special.update());
 };
+
+window.getgs = (gamestateId) => gameStateSelectors.gamestates(store.getState())[gamestateId];

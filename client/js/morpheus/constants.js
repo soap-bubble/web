@@ -1,8 +1,8 @@
 export const TEST_TYPES = [
-  'EqualTo',
-  'NotEqualTo',
-  'GreaterThan',
-  'LessThan',
+  'EqualTo',    // 0
+  'NotEqualTo', // 1
+  'GreaterThan',// 2
+  'LessThan',   // 3
 ];
 
 export const GESTURES = [

@@ -182,7 +182,7 @@ function generateControlledFrames({
 function generateSpecialImages({ specials, canvas }) {
   if (canvas) {
     const ctx = canvas.getContext('2d');
-    specials.forEach(op => ctx.drawImage(...op));  
+    specials.forEach(op => ctx.drawImage(...op));
   }
 }
 
@@ -213,7 +213,7 @@ export function selectors(scene) {
 
   const selectMovieCasts = createSelector(
     selectExtraCasts,
-    extraCasts => extraCasts.filter(c => c.__t === 'MovieSpecialCast'),
+    extraCasts => extraCasts.filter(c => c.__t === 'MovieSpecialCast' && !c.audioOnly),
   );
 
   const selectControlledCastImgUrl = createSelector(

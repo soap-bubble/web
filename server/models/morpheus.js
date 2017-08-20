@@ -8,6 +8,11 @@ export class Cast extends Morpheus {
     this.add({
       castId: Number,
       initiallyEnabled: Boolean,
+      comparators: [{
+        gameStateId: Number,
+        testType: Number,
+        value: Number,
+      }],
     });
   }
 }
@@ -30,11 +35,6 @@ export class HotSpot extends Cast {
   constructor(opts) {
     super(opts);
     this.add({
-      comparators: [{
-        gameStateId: Number,
-        testType: Number,
-        value: Number,
-      }],
       castId: Number,
       rectTop: Number,
       rectBottom: Number,
@@ -113,11 +113,6 @@ export class MovieSpecialCast extends MovieCast {
       nextSceneId: Number,
       angleAtEnd: Number,
       audioOnly: Boolean,
-      comparators: [{
-        gameStateId: Number,
-        testType: Number,
-        value: Number,
-      }],
     });
   }
 }

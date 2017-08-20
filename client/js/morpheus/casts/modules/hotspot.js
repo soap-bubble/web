@@ -30,6 +30,8 @@ import {
 } from 'morpheus/game';
 import {
   actions as gamestateActions,
+  selectors as gamestateSelectors,
+  isActive,
 } from 'morpheus/gamestate';
 import {
   actions as sceneActions,
@@ -543,18 +545,23 @@ export const actions = memoize((scene) => {
   function activated(activatedHotspots) {
     return (dispatch, getState) => {
       activatedHotspots.every((hotspot) => {
-        switch (ACTION_TYPES[hotspot.type]) {
-          case 'ChangeScene':
-          case 'DissolveTo':
-          case 'GoBack':
-          case 'ReturnFromHelp':
-            const hitObject3D = selectors(scene).hitObject3D(getState());
-            dispatch(sceneActions.setNextStartAngle(hitObject3D.rotation.y));
-            dispatch(sceneActions.goToScene(hotspot.param1));
-            return false;
-          default:
-            return true;
+        const gamestates = gamestateSelectors.gamestates(getState());
+        if (isActive({ cast: hotspot, gamestates })) {
+          switch (ACTION_TYPES[hotspot.type]) {
+            case 'ChangeScene':
+            case 'DissolveTo':
+            case 'GoBack':
+            case 'ReturnFromHelp': {
+              const hitObject3D = selectors(scene).hitObject3D(getState());
+              dispatch(sceneActions.setNextStartAngle(hitObject3D.rotation.y));
+              dispatch(sceneActions.goToScene(hotspot.param1));
+              return false;
+            }
+            default:
+              return true;
+          }
         }
+        return true;
       });
     };
   }

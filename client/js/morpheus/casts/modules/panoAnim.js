@@ -4,7 +4,6 @@ import {
   Uint16BufferAttribute,
   MeshBasicMaterial,
   LinearFilter,
-  RGBFormat,
   VideoTexture,
   Mesh,
   DoubleSide,
@@ -17,6 +16,9 @@ import {
   uniq,
 } from 'lodash';
 import {
+  defer,
+} from 'utils/promise';
+import {
   createSelector,
 } from 'reselect';
 import {
@@ -26,17 +28,15 @@ import {
   getPanoAnimUrl,
 } from 'service/gamedb';
 import {
-  selectors as sceneSelectors,
-} from 'morpheus/scene';
+  isActive,
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   selectors as panoSelectors,
 } from './pano';
-import {
-  defer,
-} from 'utils/promise';
 
 const ONE_TWENTYFOURTH_RAD = Math.PI / 12;
 const SLICE_WIDTH = 0.1325;
@@ -112,10 +112,12 @@ function createObject3D({ geometry, material, frame }) {
 
 export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
-
   const selectPanoAnimData = createSelector(
     () => scene,
-    scene => get(scene, 'casts', []).filter(c => c.__t === 'PanoAnim'),
+    gamestateSelectors.gamestates,
+    (s, gamestates) => get(s, 'casts', [])
+      .filter(c => c.__t === 'PanoAnim')
+      .filter(c => isActive({ cast: c, gamestates })),
   );
   const selectPanoAnim = createSelector(
     selectSceneCache,

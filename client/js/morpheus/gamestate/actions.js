@@ -8,6 +8,7 @@ import {
 } from 'morpheus/scene';
 import {
   selectors as gameStateSelectors,
+  isActive,
 } from 'morpheus/gamestate';
 import {
   actions as gameActions,
@@ -18,11 +19,9 @@ import {
   API_ERROR,
   LOAD_COMPLETE,
   UPDATE,
-  SCENE_END,
 } from './actionTypes';
 import {
   ACTION_TYPES,
-  TEST_TYPES,
 } from '../constants';
 
 export function gameStateLoadComplete(responseData) {
@@ -46,44 +45,13 @@ export function updateGameState(gamestateId, value) {
   };
 }
 
-function isActive({ hotspot, comparators, gameStates }) {
-  const { mInitiallyEnabled } = hotspot;
-  return comparators.every(({
-    gameStateId,
-    testType,
-    value,
-  }) => {
-    const gs = gameStates[gameStateId];
-    let retValue;
-    switch (TEST_TYPES[testType]) {
-      case 'EqualTo':
-        retValue = value === gs.value;
-        break;
-      case 'NotEqualTo':
-        retValue = value !== gs.value;
-        break;
-      case 'GreaterThan':
-        retValue = value > gs.value;
-        break;
-      case 'LessThan':
-        retValue = value < gs.value;
-        break;
-      default:
-        retValue = false;
-    }
-    retValue = mInitiallyEnabled ? retValue : !retValue;
-    return retValue;
-  });
-}
-
 export function handleMouseOver({ hotspot }) {
   return (dispatch, getState) => {
-    const gameStates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.gamestates(getState());
     const {
-      comparators,
       type,
     } = hotspot;
-    if (isActive({ hotspot, comparators, gameStates })) {
+    if (isActive({ cast: hotspot, gamestates })) {
       if (type >= 5 && type <= 8) {
         dispatch(gameActions.setOpenHandCursor());
         return false;
@@ -93,16 +61,15 @@ export function handleMouseOver({ hotspot }) {
   };
 }
 
-export function handleMouseDown({ hotspot, top, left }) {
+export function handleMouseDown({ hotspot }) {
   return (dispatch, getState) => {
-    const gameStates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.gamestates(getState());
     const {
-      comparators,
       type,
     } = hotspot;
-    if (isActive({ hotspot, comparators, gameStates })) {
+    if (isActive({ cast: hotspot, gamestates })) {
       if (type >= 5 && type <= 8) {
-        const gs = gameStates[hotspot.param1];
+        const gs = gamestates[hotspot.param1];
         if (gs) {
           gs.oldValue = gs.value;
         }
@@ -114,16 +81,15 @@ export function handleMouseDown({ hotspot, top, left }) {
 
 export function handleMouseStillDown({ hotspot, top, left }) {
   return (dispatch, getState) => {
-    const gameStates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.gamestates(getState());
     const {
-      comparators,
       type,
     } = hotspot;
-    if (isActive({ hotspot, comparators, gameStates })) {
+    if (isActive({ cast: hotspot, gamestates })) {
       const actionType = ACTION_TYPES[type];
       if (actionType === 'VertSlider') {
         dispatch(gameActions.setCloseHandCursor());
-        const gs = gameStates[hotspot.param1];
+        const gs = gamestates[hotspot.param1];
         const { stateWraps, minValue: min, maxValue: max } = gs;
         const oldValue = gs.oldValue || gs.value;
         const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
@@ -156,7 +122,7 @@ export function handleMouseStillDown({ hotspot, top, left }) {
         // gs.value = value;
       } else if (actionType === 'HorizSlider') {
         dispatch(gameActions.setCloseHandCursor());
-        const gs = gameStates[hotspot.param1];
+        const gs = gamestates[hotspot.param1];
         const { stateWraps, minValue: min, maxValue: max } = gs;
         const oldValue = gs.oldValue || gs.value;
         const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
@@ -167,15 +133,14 @@ export function handleMouseStillDown({ hotspot, top, left }) {
   };
 }
 
-export function handleHotspot({ hotspot, top, left }) {
+export function handleHotspot({ hotspot }) {
   return (dispatch, getState) => {
-    const gameStates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.gamestates(getState());
     const {
-      comparators,
       type,
     } = hotspot;
 
-    if (isActive({ hotspot, comparators, gameStates })) {
+    if (isActive({ cast: hotspot, gamestates })) {
       const actionType = ACTION_TYPES[type];
       switch (actionType) {
         case 'GoBack': {
@@ -186,9 +151,8 @@ export function handleHotspot({ hotspot, top, left }) {
         case 'DissolveTo':
         case 'ChangeScene': {
           const { defaultPass, param1: nextSceneId } = hotspot;
-          nextSceneId && dispatch(sceneActions.goToScene(nextSceneId));
+          if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId));
           return defaultPass;
-          break;
         }
         case 'IncrementState': {
           const { defaultPass, param1: gamestateId } = hotspot;
@@ -209,7 +173,6 @@ export function handleHotspot({ hotspot, top, left }) {
           }
           dispatch(updateGameState(gamestateId, value));
           return defaultPass;
-          break;
         }
         case 'DecrementState': {
           const { defaultPass, param1: gamestateId } = hotspot;
@@ -230,14 +193,14 @@ export function handleHotspot({ hotspot, top, left }) {
           }
           dispatch(updateGameState(gamestateId, value));
           return defaultPass;
-          break;
         }
         case 'SetStateTo': {
           const { defaultPass, param1: gamestateId, param2: value } = hotspot;
           dispatch(updateGameState(gamestateId, value));
           return defaultPass;
-          break;
         }
+        default:
+          break;
       }
     }
     return true;
@@ -246,7 +209,16 @@ export function handleHotspot({ hotspot, top, left }) {
 
 window.updategs = (gamestateId, value) => {
   store.dispatch(updateGameState(gamestateId, value));
-  store.dispatch(castActions.forScene(sceneSelectors.currentSceneId(store.getState())).special.update());
+  store
+    .dispatch(
+      castActions.forScene(
+        sceneSelectors.currentSceneId(
+          store.getState(),
+        ),
+      )
+      .special
+      .update(),
+    );
 };
 
 window.getgs = gamestateId => gameStateSelectors.gamestates(store.getState())[gamestateId];

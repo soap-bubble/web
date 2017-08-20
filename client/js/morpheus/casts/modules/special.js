@@ -6,12 +6,9 @@ import {
   createSelector,
 } from 'reselect';
 import {
-  getSceneType,
-  selectors as sceneSelectors,
-} from 'morpheus/scene';
-import {
   actions as gamestateActions,
-  selectors as gameStateSelectors,
+  selectors as gamestateSelectors,
+  isActive,
 } from 'morpheus/gamestate';
 import {
   selectors as gameSelectors,
@@ -34,10 +31,7 @@ import {
 
 const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
-    const rootCast = get(scene, 'casts', []).find(c => c.castId === scene.sceneId);
-    if (rootCast && !rootCast.nextSceneId) {
-      return rootCast;
-    }
+    return get(scene, 'casts', []).find(c => c.__t === 'MovieSpecialCast' && !c.nextSceneId && !c.audioOnly);
   }
   return null;
 };
@@ -202,8 +196,9 @@ export function selectors(scene) {
 
   const selectExtraCasts = createSelector(
     () => scene,
-    scene => get(scene, 'casts', [])
-      .filter(c => c.castId && c.castId !== scene.sceneId),
+    selectSpecialCastData,
+    (s, specialCastData) => get(s, 'casts', [])
+      .filter(c => c !== specialCastData),
   );
 
   const selectControlledCastsData = createSelector(
@@ -228,7 +223,8 @@ export function selectors(scene) {
 
   const selectHotspotsData = createSelector(
     () => scene,
-    scene => get(scene, 'casts', []).filter(c => c.castId === 0),
+    s => get(s, 'casts', [])
+      .filter(c => c.castId === 0),
   );
 
   const selectSpecial = createSelector(
@@ -274,14 +270,14 @@ export const delegate = memoize((scene) => {
       const leadCast = specialSelectors.data(getState());
       const controlledCastsData = specialSelectors.controlledCastsData(getState());
       const movieCasts = specialSelectors.movieCasts(getState());
-      const gameStates = gameStateSelectors.gamestates(getState());
+      const gameStates = gamestateSelectors.gamestates(getState());
       const dimensions = gameSelectors.dimensions(getState());
 
       return Promise.all([
         Promise.all(movieCasts
           .map(movieCast => new Promise((resolve, reject) => {
             const video = createVideo(getAssetUrl(movieCast.fileName), {
-              loop: true,
+              loop: movieCast.looping,
               autoplay: true,
               oncanplaythrough() {
                 resolve(video);
@@ -354,7 +350,7 @@ export const actions = memoize((scene) => {
   const specialSelectors = selectors(scene);
   function update() {
     return (dispatch, getState) => {
-      const gameStates = gameStateSelectors.gamestates(getState());
+      const gameStates = gamestateSelectors.gamestates(getState());
       const dimensions = gameSelectors.dimensions(getState());
       const canvas = specialSelectors.canvas(getState());
       const controlledCasts = specialSelectors.controlledCasts(getState());

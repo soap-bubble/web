@@ -13,9 +13,6 @@ import {
   get,
   memoize,
 } from 'lodash';
-import {
-  defer,
-} from 'utils/promise';
 import { createSelector } from 'reselect';
 import createCanvas from 'utils/canvas';
 import {
@@ -59,7 +56,10 @@ export const selectors = memoize((scene) => {
 
   const selectHotspotsData = createSelector(
     () => scene,
-    scene => get(scene, 'casts', []).filter(c => c.castId === 0),
+    gamestateSelectors.gamestates,
+    (s, gamestates) => get(s, 'casts', [])
+      .filter(c => c.castId === 0)
+      .filter(c => isActive({ cast: c, gamestates })),
   );
   const selectHitColorList = createSelector(
     selectHotspot,

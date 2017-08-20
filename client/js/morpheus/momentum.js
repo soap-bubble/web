@@ -1,24 +1,12 @@
 import { last } from 'lodash';
 import {
   actions as castActions,
-  selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import raf from 'raf';
 import store from 'store';
-import input from 'morpheus/input';
-
-const {
-  addMouseUp,
-  addMouseMove,
-  addMouseDown,
-  addTouchStart,
-  addTouchMove,
-  addTouchEnd,
-  addTouchCancel,
-} = input.actions;
 
 export default function ({ dispatch, scene }) {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
@@ -33,14 +21,14 @@ export default function ({ dispatch, scene }) {
     startPos: {},
   };
 
-  // Momentum is a sense of continued be deaccelerating user interaction that continues after the user event ends
+  // Momentum is a sense of continued be deaccelerating user interaction that continues
+  // after the user event ends
   const momentum = {
     enabled: false,
     abort: false,
     speed: { x: 0, y: 0 },
   };
 
-  const SWING_DELTA = 0.25;
   const DEG_TO_RAD = Math.PI / 180;
   const MAX_MOMENTUM = 0.0125 * DEG_TO_RAD;
   const DAMPER = 0.90;
@@ -54,17 +42,8 @@ export default function ({ dispatch, scene }) {
     return (delta * DEG_TO_RAD) / (7.0 * ((19 - sensitivity) / 18.0));
   }
 
-  function startMomentum() {
-    if (!momentum.enabled) {
-      momentum.enabled = true;
-      updateMomentum();
-    }
-  }
-
   function updateMomentum() {
     if (!momentum.abort) {
-      const rotation = castSelectors.pano.rotation(store.getState());
-      const sensitivity = gameSelectors.sensitivity(store.getState());
       let yFine = false;
 
       if (momentum.speed.y > MAX_MOMENTUM || momentum.speed.y < -MAX_MOMENTUM) {
@@ -89,6 +68,13 @@ export default function ({ dispatch, scene }) {
     }
   }
 
+  function startMomentum() {
+    if (!momentum.enabled) {
+      momentum.enabled = true;
+      updateMomentum();
+    }
+  }
+
   function onInteractionStart({ left, top }) {
     interaction.startTime = Date.now();
     interaction.active = true;
@@ -98,9 +84,8 @@ export default function ({ dispatch, scene }) {
   }
 
   function onInteractionMove({ left, top }) {
+    const sensitivity = gameSelectors.sensitivity(store.getState());
     if (interaction.active) {
-      const controlType = gameSelectors.controlType(store.getState());
-      const sensitivity = gameSelectors.sensitivity(store.getState());
       const interactionLastPos = last(interaction.positions);
       const speed = {
         horizontal: left - interactionLastPos.left,
@@ -126,12 +111,10 @@ export default function ({ dispatch, scene }) {
   }
 
   function onInteractionEnd({ left, top }) {
-    const sensitivity = gameSelectors.sensitivity(store.getState());
     const interactionDebounce = gameSelectors.interactionDebounce(store.getState());
-    const interactionMomemtum = { x: 0, y: 0 };
     const interactionDistance = Math.sqrt(
-      Math.pow(interaction.startPos.left - left, 2)
-       + Math.pow(interaction.startPos.top - top, 2),
+      ((interaction.startPos.left - left) ** 2)
+       + ((interaction.startPos.top - top) ** 2),
     );
     if (interactionDistance > interactionDebounce) {
       const lastPosition = last(interaction.positions);
@@ -166,7 +149,7 @@ export default function ({ dispatch, scene }) {
     }
   }
 
-  function onTouchCancel(touchEvent) {
+  function onTouchCancel() {
 
   }
 

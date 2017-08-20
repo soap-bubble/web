@@ -2,7 +2,6 @@ import reducer from './reducer';
 import * as selectors from './selectors';
 import * as actions from './actions';
 import {
-  ACTION_TYPES,
   TEST_TYPES,
 } from '../constants';
 
@@ -17,16 +16,16 @@ export function isActive({ cast, gamestates }) {
     let retValue;
     switch (TEST_TYPES[testType]) {
       case 'EqualTo':
-        retValue = value === gs.value;
+        retValue = gs && (value === gs.value);
         break;
       case 'NotEqualTo':
-        retValue = value !== gs.value;
+        retValue = gs && (value !== gs.value);
         break;
       case 'GreaterThan':
-        retValue = value > gs.value;
+        retValue = gs && (value > gs.value);
         break;
       case 'LessThan':
-        retValue = value < gs.value;
+        retValue = gs && (value < gs.value);
         break;
       default:
         retValue = false;

@@ -26,12 +26,15 @@ import {
   createVideo,
 } from 'utils/video';
 import {
+  createSound,
+} from 'utils/sound';
+import {
   GESTURES,
 } from 'morpheus/constants';
 
 const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
-    return get(scene, 'casts', []).find(c => c.__t === 'MovieSpecialCast' && !c.nextSceneId && !c.audioOnly);
+    return get(scene, 'casts', []).find(c => c.__t === 'MovieSpecialCast');
   }
   return null;
 };
@@ -103,7 +106,7 @@ function resizeToScreen({ width, height, top, left, right, bottom, clip = false 
   };
 }
 
-function generateMovieTransform({ cast, video, dimensions }) {
+function generateMovieTransform({ cast, dimensions }) {
   const { width, height } = dimensions;
   const { y: top, x: left } = cast.location;
   const bottom = top + cast.height;
@@ -124,10 +127,33 @@ function applyTransformToVideo({ transform, video }) {
   video.style.top = `${transform.top}px`;
 }
 
-function calculateControlledFrameLocation({ cast, img, gameStates, rect }) {
+function calculateImageOperation({ cast, img, rect }) {
+  const { scale, width, height } = cast;
+
+  const source = {
+    x: 0,
+    y: 0,
+    sizeX: width,
+    sizeY: height,
+  };
+
+  return [
+    img,
+    source.x,
+    source.y,
+    source.sizeX,
+    source.sizeY,
+    rect.x * scale,
+    rect.y * scale,
+    rect.sizeX * scale,
+    rect.sizeY * scale,
+  ];
+}
+
+function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
   const { controlledMovieCallbacks, width, height } = cast;
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
-  const value = Math.round(get(gameStates, `[${gameStateId}].value`, 0));
+  const value = Math.round(get(gamestates, `[${gameStateId}].value`, 0));
 
   const source = {
     x: value * width,
@@ -149,18 +175,45 @@ function calculateControlledFrameLocation({ cast, img, gameStates, rect }) {
   ];
 }
 
+function generateImages({
+  images,
+  dimensions,
+  gamestates,
+}) {
+  const { width, height } = dimensions;
+  const generatedImages = [];
+  images.forEach(({ data: cast, el: img }) => {
+    if (isActive({ cast, gamestates })) {
+      const location = cast.location;
+      generatedImages.push(calculateImageOperation({
+        cast,
+        img,
+        rect: resizeToScreen({
+          left: location.x,
+          top: location.y,
+          right: location.x + cast.width,
+          bottom: location.y + cast.height,
+          width,
+          height,
+        }),
+      }));
+    }
+  });
+  return generatedImages;
+}
+
 function generateControlledFrames({
   controlledCasts,
   dimensions,
-  gameStates,
+  gamestates,
 }) {
   const { width, height } = dimensions;
-  return controlledCasts.map(({ data: cast, img }) => {
+  return controlledCasts.map(({ data: cast, el: img }) => {
     const location = cast.location || cast.controlledLocation;
-    return calculateControlledFrameLocation({
+    return calculateControlledFrameOperation({
       cast,
       img,
-      gameStates,
+      gamestates,
       rect: resizeToScreen({
         left: location.x,
         top: location.y,
@@ -173,10 +226,11 @@ function generateControlledFrames({
   }, {});
 }
 
-function generateSpecialImages({ specials, canvas }) {
+function generateSpecialImages({ images, controlledFrames, canvas }) {
   if (canvas) {
     const ctx = canvas.getContext('2d');
-    specials.forEach(op => ctx.drawImage(...op));
+    images.forEach(op => ctx.drawImage(...op));
+    controlledFrames.forEach(op => ctx.drawImage(...op));
   }
 }
 
@@ -196,9 +250,7 @@ export function selectors(scene) {
 
   const selectExtraCasts = createSelector(
     () => scene,
-    selectSpecialCastData,
-    (s, specialCastData) => get(s, 'casts', [])
-      .filter(c => c !== specialCastData),
+    s => get(s, 'casts', []),
   );
 
   const selectControlledCastsData = createSelector(
@@ -206,19 +258,29 @@ export function selectors(scene) {
     extraCasts => extraCasts.filter(c => c.__t === 'ControlledMovieCast', []),
   );
 
-  const selectMovieCasts = createSelector(
+  const selectAllMovieCasts = createSelector(
     selectExtraCasts,
-    extraCasts => extraCasts.filter(c => c.__t === 'MovieSpecialCast' && !c.audioOnly),
+    extraCasts => extraCasts.filter(c =>
+      c.__t === 'MovieSpecialCast',
+    ),
   );
 
-  const selectControlledCastImgUrl = createSelector(
-    selectSpecialCastData,
-    (cast) => {
-      const asset = get(cast, 'fileName');
-      if (asset) {
-        return getAssetUrl(asset, 'png');
-      }
-    },
+  const selectMovieCasts = createSelector(
+    selectAllMovieCasts,
+    extraCasts => extraCasts.filter(c =>
+      !c.audioOnly
+      && !c.image,
+    ),
+  );
+
+  const selectImageCasts = createSelector(
+    selectAllMovieCasts,
+    extraCasts => extraCasts.filter(c => c.image),
+  );
+
+  const selectSoundCasts = createSelector(
+    selectAllMovieCasts,
+    extraCasts => extraCasts.filter(c => c.audioOnly),
   );
 
   const selectHotspotsData = createSelector(
@@ -239,6 +301,14 @@ export function selectors(scene) {
     selectSpecial,
     special => get(special, 'videos'),
   );
+  const selectSounds = createSelector(
+    selectSpecial,
+    special => get(special, 'sounds'),
+  );
+  const selectImages = createSelector(
+    selectSpecial,
+    special => get(special, 'images'),
+  );
   const selectControlledCasts = createSelector(
     selectSpecial,
     special => get(special, 'controlledCasts', []),
@@ -250,11 +320,13 @@ export function selectors(scene) {
     extraCasts: selectExtraCasts,
     controlledCasts: selectControlledCasts,
     movieCasts: selectMovieCasts,
-    controlledCastImgUrl: selectControlledCastImgUrl,
+    imageCasts: selectImageCasts,
+    soundCasts: selectSoundCasts,
     hotspotData: selectHotspotsData,
     canvas: selectCanvas,
     videos: selectVideos,
-    controlledCasts: selectControlledCasts,
+    sounds: selectSounds,
+    images: selectImages,
   };
 }
 
@@ -267,76 +339,102 @@ export const delegate = memoize((scene) => {
 
   function doEnter() {
     return (dispatch, getState) => {
-      const leadCast = specialSelectors.data(getState());
-      const controlledCastsData = specialSelectors.controlledCastsData(getState());
-      const movieCasts = specialSelectors.movieCasts(getState());
-      const gameStates = gamestateSelectors.gamestates(getState());
-      const dimensions = gameSelectors.dimensions(getState());
+      const state = getState();
+      const controlledCastsData = specialSelectors.controlledCastsData(state);
+      const movieCasts = specialSelectors.movieCasts(state);
+      const imageCasts = specialSelectors.imageCasts(state);
+      const soundCasts = specialSelectors.soundCasts(state);
+      const gamestates = gamestateSelectors.gamestates(state);
+      const dimensions = gameSelectors.dimensions(state);
+
+      const loadImages = Promise.all(imageCasts.map((imageCast) => {
+        const {
+          fileName,
+          startFrame,
+        } = imageCast;
+        return loadAsImage(getAssetUrl(fileName, `${startFrame}.png`))
+          .then(img => ({
+            el: img,
+            data: imageCast,
+          }));
+      }));
+
+      const loadSounds = Promise.all(soundCasts.map((soundCast) => {
+        const {
+          fileName,
+        } = soundCast;
+        return createSound(getAssetUrl(fileName))
+          .then(sound => ({
+            el: sound,
+            data: soundCast,
+          }));
+      }));
+
+      const loadMovies = Promise.all(movieCasts.map(movieCast => new Promise((resolve, reject) => {
+        const video = createVideo(getAssetUrl(movieCast.fileName), {
+          loop: movieCast.looping,
+          autoplay: true,
+          oncanplaythrough() {
+            resolve(video);
+          },
+          onerror: reject,
+        });
+      })
+        .then((video) => {
+          video.classList.add('MovieSpecialCast');
+          return {
+            el: video,
+            data: movieCast,
+          };
+        })));
+
+      const loadControlledMovies = Promise.all(controlledCastsData
+        .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))
+          .then(img => ({
+            el: img,
+            data: cast,
+          })),
+      ));
 
       return Promise.all([
-        Promise.all(movieCasts
-          .map(movieCast => new Promise((resolve, reject) => {
-            const video = createVideo(getAssetUrl(movieCast.fileName), {
-              loop: movieCast.looping,
-              autoplay: true,
-              oncanplaythrough() {
-                resolve(video);
-              },
-              onerror: reject,
-            });
-          })
-            .then((video) => {
-              video.classList.add('MovieSpecialCast');
-              return video;
-            })))
-          .then((videos) => {
-            const transforms = videos.map((video, index) => generateMovieTransform({
-              video,
-              dimensions,
-              cast: movieCasts[index],
-            }));
-            transforms.forEach((transform, index) => applyTransformToVideo({
-              transform,
-              video: videos[index],
-            }));
-            return videos;
-          }),
-        Promise.all(
-          [
-            loadAsImage(specialSelectors.controlledCastImgUrl(getState()))
-              .then(img => ({
-                img,
-                data: leadCast,
-              })),
-          ].concat(controlledCastsData
-            .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))
-              .then(img => ({
-                img,
-                data: cast,
-              })),
-            ),
-        ))
-          .then((controlledCasts) => {
-            const canvas = createCanvas(dimensions);
-            generateSpecialImages({
-              specials: generateControlledFrames({
-                gameStates,
-                controlledCasts,
-                dimensions,
-              }),
-              canvas,
-            });
-            return {
-              canvas,
-              controlledCasts,
-            };
-          }),
+        loadImages,
+        loadSounds,
+        loadMovies,
+        loadControlledMovies,
       ])
-        .then(([videos, { canvas, controlledCasts }]) => ({
-          videos,
-          canvas,
-          controlledCasts,
-        }));
+        .then(([images, sounds, videos, controlledCasts]) => {
+          const canvas = createCanvas(dimensions);
+          videos.forEach(({ el: video, data }) => {
+            applyTransformToVideo({
+              transform: generateMovieTransform({
+                dimensions,
+                cast: data,
+              }),
+              video,
+            });
+          });
+
+          generateSpecialImages({
+            images: generateImages({
+              gamestates,
+              images,
+              dimensions,
+            }),
+            controlledFrames: generateControlledFrames({
+              gamestates,
+              controlledCasts,
+              dimensions,
+            }),
+            canvas,
+          });
+          return {
+            images,
+            sounds,
+            videos,
+            canvas,
+            controlledCasts,
+          };
+        });
     };
   }
 
@@ -350,14 +448,31 @@ export const actions = memoize((scene) => {
   const specialSelectors = selectors(scene);
   function update() {
     return (dispatch, getState) => {
-      const gameStates = gamestateSelectors.gamestates(getState());
+      const gamestates = gamestateSelectors.gamestates(getState());
       const dimensions = gameSelectors.dimensions(getState());
       const canvas = specialSelectors.canvas(getState());
       const controlledCasts = specialSelectors.controlledCasts(getState());
+      const images = specialSelectors.images(getState());
+      const videos = specialSelectors.videos(getState());
+
+      videos.forEach(({ el: video, data }) => {
+        applyTransformToVideo({
+          transform: generateMovieTransform({
+            dimensions,
+            cast: data,
+          }),
+          video,
+        });
+      });
 
       generateSpecialImages({
-        specials: generateControlledFrames({
-          gameStates,
+        images: generateImages({
+          gamestates,
+          images,
+          dimensions,
+        }),
+        controlledFrames: generateControlledFrames({
+          gamestates,
           controlledCasts,
           dimensions,
         }),

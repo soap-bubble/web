@@ -15,14 +15,7 @@ export const SCENE_TYPE_LIST = {
 export function getSceneType(sceneData) {
   if (!sceneData) return 'none';
 
-  let sceneType = sceneData.sceneType;
-  const { casts } = sceneData;
-  // Find cast with scene's root resource
-  const rootCast = casts.find(c => c.castId === sceneData.sceneId);
-  if (rootCast && rootCast.nextSceneId) {
-    // This is actually a transition....
-    sceneType = 4;
-  }
+  const sceneType = sceneData.sceneType;
   return SCENE_TYPE_LIST[sceneType];
 }
 

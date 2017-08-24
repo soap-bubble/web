@@ -10,22 +10,10 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
-  actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
-import input from 'morpheus/input';
 import store from 'store';
 import loggerFactory from 'utils/logger';
-
-const {
-  addMouseUp,
-  addMouseMove,
-  addMouseDown,
-  addTouchStart,
-  addTouchMove,
-  addTouchEnd,
-  addTouchCancel,
-} = input.actions;
 
 const logger = loggerFactory('flatspot');
 

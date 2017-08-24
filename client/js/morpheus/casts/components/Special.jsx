@@ -48,7 +48,7 @@ const Special = connect(
           el.appendChild(canvas);
         }
         if (videos) {
-          videos.forEach(video => el.appendChild(video));
+          videos.forEach(video => el.appendChild(video.el));
         }
       }
     }}

@@ -113,6 +113,7 @@ export class MovieSpecialCast extends MovieCast {
       nextSceneId: Number,
       angleAtEnd: Number,
       audioOnly: Boolean,
+      image: Boolean,
     });
   }
 }

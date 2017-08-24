@@ -99,6 +99,7 @@ export const selectors = memoize((scene) => {
 export const delegate = memoize((scene) => {
   const transitionSelectors = selectors(scene);
   function applies(state) {
+    return false;
     return transitionSelectors.transitionCastData(state);
   }
 

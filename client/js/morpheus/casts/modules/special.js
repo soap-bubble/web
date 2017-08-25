@@ -1,6 +1,7 @@
 import {
   get,
   memoize,
+  isUndefined,
 } from 'lodash';
 import {
   createSelector,
@@ -16,6 +17,9 @@ import {
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
+import {
+  actions as sceneActions,
+} from 'morpheus/scene';
 import {
   getAssetUrl,
 } from 'service/gamedb';
@@ -108,15 +112,15 @@ function resizeToScreen({ width, height, top, left, right, bottom, clip = false 
 
 function generateMovieTransform({ cast, dimensions }) {
   const { width, height } = dimensions;
-  const { y: top, x: left } = cast.location;
+  const { scale, location: { y: top, x: left } } = cast;
   const bottom = top + cast.height;
   const right = left + cast.width;
   const { x, y, sizeX, sizeY } = resizeToScreen({ top, left, bottom, right, width, height });
   return {
-    left: x,
-    top: y,
-    width: sizeX,
-    height: sizeY,
+    left: x * scale,
+    top: y * scale,
+    width: sizeX * scale,
+    height: sizeY * scale,
   };
 }
 
@@ -289,6 +293,14 @@ export function selectors(scene) {
       .filter(c => c.castId === 0),
   );
 
+  const selectNextSceneId = createSelector(
+    selectAllMovieCasts,
+    (casts) => {
+      const cast = casts.find(c => c.nextSceneId);
+      return cast && cast.nextSceneId;
+    },
+  );
+
   const selectSpecial = createSelector(
     castSelectors.forScene(scene).cache,
     castCache => get(castCache, 'special'),
@@ -323,6 +335,7 @@ export function selectors(scene) {
     imageCasts: selectImageCasts,
     soundCasts: selectSoundCasts,
     hotspotData: selectHotspotsData,
+    nextSceneId: selectNextSceneId,
     canvas: selectCanvas,
     videos: selectVideos,
     sounds: selectSounds,
@@ -362,12 +375,26 @@ export const delegate = memoize((scene) => {
       const loadSounds = Promise.all(soundCasts.map((soundCast) => {
         const {
           fileName,
+          nextSceneId,
+          angleAtEnd,
         } = soundCast;
-        return createSound(getAssetUrl(fileName))
-          .then(sound => ({
-            el: sound,
-            data: soundCast,
-          }));
+        const sound = createSound(getAssetUrl(fileName));
+        if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+          sound.addEventListener('ended', function onSoundEnded() {
+            let startAngle;
+            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+              startAngle = (angleAtEnd * Math.PI) / 1800;
+              startAngle -= Math.PI - (Math.PI / 6);
+            }
+            sound.removeEventListener('ended', onSoundEnded);
+            dispatch(sceneActions.goToScene(nextSceneId));
+            dispatch(sceneActions.setNextStartAngle(startAngle));
+          });
+        }
+        return {
+          el: sound,
+          data: soundCast,
+        };
       }));
 
       const loadMovies = Promise.all(movieCasts.map(movieCast => new Promise((resolve, reject) => {
@@ -379,14 +406,26 @@ export const delegate = memoize((scene) => {
           },
           onerror: reject,
         });
+        const { nextSceneId, angleAtEnd } = movieCast;
+        video.classList.add('MovieSpecialCast');
+        if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+          video.addEventListener('ended', function onSoundEnded() {
+            let startAngle;
+            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+              startAngle = (angleAtEnd * Math.PI) / 1800;
+              startAngle -= Math.PI - (Math.PI / 6);
+            }
+            video.removeEventListener('ended', onSoundEnded);
+            dispatch(sceneActions.goToScene(nextSceneId));
+            dispatch(sceneActions.setNextStartAngle(startAngle));
+          });
+        }
+        return video;
       })
-        .then((video) => {
-          video.classList.add('MovieSpecialCast');
-          return {
-            el: video,
-            data: movieCast,
-          };
-        })));
+        .then(video => ({
+          el: video,
+          data: movieCast,
+        }))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
         .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))

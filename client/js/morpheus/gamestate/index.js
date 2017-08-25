@@ -16,19 +16,19 @@ export function isActive({ cast, gamestates }) {
     let retValue;
     switch (TEST_TYPES[testType]) {
       case 'EqualTo':
-        retValue = gs && (value === gs.value);
+        retValue = gs && (gs.value === value);
         break;
       case 'NotEqualTo':
-        retValue = gs && (value !== gs.value);
+        retValue = gs && (gs.value !== value);
         break;
       case 'GreaterThan':
-        retValue = gs && (value > gs.value);
+        retValue = gs && (gs.value > value);
         break;
       case 'LessThan':
-        retValue = gs && (value < gs.value);
+        retValue = gs && (gs.value < value);
         break;
       default:
-        retValue = false;
+        retValue = true;
     }
     retValue = initiallyEnabled ? retValue : !retValue;
     return retValue;

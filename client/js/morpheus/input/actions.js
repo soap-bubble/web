@@ -7,11 +7,18 @@ import {
   ADD_ONTOUCHEND,
   ADD_ONTOUCHCANCEL,
   DISABLE_CONTROL,
+  ENABLE_CONTROL,
 } from './actionTypes';
 
 export function disableControl() {
   return {
     type: DISABLE_CONTROL,
+  };
+}
+
+export function enableControl() {
+  return {
+    type: ENABLE_CONTROL,
   };
 }
 

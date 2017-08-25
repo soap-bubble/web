@@ -10,6 +10,9 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
+  selectors as inputSelectors,
+} from 'morpheus/input';
+import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import store from 'store';
@@ -59,7 +62,11 @@ export default function ({ dispatch, scene }) {
 
   function updateState({ top, left }) {
     const state = store.getState();
-    const hotspots = castSelectorForScene.hotspot.hotspotsData(state);
+    const inputEnabled = inputSelectors.enabled(state);
+    if (!inputEnabled) {
+      return;
+    }
+    const hotspots = castSelectorForScene.special.hotspotData(state);
     const isCurrent = sceneSelectors.currentSceneData(state) === scene;
     const isExiting = castSelectorForScene.isExiting(state);
     const acceptsMouseEvents = isCurrent && !isExiting;
@@ -189,6 +196,14 @@ export default function ({ dispatch, scene }) {
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
       hotspots: difference(hotspots, nowActiveHotspots),
+    });
+
+    handleHotspotDispatches({
+      type: 'Always',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: hotspots
+        .filter(h => h.castId === 0),
     });
 
     wasActiveHotspots = nowActiveHotspots;

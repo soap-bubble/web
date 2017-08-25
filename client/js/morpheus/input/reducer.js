@@ -8,6 +8,7 @@ import {
   ADD_ONTOUCHEND,
   ADD_ONTOUCHCANCEL,
   DISABLE_CONTROL,
+  ENABLE_CONTROL,
 } from './actionTypes';
 
 function reducerForType(type) {
@@ -30,6 +31,7 @@ function reducerForType(type) {
       ...ui,
       [type]: handlerList,
       removeOnSceneEnd,
+      enabled: true,
     };
     return ret;
   };
@@ -60,6 +62,13 @@ const reducer = createReducer(
       return {
         ...state,
         ...inputDefaults,
+        enabled: false,
+      };
+    },
+    [ENABLE_CONTROL](state) {
+      return {
+        ...state,
+        enabled: true,
       };
     },
   },

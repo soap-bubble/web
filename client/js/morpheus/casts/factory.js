@@ -1,14 +1,13 @@
 import React from 'react';
-import { decorate as faderDecorator } from './components/Fader';
 import { createSelector } from 'reselect';
 import {
   selectors as sceneSelectors,
   getSceneType,
 } from 'morpheus/scene';
 
+import { decorate as faderDecorator } from './components/Fader';
 import Special from './components/Special';
 import Pano from './components/Pano';
-import Transition from './components/Transition';
 import Sound from './components/Sound';
 
 function createSceneMapper(map) {
@@ -18,19 +17,15 @@ function createSceneMapper(map) {
 export const createLiveSceneSelector = createSceneMapper({
   panorama: Pano,
   special: Special,
-  transition: Transition,
 });
 
 export const createEnteringSceneSelector = createSceneMapper({
   panorama: Pano,
-  // special: Special,
-  // transition: Transition,
 });
 
 export const createExitingSceneSelector = createSceneMapper({
   panorama: Pano,
   special: Special,
-  transition: Transition,
 });
 
 export default createSelector(

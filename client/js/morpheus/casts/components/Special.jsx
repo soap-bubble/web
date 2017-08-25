@@ -1,12 +1,9 @@
 import { connect } from 'react-redux';
 import React from 'react';
-import flatspot, { remove } from 'morpheus/flatspot';
+import flatspot from 'morpheus/flatspot';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
-import {
-  selectors as sceneSelectors,
-} from 'morpheus/scene';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';

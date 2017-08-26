@@ -27,3 +27,4 @@ export const previousSceneId = createSelector(
   cs => get(cs, 'sceneId'),
 );
 export const nextSceneStartAngle = state => state.scene.nextStartAngle;
+export const dissolve = state => state.scene.dissolve;

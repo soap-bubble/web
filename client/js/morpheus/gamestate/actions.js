@@ -89,16 +89,19 @@ export function handleMouseStillDown({ hotspot, top, left }) {
       const actionType = ACTION_TYPES[type];
       if (actionType === 'TwoAxisSlider') {
         const gs = gamestates[hotspot.param1];
-        const gsLs = gamestates[hotspot.param2];
-        const gsMs = gamestates[hotspot.param3];
-        const verticalRatio = Math.floor((gsLs.maxValue + 1) * (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop));
-        const horizontalRatio = Math.floor((gsMs.maxValue + 1) * (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft));
+        const { maxValue: vertFromState } = gamestates[hotspot.param2];
+        const { maxValue: horFromState } = gamestates[hotspot.param3];
+        const maxVert = vertFromState + 1;
+        const maxHor = horFromState + 1;
+        const verticalRatio = Math.floor(
+          maxVert * ((top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop)),
+        );
+        const horizontalRatio = Math.floor(
+          maxHor * ((left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft)),
+        );
 
-        if (gs && gsLs && gsMs) {
-          const valueLs = gsLs.value;
-          const valueMs = gsMs.value;
-          const value = (gsMs.maxValue + 1) * verticalRatio + horizontalRatio;
-          console.log({ vMax: gsLs.maxValue, hMax: gsLs.maxValue, v: verticalRatio, h: horizontalRatio, value });
+        if (gs && maxVert && maxHor) {
+          const value = (maxVert * verticalRatio) + horizontalRatio;
           dispatch(updateGameState(hotspot.param1, Math.round(value)));
         }
       } else if (actionType === 'VertSlider') {

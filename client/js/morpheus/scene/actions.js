@@ -103,7 +103,7 @@ export function startAtScene(id) {
       });
 }
 
-export function goToScene(id) {
+export function goToScene(id, dissolve) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
     if (currentSceneData.sceneId === id) return;
@@ -111,7 +111,10 @@ export function goToScene(id) {
       .then(() => {
         dispatch({
           type: SCENE_DO_EXITING,
-          payload: currentSceneData.sceneId,
+          payload: {
+            sceneId: currentSceneData.sceneId,
+            dissolve,
+          },
         });
         dispatch(inputActions.disableControl());
         reset();

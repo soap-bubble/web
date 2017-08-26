@@ -48,10 +48,11 @@ const reducer = createReducer('scene', {
       currentScene: scene,
     };
   },
-  [SCENE_DO_EXITING](state) {
+  [SCENE_DO_EXITING](state, { dissolve }) {
     return {
       ...state,
       status: 'exiting',
+      dissolve: isUndefined(dissolve) || !!dissolve,
     };
   },
   [SCENE_DO_ENTER](state) {

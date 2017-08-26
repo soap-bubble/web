@@ -8,7 +8,7 @@ export function addSourceToSound(element, src, type) {
 }
 
 export function createSound(url, options) {
-  const video = document.createElement('sound');
+  const video = document.createElement('audio');
   video.crossOrigin = 'anonymous';
   Object.assign(video, options);
   addSourceToSound(video, `${url}.aac`, 'audio/aac');

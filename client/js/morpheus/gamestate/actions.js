@@ -87,22 +87,33 @@ export function handleMouseStillDown({ hotspot, top, left }) {
     } = hotspot;
     if (isActive({ cast: hotspot, gamestates })) {
       const actionType = ACTION_TYPES[type];
-      if (actionType === 'VertSlider') {
+      if (actionType === 'TwoAxisSlider') {
+        const gs = gamestates[hotspot.param1];
+        const gsLs = gamestates[hotspot.param2];
+        const gsMs = gamestates[hotspot.param3];
+        const verticalRatio = Math.floor((gsLs.maxValue + 1) * (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop));
+        const horizontalRatio = Math.floor((gsMs.maxValue + 1) * (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft));
+
+        if (gs && gsLs && gsMs) {
+          const valueLs = gsLs.value;
+          const valueMs = gsMs.value;
+          const value = (gsMs.maxValue + 1) * verticalRatio + horizontalRatio;
+          console.log({ vMax: gsLs.maxValue, hMax: gsLs.maxValue, v: verticalRatio, h: horizontalRatio, value });
+          dispatch(updateGameState(hotspot.param1, Math.round(value)));
+        }
+      } else if (actionType === 'VertSlider') {
         dispatch(gameActions.setCloseHandCursor());
         const gs = gamestates[hotspot.param1];
         const { stateWraps, minValue: min, maxValue: max } = gs;
         const oldValue = gs.oldValue || gs.value;
         const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
-
-        gs.value = ratio * max;
+        dispatch(updateGameState(hotspot.param1, ratio * max));
         // let rate = hotspot.param2;
         // if (rate === 0) {
         //   rate = max - min;
         // }
         //
-        //
-        // const delta = rate * ratio - .95;
-        // console.log(oldValue, rate, ratio, delta)
+        // const delta = (rate * ratio) - 0.95;
         //
         // let value = oldValue + delta;
         // if (value < min) {
@@ -126,18 +137,64 @@ export function handleMouseStillDown({ hotspot, top, left }) {
         const { stateWraps, minValue: min, maxValue: max } = gs;
         const oldValue = gs.oldValue || gs.value;
         const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
-        gs.value = ratio * max;
+        dispatch(updateGameState(hotspot.param1, ratio * max));
       }
     }
     return true;
   };
 }
 
+// Rotate
+// CCast::DoMouseStillDown	(	inWhere	);
+//
+// switch (	mType	) {
+//
+// case Rotate:
+//   {
+//     SB_Types::Point mousePt 		= inWhere;
+//     CPanoCast::WindowToPano	(	mousePt	);
+//
+//     CGameState *	gameStateVar 	= CGameState::FindByID(mParam1);
+//
+//     if (	gameStateVar != nil	) {
+//
+//       SB_Types::Int32 min = gameStateVar->GetMin();
+//       SB_Types::Int32	max	= gameStateVar->GetMax();
+//       double centerX 		= (mRect.right + mRect.left) / 2;
+//       double centerY 		= (mRect.bottom + mRect.top) / 2;
+//       double angle 		= atan2 (	mousePt.h - centerX,
+//                       centerY - mousePt.v	);
+//       angle 				= 180 * angle/Pi - mParam2;
+//       while (	angle < 0	) {
+//         angle += 360;
+//       }
+//
+//       if (	angle > mParam3 - mParam2	) {
+//
+//         angle = 360 - angle > angle - mParam3 ?
+//               mParam3 - mParam2 :
+//               0;
+//       }
+//
+//       double currAngle =	double(mParam3 - mParam2)*(gameStateVar->GetState() - min) /
+//                 (max - min);
+//
+//       if (	angle - currAngle < 90 && angle - currAngle > -90	) {
+//
+//         double 			ratio	= angle / (mParam3 - mParam2);
+//         SB_Types::Int32 value	= SB_Types::Int32
+//                       ( min + (max - min)*ratio + .5 );
+//         gameStateVar->SetState(value);
+//       }
+//     }
+//   }
+
 export function handleHotspot({ hotspot }) {
   return (dispatch, getState) => {
     const gamestates = gameStateSelectors.gamestates(getState());
     const {
       type,
+      dissolveToNextScene,
     } = hotspot;
 
     if (isActive({ cast: hotspot, gamestates })) {
@@ -151,7 +208,7 @@ export function handleHotspot({ hotspot }) {
         case 'DissolveTo':
         case 'ChangeScene': {
           const { defaultPass, param1: nextSceneId } = hotspot;
-          if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId));
+          if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
           return defaultPass;
         }
         case 'IncrementState': {
@@ -199,6 +256,29 @@ export function handleHotspot({ hotspot }) {
           dispatch(updateGameState(gamestateId, value));
           return defaultPass;
         }
+
+        // case ExchangeState:
+        //   {
+        //     CGameState *	stateVariable2 = CGameState::FindByID (	mParam2	);
+        //     if (	stateVariable2 != nil	) {
+        //       SB_Types::Int32 value1 = stateVariable->GetState ();
+        //       SB_Types::Int32 value2 = stateVariable2->GetState ();
+        //       stateVariable->SetState(value2);
+        //       stateVariable2->SetState(value1);
+        //     }
+        //   }
+        //   break;
+        // case CopyState:
+        //   {
+        //     CGameState *	stateVariable2 = CGameState::FindByID (	mParam2	);
+        //     if (	stateVariable2 != nil	) {
+        //       SB_Types::Int32 value = stateVariable2->GetState ();
+        //       stateVariable->SetState(value);
+        //     }
+        //   }
+        //   break;
+        // }
+
         default:
           break;
       }
@@ -212,7 +292,7 @@ window.updategs = (gamestateId, value) => {
   store
     .dispatch(
       castActions.forScene(
-        sceneSelectors.currentSceneId(
+        sceneSelectors.currentSceneData(
           store.getState(),
         ),
       )

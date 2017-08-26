@@ -311,15 +311,15 @@ export function selectors(scene) {
   );
   const selectVideos = createSelector(
     selectSpecial,
-    special => get(special, 'videos'),
+    special => get(special, 'videos', []),
   );
   const selectSounds = createSelector(
     selectSpecial,
-    special => get(special, 'sounds'),
+    special => get(special, 'sounds', []),
   );
   const selectImages = createSelector(
     selectSpecial,
-    special => get(special, 'images'),
+    special => get(special, 'images', []),
   );
   const selectControlledCasts = createSelector(
     selectSpecial,
@@ -372,30 +372,34 @@ export const delegate = memoize((scene) => {
           }));
       }));
 
-      const loadSounds = Promise.all(soundCasts.map((soundCast) => {
-        const {
-          fileName,
-          nextSceneId,
-          angleAtEnd,
-        } = soundCast;
-        const sound = createSound(getAssetUrl(fileName));
-        if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-          sound.addEventListener('ended', function onSoundEnded() {
-            let startAngle;
-            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
-              startAngle = (angleAtEnd * Math.PI) / 1800;
-              startAngle -= Math.PI - (Math.PI / 6);
-            }
-            sound.removeEventListener('ended', onSoundEnded);
-            dispatch(sceneActions.goToScene(nextSceneId));
-            dispatch(sceneActions.setNextStartAngle(startAngle));
-          });
-        }
-        return {
-          el: sound,
-          data: soundCast,
-        };
-      }));
+      const loadSounds = Promise.all(soundCasts
+        .filter(soundCast => isActive({ cast: soundCast, gamestates }))
+        .map((soundCast) => {
+          const {
+            fileName,
+            nextSceneId,
+            angleAtEnd,
+            dissolveToNextScene,
+          } = soundCast;
+          const sound = createSound(getAssetUrl(fileName));
+          if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+            sound.addEventListener('ended', function onSoundEnded() {
+              let startAngle;
+              if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+                startAngle = (angleAtEnd * Math.PI) / 1800;
+                startAngle -= Math.PI - (Math.PI / 6);
+              }
+              sound.removeEventListener('ended', onSoundEnded);
+              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
+              dispatch(sceneActions.setNextStartAngle(startAngle));
+            });
+          }
+          sound.play();
+          return {
+            el: sound,
+            data: soundCast,
+          };
+        }));
 
       const loadMovies = Promise.all(movieCasts.map(movieCast => new Promise((resolve, reject) => {
         const video = createVideo(getAssetUrl(movieCast.fileName), {
@@ -406,7 +410,11 @@ export const delegate = memoize((scene) => {
           },
           onerror: reject,
         });
-        const { nextSceneId, angleAtEnd } = movieCast;
+        const {
+          nextSceneId,
+          angleAtEnd,
+          dissolveToNextScene,
+        } = movieCast;
         video.classList.add('MovieSpecialCast');
         if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
           video.addEventListener('ended', function onSoundEnded() {
@@ -416,7 +424,7 @@ export const delegate = memoize((scene) => {
               startAngle -= Math.PI - (Math.PI / 6);
             }
             video.removeEventListener('ended', onSoundEnded);
-            dispatch(sceneActions.goToScene(nextSceneId));
+            dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
             dispatch(sceneActions.setNextStartAngle(startAngle));
           });
         }

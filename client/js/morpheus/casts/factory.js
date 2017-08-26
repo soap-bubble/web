@@ -43,7 +43,9 @@ export default createSelector(
     const PreviousScene = createExitingSceneSelector(previous);
     if (_isLive && CurrentScene) {
       if (PreviousScene) {
-        const Fader = faderDecorator(<PreviousScene scene={previous} />, <CurrentScene scene={current} />);
+        const Fader = faderDecorator(
+          <PreviousScene scene={previous} />, <CurrentScene scene={current} />,
+        );
         scenes.push(<Fader />);
       } else {
         scenes.push(<CurrentScene scene={current} />);

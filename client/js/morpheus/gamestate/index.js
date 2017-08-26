@@ -7,7 +7,7 @@ import {
 
 export function isActive({ cast, gamestates }) {
   const { initiallyEnabled = true, comparators = [] } = cast;
-  return comparators.every(({
+  return comparators.length === 0 || comparators.every(({
     gameStateId,
     testType,
     value,

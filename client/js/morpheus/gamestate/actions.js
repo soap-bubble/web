@@ -81,16 +81,16 @@ export function handleMouseDown({ hotspot }) {
 
 export function handleMouseStillDown({ hotspot, top, left }) {
   return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors(getState());
     const {
       type,
     } = hotspot;
     if (isActive({ cast: hotspot, gamestates })) {
       const actionType = ACTION_TYPES[type];
       if (actionType === 'TwoAxisSlider') {
-        const gs = gamestates[hotspot.param1];
-        const { maxValue: vertFromState } = gamestates[hotspot.param2];
-        const { maxValue: horFromState } = gamestates[hotspot.param3];
+        const gs = gamestates.byId(hotspot.param1);
+        const { maxValue: vertFromState } = gamestates.byId(hotspot.param2);
+        const { maxValue: horFromState } = gamestates.byId(hotspot.param3);
         const maxVert = vertFromState + 1;
         const maxHor = horFromState + 1;
         const verticalRatio = Math.floor(
@@ -107,38 +107,13 @@ export function handleMouseStillDown({ hotspot, top, left }) {
       } else if (actionType === 'VertSlider') {
         dispatch(gameActions.setCloseHandCursor());
         const gs = gamestates[hotspot.param1];
-        const { stateWraps, minValue: min, maxValue: max } = gs;
-        const oldValue = gs.oldValue || gs.value;
+        const { maxValue: max } = gs;
         const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
         dispatch(updateGameState(hotspot.param1, ratio * max));
-        // let rate = hotspot.param2;
-        // if (rate === 0) {
-        //   rate = max - min;
-        // }
-        //
-        // const delta = (rate * ratio) - 0.95;
-        //
-        // let value = oldValue + delta;
-        // if (value < min) {
-        //   if (stateWraps) {
-        //     value += max - min;
-        //   } else {
-        //     value = min;
-        //   }
-        // }
-        // if (value > max) {
-        //   if (stateWraps) {
-        //     value -= max - min;
-        //   } else {
-        //     value = max;
-        //   }
-        // }
-        // gs.value = value;
       } else if (actionType === 'HorizSlider') {
         dispatch(gameActions.setCloseHandCursor());
         const gs = gamestates[hotspot.param1];
-        const { stateWraps, minValue: min, maxValue: max } = gs;
-        const oldValue = gs.oldValue || gs.value;
+        const { maxValue: max } = gs;
         const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
         dispatch(updateGameState(hotspot.param1, ratio * max));
       }

@@ -2,7 +2,7 @@ import {
   Raycaster,
 } from 'three';
 import {
-  every,
+  uniq,
   sortBy,
 } from 'lodash';
 import {
@@ -10,16 +10,13 @@ import {
   actions as castActions,
 } from 'morpheus/casts';
 import store from 'store';
-import renderEvents from 'utils/render';
 
 export default function ({
   dispatch,
   scene,
 }) {
-  const pixel = new Uint8Array(4);
   const raycaster = new Raycaster();
   const clickStartPos = { left: 0, top: 0 };
-  const hitColorList = castSelectors.forScene(scene).hotspot.hitColorList(store.getState());
   const hotspotsData = castSelectors.forScene(scene).hotspot.hotspotsData(store.getState());
   let possibleValidClick = false;
   let wasMouseDowned = false;
@@ -31,40 +28,21 @@ export default function ({
       const canvas = castSelectors.forScene(scene).hotspot.canvas(store.getState());
       const scene3D = castSelectors.forScene(scene).hotspot.scene3D(store.getState());
       const camera = castSelectors.forScene(scene).hotspot.camera(store.getState());
-      // readPixels reads from lower left so need to inverse top (y) coordinate
+      // Convert mouse coordinates to x, y clamped between -1 and 1.  Also invert y
       const y = (((canvas.height - top) / canvas.height) * 2) - 1;
       const x = (((left - canvas.width) / canvas.width) * 2) + 1;
+      // Create a ray that travels from camera through screen at mouse location
       raycaster.setFromCamera({ x, y }, camera);
+      // Got all faces that the ray intersects
       const intersects = raycaster.intersectObjects(scene3D.children, true);
-      const hoveredHotspots = [];
-      if (intersects.length) {
-        sortBy(intersects.map(i => Math.floor(i.faceIndex / 2)))
-          .forEach(hotspotIndex => hoveredHotspots.push(hotspotsData[hotspotIndex]));
-      }
-      //
-      // gl.readPixels(x, y, 1, 1, gl.RGBA, gl.UNSIGNED_BYTE, pixel);
-      //
+      // Map faces to hotspots...
+      const hoveredHotspots = sortBy( // Sorted by cast index
+        uniq( // In the off chance that we hit both faces in a hotspot
+          intersects.map(i => Math.floor(i.faceIndex / 2)),
+        ),
+      ) // Map back to hotspot index
+        .map(hotspotIndex => hotspotsData[hotspotIndex]);
 
-      // every(hitColorList, ({ color, data: hotspotData }) => {
-      //   // Extract 8-bit color components from 24-bit integer
-      //   // eslint-disable-next-line no-bitwise
-      //   const red = color >>> 16;
-      //   // eslint-disable-next-line
-      //   const green = color >>> 8 & 0xFF;
-      //   // eslint-disable-next-line no-bitwise
-      //   const blue = color & 0xFF;
-      //
-      //   // Compare with pixel array
-      //   if (
-      //     red === pixel[0]
-      //     && green === pixel[1]
-      //     && blue === pixel[2]
-      //   ) {
-      //     hoveredHotspots.push(hotspotData);
-      //     return false;
-      //   }
-      //   return true;
-      // });
       const hovering = !!hoveredHotspots.length;
 
       // Update our state
@@ -84,8 +62,7 @@ export default function ({
       // User pressed and released mouse button inside a valid hotspot
       // TODO: debounce??
       const interactionDistance = Math.sqrt(
-        Math.pow(clickStartPos.left - left, 2)
-         + Math.pow(clickStartPos.top - top, 2),
+        ((clickStartPos.left - left) ** 2) + ((clickStartPos.top - top) ** 2),
       );
       if (wasMouseUpped && possibleValidClick && hovering && interactionDistance < 20) {
         dispatch(castActions.forScene(scene).hotspot.activated(hoveredHotspots));

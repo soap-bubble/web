@@ -3836,9 +3836,8 @@
     },
     "immutable": {
       "version": "3.8.1",
-      "from": "immutable@3.8.1",
-      "resolved": "https://registry.npmjs.org/immutable/-/immutable-3.8.1.tgz",
-      "dev": true
+      "from": "https://registry.npmjs.org/immutable/-/immutable-3.8.1.tgz",
+      "resolved": "https://registry.npmjs.org/immutable/-/immutable-3.8.1.tgz"
     },
     "imurmurhash": {
       "version": "0.1.4",

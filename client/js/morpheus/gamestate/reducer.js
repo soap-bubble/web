@@ -1,33 +1,26 @@
+import {
+  omit,
+} from 'lodash';
 import createReducer from 'utils/createReducer';
+import Immutable from 'immutable';
 import {
   UPDATE,
   LOAD_COMPLETE,
 } from './actionTypes';
 
-const reducer = createReducer('gamestate', {
+const reducer = createReducer('gamestate', Immutable.fromJS({
   idMap: {},
-}, {
+}), {
   [UPDATE](gamestate, { payload: value, meta: gamestateId }) {
-    const { idMap } = gamestate;
-    return {
-      ...gamestate,
-      idMap: {
-        ...idMap,
-        [gamestateId]: {
-          ...idMap[gamestateId],
-          value,
-        },
-      },
-    };
+    return gamestate.setIn(['idMap', gamestateId, 'value'], value);
   },
   [LOAD_COMPLETE](gamestate, { payload: gamestates }) {
-    return {
-      ...gamestate,
-      idMap: gamestates.reduce((memo, curr) => {
-        memo[curr.stateId] = curr;
-        return memo;
-      }, {}),
-    };
+    return gamestates.reduce((newState, gs) =>
+      newState.setIn(
+        ['idMap', gs.stateId],
+        new Immutable.Map(omit(gs, 'stateId')),
+      ), gamestate,
+    );
   },
 });
 

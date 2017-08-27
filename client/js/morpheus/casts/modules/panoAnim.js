@@ -114,7 +114,7 @@ export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
   const selectPanoAnimData = createSelector(
     () => scene,
-    gamestateSelectors.gamestates,
+    gamestateSelectors.forState,
     (s, gamestates) => get(s, 'casts', [])
       .filter(c => c.__t === 'PanoAnim')
       .filter(c => isActive({ cast: c, gamestates })),

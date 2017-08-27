@@ -34,25 +34,27 @@ export function castEnabled({ comparators }) {
   );
 }
 
-export default state => ({
-  byId(id) {
-    const gamestate = gamestates(state).get(id);
-    return {
-      get value() {
-        return gamestate.get('value');
-      },
-      get maxValue() {
-        return gamestate.get('maxValue');
-      },
-      get minValue() {
-        return gamestate.get('minValue');
-      },
-      get stateWraps() {
-        return gamestate.get('stateWraps');
-      },
-      get stateId() {
-        return id;
-      },
-    };
-  },
-});
+export function forState(state) {
+  return {
+    byId(id) {
+      const gamestate = gamestates(state).get(id);
+      return {
+        get value() {
+          return gamestate.get('value');
+        },
+        get maxValue() {
+          return gamestate.get('maxValue');
+        },
+        get minValue() {
+          return gamestate.get('minValue');
+        },
+        get stateWraps() {
+          return gamestate.get('stateWraps');
+        },
+        get stateId() {
+          return id;
+        },
+      };
+    },
+  };
+}

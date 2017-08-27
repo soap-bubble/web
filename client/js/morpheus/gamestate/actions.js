@@ -47,7 +47,7 @@ export function updateGameState(gamestateId, value) {
 
 export function handleMouseOver({ hotspot }) {
   return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.forState(getState());
     const {
       type,
     } = hotspot;
@@ -63,15 +63,15 @@ export function handleMouseOver({ hotspot }) {
 
 export function handleMouseDown({ hotspot }) {
   return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.forState(getState());
     const {
       type,
     } = hotspot;
     if (isActive({ cast: hotspot, gamestates })) {
       if (type >= 5 && type <= 8) {
-        const gs = gamestates[hotspot.param1];
+        const gs = gamestates.byId(hotspot.param1);
         if (gs) {
-          gs.oldValue = gs.value;
+          // gs.oldValue = gs.value;
         }
       }
     }
@@ -81,7 +81,7 @@ export function handleMouseDown({ hotspot }) {
 
 export function handleMouseStillDown({ hotspot, top, left }) {
   return (dispatch, getState) => {
-    const gamestates = gameStateSelectors(getState());
+    const gamestates = gameStateSelectors.forState(getState());
     const {
       type,
     } = hotspot;
@@ -106,13 +106,13 @@ export function handleMouseStillDown({ hotspot, top, left }) {
         }
       } else if (actionType === 'VertSlider') {
         dispatch(gameActions.setCloseHandCursor());
-        const gs = gamestates[hotspot.param1];
+        const gs = gamestates.byId(hotspot.param1);
         const { maxValue: max } = gs;
         const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
         dispatch(updateGameState(hotspot.param1, ratio * max));
       } else if (actionType === 'HorizSlider') {
         dispatch(gameActions.setCloseHandCursor());
-        const gs = gamestates[hotspot.param1];
+        const gs = gamestates.byId(hotspot.param1);
         const { maxValue: max } = gs;
         const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
         dispatch(updateGameState(hotspot.param1, ratio * max));
@@ -169,7 +169,7 @@ export function handleMouseStillDown({ hotspot, top, left }) {
 
 export function handleHotspot({ hotspot }) {
   return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.gamestates(getState());
+    const gamestates = gameStateSelectors.forState(getState());
     const {
       type,
       dissolveToNextScene,
@@ -191,7 +191,7 @@ export function handleHotspot({ hotspot }) {
         }
         case 'IncrementState': {
           const { defaultPass, param1: gamestateId } = hotspot;
-          const gs = gameStateSelectors.gamestates(getState())[gamestateId];
+          const gs = gamestates.byId(gamestateId);
           const {
             maxValue,
             minValue,
@@ -211,7 +211,7 @@ export function handleHotspot({ hotspot }) {
         }
         case 'DecrementState': {
           const { defaultPass, param1: gamestateId } = hotspot;
-          const gs = gameStateSelectors.gamestates(getState())[gamestateId];
+          const gs = gamestates.byId(gamestateId);
           const {
             maxValue,
             minValue,
@@ -279,4 +279,4 @@ window.updategs = (gamestateId, value) => {
     );
 };
 
-window.getgs = gamestateId => gameStateSelectors.gamestates(store.getState())[gamestateId];
+window.getgs = gamestateId => gameStateSelectors.forState(store.getState()).byId(gamestateId);

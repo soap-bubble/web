@@ -157,7 +157,7 @@ function calculateImageOperation({ cast, img, rect }) {
 function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
   const { controlledMovieCallbacks, width, height } = cast;
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
-  const value = Math.round(get(gamestates, `[${gameStateId}].value`, 0));
+  const value = Math.round(gamestates.byId(gameStateId).value, 0);
 
   const source = {
     x: value * width,
@@ -357,7 +357,7 @@ export const delegate = memoize((scene) => {
       const movieCasts = specialSelectors.movieCasts(state);
       const imageCasts = specialSelectors.imageCasts(state);
       const soundCasts = specialSelectors.soundCasts(state);
-      const gamestates = gamestateSelectors.gamestates(state);
+      const gamestates = gamestateSelectors.forState(state);
       const dimensions = gameSelectors.dimensions(state);
 
       const loadImages = Promise.all(imageCasts.map((imageCast) => {
@@ -495,7 +495,7 @@ export const actions = memoize((scene) => {
   const specialSelectors = selectors(scene);
   function update() {
     return (dispatch, getState) => {
-      const gamestates = gamestateSelectors.gamestates(getState());
+      const gamestates = gamestateSelectors.forState(getState());
       const dimensions = gameSelectors.dimensions(getState());
       const canvas = specialSelectors.canvas(getState());
       const controlledCasts = specialSelectors.controlledCasts(getState());

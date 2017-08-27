@@ -59,10 +59,8 @@ export const selectors = memoize((scene) => {
 
   const selectHotspotsData = createSelector(
     () => scene,
-    gamestateSelectors.gamestates,
-    (s, gamestates) => get(s, 'casts', [])
-      .filter(c => c.castId === 0)
-      .filter(c => isActive({ cast: c, gamestates })),
+    s => get(s, 'casts', [])
+      .filter(c => c.castId === 0),
   );
   const selectHitColorList = createSelector(
     selectHotspot,

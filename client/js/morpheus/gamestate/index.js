@@ -12,20 +12,21 @@ export function isActive({ cast, gamestates }) {
     testType,
     value,
   }) => {
-    const gs = gamestates[gameStateId];
+    const gs = gamestates.byId(gameStateId);
+    const gsValue = gs && gs.value;
     let retValue;
     switch (TEST_TYPES[testType]) {
       case 'EqualTo':
-        retValue = gs && (gs.value === value);
+        retValue = gs && (gsValue === value);
         break;
       case 'NotEqualTo':
-        retValue = gs && (gs.value !== value);
+        retValue = gs && (gsValue !== value);
         break;
       case 'GreaterThan':
-        retValue = gs && (gs.value > value);
+        retValue = gs && (gsValue > value);
         break;
       case 'LessThan':
-        retValue = gs && (gs.value < value);
+        retValue = gs && (gsValue < value);
         break;
       default:
         retValue = true;

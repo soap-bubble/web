@@ -370,18 +370,10 @@ function createScene(...objects) {
 }
 
 function startRenderLoop({ scene3D, camera, renderer }) {
-  const raycaster = new Raycaster();
   const render = () => {
     renderer.render(scene3D, camera);
   };
   renderEvents.onRender(render);
-  renderEvents.onAfter(() => {
-    // raycaster.setFromCamera({ x: 0, y: 0 }, camera);
-    // const intersects = raycaster.intersectObjects(scene3D.children, true);
-    // if (intersects.length) {
-    //   console.log(intersects);
-    // }
-  });
   renderEvents.onDestroy(() => renderer.dispose());
 }
 

@@ -12,12 +12,12 @@ jest.mock('service/scene');
 
 const logger = require('store/logger');
 
-describe('#fetchScene', () => {
+describe.skip('#fetchScene', () => {
   afterEach(() => {
     logger.reset();
   });
 
-  test('SCENE_LOAD_START', () => {
+  test.skip('SCENE_LOAD_START', () => {
     const p = store.dispatch(actions.fetchScene(1010));
     expect(logger.lastActionType()).toEqual(SCENE_LOAD_START);
     expect(logger.actions()).not.toContain(SCENE_SET_CURRENT_SCENE);

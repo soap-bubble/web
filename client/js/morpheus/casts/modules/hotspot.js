@@ -124,11 +124,8 @@ function cylinderMap(y, x) {
   };
 }
 
-function createPositions(hotspotsData) {
-  const visiblePositionsList = [];
-  const hitPositionsList = [];
-
-  hotspotsData.map((hotspotData) => {
+function createHotspotModel(hotspotsData) {
+  return hotspotsData.map((hotspotData) => {
     let {
       rectTop: top,
       rectRight: right,
@@ -141,65 +138,58 @@ function createPositions(hotspotsData) {
     right = (HOTSPOT_X_COORD_FACTOR * right) + HOTSPOT_X_OFFSET;
     left = (HOTSPOT_X_COORD_FACTOR * left) + HOTSPOT_X_OFFSET;
 
-    return [
-      cylinderMap(bottom, left),
-      cylinderMap(bottom, right),
-      cylinderMap(top, right),
-      cylinderMap(top, left),
-    ];
-  }).forEach(([bottomLeft, bottomRight, topRight, topLeft]) => {
-    const visiblePositions = new BufferAttribute(
-      new Float32Array(12), 3,
-    );
-
-    const hitPositions = new BufferAttribute(
-      new Float32Array(12), 3,
-    );
-
-    visiblePositions.setXYZ(0, bottomLeft.x, bottomLeft.y, bottomLeft.z);
-    visiblePositions.setXYZ(1, bottomRight.x, bottomRight.y, bottomRight.z);
-    visiblePositions.setXYZ(2, topRight.x, topRight.y, topRight.z);
-    visiblePositions.setXYZ(3, topLeft.x, topLeft.y, topLeft.z);
-
-    hitPositions.setXYZ(0, bottomLeft.x, bottomLeft.y, bottomLeft.z);
-    hitPositions.setXYZ(1, bottomRight.x, bottomRight.y, bottomRight.z);
-    hitPositions.setXYZ(2, topRight.x, topRight.y, topRight.z);
-    hitPositions.setXYZ(3, topLeft.x, topLeft.y, topLeft.z);
-
-    visiblePositionsList.push(visiblePositions);
-    hitPositionsList.push(hitPositions);
+    return {
+      bottomLeft: cylinderMap(bottom, left),
+      bottomRight: cylinderMap(bottom, right),
+      topRight: cylinderMap(top, right),
+      topLeft: cylinderMap(top, left),
+    };
   });
-  return {
-    visiblePositionsList,
-    hitPositionsList,
-  };
+}
+
+function createHitModel(hotspotsData) {
+  return createHotspotModel(hotspotsData)
+    .map(({ bottomLeft, bottomRight, topRight, topLeft }) => {
+      const quaternion = new THREE.Quaternion();
+      quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
+
+      const vector = new THREE.Vector3(1, 0, 0);
+      vector.applyQuaternion(quaternion);
+    });
+}
+
+function createHotspotObjectPositions({ bottomLeft, bottomRight, topRight, topLeft }) {
+  const positions = new BufferAttribute(
+    new Float32Array(12), 3,
+  );
+
+  positions.setXYZ(0, bottomLeft.x, bottomLeft.y, bottomLeft.z);
+  positions.setXYZ(1, bottomRight.x, bottomRight.y, bottomRight.z);
+  positions.setXYZ(2, topRight.x, topRight.y, topRight.z);
+  positions.setXYZ(3, topLeft.x, topLeft.y, topLeft.z);
+
+  return positions;
+}
+
+function createPositions(hotspotsData) {
+  return createHotspotModel(hotspotsData)
+    .map(createHotspotObjectPositions);
 }
 
 function createUvs(count) {
-  const visibleUvsList = [];
-  const hitUvsList = [];
+  const uvList = [];
 
   for (let i = 0; i < count; i += 1) {
-    const visibleUvs = new BufferAttribute(new Float32Array(8), 2);
-    const hitUvs = new BufferAttribute(new Float32Array(8), 2);
+    const uvs = new BufferAttribute(new Float32Array(8), 2);
 
-    visibleUvs.setXY(0, 0.0, 0.0);
-    visibleUvs.setXY(1, 1.0, 0.0);
-    visibleUvs.setXY(2, 1.0, 1.0);
-    visibleUvs.setXY(3, 0.0, 1.0);
+    uvs.setXY(0, 0.0, 0.0);
+    uvs.setXY(1, 1.0, 0.0);
+    uvs.setXY(2, 1.0, 1.0);
+    uvs.setXY(3, 0.0, 1.0);
 
-    hitUvs.setXY(0, 0.0, 0.0);
-    hitUvs.setXY(1, 1.0, 0.0);
-    hitUvs.setXY(2, 1.0, 1.0);
-    hitUvs.setXY(3, 0.0, 1.0);
-
-    visibleUvsList.push(visibleUvs);
-    hitUvsList.push(hitUvs);
+    uvList.push(uvs);
   }
-  return {
-    visibleUvsList,
-    hitUvsList,
-  };
+  return uvList;
 }
 
 function createIndex(count) {
@@ -217,36 +207,23 @@ function createIndex(count) {
 
 function createGeometry({
   count,
-  visibleIndexList,
-  visibleUvsList,
-  visiblePositionsList,
-  hitIndexList,
-  hitUvsList,
-  hitPositionsList,
+  indexList,
+  uvsList,
+  positionsList,
 }) {
   const visibleGeometryList = [];
-  const hitGeometryList = [];
 
   for (let i = 0; i < count; i++) {
     const visibleGeometry = new BufferGeometry();
-    const hitGeometry = new BufferGeometry();
 
-    visibleGeometry.setIndex(visibleIndexList[i]);
-    visibleGeometry.addAttribute('position', visiblePositionsList[i]);
-    visibleGeometry.addAttribute('uv', visibleUvsList[i]);
-
-    hitGeometry.setIndex(hitIndexList[i]);
-    hitGeometry.addAttribute('position', hitPositionsList[i]);
-    hitGeometry.addAttribute('uv', hitUvsList[i]);
+    visibleGeometry.setIndex(indexList[i]);
+    visibleGeometry.addAttribute('position', positionsList[i]);
+    visibleGeometry.addAttribute('uv', uvsList[i]);
 
     visibleGeometryList.push(visibleGeometry);
-    hitGeometryList.push(hitGeometry);
   }
 
-  return {
-    visibleGeometryList,
-    hitGeometryList,
-  };
+  return visibleGeometryList;
 }
 
 function createMaterials(hotspotData) {
@@ -286,9 +263,8 @@ function createMaterials(hotspotData) {
 function createObjects3D({
   count,
   theta = 0,
-  visibleGeometryList,
+  geometryList,
   visibleMaterialList,
-  hitGeometryList,
   hitMaterialList,
   startAngle = 0,
 }) {
@@ -303,11 +279,11 @@ function createObjects3D({
 
   for (let i = 0; i < count; i++) {
     visibleObject.add(createObject3D({
-      geometry: visibleGeometryList[i],
+      geometry: geometryList[i],
       material: visibleMaterialList[i],
     }));
     hitObject.add(createObject3D({
-      geometry: hitGeometryList[i],
+      geometry: geometryList[i],
       material: hitMaterialList[i],
     }));
   }
@@ -424,28 +400,16 @@ export const delegate = memoize((scene) => {
       const isPano = hotspotSelectors.isPano(getState());
       if (hotspotsData.length && isPano) {
         // 3D hotspots
-        const {
-          visiblePositionsList,
-          hitPositionsList,
-        } = createPositions(hotspotsData);
+        const positionsList = createPositions(hotspotsData);
         const { width, height } = gameSelectors.dimensions(getState());
-        const {
-          visibleUvsList,
-          hitUvsList,
-        } = createUvs(hotspotsData.length);
+        const uvsList = createUvs(hotspotsData.length);
         const indexList = createIndex(hotspotsData.length);
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-        const {
-          visibleGeometryList,
-          hitGeometryList,
-        } = createGeometry({
+        const geometryList = createGeometry({
           count: hotspotsData.length,
-          visibleIndexList: indexList,
-          visibleUvsList,
-          visiblePositionsList,
-          hitIndexList: indexList,
-          hitUvsList,
-          hitPositionsList,
+          indexList,
+          uvsList,
+          positionsList,
         });
         const {
           hitColorList,
@@ -458,9 +422,8 @@ export const delegate = memoize((scene) => {
           hitObject: hitObject3D,
         } = createObjects3D({
           count: hotspotsData.length,
-          visibleGeometryList,
+          geometryList,
           visibleMaterialList,
-          hitGeometryList,
           hitMaterialList,
           startAngle: nextStartAngle,
         });

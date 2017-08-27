@@ -4,9 +4,12 @@ import THREE, {
   Uint16BufferAttribute,
   MeshBasicMaterial,
   BufferGeometry,
+  Geometry,
+  Face3,
   Mesh,
   Scene,
-  WebGLRenderer,
+  Raycaster,
+  Vector3,
   Object3D,
 } from 'three';
 import {
@@ -97,6 +100,11 @@ export const selectors = memoize((scene) => {
     hotspot => hotspot.scene3D,
   );
 
+  const selectCamera = createSelector(
+    selectHotspot,
+    hotspot => hotspot.camera,
+  );
+
   return {
     isPano: selectIsPano,
     scene3D: selectScene3D,
@@ -106,6 +114,7 @@ export const selectors = memoize((scene) => {
     renderElements: selectRenderElements,
     hotspotsData: selectHotspotsData,
     canvas: selectCanvas,
+    camera: selectCamera,
   };
 });
 
@@ -147,15 +156,19 @@ function createHotspotModel(hotspotsData) {
   });
 }
 
-function createHitModel(hotspotsData) {
-  return createHotspotModel(hotspotsData)
-    .map(({ bottomLeft, bottomRight, topRight, topLeft }) => {
-      const quaternion = new THREE.Quaternion();
-      quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.PI / 2);
-
-      const vector = new THREE.Vector3(1, 0, 0);
-      vector.applyQuaternion(quaternion);
+function createHitGeometry(hotspotsData) {
+  const geometry = new Geometry();
+  createHotspotModel(hotspotsData)
+    .forEach(({ bottomLeft, bottomRight, topRight, topLeft }, index) => {
+      const offset = index * 4;
+      geometry.vertices.push(new Vector3(bottomLeft.x, bottomLeft.y, bottomLeft.z));
+      geometry.vertices.push(new Vector3(bottomRight.x, bottomRight.y, bottomRight.z));
+      geometry.vertices.push(new Vector3(topRight.x, topRight.y, topRight.z));
+      geometry.vertices.push(new Vector3(topLeft.x, topLeft.y, topLeft.z));
+      geometry.faces.push(new Face3(offset + 0, offset + 1, offset + 2));
+      geometry.faces.push(new Face3(offset + 0, offset + 2, offset + 3));
     });
+  return geometry;
 }
 
 function createHotspotObjectPositions({ bottomLeft, bottomRight, topRight, topLeft }) {
@@ -357,10 +370,18 @@ function createScene(...objects) {
 }
 
 function startRenderLoop({ scene3D, camera, renderer }) {
+  const raycaster = new Raycaster();
   const render = () => {
     renderer.render(scene3D, camera);
   };
   renderEvents.onRender(render);
+  renderEvents.onAfter(() => {
+    // raycaster.setFromCamera({ x: 0, y: 0 }, camera);
+    // const intersects = raycaster.intersectObjects(scene3D.children, true);
+    // if (intersects.length) {
+    //   console.log(intersects);
+    // }
+  });
   renderEvents.onDestroy(() => renderer.dispose());
 }
 
@@ -427,7 +448,12 @@ export const delegate = memoize((scene) => {
           hitMaterialList,
           startAngle: nextStartAngle,
         });
-        const scene3D = createScene(hitObject3D);
+        const hitGeometry = createHitGeometry(hotspotsData);
+        const hitMesh = new Mesh(hitGeometry);
+        const hitObject = new Object3D();
+        hitObject.add(hitMesh);
+        const scene3D = createScene(hitObject);
+        scene3D.rotation.y = nextStartAngle;
         const canvas = createCanvas({ width, height });
         return Promise.resolve({
           canvas,
@@ -466,11 +492,15 @@ export const delegate = memoize((scene) => {
         });
       }
 
-      hotspotsData.forEach(({ gesture, type, param1: gamestateId, param2: value }) => {
+      hotspotsData.forEach((hotspot) => {
+        const { gesture, type, param1: gamestateId, param2: value } = hotspot;
         if (GESTURES[gesture] === 'Always') {
-          if (ACTION_TYPES[type] === 'SetStateTo') {
-            dispatch(gamestateActions.updateGameState(gamestateId, value));
-          }
+          dispatch(gamestateActions.handleHotspot({ hotspot }));
+          // if (ACTION_TYPES[type] === 'SetStateTo') {
+          //   dispatch(gamestateActions.updateGameState(gamestateId, value));
+          // } else if (ACTION_TYPES[type] === 'IncrementState') {
+          //   dispatch(gamestateActions.updateGameState(gamestateId, value));
+          // }
         }
       });
 
@@ -507,25 +537,28 @@ export const actions = memoize((scene) => {
 
   function activated(activatedHotspots) {
     return (dispatch, getState) => {
-      activatedHotspots.every((hotspot) => {
-        const gamestates = gamestateSelectors.gamestates(getState());
-        if (isActive({ cast: hotspot, gamestates })) {
-          switch (ACTION_TYPES[hotspot.type]) {
-            case 'ChangeScene':
-            case 'DissolveTo':
-            case 'GoBack':
-            case 'ReturnFromHelp': {
-              const hitObject3D = selectors(scene).hitObject3D(getState());
-              dispatch(sceneActions.setNextStartAngle(hitObject3D.rotation.y));
-              dispatch(sceneActions.goToScene(hotspot.param1));
-              return false;
-            }
-            default:
-              return true;
-          }
-        }
-        return true;
-      });
+      const scene3D = selectors(scene).scene3D(getState());
+      dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
+      activatedHotspots.every(hotspot =>
+        // const gamestates = gamestateSelectors.gamestates(getState());
+         dispatch(gamestateActions.handleHotspot({ hotspot })),
+        // if (isActive({ cast: hotspot, gamestates })) {
+        //   switch (ACTION_TYPES[hotspot.type]) {
+        //     case 'ChangeScene':
+        //     case 'DissolveTo':
+        //     case 'GoBack':
+        //     case 'ReturnFromHelp': {
+        //       const scene3D = selectors(scene).scene3D(getState());
+        //       dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
+        //       dispatch(sceneActions.goToScene(hotspot.param1));
+        //       return false;
+        //     }
+        //     default:
+        //       return true;
+        //   }
+        // }
+        // return true;
+      );
     };
   }
 

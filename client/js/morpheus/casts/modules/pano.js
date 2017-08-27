@@ -204,6 +204,8 @@ export const actions = memoize((scene) => {
   const panoSelectors = selectors(scene);
   function rotate({ x, y }) {
     return (dispatch, getState) => {
+      const hotspotCamera = hotspotSelectors(scene).camera(getState());
+      const scene3D = hotspotSelectors(scene).scene3D(getState());
       const hitObject3D = hotspotSelectors(scene).hitObject3D(getState());
       const visibleObject3D = hotspotSelectors(scene).visibleObject3D(getState());
       const panoObject3D = panoSelectors.panoObject3D(getState());
@@ -212,8 +214,7 @@ export const actions = memoize((scene) => {
         y,
       });
 
-      Object.assign(hitObject3D.rotation, rot);
-      Object.assign(visibleObject3D.rotation, rot);
+      Object.assign(scene3D.rotation, rot);
       Object.assign(panoObject3D.rotation, rot);
     };
   }

@@ -8,8 +8,6 @@ import {
 } from 'morpheus/game';
 import momentum from 'morpheus/momentum';
 import hotspots from 'morpheus/hotspots';
-import Hotspots3D from './Hotspots3D';
-import Scene3D from './Scene3D';
 
 function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
@@ -53,28 +51,26 @@ const Pano = ({
   onTouchMove,
   onTouchEnd,
   onTouchCancel,
-}) => {
-  return (
-    <div
-      ref={(el) => {
-        if (el) {
-          el.appendChild(canvas)
-        }
-      }}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
-      style={{
-        width: `${width}px`,
-        height: `${height}px`,
-      }}
-    />
+}) => (
+  <div
+    ref={(el) => {
+      if (el) {
+        el.appendChild(canvas);
+      }
+    }}
+    onMouseDown={onMouseDown}
+    onMouseMove={onMouseMove}
+    onMouseUp={onMouseUp}
+    onTouchStart={onTouchStart}
+    onTouchMove={onTouchMove}
+    onTouchEnd={onTouchEnd}
+    onTouchCancel={onTouchCancel}
+    style={{
+      width: `${width}px`,
+      height: `${height}px`,
+    }}
+  />
   );
-};
 
 export default connect(
   mapStateToProps,

@@ -33,9 +33,9 @@ window.onload = () => {
   store.dispatch(gameActions.resize({
     width: window.innerWidth,
     height: window.innerHeight,
-  }))
+  }));
   store.dispatch(gamestateActions.fetchInitial())
-    .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 8010)));
+    .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
 
   window.addEventListener('resize', () => {
     resizeToWindow();

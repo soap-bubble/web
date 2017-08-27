@@ -14,10 +14,9 @@ import {
   memoize,
   values,
   uniq,
+  pick,
 } from 'lodash';
-import {
-  defer,
-} from 'utils/promise';
+import Promise from 'bluebird';
 import {
   createSelector,
 } from 'reselect';
@@ -114,37 +113,66 @@ export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
   const selectPanoAnimData = createSelector(
     () => scene,
+    s => get(s, 'casts', [])
+      .filter(c => c.__t === 'PanoAnim'),
+  );
+  const selectEnabledPanoAnimData = createSelector(
+    selectPanoAnimData,
     gamestateSelectors.forState,
-    (s, gamestates) => get(s, 'casts', [])
-      .filter(c => c.__t === 'PanoAnim')
+    (panos, gamestates) => panos
       .filter(c => isActive({ cast: c, gamestates })),
   );
   const selectPanoAnim = createSelector(
     selectSceneCache,
     cache => get(cache, 'panoAnim'),
   );
-  const selectPanoAnimFilenames = createSelector(
-    selectPanoAnim,
-    panoAnim => uniq(panoAnim.filenames),
-  );
   const selectPanoAnimCastMap = createSelector(
     selectPanoAnim,
     panoAnim => panoAnim.panoAnimCastMap,
+  );
+  const mapPanoAnimDataToUniqueFilenames = panoAnimData => uniq(
+    panoAnimData
+      .map(p => p.fileName),
+    )
+      .map(getPanoAnimUrl);
+
+  const selectPanoAnimFilenames = createSelector(
+    selectPanoAnimData,
+    mapPanoAnimDataToUniqueFilenames,
   );
   const selectIsPanoAnim = createSelector(
     selectPanoAnimFilenames,
     filenames => !!filenames.length,
   );
+  const selectEnabledFilenames = createSelector(
+    selectEnabledPanoAnimData,
+    mapPanoAnimDataToUniqueFilenames,
+  );
   return {
     panoAnimData: selectPanoAnimData,
+    enabledPanoAnimData: selectEnabledPanoAnimData,
     filenames: selectPanoAnimFilenames,
+    enabledFilenames: selectEnabledFilenames,
     castMap: selectPanoAnimCastMap,
     isPanoAnim: selectIsPanoAnim,
   };
 });
 
+function promiseVideoElement(name, options) {
+  return new Promise((resolve, reject) => {
+    const video = createVideo(name, {
+      ...options,
+      defaultMuted: true,
+      autoplay: true,
+      oncanplaythrough() {
+        resolve(video);
+      },
+      onerror: reject,
+    });
+  });
+}
+
 export const delegate = memoize((scene) => {
-  let videoElDefers;
   const panoAnimSelectors = selectors(scene);
 
   function applies(state) {
@@ -153,36 +181,18 @@ export const delegate = memoize((scene) => {
 
   function doEnter() {
     return (dispatch, getState) => {
-      const panoAnimCasts = panoAnimSelectors.panoAnimData(getState());
-      const panoAnimCastMap = {};
-      videoElDefers = {};
-      return Promise.all(
-        panoAnimCasts.map((panoAnimCastData) => {
-          const name = getPanoAnimUrl(panoAnimCastData.fileName);
-          videoElDefers[name] = defer();
-          panoAnimCastMap[name] = panoAnimCastData;
-          let video;
-          return new Promise((resolve, reject) => {
-            video = createVideo(name, {
-              loop: true,
-              oncanplaythrough() {
-                resolve(video);
-              },
-              onerror: reject,
-            });
-          })
-            .then((video) => {
-              video.play();
-              videoElDefers[name].resolve({
-                videoEl: video,
-                name,
-              });
-            });
-          return name;
-        }))
-        .then(filenames => ({
-          filenames,
-          panoAnimCastMap,
+      const panoAnimCasts = panoAnimSelectors.enabledPanoAnimData(getState());
+      return Promise.props(panoAnimCasts.reduce((memo, curr) => {
+        const name = getPanoAnimUrl(curr.fileName);
+        memo[curr.fileName] = promiseVideoElement(name, { loop: curr.looping })
+          .then(video => ({
+            el: video,
+            data: curr,
+          }));
+        return memo;
+      }, {}))
+        .then(p => ({
+          panoAnimCastMap: p,
         }));
     };
   }
@@ -196,10 +206,9 @@ export const delegate = memoize((scene) => {
 
       const panoObject3D = panoSelectors(scene).panoObject3D(getState());
       const panoAnimCastMap = panoAnimSelectors.castMap(getState());
-      return Promise.all(values(map(videoElDefers, 'promise')))
-        .then((videoEls) => {
-          videoEls.forEach(({ name, videoEl }) => {
-            const panoAnimCast = panoAnimCastMap[name];
+      return Promise.all(values(panoAnimCastMap))
+        .then((panoAnims) => {
+          panoAnims.forEach(({ data: panoAnimCast, el: videoEl }) => {
             const { frame } = panoAnimCast;
             const postions = createPositions(panoAnimCast);
             const uvs = createUvs();

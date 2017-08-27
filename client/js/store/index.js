@@ -10,7 +10,7 @@ let middleware;
 if (process.env.NODE_ENV === 'production') {
   middleware = applyMiddleware(thunkMiddleware, promiseMiddleware);
 } else {
-  middleware = applyMiddleware(thunkMiddleware, promiseMiddleware);
+  middleware = applyMiddleware(thunkMiddleware, promiseMiddleware, loggingMiddleware);
 }
 
 const store = createStore(

@@ -9,6 +9,7 @@ import scene3910 from '../../assets/img/scene_3910.png';
 import scene7030 from '../../assets/img/scene_7030.png';
 import scene8010 from '../../assets/img/scene_8010.png';
 import scene8500 from '../../assets/img/scene_8500.png';
+import scene532012 from '../../assets/img/scene_532012.png';
 import scene100000 from '../../assets/img/scene_100000.png';
 
 const reducer = createReducer({
@@ -46,17 +47,21 @@ const reducer = createReducer({
     img: scene3910,
   }, {
     label: 'Water Front',
-    url: '//morpheus.soapbubble.online/?scene=8500',
+    url: '//morpheus.soapbubble.online/?scene=532013',
     img: scene8500,
   }, {
-    label: 'Monkey Cave',
-    url: '//morpheus.soapbubble.online/?scene=7030',
+    label: 'Voodoo',
+    url: '//morpheus.soapbubble.online/?scene=532014',
     img: scene7030,
   }, {
-    label: 'Merry-go-round',
-    url: '//morpheus.soapbubble.online/?scene=8010',
+    label: 'Harem',
+    url: '//morpheus.soapbubble.online/?scene=532012',
+    img: scene532012,
+  }, {
+    label: 'Carnival',
+    url: '//morpheus.soapbubble.online/?scene=532011',
     img: scene8010,
-  }]
+  }],
 }, {
 });
 

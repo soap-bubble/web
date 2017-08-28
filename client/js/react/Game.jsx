@@ -11,14 +11,13 @@ function mapStateToProps(state) {
 // <Mouse />
 const World = ({
   casts,
-}) => {
-  return (
-    <div>
-      {casts}
-      { /* process.env.NODE_ENV !== 'production' ? <Tools /> : null */ }
-    </div>
+}) => (
+  <div>
+    {casts}
+    <Mouse />
+    { /* process.env.NODE_ENV !== 'production' ? <Tools /> : null */ }
+  </div>
   );
-};
 
 
 export default connect(

@@ -24,19 +24,20 @@ function resizeToWindow() {
 }
 
 window.onload = () => {
+  store.dispatch(gameActions.resize({
+    width: window.innerWidth,
+    height: window.innerHeight,
+  }));
+  store.dispatch(gameActions.createUIOverlay());
+  store.dispatch(gameActions.setCursor(0));
+  store.dispatch(gamestateActions.fetchInitial())
+    .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
   render(
     <Provider store={store}>
       <Game />
     </Provider>,
     document.getElementById('root'),
   );
-  store.dispatch(gameActions.resize({
-    width: window.innerWidth,
-    height: window.innerHeight,
-  }));
-  store.dispatch(gamestateActions.fetchInitial())
-    .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
-
   window.addEventListener('resize', () => {
     resizeToWindow();
   });

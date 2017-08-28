@@ -31,6 +31,10 @@ video.MovieSpecialCast {
   opacity: 0;
 }
 
+.fadeIn {
+  opacity: 1;
+}
+
 .hidden {
   display: none;
 }

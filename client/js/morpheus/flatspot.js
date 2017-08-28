@@ -13,6 +13,7 @@ import {
   selectors as inputSelectors,
 } from 'morpheus/input';
 import {
+  actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
 import store from 'store';
@@ -219,6 +220,7 @@ export default function ({ dispatch, scene }) {
   }
 
   function onMouseMove({ clientX: left, clientY: top }) {
+    dispatch(gameActions.setCursorLocation({ top, left }));
     wasMouseMoved = true;
     updateState({ top, left });
   }

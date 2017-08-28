@@ -61,6 +61,7 @@
     "eslint-plugin-import": "^2.2.0",
     "eslint-plugin-jsx-a11y": "^2.2.3",
     "eslint-plugin-react": "^6.8.0",
+    "file-loader": "^0.11.2",
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-nodemon": "^2.1.0",
@@ -79,6 +80,7 @@
     "sinon": "^1.17.4",
     "sinon-chai": "^2.8.0",
     "sprintf": "^0.1.5",
+    "url-loader": "^0.5.9",
     "webpack": "^1.13.1",
     "webpack-dev-server": "^1.14.1",
     "whatwg-fetch": "^2.0.2"

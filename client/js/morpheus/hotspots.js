@@ -9,6 +9,9 @@ import {
   selectors as castSelectors,
   actions as castActions,
 } from 'morpheus/casts';
+import {
+  actions as gameActions,
+} from 'morpheus/game';
 import store from 'store';
 
 export default function ({
@@ -119,7 +122,9 @@ export default function ({
   }
 
   function onMouseMove(mouseEvent) {
+    const { clientX: left, clientY: top } = mouseEvent;
     wasMouseMoved = true;
+    dispatch(gameActions.setCursorLocation({ top, left }));
     rememberEvent(mouseEvent);
   }
 

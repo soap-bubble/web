@@ -15,6 +15,7 @@ import {
   ADD_ONTOUCHEND,
   ADD_ONTOUCHCANCEL,
   SCENE_END,
+  CREATE_CANVAS,
 } from './actionTypes';
 
 function reducerForType(type) {
@@ -46,7 +47,7 @@ const reducer = createReducer(
   'game',
   {
     volume: 1,
-    cursor: 10001,
+    cursor: null,
     width: 800,
     height: 480,
     removeOnSceneEnd: {},
@@ -61,6 +62,12 @@ const reducer = createReducer(
     onTouchEnd: [],
     onTouchCancel: [],
   }, {
+    [CREATE_CANVAS](ui, { payload: canvas }) {
+      return {
+        ...ui,
+        canvas,
+      };
+    },
     [SCENE_END](ui) {
       const { removeOnSceneEnd } = ui;
       const newUi = { ...ui };

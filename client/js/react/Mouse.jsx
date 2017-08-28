@@ -6,88 +6,45 @@ import {
 } from 'morpheus/game';
 
 function mapStateToProps(state) {
-  const {
-    onMouseUp: onMouseUpCallbacks,
-    onMouseMove: onMouseMoveCallbacks,
-    onMouseDown: onMouseDownCallbacks,
-    onTouchStart: onTouchStartCallbacks,
-    onTouchMove: onTouchMoveCallbacks,
-    onTouchEnd: onTouchEndCallbacks,
-    onTouchCancel: onTouchCancelCallbacks,
-  } = input.selectors.allMouseEvents(state);
   const width = gameSelectors.width(state);
   const height = gameSelectors.height(state);
-  const cursor = gameSelectors.htmlCursor(state);
+  const cursor = gameSelectors.morpheusCursor(state);
+  const canvas = gameSelectors.canvas(state);
 
   return {
-    onMouseUp(mouseEvent) {
-      onMouseUpCallbacks.forEach(c => c(mouseEvent));
-    },
-    onMouseMove(mouseEvent) {
-      onMouseMoveCallbacks.forEach(c => c(mouseEvent));
-    },
-    onMouseDown(mouseEvent) {
-      onMouseDownCallbacks.forEach(c => c(mouseEvent));
-    },
-    onTouchStart(touchEvent) {
-      onTouchStartCallbacks.forEach(c => c(touchEvent));
-    },
-    onTouchMove(touchEvent) {
-      onTouchMoveCallbacks.forEach(c => c(touchEvent));
-      touchEvent.preventDefault();
-    },
-    onTouchEnd(touchEvent) {
-      onTouchEndCallbacks.forEach(c => c(touchEvent));
-    },
-    onTouchCancel(touchEvent) {
-      onTouchCancelCallbacks.forEach(c => c(touchEvent));
-    },
     width,
     height,
     cursor,
+    canvas,
   };
 }
 
 const MousePresentation = ({
-  onMouseUp,
-  onMouseMove,
-  onMouseDown,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  onTouchCancel,
   width,
   height,
-  cursor,
+  canvas,
 }) => (
   <div
+    ref={(el) => {
+      if (el) {
+        el.appendChild(canvas);
+      }
+    }}
     id="mouse"
     style={{
       width,
       height,
-      cursor,
+      left: '0px',
+      top: '0px',
+      'pointer-events': 'none',
     }}
-    onMouseUp={onMouseUp}
-    onMouseMove={onMouseMove}
-    onMouseDown={onMouseDown}
-    onTouchStart={onTouchStart}
-    onTouchMove={onTouchMove}
-    onTouchEnd={onTouchEnd}
-    onTouchCancel={onTouchCancel}
   />
 );
 
 MousePresentation.propTypes = {
-  onMouseUp: PropTypes.func,
-  onMouseMove: PropTypes.func,
-  onMouseDown: PropTypes.func,
-  onTouchStart: PropTypes.func,
-  onTouchEnd: PropTypes.func,
-  onTouchMove: PropTypes.func,
-  onTouchCancel: PropTypes.func,
+  canvas: PropTypes.instanceOf(HTMLCanvasElement).isRequired,
   width: PropTypes.number.isRequired,
   height: PropTypes.number.isRequired,
-  cursor: PropTypes.string,
 };
 
 export default connect(

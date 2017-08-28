@@ -41,6 +41,10 @@ module.exports = {
         test: /\.json$/,
         loader: 'json',
       },
+      {
+        test: /\.png/,
+        loader: 'url-loader?limit=10000&mimetype=image/png',
+      },
     ],
   },
   plugins: [

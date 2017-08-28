@@ -68,6 +68,7 @@ const Pano = ({
     style={{
       width: `${width}px`,
       height: `${height}px`,
+      cursor: 'none',
     }}
   />
   );

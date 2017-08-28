@@ -17,6 +17,10 @@ export const htmlCursor = createSelector(
   morpheusCursor,
   _cursor => MORPHEUS_TO_HTML_CURSOR[_cursor] || 'move',
 );
+export const canvas = createSelector(
+  game,
+  _game => _game.canvas,
+);
 export const volume = createSelector(
   game,
   _game => _game.volume,

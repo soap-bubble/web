@@ -118,6 +118,46 @@ describe('morpheus/scene/reducer', () => {
       });
       expect(scene).toHaveCurrentScene(second);
       expect(scene).toHavePreviousScene(first);
+      expect(scene).toHaveCurrentScenes(2);
+    });
+
+    it('currentScenes can only have 3', () => {
+      const first = {
+        sceneId: 100,
+      };
+      const second = {
+        sceneId: 200,
+      };
+      const third = {
+        sceneId: 200,
+      };
+      const fourth = {
+        sceneId: 200,
+      };
+      let scene = reducer(undefined, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: first,
+      });
+      expect(scene).toHaveCurrentScenes(1);
+      expect(scene).toHaveCurrentScenes([first]);
+      scene = reducer({ scene }, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: second,
+      });
+      expect(scene).toHaveCurrentScenes(2);
+      expect(scene).toHaveCurrentScenes([first, second]);
+      scene = reducer({ scene }, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: third,
+      });
+      expect(scene).toHaveCurrentScenes(3);
+      expect(scene).toHaveCurrentScenes([first, second, third]);
+      scene = reducer({ scene }, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: fourth,
+      });
+      expect(scene).toHaveCurrentScenes(3);
+      expect(scene).toHaveCurrentScenes([second, third, fourth]);
     });
   });
 

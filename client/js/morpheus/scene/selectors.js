@@ -4,6 +4,10 @@ import {
 import { createSelector } from 'reselect';
 
 export const backgroundSceneData = state => state.scene.get('backgroundScene');
+export const currentScenesData = createSelector(
+  state => state.scene.get('currentScenes'),
+  _currentScenes => _currentScenes.toJS(),
+);
 export const currentSceneData = state => state.scene.get('currentScene');
 export const previousSceneData = state => state.scene.get('previousScene');
 export const isEntering = state => state.scene.get('status') === 'entering';

@@ -13,9 +13,12 @@ import {
   SCENE_LOAD_COMPLETE,
 } from './actionTypes';
 
+const CURRENT_SCENE_STACK_SIZE = 3;
+
 const reducer = createReducer('scene', Immutable.fromJS({
   cache: {},
   backgroundScene: null,
+  currentScenes: [],
   currentScene: null,
   previousScene: null,
   status: 'null',
@@ -45,10 +48,18 @@ const reducer = createReducer('scene', Immutable.fromJS({
     return state.set('backgroundScene', scene);
   },
   [SCENE_DO_ENTERING](state, { payload: scene }) {
-    return state
-      .set('status', 'entering')
-      .set('previousScene', state.get('currentScene'))
-      .set('currentScene', scene);
+    let currentScenes = state.get('currentScenes');
+    if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE) {
+      currentScenes = currentScenes
+        .takeLast(CURRENT_SCENE_STACK_SIZE - 1);
+    }
+    currentScenes = currentScenes.push(scene);
+    return state.withMutations(s =>
+      s.set('status', 'entering')
+        .set('previousScene', state.get('currentScene'))
+        .set('currentScene', scene)
+        .set('currentScenes', currentScenes),
+    );
   },
   [SCENE_DO_EXITING](state, { dissolve }) {
     return state

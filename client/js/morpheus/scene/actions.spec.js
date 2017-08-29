@@ -57,7 +57,8 @@ describe('goToScene', () => {
 });
 
 test('changeScene', () => {
-  it('goes from one scene to another', () => store.dispatch(actions.goToScene(1010))
+  it('goes from one scene to another', () =>
+    store.dispatch(actions.goToScene(1010))
       .then(store.dispatch(actions.goToScene(101004)))
       .then(() => {
         expect(store.getState().scene).toHaveCurrentScene(scene101004);

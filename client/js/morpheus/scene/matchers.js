@@ -36,6 +36,24 @@ expect.extend({
     });
     return { actual: state, message, pass };
   },
+  toHaveCurrentScenes(state, stuff) {
+    const actual = selectors.currentScenesData({ scene: state });
+    let pass;
+    if (isNumber(stuff)) {
+      pass = actual.length === stuff;
+    } else {
+      pass = this.equals(actual, stuff);
+    }
+
+    const message = createMessage(this.utils, {
+      name: 'toHaveCurrentScenes',
+      expected: stuff,
+      actual,
+      pass,
+      state,
+    });
+    return { actual: state, message, pass };
+  },
   toHaveLoadingScenes(state, stuff) {
     const actual = selectors.loadingScenes({ scene: state });
     let pass;

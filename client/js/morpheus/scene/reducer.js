@@ -4,15 +4,16 @@ import {
 } from 'lodash';
 import {
   SCENE_SET_BACKGROUND_SCENE,
-  SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
   SCENE_DO_EXITING,
   SCENE_DO_ENTER,
   SET_NEXT_START_ANGLE,
+  SCENE_LOAD_START,
+  SCENE_LOAD_COMPLETE,
 } from './actionTypes';
 
 const reducer = createReducer('scene', {
-  loadedScenes: [],
+  cache: {},
   backgroundScene: null,
   currentScene: null,
   previousScene: null,
@@ -28,16 +29,33 @@ const reducer = createReducer('scene', {
     }
     return state;
   },
+  [SCENE_LOAD_START](state, { payload: sceneId }) {
+    return {
+      ...state,
+      cache: {
+        ...state.cache,
+        [sceneId]: {
+          status: 'loading',
+        },
+      },
+    };
+  },
+  [SCENE_LOAD_COMPLETE](state, { payload: scene }) {
+    return {
+      ...state,
+      cache: {
+        ...state.cache,
+        [scene.sceneId]: {
+          data: scene,
+          status: 'loaded',
+        },
+      },
+    };
+  },
   [SCENE_SET_BACKGROUND_SCENE](state, { payload: scene }) {
     return {
       ...state,
       backgroundScene: scene,
-    };
-  },
-  [SCENE_SET_CURRENT_SCENE](state, { payload: scene }) {
-    return {
-      ...state,
-      loadedScenes: state.loadedScenes.concat([scene]),
     };
   },
   [SCENE_DO_ENTERING](state, { payload: scene }) {

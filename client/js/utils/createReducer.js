@@ -6,8 +6,8 @@ export function reducer(state, action) {
 }
 
 export default function createReducer(keyPath, initialState, handlers) {
-  const r = (parentState = {}, stateKey, action) => {
-    let state = parentState[stateKey];
+  const r = (parentState = {}, stateKey, action = {}) => {
+    let state = stateKey ? parentState[stateKey] : undefined;
     if (isUndefined(state)) {
       state = initialState;
     }

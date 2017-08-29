@@ -50,7 +50,7 @@ expect.extend({
     const actual = selectors.loadingScenes({ scene: state });
     let pass;
     if (isNumber(stuff)) {
-      pass = actual.length === stuff;
+      pass = actual.count() === stuff;
     } else {
       pass = this.equals(actual, stuff);
     }
@@ -68,7 +68,7 @@ expect.extend({
     const actual = selectors.loadedScenes({ scene: state });
     let pass;
     if (isNumber(stuff)) {
-      pass = actual.length === stuff;
+      pass = actual.count() === stuff;
     } else {
       pass = this.equals(actual, stuff);
     }
@@ -164,7 +164,7 @@ expect.extend({
   },
 });
 
-describe.only('morpheus/scene/reducer', () => {
+describe('morpheus/scene/reducer', () => {
   describe(SET_NEXT_START_ANGLE, () => {
     it('does nothing on undefined', () => {
       const oldState = reducer(undefined, 'scene', {});

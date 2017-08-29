@@ -42,7 +42,7 @@ export function doEnter(scene) {
     return Promise.all(Object.keys(modules).map((cast) => {
       const module = modules[cast];
       const delegate = module.delegate && module.delegate(scene);
-      if (delegate && delegate.doEnter && delegate.applies(getState())) {
+      if (delegate && delegate && delegate.doEnter && delegate.applies(getState())) {
         return dispatch(doEnterForCast(scene, cast, delegate.doEnter));
       }
       return Promise.resolve();
@@ -71,7 +71,7 @@ export function onStage(scene) {
   return (dispatch, getState) => Promise.all(Object.keys(modules).map((cast) => {
     const module = modules[cast];
     const delegate = module.delegate && module.delegate(scene);
-    if (delegate.onStage && delegate.applies(getState())) {
+    if (delegate && delegate.onStage && delegate.applies(getState())) {
       return dispatch(onStageForCast(scene, cast, delegate.onStage));
     }
     return Promise.resolve();
@@ -92,7 +92,7 @@ export function doExit(scene) {
   return (dispatch, getState) => Promise.all(Object.keys(modules).map((cast) => {
     const module = modules[cast];
     const delegate = module.delegate && module.delegate(scene);
-    if (delegate.doExit && delegate.applies(getState())) {
+    if (delegate && delegate.doExit && delegate.applies(getState())) {
       return dispatch(doExitForCast(scene, cast, delegate.doExit));
     }
     return Promise.resolve();

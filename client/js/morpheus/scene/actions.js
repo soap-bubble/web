@@ -30,7 +30,6 @@ export function sceneLoadComplete(responseData) {
       type: SCENE_SET_CURRENT_SCENE,
       payload: responseData,
     });
-    // dispatch(hotspotActions.hotspotsLoaded(responseData));
   };
 }
 
@@ -80,8 +79,7 @@ export function setNextStartAngle(angle) {
 
 export function startAtScene(id) {
   return dispatch => dispatch(fetchScene(id))
-      .then((scene) => {
-        dispatch(castActions.doLoad(scene))
+      .then(scene => dispatch(castActions.doLoad(scene))
           .then(() => dispatch(castActions.doEnter(scene)))
           .then(() => dispatch({
             type: SCENE_DO_ENTERING,
@@ -99,15 +97,14 @@ export function startAtScene(id) {
             });
             dispatch(inputActions.enableControl());
             return scene;
-          });
-      });
+          }));
 }
 
 export function goToScene(id, dissolve) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
-    if (currentSceneData.sceneId === id) return;
-    dispatch(castActions.doExit(currentSceneData))
+    if (currentSceneData.sceneId === id) return Promise.resolve(currentSceneData);
+    return dispatch(castActions.doExit(currentSceneData))
       .then(() => {
         dispatch({
           type: SCENE_DO_EXITING,

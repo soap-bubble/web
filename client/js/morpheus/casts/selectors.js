@@ -2,10 +2,7 @@ import {
   get,
 } from 'lodash';
 import { createSelector } from 'reselect';
-import { selectors as gameStateSelectors } from 'morpheus/gamestate';
-import { selectors as sceneSelectors } from 'morpheus/scene';
 import * as modules from './modules';
-const { gamestates } = gameStateSelectors;
 
 // const selectCastsFromScene = scene => get(scene, 'casts', []);
 // const selectCastsCurrent = createSelector(

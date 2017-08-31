@@ -51,9 +51,9 @@ const reducer = createReducer('scene', Immutable.fromJS({
     let currentScenes = state.get('currentScenes');
     if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE) {
       currentScenes = currentScenes
-        .takeLast(CURRENT_SCENE_STACK_SIZE - 1);
+        .pop();
     }
-    currentScenes = currentScenes.push(scene);
+    currentScenes = currentScenes.unshift(scene);
     return state.withMutations(s =>
       s.set('status', 'entering')
         .set('previousScene', state.get('currentScene'))

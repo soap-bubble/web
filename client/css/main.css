@@ -14,6 +14,11 @@ video.MovieSpecialCast {
   position: absolute;
 }
 
+.scene {
+  position:absolute;
+  left: 0;
+}
+
 .fromFade {
   position:absolute;
   left: 0;
@@ -22,8 +27,6 @@ video.MovieSpecialCast {
 }
 
 .fader {
-  position:absolute;
-  left: 0;
   transition: opacity 0.66s ease-in-out;
 }
 

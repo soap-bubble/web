@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import cn from 'classnames';
 import React from 'react';
 import flatspot from 'morpheus/flatspot';
 import {
@@ -39,6 +40,7 @@ const Special = connect(
   onTouchCancel,
 }) => (
   <div
+    className={cn('scene')}
     ref={(el) => {
       if (el) {
         if (canvas) {

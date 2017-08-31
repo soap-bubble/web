@@ -1,4 +1,9 @@
 import React from 'react';
+import {
+  head,
+  tail,
+  reverse,
+} from 'lodash';
 import { createSelector } from 'reselect';
 import {
   selectors as sceneSelectors,
@@ -29,39 +34,42 @@ export const createExitingSceneSelector = createSceneMapper({
 });
 
 export default createSelector(
-  sceneSelectors.currentSceneData,
-  sceneSelectors.previousSceneData,
+  sceneSelectors.currentScenesData,
   sceneSelectors.isEntering,
   sceneSelectors.isLive,
   sceneSelectors.isExiting,
   sceneSelectors.dissolve,
-  (current, previous, _isEntering, _isLive, _isExiting, dissolve) => {
-    const scenes = [];
-    // console.log(getSceneType(current));
+  (currentScenes, _isEntering, _isLive, _isExiting, dissolve) => {
+    let scenes = [];
+    const current = head(currentScenes);
+    const previouses = reverse(tail(currentScenes));
     const CurrentScene = createLiveSceneSelector(current);
     const EnteringScene = createEnteringSceneSelector(current);
     const CurrentExitingScene = createExitingSceneSelector(current);
-    const PreviousScene = createExitingSceneSelector(previous);
+    const PreviousScenes = previouses.map(createExitingSceneSelector);
+    let previousScene;
+    if (PreviousScenes.length) {
+      previousScene = PreviousScenes.map((PreviousScene, index) => (
+        <PreviousScene key={`scene${previouses[index].sceneId}`} scene={previouses[index]} />
+      ));
+      scenes = scenes.concat(previousScene);
+    }
     if (_isLive && CurrentScene) {
-      if (PreviousScene && dissolve) {
-        const Fader = faderDecorator(
-          <PreviousScene scene={previous} />, <CurrentScene scene={current} />,
-        );
-        scenes.push(<Fader />);
+      if (previousScene && dissolve) {
+        const Fader = faderDecorator(<CurrentScene scene={current} />);
+        scenes.push(<Fader key={`scene${current.sceneId}`} />);
       } else {
-        scenes.push(<CurrentScene scene={current} />);
+        scenes.push(<CurrentScene key={`scene${current.sceneId}`} scene={current} />);
       }
     }
     if (_isEntering && EnteringScene) {
-      scenes.push(<EnteringScene scene={current} />);
-    }
-    if (_isEntering && PreviousScene) {
-      scenes.push(<PreviousScene scene={previous} />);
+      scenes.push(<EnteringScene key={`scene${current.sceneId}`} scene={current} />);
     }
     if (_isExiting && CurrentExitingScene) {
-      scenes.push(<CurrentExitingScene scene={current} />);
+      scenes.push(<CurrentExitingScene key={`scene${current.sceneId}`} scene={current} />);
     }
     scenes.push(<Sound key="sound" scene={current} />);
+    console.log(current && current.sceneId, scenes);
     return scenes;
   },
 );

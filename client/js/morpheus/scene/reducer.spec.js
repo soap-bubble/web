@@ -145,19 +145,19 @@ describe('morpheus/scene/reducer', () => {
         payload: second,
       });
       expect(scene).toHaveCurrentScenes(2);
-      expect(scene).toHaveCurrentScenes([first, second]);
+      expect(scene).toHaveCurrentScenes([second, first]);
       scene = reducer({ scene }, 'scene', {
         type: SCENE_DO_ENTERING,
         payload: third,
       });
       expect(scene).toHaveCurrentScenes(3);
-      expect(scene).toHaveCurrentScenes([first, second, third]);
+      expect(scene).toHaveCurrentScenes([third, second, first]);
       scene = reducer({ scene }, 'scene', {
         type: SCENE_DO_ENTERING,
         payload: fourth,
       });
       expect(scene).toHaveCurrentScenes(3);
-      expect(scene).toHaveCurrentScenes([second, third, fourth]);
+      expect(scene).toHaveCurrentScenes([fourth, third, second]);
     });
   });
 

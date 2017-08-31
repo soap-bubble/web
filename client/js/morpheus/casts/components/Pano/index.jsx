@@ -1,5 +1,6 @@
 import { connect } from 'react-redux';
 import React from 'react';
+import cn from 'classnames';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
@@ -53,6 +54,7 @@ const Pano = ({
   onTouchCancel,
 }) => (
   <div
+    className={cn('scene')}
     ref={(el) => {
       if (el) {
         el.appendChild(canvas);

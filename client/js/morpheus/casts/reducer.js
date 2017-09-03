@@ -1,15 +1,12 @@
-import createReducer from 'utils/createReducer';
-import * as castModules from './modules';
-import castSelectors from './selectors';
-
 import {
   merge,
 } from 'lodash';
+import createReducer from 'utils/createReducer';
+
 import {
   LOADING,
   ENTERING,
   EXITING,
-  ENTER,
   ON_STAGE,
 } from './actionTypes';
 
@@ -23,18 +20,6 @@ const reducer = createReducer('casts', {
         ...state.cache,
         [scene.sceneId]: {
           status: 'loading',
-        },
-      },
-    };
-  },
-  [ENTER](state, { payload: scene }) {
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...state.cache[scene.sceneId],
-          status: 'loaded',
         },
       },
     };

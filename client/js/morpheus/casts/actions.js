@@ -1,18 +1,15 @@
 import {
+  memoize,
+} from 'lodash';
+import {
   LOADING,
   ENTERING,
   EXITING,
   ON_STAGE,
-  ENTER,
   UNLOADING,
 } from './actionTypes';
-import {
-  memoize,
-} from 'lodash';
-import createLogger from 'utils/logger';
 import * as modules from './modules';
 
-const logger = createLogger('casts:actions');
 
 function doActionForCast({ event, scene, castType, action }) {
   return dispatch => dispatch(action())

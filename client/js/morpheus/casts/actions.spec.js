@@ -3,6 +3,7 @@ import {
   actions,
 } from 'morpheus/casts';
 import 'morpheus/scene/reducer';
+// eslint-disable-next-line import/no-named-as-default, import/no-named-as-default-member
 import mockModules from 'morpheus/casts/modules/index';
 
 jest.mock('morpheus/casts/modules/index');

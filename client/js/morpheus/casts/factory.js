@@ -39,7 +39,8 @@ export default createSelector(
   sceneSelectors.isLive,
   sceneSelectors.isExiting,
   sceneSelectors.dissolve,
-  (currentScenes, _isEntering, _isLive, _isExiting, dissolve) => {
+  (_currentScenes, _isEntering, _isLive, _isExiting, dissolve) => {
+    const currentScenes = _currentScenes.toJS();
     let scenes = [];
     const current = head(currentScenes);
     const previouses = reverse(tail(currentScenes));
@@ -69,7 +70,6 @@ export default createSelector(
       scenes.push(<CurrentExitingScene key={`scene${current.sceneId}`} scene={current} />);
     }
     scenes.push(<Sound key="sound" scene={current} />);
-    console.log(current && current.sceneId, scenes);
     return scenes;
   },
 );

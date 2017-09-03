@@ -1,17 +1,20 @@
 import store from 'store';
-import 'morpheus/scene';
 import {
   actions,
 } from 'morpheus/casts';
 import {
   actions as sceneActions,
 } from 'morpheus/scene';
+import 'morpheus/scene/reducer';
 
 jest.mock('store/logger');
 jest.mock('service/scene');
 jest.mock('utils/video');
 
-describe.skip('sanity', () => {
+describe('sanity', () => {
+  beforeAll(() => {
+    store.dispatch({ type: 'reset' });
+  });
   it('enter scenes', () => store.dispatch(sceneActions.fetchScene(1010))
       .then((scene) => {
         store.dispatch({

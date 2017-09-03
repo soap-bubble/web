@@ -14,8 +14,7 @@ import {
 } from './actionTypes';
 
 const CURRENT_SCENE_STACK_SIZE = 3;
-
-const reducer = createReducer('scene', Immutable.fromJS({
+const defaultState = Immutable.fromJS({
   cache: {},
   backgroundScene: null,
   currentScenes: [],
@@ -23,7 +22,12 @@ const reducer = createReducer('scene', Immutable.fromJS({
   previousScene: null,
   status: 'null',
   nextStartAngle: 0,
-}), {
+});
+
+const reducer = createReducer('scene', defaultState, {
+  reset() {
+    return defaultState;
+  },
   [SET_NEXT_START_ANGLE](state, { payload: nextStartAngle }) {
     if (!isUndefined(nextStartAngle)) {
       return state.set('nextStartAngle', nextStartAngle);

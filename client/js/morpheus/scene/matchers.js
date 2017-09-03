@@ -40,19 +40,19 @@ expect.extend({
     const actual = selectors.currentScenesData({ scene: state });
     let pass;
     if (isNumber(stuff)) {
-      pass = actual.length === stuff;
+      pass = actual.count() === stuff;
     } else {
-      pass = this.equals(actual, stuff);
+      pass = this.equals(actual.toJS(), stuff);
     }
 
     const message = createMessage(this.utils, {
       name: 'toHaveCurrentScenes',
       expected: stuff,
-      actual,
+      actual: isNumber(stuff) ? actual.count() : actual,
       pass,
       state,
     });
-    return { actual: state, message, pass };
+    return { actual, message, pass };
   },
   toHaveLoadingScenes(state, stuff) {
     const actual = selectors.loadingScenes({ scene: state });
@@ -66,7 +66,7 @@ expect.extend({
     const message = createMessage(this.utils, {
       name: 'toHaveLoadingScenes',
       expected: stuff,
-      actual,
+      actual: isNumber(stuff) ? actual.count() : actual,
       pass,
       state,
     });
@@ -84,7 +84,25 @@ expect.extend({
     const message = createMessage(this.utils, {
       name: 'toHaveLoadedScenes',
       expected: stuff,
-      actual,
+      actual: isNumber(stuff) ? actual.count() : actual,
+      pass,
+      state,
+    });
+    return { actual: state, message, pass };
+  },
+  toHaveActiveScenes(state, stuff) {
+    const actual = selectors.currentScenesData({ scene: state });
+    let pass;
+    if (isNumber(stuff)) {
+      pass = actual && actual.count() === stuff;
+    } else {
+      pass = this.equals(actual, stuff);
+    }
+
+    const message = createMessage(this.utils, {
+      name: 'toHaveActiveScenes',
+      expected: stuff,
+      actual: isNumber(stuff) ? actual.count() : actual,
       pass,
       state,
     });
@@ -102,7 +120,7 @@ expect.extend({
     const message = createMessage(this.utils, {
       name: 'toHaveCurrentScene',
       expected: stuff,
-      actual,
+      actual: isNumber(stuff) ? actual.sceneId : actual,
       pass,
       state,
     });
@@ -120,7 +138,7 @@ expect.extend({
     const message = createMessage(this.utils, {
       name: 'toHaveBackgroundScene',
       expected: stuff,
-      actual,
+      actual: isNumber(stuff) ? actual.sceneId : actual,
       pass,
       state,
     });
@@ -138,7 +156,7 @@ expect.extend({
     const message = createMessage(this.utils, {
       name: 'toHavePreviousScene',
       expected: stuff,
-      actual,
+      actual: isNumber(stuff) ? actual.sceneId : actual,
       pass,
       state,
     });

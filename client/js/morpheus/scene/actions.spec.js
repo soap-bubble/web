@@ -48,23 +48,35 @@ describe('startAtScene', () => {
 });
 
 describe('goToScene', () => {
+  beforeEach(() => {
+    store.dispatch({ type: 'reset' });
+  });
+
   it('returns scene', () => store.dispatch(actions.goToScene(1020))
     .then((response) => {
       expect(response)
         .toEqual(scene1020);
     }),
   );
-});
 
-test('changeScene', () => {
   it('goes from one scene to another', () =>
-    store.dispatch(actions.goToScene(1010))
-      .then(store.dispatch(actions.goToScene(101004)))
+    store.dispatch(actions.startAtScene(1010))
+      .then(() => store.dispatch(actions.goToScene(101004)))
       .then(() => {
         expect(store.getState().scene).toHaveCurrentScene(scene101004);
         expect(store.getState().scene).toHavePreviousScene(scene1010);
       }));
+
+  it('has up to three active scenes', () => store.dispatch(actions.startAtScene(1010))
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(1))
+        .then(() => store.dispatch(actions.goToScene(101004)))
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(2))
+        .then(() => store.dispatch(actions.goToScene(1020)))
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(3))
+        .then(() => store.dispatch(actions.goToScene(2270)))
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(3)));
 });
+
 test('exitScene');
 test('enterScene');
 test('doEntering');

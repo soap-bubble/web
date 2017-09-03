@@ -103,13 +103,15 @@ export function startAtScene(id) {
 export function goToScene(id, dissolve) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
-    if (currentSceneData.sceneId === id) return Promise.resolve(currentSceneData);
+    if (currentSceneData && currentSceneData.sceneId === id) {
+      return Promise.resolve(currentSceneData);
+    }
     return dispatch(castActions.doExit(currentSceneData))
       .then(() => {
         dispatch({
           type: SCENE_DO_EXITING,
           payload: {
-            sceneId: currentSceneData.sceneId,
+            sceneId: currentSceneData && currentSceneData.sceneId,
             dissolve,
           },
         });

@@ -11,7 +11,6 @@ import {
   EXITING,
   ENTER,
   ON_STAGE,
-  EXIT,
 } from './actionTypes';
 
 const reducer = createReducer('casts', {
@@ -69,7 +68,7 @@ const reducer = createReducer('casts', {
       },
     };
   },
-  [EXIT](state, { payload: castData, meta: { type: castType, scene } }) {
+  [EXITING](state, { payload: castData, meta: { type: castType, scene } }) {
     const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
     return {
       ...state,

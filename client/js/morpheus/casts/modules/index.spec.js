@@ -22,7 +22,7 @@ describe('sanity', () => {
           type: 'SCENE_DO_ENTERING',
           payload: scene,
         });
-        return store.dispatch(actions.doEnter(scene));
+        return store.dispatch(actions.lifecycle.doEnter(scene));
       })
       .then(() => {
         expect(Object.keys(store.getState().casts.cache[1010])).toEqual(expect.arrayContaining(['pano', 'hotspot']));

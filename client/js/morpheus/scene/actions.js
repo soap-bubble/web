@@ -79,13 +79,13 @@ export function setNextStartAngle(angle) {
 
 export function startAtScene(id) {
   return dispatch => dispatch(fetchScene(id))
-      .then(scene => dispatch(castActions.doLoad(scene))
-          .then(() => dispatch(castActions.doEnter(scene)))
+      .then(scene => dispatch(castActions.lifecycle.doLoad(scene))
+          .then(() => dispatch(castActions.lifecycle.doEnter(scene)))
           .then(() => dispatch({
             type: SCENE_DO_ENTERING,
             payload: scene,
           }))
-          .then(() => dispatch(castActions.onStage(scene)))
+          .then(() => dispatch(castActions.lifecycle.onStage(scene)))
           .then(() => {
             dispatch(gameActions.resize({
               width: window.innerWidth,
@@ -106,7 +106,7 @@ export function goToScene(id, dissolve) {
     if (currentSceneData && currentSceneData.sceneId === id) {
       return Promise.resolve(currentSceneData);
     }
-    return dispatch(castActions.doExit(currentSceneData))
+    return dispatch(castActions.lifecycle.doExit(currentSceneData))
       .then(() => {
         dispatch({
           type: SCENE_DO_EXITING,

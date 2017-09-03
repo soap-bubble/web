@@ -26,7 +26,7 @@ describe('casts actions', () => {
             return fakeDelegate;
           },
         });
-        return store.dispatch(actions[testAction]({
+        return store.dispatch(actions.lifecycle[testAction]({
           sceneId: index,
         }))
           .then(() => {
@@ -47,7 +47,7 @@ describe('casts actions', () => {
             return fakeDelegate;
           },
         });
-        return store.dispatch(actions[testAction]({
+        return store.dispatch(actions.lifecycle[testAction]({
           sceneId: index,
         }))
           .then(() => {

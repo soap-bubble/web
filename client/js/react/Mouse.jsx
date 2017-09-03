@@ -1,6 +1,5 @@
 import React, { PropTypes } from 'react';
 import { connect } from 'react-redux';
-import input from 'morpheus/input';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
@@ -8,13 +7,11 @@ import {
 function mapStateToProps(state) {
   const width = gameSelectors.width(state);
   const height = gameSelectors.height(state);
-  const cursor = gameSelectors.morpheusCursor(state);
   const canvas = gameSelectors.canvas(state);
 
   return {
     width,
     height,
-    cursor,
     canvas,
   };
 }

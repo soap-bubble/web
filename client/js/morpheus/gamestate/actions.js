@@ -12,6 +12,7 @@ import {
 } from 'morpheus/gamestate';
 import {
   actions as gameActions,
+  selectors as gameSelectors,
 } from 'morpheus/game';
 import store from 'store';
 
@@ -53,9 +54,30 @@ export function handleMouseOver({ hotspot }) {
     } = hotspot;
     if (isActive({ cast: hotspot, gamestates })) {
       if (type >= 5 && type <= 8) {
+        const currentCursor = gameSelectors.morpheusCursor(getState());
+        if (currentCursor !== 10009) {
+          dispatch(gameActions.setOpenHandCursor());
+        }
+        return false;
+      }
+      dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
+    }
+    return true;
+  };
+}
+
+export function handleMouseUp({ hotspot }) {
+  return (dispatch, getState) => {
+    const gamestates = gameStateSelectors.forState(getState());
+    const {
+      type,
+    } = hotspot;
+    if (isActive({ cast: hotspot, gamestates })) {
+      if (type >= 5 && type <= 8) {
         dispatch(gameActions.setOpenHandCursor());
         return false;
       }
+      dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
     }
     return true;
   };
@@ -69,6 +91,7 @@ export function handleMouseDown({ hotspot }) {
     } = hotspot;
     if (isActive({ cast: hotspot, gamestates })) {
       if (type >= 5 && type <= 8) {
+        dispatch(gameActions.setCloseHandCursor());
         const gs = gamestates.byId(hotspot.param1);
         if (gs) {
           // gs.oldValue = gs.value;
@@ -88,6 +111,7 @@ export function handleMouseStillDown({ hotspot, top, left }) {
     if (isActive({ cast: hotspot, gamestates })) {
       const actionType = ACTION_TYPES[type];
       if (actionType === 'TwoAxisSlider') {
+        dispatch(gameActions.setCloseHandCursor());
         const gs = gamestates.byId(hotspot.param1);
         const { maxValue: vertFromState } = gamestates.byId(hotspot.param2);
         const { maxValue: horFromState } = gamestates.byId(hotspot.param3);

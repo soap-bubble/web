@@ -13,9 +13,9 @@ export const morpheusCursor = createSelector(
   game,
   _game => _game.cursor,
 );
-export const htmlCursor = createSelector(
-  morpheusCursor,
-  _cursor => MORPHEUS_TO_HTML_CURSOR[_cursor] || 'move',
+export const cursorImg = createSelector(
+  game,
+  _game => _game.cursorImg,
 );
 export const canvas = createSelector(
   game,

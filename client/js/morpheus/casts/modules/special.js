@@ -580,16 +580,24 @@ export const actions = memoize((scene) => {
         gesture,
       } = hotspot;
       const gestureType = GESTURES[gesture];
+      let cursor = 0;
+      let isIgnored = true;
       if (type === gestureType) {
-        return dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
+        isIgnored = dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
       } else if (type === 'MouseDown') {
-        return dispatch(gamestateActions.handleMouseDown({ hotspot, top, left }));
+        isIgnored = dispatch(gamestateActions.handleMouseDown({ hotspot, top, left }));
       } else if (type === 'MouseStillDown') {
-        return dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
-      } else if (type === 'MouseEnter') {
-        return dispatch(gamestateActions.handleMouseOver({ hotspot, top, left }));
+        isIgnored = dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
+      } else if (type === 'MouseEnter' || type === 'MouseOver') {
+        isIgnored = dispatch(gamestateActions.handleMouseOver({ hotspot, top, left }));
+      } else if (type === 'MouseUp') {
+        isIgnored = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
       }
-      return true;
+      // Double negative not is ignored.  FIXME: rename variable isIgnored
+      if (!isIgnored) {
+        cursor = hotspot.cursorShapeWhenActive;
+      }
+      return isIgnored;
     };
   }
 

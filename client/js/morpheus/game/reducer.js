@@ -48,6 +48,7 @@ const reducer = createReducer(
   {
     volume: 1,
     cursor: null,
+    cursorImg: null,
     width: 800,
     height: 480,
     removeOnSceneEnd: {},
@@ -102,10 +103,11 @@ const reducer = createReducer(
         volume,
       };
     },
-    [GAME_SET_CURSOR](game, { payload: morpheusCursor }) {
+    [GAME_SET_CURSOR](game, { payload: { cursor, cursorImg } }) {
       return {
         ...game,
-        cursor: morpheusCursor,
+        cursor,
+        cursorImg,
       };
     },
   },

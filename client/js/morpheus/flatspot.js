@@ -53,12 +53,20 @@ export default function ({ dispatch, scene }) {
     left,
     hotspots,
   }) {
-    hotspots.every(hotspot => dispatch(castActionsForScene.special.handleMouseEvent({
-      type,
-      top,
-      left,
-      hotspot,
-    })));
+    let cursor = 0;
+    hotspots.every((hotspot) => {
+      const handled = dispatch(castActionsForScene.special.handleMouseEvent({
+        type,
+        top,
+        left,
+        hotspot,
+      }));
+      if (handled) {
+        cursor = handled;
+      }
+      return handled;
+    });
+    return cursor;
   }
 
   function updateState({ top, left }) {
@@ -103,7 +111,9 @@ export default function ({ dispatch, scene }) {
       left: (left + (clipWidth / 2)) / widthScaler,
     };
 
-    each(hotspots, (hotspot, index) => {
+    let cursor = 0;
+
+    each(hotspots, (hotspot) => {
       const {
         rectTop,
         rectBottom,
@@ -130,7 +140,7 @@ export default function ({ dispatch, scene }) {
     //   },
     // }, null, 2));
     // Events for hotspots we have left
-    handleHotspotDispatches({
+    cursor = handleHotspotDispatches({
       type: 'MouseLeave',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
@@ -138,7 +148,7 @@ export default function ({ dispatch, scene }) {
     });
 
     // Events for hotspots we have entered
-    handleHotspotDispatches({
+    cursor = handleHotspotDispatches({
       type: 'MouseEnter',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
@@ -148,7 +158,7 @@ export default function ({ dispatch, scene }) {
     // User initiated event inside a hotspot so could be valid
     if (!mouseDown && wasMouseDowned && nowActiveHotspots.length) {
       mouseDown = true;
-      handleHotspotDispatches({
+      cursor = handleHotspotDispatches({
         type: 'MouseDown',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -157,7 +167,7 @@ export default function ({ dispatch, scene }) {
     }
 
     if (wasMouseMoved) {
-      handleHotspotDispatches({
+      cursor = handleHotspotDispatches({
         type: 'MouseMove',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -166,7 +176,7 @@ export default function ({ dispatch, scene }) {
     }
 
     if (wasMouseMoved && mouseDown) {
-      handleHotspotDispatches({
+      cursor = handleHotspotDispatches({
         type: 'MouseStillDown',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -178,13 +188,13 @@ export default function ({ dispatch, scene }) {
     // TODO: debounce??
     if (wasMouseUpped && nowActiveHotspots.length) {
       mouseDown = false;
-      handleHotspotDispatches({
+      cursor = handleHotspotDispatches({
         type: 'MouseUp',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
         hotspots: nowActiveHotspots,
       });
-      handleHotspotDispatches({
+      cursor = handleHotspotDispatches({
         type: 'MouseClick',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -192,14 +202,21 @@ export default function ({ dispatch, scene }) {
       });
     }
 
-    handleHotspotDispatches({
+    cursor = handleHotspotDispatches({
+      type: 'MouseOver',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: nowActiveHotspots,
+    });
+
+    cursor = handleHotspotDispatches({
       type: 'MouseNone',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
       hotspots: difference(hotspots, nowActiveHotspots),
     });
 
-    handleHotspotDispatches({
+    cursor = handleHotspotDispatches({
       type: 'Always',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
@@ -211,6 +228,9 @@ export default function ({ dispatch, scene }) {
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
+    if (cursor) {
+      // dispatch(gameActions.setCursor(cursor));
+    }
     dispatch(castActionsForScene.special.update(scene));
   }
 

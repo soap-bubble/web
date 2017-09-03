@@ -112,7 +112,7 @@ export default function ({
     }
   }
 
-  function onTouchCancel(touchEvent) {
+  function onTouchCancel() {
 
   }
 

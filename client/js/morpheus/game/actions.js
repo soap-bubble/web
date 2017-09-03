@@ -1,6 +1,4 @@
 import {
-  getSceneType,
-  actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
@@ -14,7 +12,6 @@ import {
 } from 'service/image';
 import {
   DIMENSIONS_RESIZE,
-  GAME_SCENE_LOADING,
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
   CREATE_CANVAS,
@@ -109,11 +106,14 @@ export function setVolume(volume) {
 export function setCursor(cursor) {
   return (dispatch, getState) => {
     const currentCursor = gameSelectors.morpheusCursor(getState());
-    if (currentCursor !== cursor) {
+    if (cursor && currentCursor !== cursor) {
       return promiseCursor(cursor)
-        .then(img => dispatch({
+        .then(cursorImg => dispatch({
           type: GAME_SET_CURSOR,
-          payload: img,
+          payload: {
+            cursor,
+            cursorImg,
+          },
         }));
     }
     return Promise.resolve();
@@ -135,7 +135,7 @@ export function setCloseHandCursor() {
 export function setCursorLocation({ top, left }) {
   return (dispatch, getState) => {
     const canvas = gameSelectors.canvas(getState());
-    const cursor = gameSelectors.morpheusCursor(getState());
+    const cursor = gameSelectors.cursorImg(getState());
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (cursor) {
@@ -176,37 +176,3 @@ export function resize({ width, height }) {
     }
   };
 }
-
-export function display() {
-  return (dispatch, getState) => {
-    const { scene } = getState();
-    const { currentScene: sceneData } = scene;
-    const sceneActionMap = {
-      panorama: panoActions.load,
-      special: specialActions.load,
-      transition: transitionActions.display,
-    };
-    const sceneType = getSceneType(sceneData);
-    const sceneActionFunction = sceneActionMap[sceneType];
-    if (sceneActionFunction) {
-      dispatch({
-        type: GAME_SCENE_LOADING,
-        payload: sceneData,
-      });
-      dispatch(sceneActionFunction(sceneData))
-        .then(() => dispatch(sceneActions.doEnter()));
-    }
-  };
-}
-
-// export function nextScene(id) {
-//   return dispatch => {
-//     dispatch(sceneActions.fetch(id))
-//       .then(sceneData => {
-//         return sceneActions.doEntering(id)
-//           .doEnter(id)
-//
-//
-//       })
-//   };
-// }

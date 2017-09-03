@@ -129,10 +129,10 @@ describe('morpheus/scene/reducer', () => {
         sceneId: 200,
       };
       const third = {
-        sceneId: 200,
+        sceneId: 300,
       };
       const fourth = {
-        sceneId: 200,
+        sceneId: 400,
       };
       let scene = reducer(undefined, 'scene', {
         type: SCENE_DO_ENTERING,
@@ -158,6 +158,42 @@ describe('morpheus/scene/reducer', () => {
       });
       expect(scene).toHaveCurrentScenes(3);
       expect(scene).toHaveCurrentScenes([fourth, third, second]);
+    });
+
+    it('currentScenes duplicates promote to top', () => {
+      const first = {
+        sceneId: 100,
+      };
+      const second = {
+        sceneId: 200,
+      };
+      const third = {
+        sceneId: 300,
+      };
+      let scene = reducer(undefined, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: first,
+      });
+      expect(scene).toHaveCurrentScenes(1);
+      expect(scene).toHaveCurrentScenes([first]);
+      scene = reducer({ scene }, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: second,
+      });
+      expect(scene).toHaveCurrentScenes(2);
+      expect(scene).toHaveCurrentScenes([second, first]);
+      scene = reducer({ scene }, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: third,
+      });
+      expect(scene).toHaveCurrentScenes(3);
+      expect(scene).toHaveCurrentScenes([third, second, first]);
+      scene = reducer({ scene }, 'scene', {
+        type: SCENE_DO_ENTERING,
+        payload: second,
+      });
+      expect(scene).toHaveCurrentScenes(3);
+      expect(scene).toHaveCurrentScenes([second, third, first]);
     });
   });
 

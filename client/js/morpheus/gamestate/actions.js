@@ -47,59 +47,56 @@ export function updateGameState(gamestateId, value) {
 }
 
 export function handleMouseOver({ hotspot }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
-    const {
-      type,
-    } = hotspot;
-    if (isActive({ cast: hotspot, gamestates })) {
-      if (type >= 5 && type <= 8) {
-        const currentCursor = gameSelectors.morpheusCursor(getState());
-        if (currentCursor !== 10009) {
-          dispatch(gameActions.setOpenHandCursor());
-        }
-        return false;
-      }
-      dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
-    }
-    return true;
-  };
+  return (dispatch, getState) =>
+    // const gamestates = gameStateSelectors.forState(getState());
+    // const {
+    //   type,
+    // } = hotspot;
+    // if (isActive({ cast: hotspot, gamestates })) {
+    //   if (type >= 5 && type <= 8) {
+    //     const currentCursor = gameSelectors.morpheusCursor(getState());
+    //     if (currentCursor !== 10009) {
+    //       dispatch(gameActions.setOpenHandCursor());
+    //     }
+    //     return false;
+    //   }
+    //   dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
+    // }
+     true;
 }
 
 export function handleMouseUp({ hotspot }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
-    const {
-      type,
-    } = hotspot;
-    if (isActive({ cast: hotspot, gamestates })) {
-      if (type >= 5 && type <= 8) {
-        dispatch(gameActions.setOpenHandCursor());
-        return false;
-      }
-      dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
-    }
-    return true;
-  };
+  return (dispatch, getState) =>
+    // const gamestates = gameStateSelectors.forState(getState());
+    // const {
+    //   type,
+    // } = hotspot;
+    // if (isActive({ cast: hotspot, gamestates })) {
+    //   if (type >= 5 && type <= 8) {
+    //     dispatch(gameActions.setOpenHandCursor());
+    //     return false;
+    //   }
+    //   dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
+    // }
+     true;
 }
 
 export function handleMouseDown({ hotspot }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
-    const {
-      type,
-    } = hotspot;
-    if (isActive({ cast: hotspot, gamestates })) {
-      if (type >= 5 && type <= 8) {
-        dispatch(gameActions.setCloseHandCursor());
-        const gs = gamestates.byId(hotspot.param1);
-        if (gs) {
-          // gs.oldValue = gs.value;
-        }
-      }
-    }
-    return true;
-  };
+  return (dispatch, getState) =>
+    // const gamestates = gameStateSelectors.forState(getState());
+    // const {
+    //   type,
+    // } = hotspot;
+    // if (isActive({ cast: hotspot, gamestates })) {
+    //   if (type >= 5 && type <= 8) {
+    //     dispatch(gameActions.setCloseHandCursor());
+    //     const gs = gamestates.byId(hotspot.param1);
+    //     if (gs) {
+    //       // gs.oldValue = gs.value;
+    //     }
+    //   }
+    // }
+     true;
 }
 
 export function handleMouseStillDown({ hotspot, top, left }) {

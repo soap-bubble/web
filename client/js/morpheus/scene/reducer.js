@@ -53,9 +53,13 @@ const reducer = createReducer('scene', defaultState, {
   },
   [SCENE_DO_ENTERING](state, { payload: scene }) {
     let currentScenes = state.get('currentScenes');
-    if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE) {
-      currentScenes = currentScenes
-        .pop();
+    // Check if scene is already in scene stack
+    const existingScene = currentScenes.find(s => s.sceneId === scene.sceneId);
+    if (existingScene) {
+      // Promote existing scene to top...
+      currentScenes = currentScenes.remove(currentScenes.indexOf(existingScene));
+    } else if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE) {
+      currentScenes = currentScenes.pop();
     }
     currentScenes = currentScenes.unshift(scene);
     return state.withMutations(s =>

@@ -4,7 +4,7 @@
   "description": "",
   "main": "lib/index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest client",
     "build:server": "babel server -d lib --copy-files",
     "build:client": "gulp build:client",
     "build:client:watch": "gulp build:client:watch",

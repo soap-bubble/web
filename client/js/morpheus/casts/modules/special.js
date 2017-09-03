@@ -590,7 +590,7 @@ export const actions = memoize((scene) => {
         isIgnored = dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
       } else if (type === 'MouseEnter' || type === 'MouseOver') {
         isIgnored = dispatch(gamestateActions.handleMouseOver({ hotspot, top, left }));
-      } else if (type === 'MouseUp') {
+      } else if (type === 'MouseUp' || type === 'MouseLeave') {
         isIgnored = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
       }
       // Double negative not is ignored.  FIXME: rename variable isIgnored

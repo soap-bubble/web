@@ -375,29 +375,6 @@ function startRenderLoop({ scene3D, camera, renderer }) {
   renderEvents.onDestroy(() => renderer.dispose());
 }
 
-export function activateHotspotIndex(index) {
-  // return (dispatch, getState) => {
-  //   const { hotspot } = getState();
-  //   const { data } = hotspot;
-  //   if (data && data[index]) {
-  //     // FIXME SCENE_END here
-  //     dispatch({
-  //       type: HOTSPOTS_ACTIVATED,
-  //       payload: data[index],
-  //     });
-  //     const { param1: nextSceneId } = data[index];
-  //     // dispatch(sceneActions.goToScene(nextSceneId));
-  //   }
-  // }
-}
-
-function createHotspotCanvas({ width, height }) {
-  const canvas = createCanvas();
-  canvas.width = width;
-  canvas.height = height;
-  return canvas;
-}
-
 export const delegate = memoize((scene) => {
   const hotspotSelectors = selectors(scene);
 
@@ -410,6 +387,21 @@ export const delegate = memoize((scene) => {
       const hotspotsData = hotspotSelectors.hotspotsData(getState());
       const isPano = hotspotSelectors.isPano(getState());
       if (hotspotsData.length && isPano) {
+        // Handle "Always" hotspots now
+        const gamestates = gamestateSelectors.forState(getState());
+        hotspotsData
+          .filter((h) => {
+            const { gesture, rectBottom, rectTop, rectLeft, rectRight } = h;
+            return GESTURES[gesture] === 'MouseClick'
+              && isActive({ cast: h, gamestates })
+              && rectBottom === 0
+              && rectTop === 0
+              && rectLeft === 0
+              && rectRight === 0;
+          })
+          .forEach((hotspot) => {
+            dispatch(gamestateActions.handleHotspot({ hotspot }));
+          });
         // 3D hotspots
         const positionsList = createPositions(hotspotsData);
         const { width, height } = gameSelectors.dimensions(getState());
@@ -483,14 +475,9 @@ export const delegate = memoize((scene) => {
       }
 
       hotspotsData.forEach((hotspot) => {
-        const { gesture, type, param1: gamestateId, param2: value } = hotspot;
+        const { gesture } = hotspot;
         if (GESTURES[gesture] === 'Always') {
           dispatch(gamestateActions.handleHotspot({ hotspot }));
-          // if (ACTION_TYPES[type] === 'SetStateTo') {
-          //   dispatch(gamestateActions.updateGameState(gamestateId, value));
-          // } else if (ACTION_TYPES[type] === 'IncrementState') {
-          //   dispatch(gamestateActions.updateGameState(gamestateId, value));
-          // }
         }
       });
 
@@ -510,7 +497,7 @@ export const actions = memoize((scene) => {
     return (dispatch, getState) => {
       hoveredHotspots.every((hotspot) => {
         const gamestates = gamestateSelectors.forState(getState());
-        if (isActive({ cast: hotspot, gamestates }) || hotspot.initiallyEnabled) {
+        if (isActive({ cast: hotspot, gamestates })) {
           const { cursorShapeWhenActive: morpheusCursor } = hotspot;
           dispatch(gameActions.setCursor(morpheusCursor));
           return false;

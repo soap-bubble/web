@@ -16,6 +16,10 @@ import {
   actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
+import {
+  isActive,
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
 import store from 'store';
 import loggerFactory from 'utils/logger';
 
@@ -111,8 +115,6 @@ export default function ({ dispatch, scene }) {
       left: (left + (clipWidth / 2)) / widthScaler,
     };
 
-    let cursor = 0;
-
     each(hotspots, (hotspot) => {
       const {
         rectTop,
@@ -140,7 +142,14 @@ export default function ({ dispatch, scene }) {
     //   },
     // }, null, 2));
     // Events for hotspots we have left
-    cursor = handleHotspotDispatches({
+    handleHotspotDispatches({
+      type: 'MouseOver',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: nowActiveHotspots,
+    });
+
+    handleHotspotDispatches({
       type: 'MouseLeave',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
@@ -148,7 +157,7 @@ export default function ({ dispatch, scene }) {
     });
 
     // Events for hotspots we have entered
-    cursor = handleHotspotDispatches({
+    handleHotspotDispatches({
       type: 'MouseEnter',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
@@ -158,7 +167,7 @@ export default function ({ dispatch, scene }) {
     // User initiated event inside a hotspot so could be valid
     if (!mouseDown && wasMouseDowned && nowActiveHotspots.length) {
       mouseDown = true;
-      cursor = handleHotspotDispatches({
+      handleHotspotDispatches({
         type: 'MouseDown',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -167,7 +176,7 @@ export default function ({ dispatch, scene }) {
     }
 
     if (wasMouseMoved) {
-      cursor = handleHotspotDispatches({
+      handleHotspotDispatches({
         type: 'MouseMove',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -176,7 +185,7 @@ export default function ({ dispatch, scene }) {
     }
 
     if (wasMouseMoved && mouseDown) {
-      cursor = handleHotspotDispatches({
+      handleHotspotDispatches({
         type: 'MouseStillDown',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -188,13 +197,13 @@ export default function ({ dispatch, scene }) {
     // TODO: debounce??
     if (wasMouseUpped && nowActiveHotspots.length) {
       mouseDown = false;
-      cursor = handleHotspotDispatches({
+      handleHotspotDispatches({
         type: 'MouseUp',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
         hotspots: nowActiveHotspots,
       });
-      cursor = handleHotspotDispatches({
+      handleHotspotDispatches({
         type: 'MouseClick',
         top: adjustedClickPos.top,
         left: adjustedClickPos.left,
@@ -202,21 +211,14 @@ export default function ({ dispatch, scene }) {
       });
     }
 
-    cursor = handleHotspotDispatches({
-      type: 'MouseOver',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: nowActiveHotspots,
-    });
-
-    cursor = handleHotspotDispatches({
+    handleHotspotDispatches({
       type: 'MouseNone',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
       hotspots: difference(hotspots, nowActiveHotspots),
     });
 
-    cursor = handleHotspotDispatches({
+    handleHotspotDispatches({
       type: 'Always',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
@@ -224,13 +226,39 @@ export default function ({ dispatch, scene }) {
         .filter(h => h.castId === 0),
     });
 
+    nowActiveHotspots.every((hotspot) => {
+      // Some special cases
+      const gamestates = gamestateSelectors.forState(store.getState());
+      if (isActive({ cast: hotspot, gamestates })) {
+        const {
+          type,
+          cursorShapeWhenActive,
+        } = hotspot;
+        if (wasMouseDowned || wasMouseMoved) {
+          if (type >= 5 && type <= 8) {
+            const currentCursor = gameSelectors.morpheusCursor(store.getState());
+            if (currentCursor !== 10009) {
+              dispatch(gameActions.setOpenHandCursor());
+              return false;
+            }
+          }
+        }
+        if (wasMouseUpped && type >= 5 && type <= 8) {
+          dispatch(gameActions.setOpenHandCursor());
+          return false;
+        }
+        if (cursorShapeWhenActive) {
+          dispatch(gameActions.setCursor(cursorShapeWhenActive));
+          return false;
+        }
+      }
+      return true;
+    });
     wasActiveHotspots = nowActiveHotspots;
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
-    if (cursor) {
-      // dispatch(gameActions.setCursor(cursor));
-    }
+
     dispatch(castActionsForScene.special.update(scene));
   }
 

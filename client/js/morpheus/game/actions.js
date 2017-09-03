@@ -78,11 +78,11 @@ function createCanvas({ width, height }) {
 
 const loadedCursors = {};
 function promiseCursor(id) {
-  const realId = id || 10000;
-  if (!loadedCursors[realId]) {
+  const realId = id;
+  if (realId && !loadedCursors[realId]) {
     loadedCursors[realId] = loadAsImage(MORPHEUS_TO_CURSOR[realId]);
   }
-  return loadedCursors[realId];
+  return loadedCursors[realId] || Promise.resolve(null);
 }
 
 export function createUIOverlay() {
@@ -106,7 +106,7 @@ export function setVolume(volume) {
 export function setCursor(cursor) {
   return (dispatch, getState) => {
     const currentCursor = gameSelectors.morpheusCursor(getState());
-    if (cursor && currentCursor !== cursor) {
+    if (cursor !== 0 && currentCursor !== cursor) {
       return promiseCursor(cursor)
         .then(cursorImg => dispatch({
           type: GAME_SET_CURSOR,

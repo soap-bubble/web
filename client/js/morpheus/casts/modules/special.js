@@ -16,6 +16,7 @@ import {
 } from 'morpheus/gamestate';
 import {
   selectors as gameSelectors,
+  actions as gameActions,
 } from 'morpheus/game';
 import {
   selectors as castSelectors,
@@ -362,7 +363,7 @@ export const delegate = memoize((scene) => {
       const soundCasts = specialSelectors.soundCasts(state);
       const gamestates = gamestateSelectors.forState(state);
       const dimensions = gameSelectors.dimensions(state);
-
+      dispatch(gameActions.setCursor(null));
       const loadImages = Promise.all(imageCasts.map((imageCast) => {
         const {
           fileName,

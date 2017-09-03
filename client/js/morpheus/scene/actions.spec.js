@@ -76,10 +76,3 @@ describe('goToScene', () => {
         .then(() => store.dispatch(actions.goToScene(2270)))
         .then(() => expect(store.getState().scene).toHaveActiveScenes(3)));
 });
-
-test('exitScene');
-test('enterScene');
-test('doEntering');
-test('doExiting');
-test('doOnStageAction');
-test('setBackgroundScene');

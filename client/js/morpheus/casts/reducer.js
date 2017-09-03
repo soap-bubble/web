@@ -54,75 +54,37 @@ const reducer = createReducer('casts', {
     };
   },
   [ON_STAGE](state, { payload: castData, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
     return {
       ...state,
       cache: {
         ...state.cache,
         [scene.sceneId]: {
-          ...state.cache[scene.sceneId],
+          ...oldSceneCache,
           status: 'onStage',
-          [castType]: merge({
-            ...state.cache[scene.sceneId][castType],
-          }, castData),
+          [castType]: oldSceneCache ? merge({
+            ...oldSceneCache[castType],
+          }, castData) : castData,
         },
       },
     };
   },
   [EXIT](state, { payload: castData, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
     return {
       ...state,
       cache: {
         ...state.cache,
         [scene.sceneId]: {
-          ...state.cache[scene.sceneId],
+          ...oldSceneCache,
           status: 'exiting',
-          [castType]: merge({
-            ...state.cache[scene.sceneId][castType],
-          }, castData),
+          [castType]: oldSceneCache ? merge({
+            ...oldSceneCache[castType],
+          }, castData) : castData,
         },
       },
     };
   },
-  // [ENTERING](state) {
-  //   return {
-  //     ...state,
-  //     current: state.current
-  //       .map(cast => ({
-  //         ...cast,
-  //         status: 'onStage',
-  //       })),
-  //   };
-  // },
-  // [ENTER](state) {
-  //   return {
-  //     ...state,
-  //     current: state.current.map(cast => ({
-  //       ...cast,
-  //       mouseWithin: false,
-  //       mouseDownOnCast: false,
-  //       status: 'entering',
-  //     })),
-  //   };
-  // },
-  // [EXIT](state) {
-  //   return {
-  //     ...state,
-  //     current: state.current.map(cast => ({
-  //       ...cast,
-  //       mouseDownOnCast: false,
-  //       status: 'exiting',
-  //     })),
-  //   };
-  // },
-  // [EXITING](state) {
-  //   return {
-  //     ...state,
-  //     current: state.current.map(cast => ({
-  //       ...cast,
-  //       status: 'offStage',
-  //     })),
-  //   };
-  // },
 });
 
 export default reducer;

@@ -7178,6 +7178,11 @@
       "resolved": "https://registry.npmjs.org/tunnel-agent/-/tunnel-agent-0.4.3.tgz",
       "dev": true
     },
+    "tween": {
+      "version": "0.9.0",
+      "from": "tween@latest",
+      "resolved": "https://registry.npmjs.org/tween/-/tween-0.9.0.tgz"
+    },
     "tweetnacl": {
       "version": "0.14.5",
       "from": "tweetnacl@>=0.14.0 <0.15.0",

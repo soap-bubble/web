@@ -4,6 +4,9 @@ import {
   isUndefined,
 } from 'lodash';
 import {
+  Tween,
+} from 'tween';
+import {
   createSelector,
 } from 'reselect';
 import {
@@ -382,21 +385,25 @@ export const delegate = memoize((scene) => {
             dissolveToNextScene,
           } = soundCast;
           const sound = createSound(getAssetUrl(fileName));
-          if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-            sound.addEventListener('ended', function onSoundEnded() {
-              let startAngle;
+          function onSoundEnded() {
+            let startAngle;
+            sound.removeEventListener('ended', onSoundEnded);
+            if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
               if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
                 startAngle = (angleAtEnd * Math.PI) / 1800;
                 startAngle -= Math.PI - (Math.PI / 6);
               }
-              sound.removeEventListener('ended', onSoundEnded);
               dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
               dispatch(sceneActions.setNextStartAngle(startAngle));
-            });
+            }
           }
+          sound.addEventListener('ended', onSoundEnded);
           sound.play();
           return {
             el: sound,
+            listeners: {
+              ended: onSoundEnded,
+            },
             data: soundCast,
           };
         }));
@@ -405,9 +412,6 @@ export const delegate = memoize((scene) => {
         const video = createVideo(getAssetUrl(movieCast.fileName), {
           loop: movieCast.looping,
           autoplay: true,
-          oncanplaythrough() {
-            resolve(video);
-          },
           onerror: reject,
         });
         const {
@@ -416,23 +420,35 @@ export const delegate = memoize((scene) => {
           dissolveToNextScene,
         } = movieCast;
         video.classList.add('MovieSpecialCast');
-        if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-          video.addEventListener('ended', function onSoundEnded() {
-            let startAngle;
+        function onSoundEnded() {
+          let startAngle;
+          video.removeEventListener('ended', onSoundEnded);
+          if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
             if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
               startAngle = (angleAtEnd * Math.PI) / 1800;
               startAngle -= Math.PI - (Math.PI / 6);
             }
-            video.removeEventListener('ended', onSoundEnded);
             dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
             dispatch(sceneActions.setNextStartAngle(startAngle));
+          }
+        }
+        function onCanPlayThrough() {
+          video.removeEventListener('canplaythrough', onCanPlayThrough);
+          resolve({
+            el: video,
+            listeners: {
+              ended: onSoundEnded,
+              canplaythrough: onCanPlayThrough,
+            },
           });
         }
-        return video;
+        video.addEventListener('ended', onSoundEnded);
+        video.addEventListener('canplaythrough', onCanPlayThrough);
       })
-        .then(video => ({
-          el: video,
+        .then(({ el, listeners }) => ({
+          el,
           data: movieCast,
+          listeners,
         }))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
@@ -485,9 +501,39 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doExit() {
+    return (dispatch, getState) => {
+      const videos = specialSelectors.videos(getState());
+      const sounds = specialSelectors.sounds(getState());
+      const everything = [...videos, ...sounds];
+      const v = {
+        volume: 1,
+      };
+      const tween = new Tween(v)
+        .to({
+          volume: 0,
+        }, 1000);
+      tween.onUpdate(() => {
+        everything.forEach(({ el }) => {
+          el.volume = v.volume;
+        });
+      });
+      tween.start();
+
+      everything.forEach(({ el, listeners }) => {
+        Object.keys(listeners).forEach((eventName) => {
+          const handler = listeners[eventName];
+          el.removeEventListener(eventName, handler);
+        });
+      });
+      return Promise.resolve();
+    };
+  }
+
   return {
     applies,
     doEnter,
+    doExit,
   };
 });
 

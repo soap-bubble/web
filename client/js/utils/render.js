@@ -1,5 +1,6 @@
 import raf from 'raf';
 import loggerFactory from 'utils/logger';
+import { update as tweenUpdate } from 'tween';
 
 const logger = loggerFactory(__filename);
 
@@ -11,6 +12,7 @@ let isActive = false;
 
 export function render() {
   if (isActive) {
+    tweenUpdate();
     try {
       if (!document.hidden) {
         onBefores.forEach(r => r());

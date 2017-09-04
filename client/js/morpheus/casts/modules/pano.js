@@ -224,9 +224,10 @@ export const actions = memoize((scene) => {
 
   function sweepTo(hotspot, callback) {
     return (dispatch, getState) => {
-      const angleAtEnd = (hotspot.rectRight - hotspot.rectLeft) / 2;
-      const startAngle = ((angleAtEnd * Math.PI) / -1800) + (Math.PI / 3);
-      const y = startAngle;
+      const angleAtEnd = hotspot.rectLeft + ((hotspot.rectRight - hotspot.rectLeft) / 2);
+      const startAngle = ((angleAtEnd * Math.PI) / 1800) - (Math.PI - (Math.PI / 6));
+      // const startAngle = ((angleAtEnd * Math.PI) / -1800) + (Math.PI / 3);
+      let y = startAngle;
       const x = 0;
       const panoObject3D = panoSelectors.panoObject3D(getState());
       const distance = Math.sqrt(
@@ -236,12 +237,15 @@ export const actions = memoize((scene) => {
         x: panoObject3D.rotation.x,
         y: panoObject3D.rotation.y,
       };
+      if ((v.y - y) > Math.PI) {
+        y += 2 * Math.PI;
+      }
       const tween = new Tween(v)
         .to({
           x,
           y,
-        }, distance * 1000)
-        .easing(Easing.Cubic.InOut);
+        }, Math.sqrt(distance) * 1000)
+        .easing(Easing.Exponential.Out);
       tween.onUpdate(() => {
         dispatch(rotate(v));
       });

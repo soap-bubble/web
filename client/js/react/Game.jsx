@@ -1,5 +1,5 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import React, { PropTypes } from 'react';
 import Mouse from 'react/Mouse';
 import castFactory from 'morpheus/casts/factory';
 
@@ -15,10 +15,12 @@ const World = ({
   <div>
     {casts}
     <Mouse />
-    { /* process.env.NODE_ENV !== 'production' ? <Tools /> : null */ }
   </div>
   );
 
+World.propTypes = {
+  casts: PropTypes.arrayOf(PropTypes.element).isRequired,
+};
 
 export default connect(
   mapStateToProps,

@@ -121,14 +121,18 @@ function createMaterial(asset) {
   };
 }
 
-const UP_DOWN_LIMIT = 7.8 * (Math.PI / 180);
+const UP_DOWN_LIMIT = 7.7 * (Math.PI / 180);
 
 function clamp({ x, y }) {
   if (x > UP_DOWN_LIMIT + X_ROTATION_OFFSET) {
     x = UP_DOWN_LIMIT + X_ROTATION_OFFSET;
-  }
-  if (x < -UP_DOWN_LIMIT + X_ROTATION_OFFSET) {
+  } else if (x < -UP_DOWN_LIMIT + X_ROTATION_OFFSET) {
     x = -UP_DOWN_LIMIT + X_ROTATION_OFFSET;
+  }
+  if (y > 2 * Math.PI) {
+    y -= 2 * Math.PI;
+  } else if (y < 0) {
+    y += 2 * Math.PI;
   }
   return { x, y };
 }
@@ -239,7 +243,7 @@ export const actions = memoize((scene) => {
         y: panoObject3D.rotation.y,
       };
       if (Math.abs(v.y - y) > Math.PI) {
-        // Travelling more than half way around the axis, so instead let's go the other way
+                // Travelling more than half way around the axis, so instead let's go the other way
         if (v.y > y) {
           v.y -= 2 * Math.PI;
           panoObject3D.rotation.y -= 2 * Math.PI;

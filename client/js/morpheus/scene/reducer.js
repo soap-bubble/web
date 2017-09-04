@@ -69,7 +69,7 @@ const reducer = createReducer('scene', defaultState, {
         .set('currentScenes', currentScenes),
     );
   },
-  [SCENE_DO_EXITING](state, { dissolve }) {
+  [SCENE_DO_EXITING](state, { payload: { dissolve } }) {
     return state
       .set('status', 'exiting')
       .set('dissolve', isUndefined(dissolve) || !!dissolve);

@@ -9,6 +9,9 @@ import {
 } from 'morpheus/game';
 import momentum from 'morpheus/momentum';
 import hotspots from 'morpheus/hotspots';
+import qs from 'query-string';
+
+const transparentPano = qs.parse(location.search).transparentPano;
 
 function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
@@ -71,6 +74,7 @@ const Pano = ({
       width: `${width}px`,
       height: `${height}px`,
       cursor: 'none',
+      opacity: transparentPano ? 0.5 : null,
     }}
   />
   );

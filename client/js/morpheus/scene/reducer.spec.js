@@ -201,6 +201,7 @@ describe('morpheus/scene/reducer', () => {
     it('set dissolve to true if undefined', () => {
       const scene = reducer(undefined, 'scene', {
         type: SCENE_DO_EXITING,
+        payload: {},
       });
       expect(scene).toHaveDissolve(true);
     });
@@ -208,14 +209,18 @@ describe('morpheus/scene/reducer', () => {
   it('set dissolve to true if true', () => {
     const scene = reducer(undefined, 'scene', {
       type: SCENE_DO_EXITING,
-      dissolve: true,
+      payload: {
+        dissolve: true,
+      },
     });
     expect(scene).toHaveDissolve(true);
   });
   it('set dissolve to false if false', () => {
     const scene = reducer(undefined, 'scene', {
       type: SCENE_DO_EXITING,
-      dissolve: false,
+      payload: {
+        dissolve: false,
+      },
     });
     expect(scene).toHaveDissolve(false);
   });

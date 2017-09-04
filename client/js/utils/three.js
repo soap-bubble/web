@@ -4,7 +4,7 @@ import {
 } from 'three';
 
 export function createCamera({ width, height, position }) {
-  const camera = new PerspectiveCamera(55, width / height, 0.01, 1000);
+  const camera = new PerspectiveCamera(45.8, 640 / 400, 0.01, 1000);
   if (position) {
     ['x', 'y', 'z'].forEach((axis) => {
       if (position[axis]) {

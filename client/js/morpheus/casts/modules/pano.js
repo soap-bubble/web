@@ -9,18 +9,15 @@ import {
   Scene,
   TextureLoader,
 } from 'three';
-
-import { range, get, memoize, pick } from 'lodash';
-import { createSelector } from 'reselect';
 import {
-  defer,
-} from 'utils/promise';
+  Tween,
+  Easing,
+} from 'tween';
+import { get, memoize, pick } from 'lodash';
+import { createSelector } from 'reselect';
 import {
   getAssetUrl,
 } from 'service/gamedb';
-import {
-  pad,
-} from 'utils/string';
 import {
   createCamera,
   positionCamera,
@@ -36,15 +33,16 @@ import {
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
+import createCanvas from 'utils/canvas';
 import {
   selectors as hotspotSelectors,
 } from './hotspot';
-import createCanvas from 'utils/canvas';
 
 const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
 const sliceHeight = 0.55;
 const sliceDepth = 1.0;
+const X_ROTATION_OFFSET = -0.038;
 
 function createGeometries() {
   const geometries = [];
@@ -104,15 +102,17 @@ function createMaterial(asset) {
   loader.crossOrigin = 'anonymous';
   let material;
   const promise = new Promise(
-    (resolve, reject) => material = new MeshBasicMaterial({
-      side: BackSide,
-      map: loader.load(
-        asset,
-        resolve,
-        undefined,
-        reject,
-      ),
-    }),
+    (resolve, reject) => {
+      material = new MeshBasicMaterial({
+        side: BackSide,
+        map: loader.load(
+         asset,
+         resolve,
+         undefined,
+         reject,
+       ),
+      });
+    },
   )
     .then(() => material);
   return {
@@ -121,19 +121,14 @@ function createMaterial(asset) {
   };
 }
 
-function generateFileNames(fileName) {
-  return range(1, 25)
-    .map(digit => getAssetUrl(`${fileName}.${pad(digit, 2)}.png`));
-}
-
-const UP_DOWN_LIMIT = 7.5 * (Math.PI / 180);
+const UP_DOWN_LIMIT = 7.8 * (Math.PI / 180);
 
 function clamp({ x, y }) {
-  if (x > UP_DOWN_LIMIT) {
-    x = UP_DOWN_LIMIT;
+  if (x > UP_DOWN_LIMIT + X_ROTATION_OFFSET) {
+    x = UP_DOWN_LIMIT + X_ROTATION_OFFSET;
   }
-  if (x < -UP_DOWN_LIMIT) {
-    x = -UP_DOWN_LIMIT;
+  if (x < -UP_DOWN_LIMIT + X_ROTATION_OFFSET) {
+    x = -UP_DOWN_LIMIT + X_ROTATION_OFFSET;
   }
   return { x, y };
 }
@@ -160,11 +155,7 @@ export const selectors = memoize((scene) => {
 
   const selectPanoCastData = createSelector(
     () => scene,
-    scene => get(scene, 'casts', []).find(c => c.__t === 'PanoCast'),
-  );
-  const selectPanoFilename = createSelector(
-    selectPanoCastData,
-    panoCast => get(panoCast, 'fileName'),
+    s => get(s, 'casts', []).find(c => c.__t === 'PanoCast'),
   );
   const selectPano = createSelector(
     selectSceneCache,
@@ -202,18 +193,15 @@ export const selectors = memoize((scene) => {
 
 export const actions = memoize((scene) => {
   const panoSelectors = selectors(scene);
+
   function rotate({ x, y }) {
     return (dispatch, getState) => {
-      const hotspotCamera = hotspotSelectors(scene).camera(getState());
       const scene3D = hotspotSelectors(scene).scene3D(getState());
-      const hitObject3D = hotspotSelectors(scene).hitObject3D(getState());
-      const visibleObject3D = hotspotSelectors(scene).visibleObject3D(getState());
       const panoObject3D = panoSelectors.panoObject3D(getState());
       const rot = clamp({
         x,
         y,
       });
-
       Object.assign(scene3D.rotation, rot);
       Object.assign(panoObject3D.rotation, rot);
     };
@@ -234,9 +222,38 @@ export const actions = memoize((scene) => {
     };
   }
 
+  function sweepTo(hotspot, callback) {
+    return (dispatch, getState) => {
+      const angleAtEnd = (hotspot.rectRight - hotspot.rectLeft) / 2;
+      const startAngle = ((angleAtEnd * Math.PI) / -1800) + (Math.PI / 3);
+      const y = startAngle;
+      const x = 0;
+      const panoObject3D = panoSelectors.panoObject3D(getState());
+      const distance = Math.sqrt(
+        ((x - panoObject3D.rotation.x) ** 2) + ((y - panoObject3D.rotation.y) ** 2),
+      );
+      const v = {
+        x: panoObject3D.rotation.x,
+        y: panoObject3D.rotation.y,
+      };
+      const tween = new Tween(v)
+        .to({
+          x,
+          y,
+        }, distance * 1000)
+        .easing(Easing.Cubic.InOut);
+      tween.onUpdate(() => {
+        dispatch(rotate(v));
+      });
+      tween.onComplete(callback);
+      tween.start();
+    };
+  }
+
   return {
     rotate,
     rotateBy,
+    sweepTo,
   };
 });
 
@@ -283,8 +300,9 @@ export const delegate = memoize((scene) => {
       const renderer = createRenderer({ canvas, width, height });
       positionCamera({
         camera,
-        vector3: { z: -0.325 },
+        vector3: { z: -0.1, y: -0.01 },
       });
+      camera.rotation.x = X_ROTATION_OFFSET;
       startRenderLoop({
         scene3D,
         camera,

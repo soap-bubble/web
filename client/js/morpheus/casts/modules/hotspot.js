@@ -1,4 +1,4 @@
-import THREE, {
+import {
   DoubleSide,
   BufferAttribute,
   Uint16BufferAttribute,
@@ -8,7 +8,6 @@ import THREE, {
   Face3,
   Mesh,
   Scene,
-  Raycaster,
   Vector3,
   Object3D,
 } from 'three';
@@ -38,6 +37,7 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
+  actions as castActions,
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
@@ -116,7 +116,7 @@ export const selectors = memoize((scene) => {
   };
 });
 
-const HOTSPOT_VERTEX_SIZE = 4;
+const X_ROTATION_OFFSET = -0.038;
 const SCALE_FACTOR = 1.0;
 const HOTSPOT_X_OFFSET = Math.PI / 3;
 const HOTSPOT_X_COORD_FACTOR = Math.PI / -1800;
@@ -322,45 +322,6 @@ export function setHotspotsTheta({
   return theta;
 }
 
-export function setHotspotsVisibility(visible) {
-  // return (dispatch, getState) => {
-  //   const { hotspot, pano } = getState();
-  //   const { visible: currentVisible } = hotspot;
-  //   if (visible === currentVisible) return;
-  //
-  //   const { scene3D } = pano;
-  //   const { visibleObject3D } = hotspot;
-  //
-  //   if (visible === true) {
-  //     scene3D.add(visibleObject3D);
-  //   } else if (visible === false) {
-  //     scene3D.remove(visibleObject3D);
-  //   } else {
-  //     return;
-  //   }
-  //
-  //   dispatch({
-  //     type: HOTSPOTS_SET_VISIBILITY,
-  //     payload: visible,
-  //   });
-  // };
-}
-
-export function setHoverIndex(index) {
-  // return (dispatch, getState) => {
-  //   const { hotspot } = getState();
-  //   const { hoverIndex, data } = hotspot;
-  //   if (index !== null && hoverIndex !== index) {
-  //     dispatch({
-  //       type: HOTSPOTS_HOVER_INDEX,
-  //       payload: index,
-  //     });
-  //     const { cursorShapeWhenActive: morpheusCursor } = data[index];
-  //     dispatch(gameActions.setCursor(morpheusCursor));
-  //   }
-  // }
-}
-
 function createScene(...objects) {
   const scene = new Scene();
   objects.forEach(o => scene.add(o));
@@ -461,8 +422,9 @@ export const delegate = memoize((scene) => {
         const renderer = createRenderer({ canvas, width, height });
         positionCamera({
           camera,
-          vector3: { z: -0.325 },
+          vector3: { z: -0.325, y: -0.01 },
         });
+        camera.rotation.x = X_ROTATION_OFFSET;
         startRenderLoop({
           scene3D,
           camera,
@@ -515,26 +477,19 @@ export const actions = memoize((scene) => {
     return (dispatch, getState) => {
       const scene3D = selectors(scene).scene3D(getState());
       dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-      activatedHotspots.every(hotspot =>
-        // const gamestates = gamestateSelectors.gamestates(getState());
-         dispatch(gamestateActions.handleHotspot({ hotspot })),
-        // if (isActive({ cast: hotspot, gamestates })) {
-        //   switch (ACTION_TYPES[hotspot.type]) {
-        //     case 'ChangeScene':
-        //     case 'DissolveTo':
-        //     case 'GoBack':
-        //     case 'ReturnFromHelp': {
-        //       const scene3D = selectors(scene).scene3D(getState());
-        //       dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-        //       dispatch(sceneActions.goToScene(hotspot.param1));
-        //       return false;
-        //     }
-        //     default:
-        //       return true;
-        //   }
-        // }
-        // return true;
-      );
+      activatedHotspots.every((hotspot) => {
+        const gamestates = gamestateSelectors.forState(getState());
+        if (isActive({ cast: hotspot, gamestates })) {
+          if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
+            dispatch(castActions.forScene(scene).pano.sweepTo(hotspot, () => {
+              dispatch(sceneActions.goToScene(hotspot.param1, false));
+            }));
+            return false;
+          }
+          return dispatch(gamestateActions.handleHotspot({ hotspot }));
+        }
+        return true;
+      });
     };
   }
 

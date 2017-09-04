@@ -100,24 +100,35 @@ export function startAtScene(id) {
           }));
 }
 
+let isTransitioning = false;
 export function goToScene(id, dissolve) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
-    if (currentSceneData && currentSceneData.sceneId === id) {
+
+    function doSceneTransition() {
+      isTransitioning = true;
+      return dispatch(castActions.lifecycle.doExit(currentSceneData))
+        .then(() => {
+          dispatch({
+            type: SCENE_DO_EXITING,
+            payload: {
+              sceneId: currentSceneData && currentSceneData.sceneId,
+              dissolve,
+            },
+          });
+          dispatch(inputActions.disableControl());
+          reset();
+          return dispatch(startAtScene(id))
+            .then((scene) => {
+              isTransitioning = false;
+              return scene;
+            });
+        });
+    }
+
+    if (isTransitioning || (currentSceneData && currentSceneData.sceneId === id)) {
       return Promise.resolve(currentSceneData);
     }
-    return dispatch(castActions.lifecycle.doExit(currentSceneData))
-      .then(() => {
-        dispatch({
-          type: SCENE_DO_EXITING,
-          payload: {
-            sceneId: currentSceneData && currentSceneData.sceneId,
-            dissolve,
-          },
-        });
-        dispatch(inputActions.disableControl());
-        reset();
-        return dispatch(startAtScene(id));
-      });
+    return doSceneTransition();
   };
 }

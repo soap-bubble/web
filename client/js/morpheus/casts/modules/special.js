@@ -389,7 +389,7 @@ export const delegate = memoize((scene) => {
           function onSoundEnded() {
             let startAngle;
             sound.removeEventListener('ended', onSoundEnded);
-            if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+            if (nextSceneId && nextSceneId !== 0x3FFFFFFF && !onSoundEnded.__aborted) {
               if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
                 startAngle = (angleAtEnd * Math.PI) / 1800;
                 startAngle -= Math.PI - (Math.PI / 6);
@@ -425,7 +425,7 @@ export const delegate = memoize((scene) => {
           let startAngle;
           video.removeEventListener('ended', onSoundEnded);
           if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
               startAngle = (angleAtEnd * Math.PI) / 1800;
               startAngle -= Math.PI - (Math.PI / 6);
             }
@@ -515,8 +515,11 @@ export const delegate = memoize((scene) => {
           volume: 0,
         }, 1000);
       tween.onUpdate(() => {
-        everything.forEach(({ el }) => {
-          el.volume = v.volume;
+        everything.forEach(({ el, listeners }) => {
+          if (!listeners.ended) {
+            // Only fade out sounds that do not need to finish
+            el.volume = v.volume;
+          }
         });
       });
       tween.start();
@@ -524,7 +527,13 @@ export const delegate = memoize((scene) => {
       everything.forEach(({ el, listeners }) => {
         Object.keys(listeners).forEach((eventName) => {
           const handler = listeners[eventName];
-          el.removeEventListener(eventName, handler);
+          if (eventName !== 'ended') {
+            // Ended events will clean themselves up
+            el.removeEventListener(eventName, handler);
+          } else {
+            // Used to keep handler from doing things it shouldn't
+            handler.__aborted = true;
+          }
         });
       });
       return Promise.resolve();
@@ -581,7 +590,6 @@ export const actions = memoize((scene) => {
         gesture,
       } = hotspot;
       const gestureType = GESTURES[gesture];
-      let cursor = 0;
       let isIgnored = true;
       if (type === gestureType) {
         isIgnored = dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
@@ -593,10 +601,6 @@ export const actions = memoize((scene) => {
         isIgnored = dispatch(gamestateActions.handleMouseOver({ hotspot, top, left }));
       } else if (type === 'MouseUp' || type === 'MouseLeave') {
         isIgnored = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
-      }
-      // Double negative not is ignored.  FIXME: rename variable isIgnored
-      if (!isIgnored) {
-        cursor = hotspot.cursorShapeWhenActive;
       }
       return isIgnored;
     };

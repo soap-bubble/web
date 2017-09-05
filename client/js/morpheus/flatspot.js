@@ -234,22 +234,20 @@ export default function ({ dispatch, scene }) {
           type,
           cursorShapeWhenActive,
         } = hotspot;
-        if (wasMouseDowned || wasMouseMoved) {
+        if (wasMouseUpped && type >= 5 && type <= 8) {
+          dispatch(gameActions.setOpenHandCursor());
+          return false;
+        } else if (wasMouseDowned || wasMouseMoved) {
           if (type >= 5 && type <= 8) {
             const currentCursor = gameSelectors.morpheusCursor(store.getState());
             if (currentCursor !== 10009) {
               dispatch(gameActions.setOpenHandCursor());
-              return false;
             }
+            return false;
+          } else if (cursorShapeWhenActive) {
+            dispatch(gameActions.setCursor(cursorShapeWhenActive));
+            return false;
           }
-        }
-        if (wasMouseUpped && type >= 5 && type <= 8) {
-          dispatch(gameActions.setOpenHandCursor());
-          return false;
-        }
-        if (cursorShapeWhenActive) {
-          dispatch(gameActions.setCursor(cursorShapeWhenActive));
-          return false;
         }
       }
       return true;
@@ -302,7 +300,7 @@ export default function ({ dispatch, scene }) {
     }
   }
 
-  function onTouchCancel(touchEvent) {
+  function onTouchCancel(/* touchEvent */) {
     // TODO....
   }
 

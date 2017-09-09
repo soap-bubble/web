@@ -61,4 +61,4 @@ typings/
 dist
 
 # local config files
-config/local.*
+config/local*

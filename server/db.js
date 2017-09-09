@@ -4,23 +4,26 @@ import Promise from 'bluebird';
 import createLogger from './logger';
 
 const logger = createLogger('db');
-export function db() { return mongoose; }
 
-export function init(config) {
+export default function dbInit(config) {
   mongoose.Promise = Promise;
   logger.info('Opening up connection to DB');
-  return mongoose.connect(config.mongodb.uri, {
+  const db = mongoose.createConnection(config.mongodb.uri, {
     useMongoClient: true,
     autoReconnect: true,
-  })
-    .then(() => logger.info('DB connection open'));
+  });
+
+  db.on('open', () => {
+    logger.info('Opening up connection to DB -- complete');
+  });
+  return db;
 }
 
-export function install(models) {
+export function install(db, models) {
   logger.info('Installing models to DB');
   Object.keys(models).forEach((model) => {
     const schema = models[model];
-    mongoose.model(model, schema);
+    db.model(model, schema);
   });
-  logger.info('Models installed');
+  logger.info('Installing models to DB -- complete');
 }

@@ -1,4 +1,4 @@
-import user from './user';
-import group from './group';
+import User from './user';
+import Group from './group';
 
-export { user, group };
+export { User, Group };

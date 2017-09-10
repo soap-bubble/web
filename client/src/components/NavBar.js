@@ -11,6 +11,11 @@ const NavBar = ({ page, onPageChange }) => (
       <Navbar.Toggle />
     </Navbar.Header>
     <Navbar.Collapse>
+      <Nav pullRight>
+        <LinkContainer to={'/login'}>
+          <NavItem active>Login</NavItem>
+        </LinkContainer>
+      </Nav>
       <Nav onSelect={onPageChange}>
         {page.available.map(({ label, route }) => (
           <LinkContainer key={`page:${route}`} to={`/${route}`}>

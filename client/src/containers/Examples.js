@@ -5,6 +5,7 @@ import {
 import {
   isUndefined,
 } from 'lodash';
+
 const ExampleCell = ({
   data,
 }) => {
@@ -13,19 +14,19 @@ const ExampleCell = ({
     <div className="cell example-cell">
       <a href={url}>
         <img src={img} />
-        <div className='centered'>{label}</div>
+        <div className="centered">{label}</div>
       </a>
     </div>
   );
 };
 
 const columnsToClassNameMap = {
-  [1]: 12,
-  [2]: 6,
-  [3]: 4,
-  [4]: 3,
-  [6]: 2,
-  [12]: 1,
+  1: 12,
+  2: 6,
+  3: 4,
+  4: 3,
+  6: 2,
+  12: 1,
 };
 
 const Grid = ({
@@ -47,7 +48,7 @@ const Grid = ({
   const elements = [];
   const columnClassName = `col-md-${columnsToClassNameMap[columns]}`;
   let r = 0;
-  while(!isUndefined(data[r * columns])) {
+  while (!isUndefined(data[r * columns])) {
     const row = [];
     for (let c = 0; c < columns; c++) {
       const d = data[r * columns + c];
@@ -58,7 +59,7 @@ const Grid = ({
               key={`cell:${r}:${c}`}
               data={d}
             />
-          </div>
+          </div>,
         );
       } else break;
     }
@@ -73,16 +74,14 @@ const Grid = ({
     <div className="container">
       {elements}
     </div>
-  )
-}
+  );
+};
 
 const Examples = ({
   data,
-}) => {
-  return (
-    <Grid columns={3} Cell={ExampleCell} data={data}/>
-  );
-};
+}) => (
+  <Grid columns={3} Cell={ExampleCell} data={data} />
+);
 
 function mapStateToProps({ examples }) {
   const { data } = examples;

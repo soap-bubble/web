@@ -6,13 +6,15 @@ import history from './history';
 import Page from '../components/Page';
 import About from '../components/About';
 import Examples from '../containers/Examples';
+import Login from '../containers/Login';
 
 const routes = (
-  <Router history={ history }>
+  <Router history={history}>
     <Route path="/" component={Page}>
       <IndexRedirect to="/examples" />
       <Route path="about" component={About} />
       <Route path="examples" component={Examples} />
+      <Route path="login" component={Login} />
     </Route>
   </Router>
 );

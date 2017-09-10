@@ -5,10 +5,10 @@ import {
 
 const available = [{
   route: 'about',
-  label: 'About'
+  label: 'About',
 }, {
   route: 'examples',
-  label: 'Gallery'
+  label: 'Gallery',
 }];
 
 const reducer = createReducer({

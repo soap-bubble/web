@@ -2,6 +2,11 @@
   "name": "soapbubble.online",
   "version": "1.0.0",
   "dependencies": {
+    "@types/react": {
+      "version": "16.0.5",
+      "from": "@types/react@*",
+      "resolved": "https://registry.npmjs.org/@types/react/-/react-16.0.5.tgz"
+    },
     "a-sync-waterfall": {
       "version": "1.0.0",
       "from": "a-sync-waterfall@>=1.0.0 <2.0.0",
@@ -271,6 +276,18 @@
       "version": "1.5.0",
       "from": "aws4@>=1.2.1 <2.0.0",
       "resolved": "https://registry.npmjs.org/aws4/-/aws4-1.5.0.tgz"
+    },
+    "axios": {
+      "version": "0.16.2",
+      "from": "axios@latest",
+      "resolved": "https://registry.npmjs.org/axios/-/axios-0.16.2.tgz",
+      "dependencies": {
+        "is-buffer": {
+          "version": "1.1.5",
+          "from": "is-buffer@>=1.1.5 <2.0.0",
+          "resolved": "https://registry.npmjs.org/is-buffer/-/is-buffer-1.1.5.tgz"
+        }
+      }
     },
     "axobject-query": {
       "version": "0.1.0",
@@ -2072,9 +2089,9 @@
       "resolved": "https://registry.npmjs.org/fastparse/-/fastparse-1.1.1.tgz"
     },
     "fbjs": {
-      "version": "0.8.8",
-      "from": "fbjs@>=0.8.4 <0.9.0",
-      "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.8.tgz",
+      "version": "0.8.15",
+      "from": "fbjs@>=0.8.1 <0.9.0",
+      "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.15.tgz",
       "dependencies": {
         "core-js": {
           "version": "1.2.7",
@@ -2140,6 +2157,28 @@
       "version": "1.0.2",
       "from": "flatten@>=1.0.2 <2.0.0",
       "resolved": "https://registry.npmjs.org/flatten/-/flatten-1.0.2.tgz"
+    },
+    "flux-standard-action": {
+      "version": "0.6.1",
+      "from": "flux-standard-action@>=0.6.1 <0.7.0",
+      "resolved": "https://registry.npmjs.org/flux-standard-action/-/flux-standard-action-0.6.1.tgz"
+    },
+    "follow-redirects": {
+      "version": "1.2.4",
+      "from": "follow-redirects@>=1.2.3 <2.0.0",
+      "resolved": "https://registry.npmjs.org/follow-redirects/-/follow-redirects-1.2.4.tgz",
+      "dependencies": {
+        "debug": {
+          "version": "2.6.8",
+          "from": "debug@>=2.4.5 <3.0.0",
+          "resolved": "https://registry.npmjs.org/debug/-/debug-2.6.8.tgz"
+        },
+        "ms": {
+          "version": "2.0.0",
+          "from": "ms@2.0.0",
+          "resolved": "https://registry.npmjs.org/ms/-/ms-2.0.0.tgz"
+        }
+      }
     },
     "for-in": {
       "version": "0.1.6",
@@ -3797,6 +3836,11 @@
       "resolved": "https://registry.npmjs.org/lodash._basecopy/-/lodash._basecopy-3.0.1.tgz",
       "dev": true
     },
+    "lodash._basefor": {
+      "version": "3.0.3",
+      "from": "lodash._basefor@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash._basefor/-/lodash._basefor-3.0.3.tgz"
+    },
     "lodash._bindcallback": {
       "version": "3.0.1",
       "from": "lodash._bindcallback@>=3.0.0 <4.0.0",
@@ -3881,10 +3925,20 @@
       "from": "lodash.isarray@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/lodash.isarray/-/lodash.isarray-3.0.4.tgz"
     },
+    "lodash.isplainobject": {
+      "version": "3.2.0",
+      "from": "lodash.isplainobject@>=3.2.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash.isplainobject/-/lodash.isplainobject-3.2.0.tgz"
+    },
     "lodash.keys": {
       "version": "3.1.2",
       "from": "lodash.keys@>=3.0.0 <4.0.0",
       "resolved": "https://registry.npmjs.org/lodash.keys/-/lodash.keys-3.1.2.tgz"
+    },
+    "lodash.keysin": {
+      "version": "3.0.8",
+      "from": "lodash.keysin@>=3.0.0 <4.0.0",
+      "resolved": "https://registry.npmjs.org/lodash.keysin/-/lodash.keysin-3.0.8.tgz"
     },
     "lodash.memoize": {
       "version": "4.1.2",
@@ -4742,19 +4796,16 @@
       "version": "15.5.10",
       "from": "prop-types@>=15.5.10 <16.0.0",
       "resolved": "https://registry.npmjs.org/prop-types/-/prop-types-15.5.10.tgz",
-      "dev": true,
       "dependencies": {
         "core-js": {
           "version": "1.2.7",
           "from": "core-js@>=1.0.0 <2.0.0",
-          "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz",
-          "dev": true
+          "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz"
         },
         "fbjs": {
           "version": "0.8.14",
           "from": "fbjs@>=0.8.9 <0.9.0",
-          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.14.tgz",
-          "dev": true
+          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.14.tgz"
         }
       }
     },
@@ -4860,9 +4911,26 @@
       }
     },
     "react": {
-      "version": "15.4.2",
-      "from": "react@>=15.4.1 <16.0.0",
-      "resolved": "https://registry.npmjs.org/react/-/react-15.4.2.tgz"
+      "version": "15.5.0",
+      "from": "react@15.5.0",
+      "resolved": "https://registry.npmjs.org/react/-/react-15.5.0.tgz",
+      "dependencies": {
+        "core-js": {
+          "version": "1.2.7",
+          "from": "core-js@>=1.0.0 <2.0.0",
+          "resolved": "https://registry.npmjs.org/core-js/-/core-js-1.2.7.tgz"
+        },
+        "fbjs": {
+          "version": "0.8.15",
+          "from": "fbjs@>=0.8.9 <0.9.0",
+          "resolved": "https://registry.npmjs.org/fbjs/-/fbjs-0.8.15.tgz"
+        },
+        "prop-types": {
+          "version": "15.5.0-alpha.0",
+          "from": "prop-types@15.5.0-alpha.0",
+          "resolved": "https://registry.npmjs.org/prop-types/-/prop-types-15.5.0-alpha.0.tgz"
+        }
+      }
     },
     "react-base16-styling": {
       "version": "0.4.6",
@@ -4909,9 +4977,14 @@
       "dev": true
     },
     "react-dom": {
-      "version": "15.4.2",
-      "from": "react-dom@>=15.4.1 <16.0.0",
-      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-15.4.2.tgz"
+      "version": "15.5.0",
+      "from": "react-dom@15.5.0",
+      "resolved": "https://registry.npmjs.org/react-dom/-/react-dom-15.5.0.tgz"
+    },
+    "react-google-login": {
+      "version": "2.9.3",
+      "from": "react-google-login@latest",
+      "resolved": "https://registry.npmjs.org/react-google-login/-/react-google-login-2.9.3.tgz"
     },
     "react-hot-loader": {
       "version": "3.0.0-beta.6",
@@ -5127,6 +5200,11 @@
       "from": "redux-logger@latest",
       "resolved": "https://registry.npmjs.org/redux-logger/-/redux-logger-2.8.1.tgz"
     },
+    "redux-promise": {
+      "version": "0.5.3",
+      "from": "redux-promise@latest",
+      "resolved": "https://registry.npmjs.org/redux-promise/-/redux-promise-0.5.3.tgz"
+    },
     "redux-thunk": {
       "version": "2.2.0",
       "from": "redux-thunk@latest",
@@ -5244,6 +5322,11 @@
       "version": "1.0.0",
       "from": "requires-port@>=1.0.0 <2.0.0",
       "resolved": "https://registry.npmjs.org/requires-port/-/requires-port-1.0.0.tgz"
+    },
+    "reselect": {
+      "version": "3.0.1",
+      "from": "reselect@latest",
+      "resolved": "https://registry.npmjs.org/reselect/-/reselect-3.0.1.tgz"
     },
     "resolve": {
       "version": "1.2.0",

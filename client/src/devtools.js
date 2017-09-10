@@ -7,7 +7,7 @@ export default {
   component: createDevTools(
     <DockMonitor toggleVisibilityKey="ctrl-H" changePositionKey="ctrl-Q" defaultIsVisible>
       <LogMonitor theme="tomorrow" />
-    </DockMonitor>
+    </DockMonitor>,
   ),
-  persistState
+  persistState,
 };

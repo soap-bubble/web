@@ -8,11 +8,11 @@ export default {
   asynchronousActionEventNaming: event => ([
     `${event}_PENDING`,
     `${event}_SUCCESS`,
-    `${event}_ERROR`
+    `${event}_ERROR`,
   ]),
 
   // When using `asynchronousActionHandler`
   // this function will generate a Redux state property name from an event name.
   // E.g. event `GET_USERS_ERROR` => state.`getUsersError`.
-  asynchronousActionHandlerStatePropertyNaming: underscoredToCamelCase
+  asynchronousActionHandlerStatePropertyNaming: underscoredToCamelCase,
 };

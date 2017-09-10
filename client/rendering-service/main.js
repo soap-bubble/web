@@ -1,17 +1,16 @@
-import React from 'react'
-import webpageServer from 'react-isomorphic-render/server'
-import { head, title, meta } from 'react-isomorphic-render'
-import { devtools } from 'universal-webpack'
-import path from 'path'
+import React from 'react';
+import webpageServer from 'react-isomorphic-render/server';
+import { head, title, meta } from 'react-isomorphic-render';
+import { devtools } from 'universal-webpack';
+import path from 'path';
 
-import settings from '../src/react-isomorphic-render'
+import settings from '../src/react-isomorphic-render';
 
 const FB_APP_ID = process.env.SOAPBUBBLE_FB_APP_ID || '';
 const WEB_SERVICE_PORT = 3000;
 const PAGE_SERVICE_PORT = 3002;
 
-export default function(parameters) {
-
+export default function (parameters) {
   // Starts webpage rendering server
   const server = webpageServer(settings, {
     // HTTP host and port for performing all AJAX requests
@@ -34,10 +33,10 @@ export default function(parameters) {
     assets(path) {
       // Retrieve asset chunk file names
       // (which are output by client side Webpack build)
-      const result = { ...parameters.chunks() }
+      const result = { ...parameters.chunks() };
 
       // Webpack entry point (can be used for code splitting)
-      result.entry = 'main'
+      result.entry = 'main';
 
       // // Clear Webpack require() cache for hot reload in development mode
       // // (this is not necessary)
@@ -49,7 +48,7 @@ export default function(parameters) {
       result.icon = require('../assets/img/favicon.png');
 
       // Return assets
-      return result
+      return result;
     },
 
     html: {
@@ -65,13 +64,13 @@ export default function(parameters) {
           { name: 'viewport', content: 'width=device-width, initial-scale=1.0, user-scalable=no' },
 
           // <meta property="..." content="..."/>
-          { property: 'og:title',       content: 'Soapbubble Productions' },
+          { property: 'og:title', content: 'Soapbubble Productions' },
           { property: 'og:description', content: 'The main site for the development of Soapbubble Productions title: Morpheus' },
-          { property: 'og:locale',      content: 'en_US' },
-          { property: 'og:type',        content: 'website' },
-          { property: 'og:url',         content: 'http://soapbubble.online/examples' },
-          { property: 'og:image',       content: `http://soapbubble.online${require('../assets/img/scene_100000.png')}` },
-          { property: 'fb:app_id',      content: FB_APP_ID },
+          { property: 'og:locale', content: 'en_US' },
+          { property: 'og:type', content: 'website' },
+          { property: 'og:url', content: 'http://soapbubble.online/examples' },
+          { property: 'og:image', content: `http://soapbubble.online${require('../assets/img/scene_100000.png')}` },
+          { property: 'fb:app_id', content: FB_APP_ID },
         ];
 
         // if (process.env.NODE_ENV !== 'production') {
@@ -99,17 +98,17 @@ export default function(parameters) {
             document.body.classList.add('javascript-is-enabled');
           </script>
         `;
-      }
-    }
+      },
+    },
   });
 
   // Start webpage rendering server
-  server.listen(PAGE_SERVICE_PORT, function(error) {
+  server.listen(PAGE_SERVICE_PORT, (error) => {
     if (error) {
-      console.error('Webpage rendering server shutdown due to an error')
-      throw error
+      console.error('Webpage rendering server shutdown due to an error');
+      throw error;
     }
 
-    console.log(`Webpage server is listening at http://localhost:${PAGE_SERVICE_PORT}`)
-  })
+    console.log(`Webpage server is listening at http://localhost:${PAGE_SERVICE_PORT}`);
+  });
 }

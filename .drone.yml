@@ -1,0 +1,17 @@
+pipeline:
+  build:
+    image: node:boron
+    commands:
+      - npm install
+    when:
+      branch: master
+      event: push
+
+  publish:
+    image: plugins/docker
+    registry: docker.soapbubble.online:5000
+    repo: docker.soapbubble.online:5000/soapbubble/auth
+    tag: latest
+    when:
+      branch: master
+      event: push

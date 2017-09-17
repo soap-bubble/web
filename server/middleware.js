@@ -39,7 +39,6 @@ export default function installMiddleware(app, db, config, createLogger) {
       .catch(done);
   });
 
-
   app.use(cors(config.cors));
   app.use(bodyParser.json(config.bodyParser.json));
   app.use(bodyParser.urlencoded({

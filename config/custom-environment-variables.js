@@ -10,7 +10,10 @@ module.exports = {
   },
   domain: 'AUTH_DOMAIN',
   cors: {
-    origin: 'CORS_ORIGIN',
+    origin: {
+      __name: 'CORS_ORIGIN',
+      __format: 'json',
+    },
   },
   passport: {
     strategies: {

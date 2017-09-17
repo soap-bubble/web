@@ -6,5 +6,5 @@ WORKDIR /opt/app
 COPY . /opt/app
 ENV NODE_ENV=production
 RUN npm run build
-CMD npm run production
+CMD npm start
 EXPOSE 4000

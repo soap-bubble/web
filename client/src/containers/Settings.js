@@ -11,23 +11,17 @@ import {
   actions as loginActions,
 } from '../modules/Login';
 
-class Login extends React.Component {
-  componentDidUpdate() {
-    const { isLoggedIn, handleLoggedIn } = this.props;
-
-    if (isLoggedIn) {
-      handleLoggedIn();
-    }
-  }
-
+class Settings extends React.Component {
   render() {
-    const { isLoggedIn } = this.props
-    if (!isLoggedIn) {
+    const { isLoggedIn, onSignOut } = this.props
+    if (isLoggedIn) {
       return <div
         className="container"
       >
         <div className="centered">
-          <GoogleLogin />
+          <Button onClick={onSignOut}>
+            Sign out
+          </Button>
         </div>
       </div>;
     }
@@ -44,8 +38,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    handleLoggedIn() {
-      dispatch(redirect('/examples'));
+    onSignOut() {
+      dispatch(loginActions.logout());
     }
   };
 }
@@ -53,4 +47,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(Login);
+)(Settings);

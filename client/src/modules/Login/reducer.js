@@ -1,6 +1,8 @@
 import {
   INIT,
   START,
+  LOGIN,
+  LOGOUT,
   SUCCESS,
   FAILURE,
 } from './actionTypes';
@@ -33,6 +35,35 @@ export default function loginReducer(state = defaultState, { type: action, paylo
       return {
         ...state,
         initStatus: false,
+      };
+    }
+    case `${LOGIN}_PENDING`: {
+      return {
+        ...state,
+        initStatus: 'pending',
+      };
+    }
+    case `${LOGIN}_SUCCESS`: {
+      return {
+        ...state,
+        initStatus: 'success',
+        loggedIn: true,
+        user: result,
+      };
+    }
+    case `${LOGIN}_ERROR`: {
+      return {
+        ...state,
+        initStatus: 'error',
+        loggedIn: false,
+      };
+    }
+    case `${LOGOUT}_SUCCESS`: {
+      return {
+        ...state,
+        initStatus: false,
+        loggedIn: false,
+        user: {},
       };
     }
     case START: {

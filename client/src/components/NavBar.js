@@ -1,9 +1,18 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
 import { LinkContainer } from 'react-router-bootstrap';
 
-const NavBar = ({ page, onPageChange }) => (
-  <Navbar inverse collapseOnSelect>
+const NavBar = ({ onInit, page, onPageChange, rightToolbar }) => (
+  <Navbar
+    ref={(el) => {
+      if (el) {
+        onInit();
+      }
+    }}
+    inverse
+    collapseOnSelect
+  >
     <Navbar.Header>
       <Navbar.Brand>
         <a href="/about">Soapbubble</a>
@@ -12,9 +21,7 @@ const NavBar = ({ page, onPageChange }) => (
     </Navbar.Header>
     <Navbar.Collapse>
       <Nav pullRight>
-        <LinkContainer to={'/login'}>
-          <NavItem active>Login</NavItem>
-        </LinkContainer>
+        {rightToolbar}
       </Nav>
       <Nav onSelect={onPageChange}>
         {page.available.map(({ label, route }) => (
@@ -26,5 +33,21 @@ const NavBar = ({ page, onPageChange }) => (
     </Navbar.Collapse>
   </Navbar>
 );
+
+NavBar.propTypes = {
+  page: PropTypes.string,
+  onPageChange: PropTypes.func.isRequired,
+  onInit: PropTypes.func,
+  rightToolbar: PropTypes.oneOfType([
+    PropTypes.node,
+    PropTypes.element,
+  ]),
+};
+
+NavBar.defaultProps = {
+  page: '',
+  rightToolbar: '',
+  onInit: () => {},
+};
 
 export default NavBar;

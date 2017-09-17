@@ -71,7 +71,7 @@ const Grid = ({
     r++;
   }
   return (
-    <div className="container">
+    <div className="container examples">
       {elements}
     </div>
   );

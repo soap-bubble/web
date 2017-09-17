@@ -9,6 +9,8 @@ import { timing } from './utils/analytics';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import 'bootstrap/dist/css/bootstrap-theme.min.css';
 import '../assets/styles/main.scss';
+import '../assets/styles/main.less';
+import 'bootstrap-social/bootstrap-social.css';
 
 require('react-responsive-ui/styles/react-responsive-ui.css');
 

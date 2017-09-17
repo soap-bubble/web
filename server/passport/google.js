@@ -103,6 +103,27 @@ export default function (db, config, createLogger) {
               },
             })
               .then(user => {
+                if (!user) {
+                  const { email, name: displayName } = payload;
+                  logger.info('No user found', { email, displayName });
+                  const User = db.model('User');
+                  const userModel = new User({
+                    emails: [{
+                      emailType: 'account',
+                      value: email,
+                    }],
+                    displayName,
+                    profiles: [{
+                      providerType: 'google',
+                      id: userid,
+                    }],
+                  });
+                  logger.info('Saving new user', { userModel });
+                  return userModel.save().then(() => {
+                    logger.info('Saving new user model -- complete');
+                    return userModel;
+                  });
+                }
                 logger.info('Found user', { id: user.id });
                 if (user.profiles.find(p => p.providerType == 'google').id === userid) {
                   logger.info('success');

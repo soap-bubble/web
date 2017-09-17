@@ -123,6 +123,10 @@ export default function (db, config, createLogger) {
                     logger.info('Saving new user model -- complete');
                     this.success(userModel);
                     return userModel;
+                  })
+                  .catch(err => {
+                    logger.error('Failed to save new user');
+                    this.fail(userModel);
                   });
                 }
                 logger.info('Found user', { id: user.id });

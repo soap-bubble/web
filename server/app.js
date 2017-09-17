@@ -4,6 +4,7 @@ import createLogger from './logger';
 import $, { define, init } from './factory';
 import * as models from './model';
 import routes from './routes';
+import passport from './passport';
 import middleware from './middleware';
 import db, { install as installDb } from './db';
 
@@ -34,5 +35,6 @@ function createAppListener(app) {
 Promise.resolve()
   .then(() => $(installDb))
   .then(() => $(createAppListener))
+  .then(() => $(passport))
   .then(() => $(middleware))
   .then(() => $(routes));

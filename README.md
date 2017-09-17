@@ -3,3 +3,5 @@
 # Authorization Server for Soapbuble.online
 
 Because for some reason I thought have a stand-alone auth server would be a great idea
+
+# Auth flow

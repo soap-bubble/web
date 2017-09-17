@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Soapbubble Login</title>
+    <script src="https://apis.google.com/js/platform.js?onload=onInit" async defer></script>
+    <style>
+      .centered {
+        margin: 0 auto;
+        width: 120px;
+      }
+    </style>
+    <script>
+    function onInit() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init({
+          client_id: '<%- googleClientId %>',
+        })
+          .then(auth2 => {
+            if (!auth2.isSignedIn.get()) {
+              window.parent.postMessage({
+                isLoggedIn: false,
+              }, '*');
+            }
+          });
+      });
+    }
+    function onSignIn(googleUser) {
+      var id_token = googleUser.getAuthResponse().id_token;
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '<%- tokenSignIn %>');
+      xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+      xhr.onload = function(event) {
+        if (event.currentTarget.status === 200) {
+          const user = JSON.parse(event.currentTarget.responseText);
+          window.parent.postMessage({
+            isLoggedIn: true,
+            user: user,
+          }, '*');
+        } else {
+          window.parent.postMessage({
+            isLoggedIn: false,
+          }, '*');
+        }
+      };
+      xhr.send('idtoken=' + id_token);
+    }
+    </script>
+    <meta name="google-signin-client_id" content="<%- googleClientId %>">
+  </head>
+  <body>
+    <div class="g-signin2 centered" data-onsuccess="onSignIn"></div>
+  </body>
+</html>

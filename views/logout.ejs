@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Soapbubble Logout</title>
+    <script src="https://apis.google.com/js/platform.js?onload=onInit" async defer></script>
+    <script>
+    function onInit() {
+      gapi.load('auth2', function() {
+        gapi.auth2.init({
+          client_id: '<%- googleClientId %>',
+        })
+          .then(auth2 => {
+            if (auth2.isSignedIn.get()) {
+              auth2.signOut().then(function () {
+                window.parent.postMessage({
+                  isSignedOut: true,
+                }, '*');
+              })
+                .catch(() => {
+                  window.parent.postMessage({
+                    isSignedOut: false,
+                  }, '*');
+                });
+            } else {
+              window.parent.postMessage({
+                isSignedOut: true,
+              }, '*');
+            }
+          });
+      });
+    }
+    </script>
+  </head>
+</html>

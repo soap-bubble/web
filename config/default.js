@@ -5,13 +5,13 @@ module.exports = {
     saveUninitialized: false,
     resave: false,
     cookie: {
-      httpOnly: true,
     },
   },
   passport: {
     strategies: {
       google: {
-        callbackURL: '/googleOauthCallback',
+        callbackURL: '/api/google/callback',
+        passReqToCallback: true,
       },
     },
   },

@@ -1,4 +1,5 @@
-import User from './user';
-import Group from './group';
-
-export { User, Group };
+export { default as AccessToken } from './accessToken';
+export { default as AuthorizationCode } from './authorizationCode';
+export { default as Client } from './client';
+export { default as Group } from './group';
+export { default as User } from './user';

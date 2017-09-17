@@ -121,6 +121,7 @@ export default function (db, config, createLogger) {
                   logger.info('Saving new user', { userModel });
                   return userModel.save().then(() => {
                     logger.info('Saving new user model -- complete');
+                    this.success(userModel);
                     return userModel;
                   });
                 }

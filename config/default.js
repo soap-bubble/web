@@ -10,7 +10,6 @@ module.exports = {
   passport: {
     strategies: {
       google: {
-        callbackURL: '/api/google/callback',
         passReqToCallback: true,
       },
     },

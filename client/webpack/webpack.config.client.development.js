@@ -1,7 +1,7 @@
 import webpack from 'webpack';
 import baseConfiguration from './webpack.config.client';
 
-const WEBPACK_DEV_SERVER_PORT = 3001
+const WEBPACK_DEV_SERVER_PORT = 3001;
 
 const configuration = baseConfiguration({ development: true, css_bundle: true }, { devtool: 'source-map' });
 
@@ -12,9 +12,9 @@ configuration.plugins.push(
   new webpack.DefinePlugin({
     'process.env': {
       NODE_ENV: JSON.stringify('development'),
-      BABEL_ENV: JSON.stringify('development/client')
+      BABEL_ENV: JSON.stringify('development/client'),
     },
-    REDUX_DEVTOOLS : false  // enable/disable redux-devtools
+    REDUX_DEVTOOLS: false, // enable/disable redux-devtools
   }),
 
   // faster code reload on changes
@@ -31,7 +31,7 @@ configuration.plugins.push(
 configuration.entry.main = [
   `webpack-hot-middleware/client?path=http://localhost:${WEBPACK_DEV_SERVER_PORT}/__webpack_hmr`,
   'react-hot-loader/patch',
-  configuration.entry.main
+  configuration.entry.main,
 ];
 
 // network path for static files: fetch all statics from webpack development server

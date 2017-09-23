@@ -1,8 +1,8 @@
 import path from 'path';
 
-import webpack            from 'webpack';
-import baseConfiguration  from './webpack.config.client';
-import CleanPlugin        from 'clean-webpack-plugin';
+import webpack from 'webpack';
+import baseConfiguration from './webpack.config.client';
+import CleanPlugin from 'clean-webpack-plugin';
 
 // With `development: false` all CSS will be extracted into a file
 // named '[name]-[contenthash].css' using `extract-text-webpack-plugin`
@@ -20,26 +20,26 @@ configuration.plugins = configuration.plugins.concat(
   new webpack.DefinePlugin({
     'process.env': {
       // Useful to reduce the size of client-side libraries, e.g. react
-      NODE_ENV: JSON.stringify('production') // 'development' to see non-minified React errors
+      NODE_ENV: JSON.stringify('production'), // 'development' to see non-minified React errors
     },
 
     // Just so that it doesn't throw "_development_tools_ is not defined"
-    REDUX_DEVTOOLS: false
+    REDUX_DEVTOOLS: false,
   }),
 
   // For production mode
   // https://moduscreate.com/webpack-2-tree-shaking-configuration/
   new webpack.LoaderOptionsPlugin({
     minimize: true,
-    debug: false
+    debug: false,
   }),
 
   // Compresses javascript files
   new webpack.optimize.UglifyJsPlugin({
     compress: {
-      warnings: false
-    }
-  })
+      warnings: false,
+    },
+  }),
 );
 
 export default configuration;

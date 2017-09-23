@@ -33,13 +33,13 @@
   },
   "betterScripts": {
     "production:client:rendering-service": {
-      "command": "node ./client/rendering-service/entry.js",
+      "command": "node ./client/rendering-service/entry.js"
     },
     "production:api": {
-      "command": "node ./api/entry.js",
+      "command": "node ./api/entry.js"
     },
     "production:webserver": {
-      "command": "node ./webserver/entry.js",
+      "command": "node ./webserver/entry.js"
     },
     "development:client:rendering-service": {
       "command": "nodemon ./client/rendering-service/entry.js --watch ./client/rendering-service --watch ./client/build/server",

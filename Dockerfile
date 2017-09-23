@@ -4,7 +4,5 @@ RUN cd /tmp && npm install
 RUN mkdir -p /opt/app && cp -a /tmp/node_modules /opt/app/
 WORKDIR /opt/app
 COPY . /opt/app
-ENV NODE_ENV=production
-RUN npm run build
-CMD npm start
+CMD npm run build && npm start
 EXPOSE 4000

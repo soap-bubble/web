@@ -2,7 +2,7 @@ pipeline:
   build:
     image: node:boron
     commands:
-      - npm install
+      - npm install --quiet
     when:
       branch: master
       event: push
@@ -17,17 +17,27 @@ pipeline:
       branch: master
       event: push
 
-
+  finish:
+    image: z3cka/drone-cli
+    environment:
+     - COMMIT_SHA=${DRONE_COMMIT_SHA:0:7}
+     - DRONE_TOKEN=${DRONE_TOKEN}
+     - DRONE_SERVER=https://drone.soapbubble.online
+    commands:
+     - drone deploy soap-bubble/auth.soapbubble.online ${COMMIT_SHA} staging
+    when:
+      branch: master
+      event: push
 
   publish_to_staging:
     image: peloton/drone-rancher
     environment:
-       - RANCHER_ENVIRONMENT=soapbubble-staging
+     - RANCHER_ENVIRONMENT=soapbubble-staging
     url: https://rancher2.soapbubble.online
     service: www/auth
     confirm: true
     start_first: true
-    docker_image: docker.soapbubble.online:5000/soapbubble/auth:${DRONE_COMMIT_SHA}
+    docker_image: docker.soapbubble.online:5000/soapbubble/auth:${DRONE_COMMIT_SHA:0:7}
     secrets: [ rancher_access_key, rancher_secret_key ]
     when:
       event: deployment

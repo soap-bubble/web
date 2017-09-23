@@ -2,7 +2,7 @@
 import path from 'path';
 import webservice from 'web-service';
 
-const WEB_SERVICE_PORT = 8060;
+const WEB_SERVICE_PORT = process.env.PORT || 8060;
 const PAGE_SERVICE_PORT = 3002;
 const API_SERVICE_PORT = 4000;
 

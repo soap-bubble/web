@@ -16,10 +16,10 @@
     "development:client:rendering-service:build:prepare": "universal-webpack --settings ./client/webpack/universal-webpack-settings.js --config ./client/webpack/webpack.config.js prepare",
     "development:client:build": "babel-node ./client/webpack/webpack-dev-server.js",
     "development:client:rendering-service:build": "webpack --config ./client/webpack/webpack.config.server.development.babel.js --watch --colors --display-error-details",
-    "development:api": "nodemon ./api/entry.js --watch ./api",
-    "development:client:rendering-service": "nodemon ./client/rendering-service/entry.js --watch ./client/rendering-service --watch ./client/build/server",
+    "development:api": "better-npm-run development:api",
+    "development:client:rendering-service": "better-npm-run development:client:rendering-service",
     "development:client:rendering-service:delayed": "npm-run-all delay development:client:rendering-service",
-    "development:webserver": "nodemon ./webserver/entry.js --watch ./webserver",
+    "development:webserver": "better-npm-run development:webserver",
     "development:webserver:delayed": "npm-run-all delay delay development:webserver",
     "development:services": "npm-run-all --parallel development:client:rendering-service:delayed development:webserver:delayed",
     "delay": "node ./sleep 500",
@@ -34,20 +34,29 @@
   "betterScripts": {
     "production:client:rendering-service": {
       "command": "node ./client/rendering-service/entry.js",
-      "env": {
-        "NODE_ENV": "production"
-      }
     },
     "production:api": {
       "command": "node ./api/entry.js",
-      "env": {
-        "NODE_ENV": "production"
-      }
     },
     "production:webserver": {
       "command": "node ./webserver/entry.js",
+    },
+    "development:client:rendering-service": {
+      "command": "nodemon ./client/rendering-service/entry.js --watch ./client/rendering-service --watch ./client/build/server",
       "env": {
-        "NODE_ENV": "production"
+        "NODE_ENV": "development"
+      }
+    },
+    "development:api": {
+      "command": "nodemon ./api/entry.js --watch ./api",
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    "development:webserver": {
+      "command": "nodemon ./webserver/entry.js --watch ./webserver",
+      "env": {
+        "NODE_ENV": "development"
       }
     }
   },

@@ -11,7 +11,7 @@ pipeline:
     image: plugins/docker
     registry: docker.soapbubble.online:5000
     repo: docker.soapbubble.online:5000/soapbubble/auth
-    tag: ${DRONE_COMMIT_SHA}
+    tag: ${DRONE_COMMIT_SHA:0:7}
     secrets: [ docker_username, docker_password ]
     when:
       branch: master
@@ -23,7 +23,8 @@ pipeline:
       - COMMIT_SHA=${DRONE_COMMIT_SHA:0:7}
       - DRONE_TOKEN=${DRONE_TOKEN}
       - DRONE_SERVER=https://drone.soapbubble.online
-    secrets: [ drone_token ]
+    commands:
+       - drone deploy soap-bubble/auth.soapbubble.online ${COMMIT_SHA} staging
      when:
        branch: master
        event: push

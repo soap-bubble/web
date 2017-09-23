@@ -24,7 +24,6 @@ pipeline:
       - DRONE_TOKEN=${DRONE_TOKEN}
       - DRONE_SERVER=https://drone.soapbubble.online
     secrets: [ drone_token ]
-
      when:
        branch: master
        event: push

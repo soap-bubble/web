@@ -19,13 +19,12 @@ pipeline:
       event: push
 
   finish:
-    image: z3cka/drone-cli
+    image: captemulation/drone-cli
     environment:
-     - COMMIT_SHA=${DRONE_COMMIT_SHA:0:7}
      - DRONE_TOKEN=${DRONE_TOKEN}
      - DRONE_SERVER=https://drone.soapbubble.online
     commands:
-     - drone deploy soap-bubble/auth.soapbubble.online ${COMMIT_SHA} staging
+     - drone deploy ${DRONE_REPO} ${DRONE_COMMIT_SHA:0:7} staging
     when:
       branch: master
       event: push

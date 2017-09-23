@@ -18,17 +18,6 @@ pipeline:
       branch: master
       event: push
 
-  finish:
-    image: captemulation/drone-cli
-    environment:
-     - DRONE_TOKEN=${DRONE_TOKEN}
-     - DRONE_SERVER=https://drone.soapbubble.online
-    commands:
-     - drone deploy ${DRONE_REPO} ${DRONE_COMMIT_SHA:0:7} staging
-    when:
-      branch: master
-      event: push
-
   publish_to_staging:
     image: peloton/drone-rancher
     environment:
@@ -40,5 +29,5 @@ pipeline:
     docker_image: docker.soapbubble.online:5000/soapbubble/auth:${DRONE_COMMIT_SHA:0:7}
     secrets: [ rancher_access_key, rancher_secret_key ]
     when:
-      event: deployment
-      environment: staging
+      branch: master
+      event: push

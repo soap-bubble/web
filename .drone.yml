@@ -17,15 +17,7 @@ pipeline:
       branch: master
       event: push
 
-  finish:
-    image: z3cka/drone-cli
-    environment:
-      - COMMIT_SHA=${DRONE_COMMIT_SHA:0:7}
-      - DRONE_TOKEN=${DRONE_TOKEN}
-      - DRONE_SERVER=https://drone.soapbubble.online
-     when:
-       branch: master
-       event: push
+
 
   publish_to_staging:
     image: peloton/drone-rancher

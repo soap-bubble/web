@@ -1,11 +1,12 @@
 pipeline:
-  build:
-    image: node:boron
-    commands:
-      - npm install --quiet
-    when:
-      branch: master
-      event: push
+  # Disabled until needed (e.g. tests)
+  # build:
+  #   image: node:boron
+  #   commands:
+  #     - npm install --quiet
+  #   when:
+  #     branch: master
+  #     event: push
 
   publish:
     image: plugins/docker

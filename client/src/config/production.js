@@ -1,3 +1,3 @@
 module.exports = {
-  authServer: 'https://soapbubble.online/auth',
+  authServer: 'https://auth.soapbubble.online',
 };

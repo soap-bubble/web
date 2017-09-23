@@ -24,8 +24,7 @@ pipeline:
       - DRONE_TOKEN=${DRONE_TOKEN}
       - DRONE_SERVER=https://drone.soapbubble.online
     secrets: [ drone_token ]
-    commands:
-       - drone deploy soap-bubble/auth.soapbubble.online ${COMMIT_SHA} staging
+
      when:
        branch: master
        event: push

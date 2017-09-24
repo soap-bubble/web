@@ -21,7 +21,7 @@ pipeline:
   publish_to_staging:
     image: peloton/drone-rancher
     environment:
-     - RANCHER_ENVIRONMENT=staging
+     - RANCHER_ENVIRONMENT=soapbubble-staging
     url: https://rancher2.soapbubble.online
     service: www/auth
     timeout: 60

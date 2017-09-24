@@ -8,10 +8,7 @@ const user = new Schema({
   }],
   displayName: String,
   profiles: [{ providerType: String, id: String }],
+  settings: Schema.Types.Mixed,
 });
-
-user.methods.byId = function userById(id) {
-  return this.model('User').findOne({ _id: id });
-};
 
 export default user;

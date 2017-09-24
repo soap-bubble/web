@@ -33,6 +33,21 @@ export const height = createSelector(
   game,
   _game => _game.height,
 );
+export const location = createSelector(
+  game,
+  _game => _game.location,
+);
+export const style = createSelector(
+  width,
+  height,
+  location,
+  (w, h, l) => ({
+    width: `${w}px`,
+    height: `${h}px`,
+    left: `${l.x}px`,
+    top: `${l.y}px`,
+  }),
+);
 export const sensitivity = createSelector(
   game,
   _game => _game.sensitivity,

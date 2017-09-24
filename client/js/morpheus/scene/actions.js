@@ -87,10 +87,6 @@ export function startAtScene(id) {
           }))
           .then(() => dispatch(castActions.lifecycle.onStage(scene)))
           .then(() => {
-            dispatch(gameActions.resize({
-              width: window.innerWidth,
-              height: window.innerHeight,
-            }));
             dispatch({
               type: SCENE_DO_ENTER,
               payload: scene.sceneId,

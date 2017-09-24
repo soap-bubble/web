@@ -11,6 +11,7 @@ import {
 } from 'morpheus/casts';
 import {
   actions as gameActions,
+  selectors as gameSelectors,
 } from 'morpheus/game';
 import store from 'store';
 
@@ -26,11 +27,17 @@ export default function ({
   let wasMouseMoved = false;
   let wasMouseUpped = false;
 
-  function update({ left, top }) {
+  function update({ clientX, clientY }) {
     if (!document.hidden) {
-      const canvas = castSelectors.forScene(scene).hotspot.canvas(store.getState());
-      const scene3D = castSelectors.forScene(scene).hotspot.scene3D(store.getState());
-      const camera = castSelectors.forScene(scene).hotspot.camera(store.getState());
+      const state = store.getState();
+      const canvas = castSelectors.forScene(scene).hotspot.canvas(state);
+      const scene3D = castSelectors.forScene(scene).hotspot.scene3D(state);
+      const camera = castSelectors.forScene(scene).hotspot.camera(state);
+      const location = gameSelectors.location(state);
+
+      const top = clientY - location.y;
+      const left = clientX - location.x;
+      dispatch(gameActions.setCursorLocation({ top, left }));
       // Convert mouse coordinates to x, y clamped between -1 and 1.  Also invert y
       const y = (((canvas.height - top) / canvas.height) * 2) - 1;
       const x = (((left - canvas.width) / canvas.width) * 2) + 1;
@@ -82,10 +89,7 @@ export default function ({
   }
 
   function rememberEvent(mouseEvent) {
-    // Grab these right away because of react event object pooling
-    //  See https://fb.me/react-event-pooling
-    const { clientX: left, clientY: top } = mouseEvent;
-    update({ left, top });
+    update(mouseEvent);
   }
 
   function onTouchStart(touchEvent) {
@@ -124,7 +128,6 @@ export default function ({
   function onMouseMove(mouseEvent) {
     const { clientX: left, clientY: top } = mouseEvent;
     wasMouseMoved = true;
-    dispatch(gameActions.setCursorLocation({ top, left }));
     rememberEvent(mouseEvent);
   }
 

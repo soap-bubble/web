@@ -15,11 +15,12 @@ const transparentPano = qs.parse(location.search).transparentPano;
 
 function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
+  const canvas = selector.pano.canvas(state);
+  const style = gameSelectors.style(state);
 
   return {
-    canvas: selector.pano.canvas(state),
-    width: gameSelectors.width(state),
-    height: gameSelectors.height(state),
+    canvas,
+    style,
   };
 }
 
@@ -46,8 +47,7 @@ function mapDispatchToProps(dispatch, { scene }) {
 
 const Pano = ({
   canvas,
-  width,
-  height,
+  style,
   onMouseUp,
   onMouseMove,
   onMouseDown,
@@ -71,8 +71,7 @@ const Pano = ({
     onTouchEnd={onTouchEnd}
     onTouchCancel={onTouchCancel}
     style={{
-      width: `${width}px`,
-      height: `${height}px`,
+      ...style,
       cursor: 'none',
       opacity: transparentPano ? 0.5 : null,
     }}

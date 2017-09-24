@@ -51,6 +51,7 @@ const reducer = createReducer(
     cursorImg: null,
     width: 800,
     height: 480,
+    location: { x: 0, y: 0 },
     removeOnSceneEnd: {},
     sensitivity: 50,
     controlType: 'touch',
@@ -90,11 +91,12 @@ const reducer = createReducer(
     [ADD_ONTOUCHEND]: reducerForType('onTouchEnd'),
     [ADD_ONTOUCHCANCEL]: reducerForType('onTouchCancel'),
     [DIMENSIONS_RESIZE](windowState, { payload }) {
-      const { width, height } = payload;
+      const { width, height, location } = payload;
       return {
         ...windowState,
         width,
         height,
+        location,
       };
     },
     [GAME_SET_VOLUME](game, { payload: volume }) {

@@ -153,7 +153,29 @@ export function setCursorLocation({ top, left }) {
   };
 }
 
-export function resize({ width, height }) {
+const ORIGINAL_HEIGHT = 400;
+const ORIGINAL_WIDTH = 640;
+const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+
+export function resize({
+  width: reqWidth = null,
+  height: reqHeight = null,
+} = {}) {
+  let horizontalPadding = 0;
+  let verticalPadding = 0;
+  let width = reqWidth || window.innerWidth;
+  let height = reqHeight || window.innerHeight;
+  if (width / height > ORIGINAL_ASPECT_RATIO) {
+    // Need to add padding to sides
+    const widthOffset = width - (height * ORIGINAL_ASPECT_RATIO);
+    width = width - widthOffset;
+    horizontalPadding = widthOffset / 2;
+  } else {
+    // Need to add padding to top and bottom
+    const heightOffset = height - (width / ORIGINAL_ASPECT_RATIO);
+    height = height - heightOffset;
+    verticalPadding = heightOffset / 2;
+  }
   function setSize({ camera, renderer }) {
     if (camera && renderer) {
       renderer.setSize(width, height);
@@ -167,6 +189,10 @@ export function resize({ width, height }) {
       payload: {
         width,
         height,
+        location: {
+          x: horizontalPadding,
+          y: verticalPadding,
+        },
       },
     });
     const scene = sceneSelectors.currentSceneData(getState());

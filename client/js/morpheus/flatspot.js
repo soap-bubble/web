@@ -73,12 +73,13 @@ export default function ({ dispatch, scene }) {
     return cursor;
   }
 
-  function updateState({ top, left }) {
+  function updateState({ clientX, clientY }) {
     const state = store.getState();
     const inputEnabled = inputSelectors.enabled(state);
     if (!inputEnabled) {
       return;
     }
+    const location = gameSelectors.location(state);
     const hotspots = castSelectorForScene.special.hotspotData(state);
     const isCurrent = sceneSelectors.currentSceneData(state) === scene;
     const isExiting = castSelectorForScene.isExiting(state);
@@ -87,6 +88,10 @@ export default function ({ dispatch, scene }) {
       return;
     }
     const nowActiveHotspots = [];
+    const left = clientX - location.x;
+    const top = clientY - location.y;
+    // Update cursor location
+    dispatch(gameActions.setCursorLocation({ top, left }));
 
     const newWidth = gameSelectors.width(store.getState());
     const newHeight = gameSelectors.height(store.getState());
@@ -260,43 +265,39 @@ export default function ({ dispatch, scene }) {
     dispatch(castActionsForScene.special.update(scene));
   }
 
-  function onMouseDown({ clientX: left, clientY: top }) {
+  function onMouseDown(mouseEvent) {
     wasMouseDowned = true;
-    updateState({ top, left });
+    updateState(mouseEvent);
   }
 
-  function onMouseMove({ clientX: left, clientY: top }) {
-    dispatch(gameActions.setCursorLocation({ top, left }));
+  function onMouseMove(mouseEvent) {
     wasMouseMoved = true;
-    updateState({ top, left });
+    updateState(mouseEvent);
   }
 
-  function onMouseUp({ clientX: left, clientY: top }) {
+  function onMouseUp(mouseEvent) {
     wasMouseUpped = true;
-    updateState({ top, left });
+    updateState(mouseEvent);
   }
 
   function onTouchStart({ touches }) {
     if (touches.length) {
-      const { clientX: left, clientY: top } = touches[0];
       wasMouseDowned = true;
-      updateState({ top, left });
+      updateState(touches[0]);
     }
   }
 
   function onTouchMove({ touches }) {
     if (touches.length) {
-      const { clientX: left, clientY: top } = touches[0];
       wasMouseMoved = true;
-      updateState({ top, left });
+      updateState(touches[0]);
     }
   }
 
   function onTouchEnd({ touches }) {
     if (touches.length) {
-      const { clientX: left, clientY: top } = touches[0];
       wasMouseUpped = true;
-      updateState({ top, left });
+      updateState(touches[0]);
     }
   }
 

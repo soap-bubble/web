@@ -9,5 +9,7 @@ pipeline:
   publish:
     image: plugins/npm
     secrets: [ npm_username, npm_password, npm_email ]
+    commands:
+     - npm publish
     when:
       event: tag

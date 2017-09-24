@@ -1,5 +1,6 @@
 import { createSelector } from 'reselect';
 import { get } from 'lodash';
+
 export default function (root) {
   const isLoggedIn = createSelector(
     root,

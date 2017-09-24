@@ -8,6 +8,7 @@ import About from '../components/About';
 import Examples from '../containers/Examples';
 import Login from '../containers/Login';
 import Settings from '../containers/Settings';
+import { Page as User } from '../modules/User';
 import Privacy from '../containers/Privacy';
 
 const routes = (
@@ -18,6 +19,7 @@ const routes = (
       <Route path="examples" component={Examples} />
       <Route path="login" component={Login} />
       <Route path="settings" component={Settings} />
+      <Route path="user/:category" component={User} />
       <Route path="privacy" component={Privacy} />
     </Route>
   </Router>

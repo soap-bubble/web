@@ -1,5 +1,5 @@
 import React from 'react';
-import SettingsLeftPanel from '../containers/SettingsLeftPanel';
+import UserSectionSelectionLeft from '../containers/UserSectionSelectionLeft';
 
 const Page = ({
   active,
@@ -7,7 +7,7 @@ const Page = ({
   <div className="container">
     <div className="row">
       <div className="col-lg-4 col-xl-3 col-md-12">
-        <SettingsLeftPanel activeKey={active} />
+        <UserSectionSelectionLeft activeKey={active} />
       </div>
       <div className="col-lg-8 col-xl-9 col-md-12">
         Content

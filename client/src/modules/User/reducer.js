@@ -4,6 +4,24 @@ import {
 
 const defaultState = {
   settings: {
+    profile: {
+      title: 'Profile',
+      forms: [{
+        label: 'Alias',
+        type: 'input-text-line',
+        help: 'Who are you?',
+        keyPath: 'username',
+      }, {
+        label: 'Anonymous',
+        type: 'input-checkbox',
+        help: 'Check to opt out of all personally identifying information storage',
+        keyPath: 'anonymous',
+      }],
+      data: {
+        username: '',
+        anonymous: false,
+      }
+    },
     saves: {
       title: 'Saves',
       data: {

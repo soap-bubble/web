@@ -5,9 +5,10 @@ import { connect } from 'react-redux';
 import * as User from '../../User';
 import SelectionList from '../../../components/SelectionList';
 
-function mapStateToProps(state) {
+function mapStateToProps(state, {
+  activeKey: startKey,
+}) {
   const delegate = User.selectors.delegate(state);
-  const startKey = User.selectors.categories(state) ? User.selectors.categories(state)[0] : '';
   const rowData = User.selectors.rowData(state);
   return {
     delegate,
@@ -19,7 +20,7 @@ function mapStateToProps(state) {
 function mapDisptachToProps(dispatch) {
   return {
     onSelect(selectedSection) {
-      redirect(`/user/${selectedSection}`);
+      dispatch(redirect(`/user/${selectedSection}`));
     },
   };
 }

@@ -39,7 +39,8 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     onSignOut() {
-      dispatch(loginActions.logout());
+      dispatch(loginActions.logout())
+        .then(dispatch(redirect('/')));
     }
   };
 }

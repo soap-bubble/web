@@ -1,3 +1,4 @@
+import config from '../config';
 import createReducer from './createReducer';
 import scene1230 from '../../assets/img/scene_1230.png';
 import scene1050 from '../../assets/img/scene_1050.png';
@@ -15,51 +16,51 @@ import scene100000 from '../../assets/img/scene_100000.png';
 const reducer = createReducer({
   data: [{
     label: 'Intro',
-    url: '//morpheus.soapbubble.online/?scene=100000',
+    url: `${config.morpheusServer}/?scene=100000`,
     img: scene100000,
   }, {
     label: 'Exterior Bridge',
-    url: '//morpheus.soapbubble.online/?scene=1050',
+    url: `${config.morpheusServer}/?scene=1050`,
     img: scene1050,
   }, {
     label: 'Globe',
-    url: '//morpheus.soapbubble.online/?scene=1230',
+    url: `${config.morpheusServer}/?scene=1230`,
     img: scene1230,
   }, {
     label: 'Bedroom',
-    url: '//morpheus.soapbubble.online/?scene=3120',
+    url: `${config.morpheusServer}/?scene=3120`,
     img: scene3120,
   }, {
     label: 'Grand Stairway',
-    url: '//morpheus.soapbubble.online/?scene=2350',
+    url: `${config.morpheusServer}/?scene=2350`,
     img: scene2350,
   }, {
     label: 'Ship Stern',
-    url: '//morpheus.soapbubble.online/?scene=2620',
+    url: `${config.morpheusServer}/?scene=2620`,
     img: scene2620,
   }, {
     label: 'Herbarium',
-    url: '//morpheus.soapbubble.online/?scene=3060',
+    url: `${config.morpheusServer}/?scene=3060`,
     img: scene3060,
   }, {
     label: 'Movie Theatre',
-    url: '//morpheus.soapbubble.online/?scene=3910',
+    url: `${config.morpheusServer}/?scene=3910`,
     img: scene3910,
   }, {
     label: 'Water Front',
-    url: '//morpheus.soapbubble.online/?scene=532013',
+    url: `${config.morpheusServer}/?scene=532013`,
     img: scene8500,
   }, {
     label: 'Voodoo',
-    url: '//morpheus.soapbubble.online/?scene=532014',
+    url: `${config.morpheusServer}/?scene=532014`,
     img: scene7030,
   }, {
     label: 'Harem',
-    url: '//morpheus.soapbubble.online/?scene=532012',
+    url: `${config.morpheusServer}/?scene=532012`,
     img: scene532012,
   }, {
     label: 'Carnival',
-    url: '//morpheus.soapbubble.online/?scene=532011',
+    url: `${config.morpheusServer}/?scene=532011`,
     img: scene8010,
   }],
 }, {

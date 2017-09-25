@@ -10,6 +10,7 @@ pipeline:
     image: plugins/npm
     username: soapbubble
     email: mmorpheus.twitch.dev@gmail.com
+    access: public
     secrets: [ npm_password ]
     when:
       event: tag

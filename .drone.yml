@@ -8,7 +8,7 @@ pipeline:
 
   publish:
     image: plugins/npm
-    username: captemulation
+    username: soapbubble
     email: mmorpheus.twitch.dev@gmail.com
     secrets: [ npm_password ]
     when:

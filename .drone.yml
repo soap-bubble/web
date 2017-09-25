@@ -10,7 +10,6 @@ pipeline:
     image: plugins/npm
     username: captemulation
     email: mmorpheus.twitch.dev@gmail.com
-    tag: ${DRONE_TAG}
     secrets: [ npm_password ]
     when:
       event: tag

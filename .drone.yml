@@ -8,6 +8,9 @@ pipeline:
 
   publish:
     image: plugins/npm
-    secrets: [ npm_username, npm_password, npm_email ]
+    username: captemulation
+    email: mmorpheus.twitch.dev@gmail.com
+    tag: ${DRONE_TAG}
+    secrets: [ npm_password ]
     when:
       event: tag

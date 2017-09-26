@@ -1,8 +1,8 @@
 {
-  "presets": ["stage-0", "react", "es2015"],
+  "presets": ["react", "env"],
   "plugins": [
-    "transform-decorators-legacy",
-    ["inline-json-import", {}],
+    "transform-export-extensions",
+    "transform-object-rest-spread",
     ["module-resolver", {
       "root": ["./client/js"]
     }]

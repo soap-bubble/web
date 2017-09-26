@@ -1,23 +1,29 @@
 const webpack = require('webpack');
 const path = require('path');
-
+// cheap-module-eval-source-map
 module.exports = {
   target: 'web',
   entry: {
     app: './client/js/app.jsx',
     vendor: [
+      'axios',
       'lodash',
-      'three',
+      'bluebird',
+      'query-string',
+      'immutable',
+      'raf',
       'react',
-      'react-redux',
       'redux',
       'react-dom',
-      'raf',
+      'react-redux',
+      'redux-logger',
       'redux-promise',
       'redux-thunk',
-      'dis-gui',
+      'reselect',
+      'tween',
+      'three',
+      'user-agent-parser',
       'classnames',
-      'bluebird',
       'babel-polyfill',
     ],
   },
@@ -26,29 +32,31 @@ module.exports = {
     filename: '[name].bundle.js',
   },
   resolve: {
-    extensions: ['', '.js', '.jsx'],
+    extensions: ['.js', '.jsx', '.json'],
   },
   module: {
-    loaders: [
+    rules: [
       {
         test: /\.jsx?$/,
         include: [
           path.resolve(__dirname, 'client', 'js'),
-          path.resolve(__dirname, 'node_modules', 'dis-gui'),
         ],
-        loader: 'babel-loader',
-      }, {
-        test: /\.json$/,
-        loader: 'json',
+        use: ['babel-loader'],
       },
       {
         test: /\.png/,
-        loader: 'url-loader?limit=10000&mimetype=image/png',
+        use: {
+          loader: 'url-loader',
+          options: {
+            limit: 10000,
+            mimetype: 'image/png',
+          },
+        },
       },
     ],
   },
   plugins: [
-    new webpack.optimize.CommonsChunkPlugin('vendor', 'vendor.bundle.js'),
+    new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: 'vendor.bundle.js' }),
     new webpack.DefinePlugin({
       'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
     }),

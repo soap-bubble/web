@@ -2,6 +2,7 @@ import createReducer from 'utils/createReducer';
 import {
   DISABLE_CONTROL,
   ENABLE_CONTROL,
+  KEY_INPUT,
 } from './actionTypes';
 
 const inputDefaults = {
@@ -23,6 +24,12 @@ const reducer = createReducer(
       return {
         ...state,
         enabled: true,
+      };
+    },
+    [KEY_INPUT](state, { payload: keyInput }) {
+      return {
+        ...state,
+        keyInput,
       };
     },
   },

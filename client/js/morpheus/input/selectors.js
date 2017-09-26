@@ -10,3 +10,8 @@ export const disabled = createSelector(
   input,
   i => !i.enabled,
 );
+
+export const pressedKey = createSelector(
+  input,
+  i => i.keyInput,
+);

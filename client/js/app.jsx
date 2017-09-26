@@ -12,7 +12,7 @@ import { actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
 import { actions as gameActions } from 'morpheus/game';
 import store from 'store';
-import Game from 'react/Game';
+import { Game } from 'morpheus/game';
 
 const qp = qs.parse(location.search);
 

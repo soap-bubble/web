@@ -1,8 +1,10 @@
 import React from 'react';
 import {
   head,
+  once,
   tail,
   reverse,
+  wrap,
 } from 'lodash';
 import { createSelector } from 'reselect';
 import {
@@ -33,7 +35,8 @@ export const createExitingSceneSelector = createSceneMapper({
   special: Special,
 });
 
-export default createSelector(
+// wrap...once creates a lazy init selector to break a circular dependency
+export default wrap(once(() => createSelector(
   sceneSelectors.currentScenesData,
   sceneSelectors.isEntering,
   sceneSelectors.isLive,
@@ -72,4 +75,6 @@ export default createSelector(
     scenes.push(<Sound key="sound" scene={current} />);
     return scenes;
   },
-);
+)), function lazyInitSelector(selectorFactory, state) {
+  return selectorFactory()(state);
+});

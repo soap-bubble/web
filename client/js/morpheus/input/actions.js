@@ -1,10 +1,14 @@
 import {
   DISABLE_CONTROL,
   ENABLE_CONTROL,
+  KEY_INPUT,
 } from './actionTypes';
 
 export function keyPress(keyCode) {
-
+  return {
+    type: KEY_INPUT,
+    payload: keyCode,
+  };
 }
 
 export function disableControl() {

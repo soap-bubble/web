@@ -19,6 +19,9 @@ Object.assign = require('object-assign');
 
 global.document = jsdom('');
 global.window = document.defaultView;
+global.location = {
+  search: '',
+};
 global.navigator = {
   userAgent: 'node.js',
 };
@@ -30,3 +33,5 @@ function copyProps(src, target) {
   Object.defineProperties(target, props);
 }
 copyProps(document.defaultView, global);
+
+global.HTMLCanvasElement = global.HTMLDivElement;

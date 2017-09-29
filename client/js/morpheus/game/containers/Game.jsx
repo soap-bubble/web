@@ -13,7 +13,7 @@ function mapStateToProps(state) {
   };
 }
 // <Mouse />
-const World = ({
+const Game = ({
   casts,
   style,
 }) => (
@@ -23,10 +23,15 @@ const World = ({
   </div>
   );
 
-World.propTypes = {
+Game.propTypes = {
   casts: PropTypes.arrayOf(PropTypes.element).isRequired,
+  style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
+};
+
+Game.defaultProps = {
+  style: {},
 };
 
 export default connect(
   mapStateToProps,
-)(World);
+)(Game);

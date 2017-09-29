@@ -168,12 +168,12 @@ export function resize({
   if (width / height > ORIGINAL_ASPECT_RATIO) {
     // Need to add padding to sides
     const widthOffset = width - (height * ORIGINAL_ASPECT_RATIO);
-    width = width - widthOffset;
+    width -= widthOffset;
     horizontalPadding = widthOffset / 2;
   } else {
     // Need to add padding to top and bottom
     const heightOffset = height - (width / ORIGINAL_ASPECT_RATIO);
-    height = height - heightOffset;
+    height -= heightOffset;
     verticalPadding = heightOffset / 2;
   }
   function setSize({ camera, renderer }) {
@@ -199,6 +199,11 @@ export function resize({
     if (scene) {
       setSize(castSelectors.forScene(scene).pano.renderElements(getState()));
       setSize(castSelectors.forScene(scene).hotspot.renderElements(getState()));
+    }
+    const canvas = gameSelectors.canvas(getState());
+    if (canvas) {
+      canvas.width = width;
+      canvas.height = height;
     }
   };
 }

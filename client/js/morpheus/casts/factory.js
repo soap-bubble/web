@@ -75,6 +75,4 @@ export default wrap(once(() => createSelector(
     scenes.push(<Sound key="sound" scene={current} />);
     return scenes;
   },
-)), function lazyInitSelector(selectorFactory, state) {
-  return selectorFactory()(state);
-});
+)), (selectorFactory, state) => selectorFactory()(state));

@@ -11,6 +11,16 @@ export const disabled = createSelector(
   i => !i.enabled,
 );
 
+export const interactionDebounce = createSelector(
+  input,
+  i => i.interactionDebounce,
+);
+
+export const sensitivity = createSelector(
+  input,
+  i => i.sensitivity,
+);
+
 export const pressedKey = createSelector(
   input,
   i => i.keyInput,

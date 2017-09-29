@@ -12,7 +12,13 @@ function mapStateToProps(state) {
     style: gameSelectors.style(state),
   };
 }
-// <Mouse />
+
+function mapDispatchToProps(/* dispatch */) {
+  return {
+
+  };
+}
+
 const Game = ({
   casts,
   style,
@@ -34,4 +40,5 @@ Game.defaultProps = {
 
 export default connect(
   mapStateToProps,
+  mapDispatchToProps,
 )(Game);

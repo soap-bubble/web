@@ -3,8 +3,8 @@ import {
   actions as castActions,
 } from 'morpheus/casts';
 import {
-  selectors as gameSelectors,
-} from 'morpheus/game';
+  selectors as inputSelectors,
+} from 'morpheus/input';
 import raf from 'raf';
 import store from 'store';
 
@@ -84,7 +84,7 @@ export default function ({ dispatch, scene }) {
   }
 
   function onInteractionMove({ left, top }) {
-    const sensitivity = gameSelectors.sensitivity(store.getState());
+    const sensitivity = inputSelectors.sensitivity(store.getState());
     if (interaction.active) {
       const interactionLastPos = last(interaction.positions);
       const speed = {
@@ -111,7 +111,7 @@ export default function ({ dispatch, scene }) {
   }
 
   function onInteractionEnd({ left, top }) {
-    const interactionDebounce = gameSelectors.interactionDebounce(store.getState());
+    const interactionDebounce = inputSelectors.interactionDebounce(store.getState());
     const interactionDistance = Math.sqrt(
       ((interaction.startPos.left - left) ** 2)
        + ((interaction.startPos.top - top) ** 2),

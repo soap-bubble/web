@@ -7,6 +7,9 @@ import {
 
 const inputDefaults = {
   enabled: true,
+  keyInput: null,
+  interactionDebounce: 5,
+  sensitivity: 50,
 };
 
 const reducer = createReducer(

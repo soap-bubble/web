@@ -25,6 +25,9 @@
     "setupFiles": [
       "<rootDir>/config/polyfills.js"
     ],
+    "watchPathIgnorePatterns": [
+      "<rootDir>//public"
+    ],
     "testMatch": [
       "<rootDir>/client/js/**/__tests__/**/*.js?(x)",
       "<rootDir>/client/js/**/?(*.)(spec|test).js?(x)"
@@ -64,7 +67,7 @@
     "gulp": "^3.9.1",
     "gulp-babel": "^6.1.2",
     "gulp-nodemon": "^2.1.0",
-    "jest": "^20.0.4",
+    "jest": "^21.2.1",
     "jsdom": "^9.12.0",
     "jsonfile": "^2.3.1",
     "minimist": "^1.2.0",

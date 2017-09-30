@@ -3,6 +3,7 @@ import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import qs from 'query-string';
+import keycode from 'keycode';
 
 // Loads all modules
 import 'morpheus';
@@ -10,9 +11,11 @@ import 'morpheus';
 // Then pull out the stuff we need
 import { actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
-import { actions as gameActions } from 'morpheus/game';
+import { Game, actions as gameActions } from 'morpheus/game';
+import {
+  actions as inputActions,
+} from 'morpheus/input';
 import store from 'store';
-import { Game } from 'morpheus/game';
 
 const qp = qs.parse(location.search);
 
@@ -40,5 +43,13 @@ window.onload = () => {
   );
   window.addEventListener('resize', () => {
     resizeToWindow();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    store.dispatch(inputActions.keyDown(keycode.names[event.which]));
+  });
+
+  document.addEventListener('keyup', (event) => {
+    store.dispatch(inputActions.keyUp(keycode.names[event.which]));
   });
 };

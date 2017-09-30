@@ -4,6 +4,7 @@ import {
   GAME_SET_CURSOR,
   DIMENSIONS_RESIZE,
   CREATE_CANVAS,
+  MENU_OPEN,
 } from './actionTypes';
 
 
@@ -16,7 +17,14 @@ const reducer = createReducer(
     width: 800,
     height: 480,
     location: { x: 0, y: 0 },
+    menuOpen: false,
   }, {
+    [MENU_OPEN](game) {
+      return {
+        ...game,
+        menuOpen: false,
+      };
+    },
     [CREATE_CANVAS](game, { payload: canvas }) {
       return {
         ...game,

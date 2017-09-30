@@ -42,7 +42,11 @@ function mapDispatchToProps(dispatch, { scene }) {
       momentumHandler[handler](event);
     };
     return memo;
-  }, {});
+  }, {
+    onKeyDown(event) {
+      dispatch(inputActions.keyPress(event.which));
+    },
+  });
 }
 
 const Pano = ({
@@ -55,6 +59,7 @@ const Pano = ({
   onTouchMove,
   onTouchEnd,
   onTouchCancel,
+  onKeyDown,
 }) => (
   <div
     className={cn('scene')}
@@ -63,6 +68,7 @@ const Pano = ({
         el.appendChild(canvas);
       }
     }}
+    onKeyDown={onKeyDown}
     onMouseDown={onMouseDown}
     onMouseMove={onMouseMove}
     onMouseUp={onMouseUp}

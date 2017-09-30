@@ -44,3 +44,12 @@ export const dimensions = createSelector(
     height: _height,
   }),
 );
+export const menuOpened = createSelector(
+  game,
+  g => g.menuOpen,
+);
+
+export const menuClosed = createSelector(
+  game,
+  g => !g.menuOpen,
+);

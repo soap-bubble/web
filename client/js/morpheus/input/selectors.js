@@ -21,7 +21,14 @@ export const sensitivity = createSelector(
   i => i.sensitivity,
 );
 
-export const pressedKey = createSelector(
+export const pressedKeys = createSelector(
   input,
-  i => i.keyInput,
+  i => i.pressedKeys,
 );
+
+export function isKeyPressed(key) {
+  return createSelector(
+    pressedKeys,
+    keys => !!keys[key],
+  );
+}

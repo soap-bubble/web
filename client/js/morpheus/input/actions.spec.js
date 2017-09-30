@@ -13,24 +13,49 @@ describe('input test suite', () => {
     const uniqueKey = uuid();
     inputHandler({
       key: uniqueKey,
-      handler: () => ({
-        type: 'test',
+      down: () => ({
+        type: 'down',
+      }),
+      up: () => ({
+        type: 'up',
       }),
     });
     const testScheduler = new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
     const action$ = new ActionsObservable(
-      testScheduler.createHotObservable('-aaab', {
+      testScheduler.createHotObservable('ab', {
         a: keyDown(uniqueKey),
         b: keyUp(uniqueKey),
       }),
     );
 
     const test$ = keyInputEpic(action$);
-    testScheduler.expectObservable(test$).toBe('-c---', {
-      c: { type: 'test' },
+    testScheduler.expectObservable(test$).toBe('ab', {
+      a: { type: 'down' },
+      b: { type: 'up' },
     });
+    testScheduler.flush();
+  });
+
+  it('handlers can not emit action', () => {
+    const uniqueKey = uuid();
+    inputHandler({
+      key: uniqueKey,
+      down: () => {},
+    });
+    const testScheduler = new TestScheduler((actual, expected) => {
+      expect(actual).toEqual(expected);
+    });
+    const action$ = new ActionsObservable(
+      testScheduler.createHotObservable('ab', {
+        a: keyDown(uniqueKey),
+        b: keyUp(uniqueKey),
+      }),
+    );
+
+    const test$ = keyInputEpic(action$);
+    testScheduler.expectObservable(test$).toBe('--');
     testScheduler.flush();
   });
 
@@ -38,7 +63,7 @@ describe('input test suite', () => {
     const uniqueKey = uuid();
     inputHandler({
       key: uniqueKey,
-      handler: () => ({
+      down: () => ({
         type: uniqueKey,
       }),
     });
@@ -64,13 +89,13 @@ describe('input test suite', () => {
     const uniqueKey2 = uuid();
     inputHandler({
       key: uniqueKey1,
-      handler: () => ({
+      down: () => ({
         type: uniqueKey1,
       }),
     });
     inputHandler({
       key: uniqueKey2,
-      handler: () => ({
+      down: () => ({
         type: uniqueKey2,
       }),
     });
@@ -78,7 +103,7 @@ describe('input test suite', () => {
       expect(actual).toEqual(expected);
     });
     const action$ = new ActionsObservable(
-      testScheduler.createHotObservable('-aaab--cd', {
+      testScheduler.createHotObservable('ab--cd', {
         a: keyDown(uniqueKey1),
         b: keyUp(uniqueKey1),
         c: keyDown(uniqueKey2),
@@ -87,7 +112,7 @@ describe('input test suite', () => {
     );
 
     const test$ = keyInputEpic(action$);
-    testScheduler.expectObservable(test$).toBe('-a-----b-', {
+    testScheduler.expectObservable(test$).toBe('a---b-', {
       a: { type: uniqueKey1 },
       b: { type: uniqueKey2 },
     });
@@ -104,24 +129,24 @@ describe('input test suite', () => {
     };
     inputHandler({
       key: uniqueKey1,
-      handler: () => type1,
+      down: () => type1,
     });
     inputHandler({
       key: uniqueKey1,
-      handler: () => type2,
+      down: () => type2,
     });
     const testScheduler = new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);
     });
     const action$ = new ActionsObservable(
-      testScheduler.createHotObservable('aaab--ab', {
+      testScheduler.createHotObservable('ab--ab', {
         a: keyDown(uniqueKey1),
         b: keyUp(uniqueKey1),
       }),
     );
 
     const test$ = keyInputEpic(action$);
-    testScheduler.expectObservable(test$).toBe('(ab)--(ab)', {
+    testScheduler.expectObservable(test$).toBe('(ab)(ab)', {
       a: type1,
       b: type2,
     });
@@ -142,15 +167,15 @@ describe('input test suite', () => {
     };
     inputHandler({
       key: uniqueKey1,
-      handler: () => type1,
+      down: () => type1,
     });
     inputHandler({
       key: uniqueKey1,
-      handler: () => type2,
+      down: () => type2,
     });
     inputHandler({
       key: uniqueKey2,
-      handler: () => type3,
+      down: () => type3,
     });
     const testScheduler = new TestScheduler((actual, expected) => {
       expect(actual).toEqual(expected);

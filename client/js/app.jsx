@@ -13,6 +13,7 @@ import { actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
 import { Game, actions as gameActions } from 'morpheus/game';
 import {
+  selectors as inputSelectors,
   actions as inputActions,
 } from 'morpheus/input';
 import store from 'store';
@@ -46,7 +47,10 @@ window.onload = () => {
   });
 
   document.addEventListener('keydown', (event) => {
-    store.dispatch(inputActions.keyDown(keycode.names[event.which]));
+    const keyName = keycode.names[event.which];
+    if (!inputSelectors.isKeyPressed(keyName)(store.getState())) {
+      store.dispatch(inputActions.keyDown(keyName));
+    }
   });
 
   document.addEventListener('keyup', (event) => {

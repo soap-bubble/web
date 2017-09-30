@@ -5,6 +5,7 @@ import {
   DIMENSIONS_RESIZE,
   CREATE_CANVAS,
   MENU_OPEN,
+  MENU_CLOSE,
 } from './actionTypes';
 
 
@@ -20,6 +21,12 @@ const reducer = createReducer(
     menuOpen: false,
   }, {
     [MENU_OPEN](game) {
+      return {
+        ...game,
+        menuOpen: true,
+      };
+    },
+    [MENU_CLOSE](game) {
       return {
         ...game,
         menuOpen: false,

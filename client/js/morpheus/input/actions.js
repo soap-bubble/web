@@ -1,4 +1,7 @@
-import { Observable } from 'rxjs';
+import 'rxjs/add/observable/of';
+import 'rxjs/add/operator/mergeMap';
+import 'rxjs/add/operator/filter';
+import { Observable } from 'rxjs/Observable';
 import createEpic from 'utils/createEpic';
 import {
   DISABLE_CONTROL,
@@ -11,21 +14,28 @@ const inputObservables = {};
 
 export const keyInputEpic = createEpic((action$, store) => action$
   .ofType(KEY_DOWN, KEY_UP)
-  .distinctUntilChanged()
-  .ofType(KEY_DOWN)
   .mergeMap((action) => {
     if (inputObservables[action.payload]) {
       return Observable.of(...inputObservables[action.payload])
+        .map((h) => {
+          if (action.type === KEY_DOWN) {
+            return h.down;
+          }
+          return h.up;
+        })
+        .filter(h => h)
         .mergeMap(handler => Observable.of(handler(action, store)));
     }
     return [];
-  }),
+  })
+  .filter(a => !!a),
 );
 
 export function inputHandler({
   key,
   keys,
-  handler,
+  down,
+  up,
 }) {
   function addKey(k, h) {
     if (!inputObservables[k]) {
@@ -34,10 +44,16 @@ export function inputHandler({
     inputObservables[k].push(h);
   }
   if (key) {
-    addKey(key, handler);
+    addKey(key, {
+      down,
+      up,
+    });
   }
   if (keys) {
-    keys.forEach(k => addKey(k, handler));
+    keys.forEach(k => addKey(k, {
+      down,
+      up,
+    }));
   }
 }
 

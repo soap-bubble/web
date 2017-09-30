@@ -12,7 +12,7 @@ module.exports = env => {
     module: {
       rules: [
         {
-          test: /\.(scss|sasss)$/,
+          test: /\.(scss|sass)$/,
           use: env.development ? ["style-loader"].concat(sassLoaders) : ExtractTextPlugin.extract({ use: sassLoaders }),
         },
         {

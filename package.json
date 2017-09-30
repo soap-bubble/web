@@ -79,6 +79,7 @@
     "sinon-chai": "^2.8.0",
     "sprintf": "^0.1.5",
     "url-loader": "^0.5.9",
+    "uuid": "https://registry.npmjs.org/uuid/-/uuid-2.0.3.tgz",
     "webpack": "^3.6.0",
     "webpack-dev-server": "^2.8.2",
     "whatwg-fetch": "^2.0.2"

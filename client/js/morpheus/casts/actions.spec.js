@@ -5,8 +5,8 @@ import {
 import 'morpheus/scene/reducer';
 // eslint-disable-next-line import/no-named-as-default, import/no-named-as-default-member
 import mockModules from 'morpheus/casts/modules/index';
-
-jest.mock('morpheus/casts/modules/index');
+// eslint-disable-next-line global-require
+jest.mock('morpheus/casts/modules/index', () => require('morpheus/casts/modules/__mocks_/index'));
 jest.mock('store/logger');
 
 describe('casts actions', () => {

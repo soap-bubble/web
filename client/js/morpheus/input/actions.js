@@ -16,8 +16,7 @@ export const keyInputEpic = createEpic((action$, store) => action$
   .mergeMap((action) => {
     if (inputObservables[action.payload]) {
       return Observable.of(...inputObservables[action.payload])
-        .mergeMap(handler => Observable.of(handler(action, store)))
-        .filter(a => !!a);
+        .mergeMap(handler => Observable.of(handler(action, store)));
     }
     return [];
   }),

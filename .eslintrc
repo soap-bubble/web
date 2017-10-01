@@ -6,7 +6,12 @@
     "no-underscore-dangle": 0,
     "no-plusplus": 0,
     "react/jsx-filename-extension": 0,
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": ["**/*.spec.js", "**/__mocks__/*.js", "**/__mocks_/*.js"]}],
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": [
+      "**/*.spec.js",
+      "**/__mocks__/*.js",
+      "**/__mocks_/*.js",
+      "webpack.config.js"
+      ]}],
   },
   "settings": {
     "import/resolver": {

@@ -8,7 +8,7 @@ import { middleware as epicMiddleware } from 'utils/createEpic';
 import loggingMiddleware from './logger';
 
 let middleware;
-// middleware = applyMiddleware(thunkMiddleware, promiseMiddleware);
+
 if (process.env.NODE_ENV === 'production') {
   middleware = applyMiddleware(
     epicMiddleware(),

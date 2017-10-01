@@ -2,7 +2,7 @@ pipeline:
   build:
     image: node:boron
     commands:
-      - npm install --quiet
+      - npm install
     when:
       event: push
 

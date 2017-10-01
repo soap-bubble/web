@@ -1,4 +1,7 @@
+import storage from 'local-storage';
+import createEpic from 'utils/createEpic';
 import {
+  actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
@@ -8,6 +11,10 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
+  actions as gamestateActions,
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
+import {
   loadAsImage,
 } from 'service/image';
 import {
@@ -15,6 +22,8 @@ import {
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
   CREATE_CANVAS,
+  SAVE,
+  LOAD,
 } from './actionTypes';
 
 import cursor10001 from '../../../image/cursors/Bigarrow.png';
@@ -207,3 +216,43 @@ export function resize({
     }
   };
 }
+
+export function saveGame() {
+  return (dispatch, getState) => {
+    const gamestate = gamestateSelectors.gamestates(getState()).toJS();
+    const currentSceneId = sceneSelectors.currentSceneId(getState());
+    const previousSceneId = sceneSelectors.previousSceneId(getState());
+    storage.set('save', {
+      gamestate,
+      currentSceneId,
+      previousSceneId,
+    });
+    dispatch({
+      type: SAVE,
+    });
+  };
+}
+
+export function loadGame() {
+  const payload = storage.get('save');
+  return {
+    type: LOAD,
+    payload,
+  };
+}
+
+export const loadGameEpic = createEpic(action$ => action$
+  .ofType(LOAD)
+  .mergeMap((action) => {
+    const {
+      payload: {
+        gamestate,
+        currentSceneId,
+      },
+    } = action;
+    return [
+      gamestateActions.inject(gamestate),
+      sceneActions.goToScene(currentSceneId),
+    ];
+  }),
+);

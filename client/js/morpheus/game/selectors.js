@@ -1,3 +1,5 @@
+import React from 'react';
+import storage from 'local-storage';
 import { createSelector } from 'reselect';
 
 export const game = state => state.game;
@@ -53,3 +55,43 @@ export const menuClosed = createSelector(
   game,
   g => !g.menuOpen,
 );
+
+export const saveData = () => storage.get('save');
+
+const menuDefinition = createSelector(
+  saveData,
+  (sd) => {
+    const menuData = [{
+      key: 'save',
+      title: 'Save',
+    }];
+    if (sd) {
+      menuData.push({
+        key: 'load',
+        title: 'Load',
+      });
+    }
+    return menuData;
+  },
+);
+
+export const menuSize = createSelector(
+  menuDefinition,
+  md => md.length,
+);
+
+export const menuDelegate = createSelector(
+    menuDefinition,
+    md => (index) => {
+      const { title, key } = md[index];
+      const content = (
+        <div className="menuListItem">
+          {title}
+        </div>
+      );
+      return {
+        key,
+        content,
+      };
+    },
+  );

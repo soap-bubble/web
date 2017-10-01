@@ -1,11 +1,13 @@
 import {
   omit,
+  mapKeys,
 } from 'lodash';
 import createReducer from 'utils/createReducer';
 import Immutable from 'immutable';
 import {
   UPDATE,
   LOAD_COMPLETE,
+  INJECT,
 } from './actionTypes';
 
 const reducer = createReducer('gamestate', Immutable.fromJS({
@@ -21,6 +23,12 @@ const reducer = createReducer('gamestate', Immutable.fromJS({
         new Immutable.Map(omit(gs, 'stateId')),
       ), gamestate,
     );
+  },
+  [INJECT](gamestate, { payload }) {
+    const immutablePayload = new Immutable.Map(payload);
+    const patchedPayload = immutablePayload
+      .mapEntries(([k, v]) => [parseInt(k, 10), new Immutable.Map(v)]);
+    return gamestate.set('idMap', patchedPayload);
   },
 });
 

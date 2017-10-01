@@ -17,6 +17,7 @@ module.exports = {
       'react-dom',
       'react-redux',
       'redux-logger',
+      'redux-observable',
       'redux-promise',
       'redux-thunk',
       'reselect',
@@ -42,6 +43,10 @@ module.exports = {
           path.resolve(__dirname, 'client', 'js'),
         ],
         use: ['babel-loader'],
+      },
+      {
+        test: /\.(scss|sass)$/,
+        use: ['style-loader', 'css-loader', 'postcss-loader', 'sass-loader'],
       },
       {
         test: /\.png/,

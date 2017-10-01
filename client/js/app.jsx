@@ -18,6 +18,8 @@ import {
 } from 'morpheus/input';
 import store from 'store';
 
+import '../css/main.scss';
+
 const qp = qs.parse(location.search);
 
 function resizeToWindow() {

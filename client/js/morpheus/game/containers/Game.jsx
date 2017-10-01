@@ -5,30 +5,30 @@ import castFactory from 'morpheus/casts/factory';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
+import Menu from '../components/Menu';
 
 function mapStateToProps(state) {
   return {
     casts: castFactory(state),
     style: gameSelectors.style(state),
-  };
-}
-
-function mapDispatchToProps(dispatch) {
-  return {
+    menuOpen: gameSelectors.menuOpened(state),
   };
 }
 
 const Game = ({
   casts,
   style,
+  menuOpen,
 }) => (
   <div style={style}>
     {casts}
     <Mouse />
+    {menuOpen ? <Menu /> : null}
   </div>
   );
 
 Game.propTypes = {
+  menuOpen: PropTypes.bool.isRequired,
   casts: PropTypes.arrayOf(PropTypes.element).isRequired,
   style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
@@ -39,5 +39,4 @@ Game.defaultProps = {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
 )(Game);

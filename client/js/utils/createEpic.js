@@ -2,19 +2,23 @@ import 'rxjs/add/operator/distinct';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/scan';
 import { combineEpics } from 'redux-observable';
+import { createEpicMiddleware } from 'redux-observable';
 
-export const _epics = [];
-let accessed = false;
+export const epics = [];
 
-export function epics() {
-  accessed = true;
-  return combineEpics(..._epics);
+let _middleware;
+
+export function middleware() {
+  if (!_middleware) {
+    _middleware = createEpicMiddleware(combineEpics(...epics));
+  }
+  return _middleware;
 }
 
 export default function createEpic(epic) {
-  if (!accessed) {
-    _epics.push(epic);
-    return epic;
+  epics.push(epic);
+  if (_middleware) {
+    _middleware.replaceEpic(combineEpics(...epics));
   }
-  throw new Error('Can not add epics once they have been loaded');
+  return epic;
 }

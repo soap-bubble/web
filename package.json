@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "webpack": "webpack",
-    "prepublish": "npm run webpack -- --env.production=true"
+    "build:production": "npm run webpack -- --env.production=true",
+    "prepublishOnly": "npm run build:production"
   },
   "files": [
     "soapbubble.css",

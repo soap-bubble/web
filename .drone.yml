@@ -3,6 +3,7 @@ pipeline:
     image: node:boron
     commands:
       - npm install --quiet
+      - npm run build:production
     when:
       event: tag
 

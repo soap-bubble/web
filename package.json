@@ -8,6 +8,10 @@
     "webpack": "webpack",
     "prepublishOnly": "npm run webpack -- --env.production=true"
   },
+  "files": [
+    "soapbubble.css",
+    "index.js"
+  ],
   "style": "soapbubble.css",
   "author": "",
   "license": "MIT",

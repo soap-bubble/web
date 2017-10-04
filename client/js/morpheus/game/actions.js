@@ -24,6 +24,8 @@ import {
   CREATE_CANVAS,
   SAVE,
   LOAD,
+  LOGGED_IN,
+  LOGIN_START,
 } from './actionTypes';
 
 import cursor10001 from '../../../image/cursors/Bigarrow.png';
@@ -92,6 +94,18 @@ function promiseCursor(id) {
     loadedCursors[realId] = loadAsImage(MORPHEUS_TO_CURSOR[realId]);
   }
   return loadedCursors[realId] || Promise.resolve(null);
+}
+
+export function login() {
+  return {
+    type: LOGIN_START,
+  };
+}
+
+export function loggedIn() {
+  return {
+    type: LOGGED_IN,
+  };
 }
 
 export function createUIOverlay() {

@@ -6,6 +6,8 @@ import {
   CREATE_CANVAS,
   MENU_OPEN,
   MENU_CLOSE,
+  LOGGED_IN,
+  LOGIN_START,
 } from './actionTypes';
 
 
@@ -58,6 +60,18 @@ const reducer = createReducer(
         ...game,
         cursor,
         cursorImg,
+      };
+    },
+    [LOGIN_START](game) {
+      return {
+        ...game,
+        isLoginStart: true,
+      };
+    },
+    [LOGGED_IN](game) {
+      return {
+        ...game,
+        isLoginStart: false,
       };
     },
   },

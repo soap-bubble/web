@@ -1,6 +1,7 @@
 import React from 'react';
 import storage from 'local-storage';
 import { createSelector } from 'reselect';
+import { login } from 'soapbubble';
 
 export const game = state => state.game;
 export const morpheusCursor = createSelector(
@@ -46,6 +47,12 @@ export const dimensions = createSelector(
     height: _height,
   }),
 );
+
+export const isLoggingIn = createSelector(
+  game,
+  g => g.isLoginStart,
+);
+
 export const menuOpened = createSelector(
   game,
   g => g.menuOpen,
@@ -60,11 +67,19 @@ export const saveData = () => storage.get('save');
 
 const menuDefinition = createSelector(
   saveData,
-  (sd) => {
-    const menuData = [{
+  login.selectors.isLoggedIn,
+  (sd, isLoggedIn) => {
+    const menuData = [];
+    if (!isLoggedIn) {
+      menuData.push({
+        key: 'login',
+        title: 'Login',
+      });
+    }
+    menuData.push({
       key: 'save',
       title: 'Save',
-    }];
+    });
     if (sd) {
       menuData.push({
         key: 'load',
@@ -81,17 +96,17 @@ export const menuSize = createSelector(
 );
 
 export const menuDelegate = createSelector(
-    menuDefinition,
-    md => (index) => {
-      const { title, key } = md[index];
-      const content = (
-        <div className="menuListItem">
-          {title}
-        </div>
-      );
-      return {
-        key,
-        content,
-      };
-    },
-  );
+  menuDefinition,
+  md => (index) => {
+    const { title, key } = md[index];
+    const content = (
+      <div className="menuListItem">
+        {title}
+      </div>
+    );
+    return {
+      key,
+      content,
+    };
+  },
+);

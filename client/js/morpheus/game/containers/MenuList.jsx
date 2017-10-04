@@ -7,6 +7,7 @@ import {
 import {
   saveGame,
   loadGame,
+  login,
 } from '../actions';
 import {
   closeMenu,
@@ -32,6 +33,9 @@ function mapDispatchToPros(dispatch) {
       } else if (key === 'load') {
         dispatch(loadGame());
         dispatch(closeMenu());
+      } else if (key === 'login') {
+        dispatch(closeMenu());
+        dispatch(login());
       }
     },
   };

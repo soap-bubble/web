@@ -6,6 +6,7 @@ import PopOver from './containers/PopOver';
 import Google from './containers/Google';
 
 const blueprint = builder({
+  selectors: rootSelector => selectorFactory(rootSelector),
   actions: $ => $(actions),
   reducer: () => reducer,
   PopOver: $ => $(PopOver),
@@ -16,6 +17,6 @@ export default function ({
   rootSelector,
 }) {
   return blueprint.construct({
-    selectors: selectorFactory(rootSelector),
+    rootSelector,
   });
 }

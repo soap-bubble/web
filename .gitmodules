@@ -1,0 +1,15 @@
+[submodule "packages/auth"]
+	path = packages/auth
+	url = git@github.com:soap-bubble/auth.git
+[submodule "packages/components"]
+	path = packages/components
+	url = git@github.com:soap-bubble/components.git
+[submodule "packages/core"]
+	path = packages/core
+	url = git@github.com:soap-bubble/core.git
+[submodule "packages/style"]
+	path = packages/style
+	url = git@github.com:soap-bubble/style.git
+[submodule "packages/morpheus"]
+	path = packages/morpheus
+	url = git@github.com:soap-bubble/morpheus.git

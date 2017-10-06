@@ -1,0 +1,9 @@
+{
+	"devDependencies": {
+		"lerna": "^2.3.1"
+	},
+	"scripts": {
+		"build:production": "lerna exec npm run build:production",
+		"start:dev": "lerna exec npm run start:dev --parallel"
+	}
+}

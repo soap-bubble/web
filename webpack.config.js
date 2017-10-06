@@ -8,9 +8,9 @@ const pathIsInside = require('path-is-inside');
 const findRoot = require('find-root');
 
 const PROPKEY_ESNEXT = 'esnext';
-const dir_js = path.resolve(__dirname, 'client/js');
+const dirJs = path.resolve(__dirname, 'client/js');
 const dirSoapbubbleComponents = path.resolve(__dirname, '../components');
-const dir_node_modules = path.resolve(__dirname, 'node_modules');
+const dirNodeModules = path.resolve(__dirname, 'node_modules');
 
 /**
  * Find package.json for file at `filepath`.
@@ -26,6 +26,7 @@ function hasPkgEsnext(filepath) {
   if (hasNextProp) {
     return hasNextProp;
   }
+  return false;
 }
 
 // cheap-module-eval-source-map
@@ -35,7 +36,7 @@ module.exports = (env) => {
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
   const webpackConfig = {
     target: 'web',
-    devtool: env.production ? null : 'source-map',
+    devtool: env.production ? false : 'source-map',
     entry: {
       app: './client/js/app.jsx',
       vendor: [
@@ -74,10 +75,8 @@ module.exports = (env) => {
         {
           test: /\.jsx?$/,
           include: [
-            path.resolve(__dirname, 'client', 'js'),
-            path.resolve(__dirname, '..', 'components'),
+            dirJs,
             filepath =>
-              pathIsInside(filepath, dir_node_modules) &&
               hasPkgEsnext(filepath),
           ],
           use: ['babel-loader'],

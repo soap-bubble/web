@@ -1,10 +1,11 @@
 {
-  "name": "webgl",
+  "name": "@soapbubble/morpheus",
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
   "scripts": {
     "test": "jest client",
+    "build:production": "npm run build:server && npm run build:client:production",
     "build:server": "babel server -d lib --copy-files",
     "build:client": "webpack --env",
     "build:client:production": "webpack --env.production=true",
@@ -98,8 +99,8 @@
     "whatwg-fetch": "^2.0.2"
   },
   "dependencies": {
-    "@soapbubble/components": "0.0.2",
-    "@soapbubble/style": "0.0.13",
+    "@soapbubble/components": "^0.1.0",
+    "@soapbubble/style": "^0.0.13",
     "axios": "^0.12.0",
     "babel-polyfill": "^6.26.0",
     "bluebird": "^3.4.7",

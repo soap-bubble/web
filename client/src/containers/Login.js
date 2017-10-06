@@ -1,10 +1,10 @@
 import React from 'react';
-import { redirect } from 'react-isomorphic-render'
+import { redirect } from 'react-isomorphic-render';
 import { connect } from 'react-redux';
 // import GoogleLogin from 'react-google-login';
 import { Button } from 'react-bootstrap';
 import config from '../config';
-import GoogleLogin from '../modules/Login/containers/Google'
+import GoogleLogin from '../modules/Login/containers/Google';
 
 import {
   selectors as loginSelectors,
@@ -21,15 +21,15 @@ class Login extends React.Component {
   }
 
   render() {
-    const { isLoggedIn } = this.props
+    const { isLoggedIn } = this.props;
     if (!isLoggedIn) {
-      return <div
+      return (<div
         className="container"
       >
         <div className="centered">
           <GoogleLogin />
         </div>
-      </div>;
+      </div>);
     }
     return null;
   }
@@ -46,7 +46,7 @@ function mapDispatchToProps(dispatch) {
   return {
     handleLoggedIn() {
       dispatch(redirect('/examples'));
-    }
+    },
   };
 }
 

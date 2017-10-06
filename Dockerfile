@@ -5,5 +5,5 @@ COPY package.json /opt/app/
 WORKDIR /opt/app
 RUN npm install --quiet
 COPY . /opt/app
-CMD npm run production
+CMD npm run start
 EXPOSE 8060

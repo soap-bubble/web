@@ -37,25 +37,23 @@ export default function (root) {
   const delegate = createSelector(
     categories,
     titles,
-    (_categories, _titles) => {
-      return function delegate(row, index) {
-        const title = _titles[index];
-        const key = _categories[index];
-        const content = (
-          <div>
-            {title}
-            <span className="pull-right">
-              >
-            </span>
-          </div>
-        );
-        return {
-          key,
-          content,
-        };
-      }
-    }
-  )
+    (_categories, _titles) => (row, index) => {
+      const title = _titles[index];
+      const key = _categories[index];
+      const content = (
+        <div>
+          {title}
+          <span className="pull-right">
+            {'>'}
+          </span>
+        </div>
+      );
+      return {
+        key,
+        content,
+      };
+    },
+  );
 
   return {
     isLoading,

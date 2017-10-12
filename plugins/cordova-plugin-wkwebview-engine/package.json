@@ -1,0 +1,97 @@
+{
+  "_args": [
+    [
+      {
+        "raw": "https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+        "scope": null,
+        "escapedName": null,
+        "name": null,
+        "rawSpec": "https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+        "spec": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+        "type": "hosted",
+        "hosted": {
+          "type": "github",
+          "ssh": "git@github.com:apache/cordova-plugin-wkwebview-engine.git#master",
+          "sshUrl": "git+ssh://git@github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+          "httpsUrl": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+          "gitUrl": "git://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+          "shortcut": "github:apache/cordova-plugin-wkwebview-engine#master",
+          "directUrl": "https://raw.githubusercontent.com/apache/cordova-plugin-wkwebview-engine/master/package.json"
+        }
+      },
+      "C:\\Users\\johnh\\Development\\web\\packages\\phonegap"
+    ]
+  ],
+  "_from": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+  "_id": "cordova-plugin-wkwebview-engine@1.1.4-dev",
+  "_inCache": true,
+  "_location": "/cordova-plugin-wkwebview-engine",
+  "_phantomChildren": {},
+  "_requested": {
+    "raw": "https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+    "scope": null,
+    "escapedName": null,
+    "name": null,
+    "rawSpec": "https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+    "spec": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+    "type": "hosted",
+    "hosted": {
+      "type": "github",
+      "ssh": "git@github.com:apache/cordova-plugin-wkwebview-engine.git#master",
+      "sshUrl": "git+ssh://git@github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+      "httpsUrl": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+      "gitUrl": "git://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+      "shortcut": "github:apache/cordova-plugin-wkwebview-engine#master",
+      "directUrl": "https://raw.githubusercontent.com/apache/cordova-plugin-wkwebview-engine/master/package.json"
+    }
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git#8d08190f1e1662d8fcef041e1b30f536422a2907",
+  "_shasum": "d16355f4a5f2abb656dca23c1a2ef2728c99c5b0",
+  "_shrinkwrap": null,
+  "_spec": "https://github.com/apache/cordova-plugin-wkwebview-engine.git#master",
+  "_where": "C:\\Users\\johnh\\Development\\web\\packages\\phonegap",
+  "author": {
+    "name": "Apache Cordova"
+  },
+  "bugs": {
+    "url": "https://issues.apache.org/jira/browse/CB"
+  },
+  "dependencies": {},
+  "description": "The official Apache Cordova WKWebView Engine Plugin",
+  "devDependencies": {
+    "eslint": "^3.19.0",
+    "eslint-config-semistandard": "^11.0.0",
+    "eslint-config-standard": "^10.2.1",
+    "eslint-plugin-import": "^2.3.0",
+    "eslint-plugin-node": "^5.0.0",
+    "eslint-plugin-promise": "^3.5.0",
+    "eslint-plugin-standard": "^3.0.1"
+  },
+  "gitHead": "8d08190f1e1662d8fcef041e1b30f536422a2907",
+  "homepage": "https://github.com/apache/cordova-plugin-wkwebview-engine#readme",
+  "keywords": [
+    "cordova",
+    "wkwebview"
+  ],
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "name": "cordova-plugin-wkwebview-engine",
+  "optionalDependencies": {},
+  "readme": "<!--\r\n# license: Licensed to the Apache Software Foundation (ASF) under one\r\n#         or more contributor license agreements.  See the NOTICE file\r\n#         distributed with this work for additional information\r\n#         regarding copyright ownership.  The ASF licenses this file\r\n#         to you under the Apache License, Version 2.0 (the\r\n#         \"License\"); you may not use this file except in compliance\r\n#         with the License.  You may obtain a copy of the License at\r\n#\r\n#           http://www.apache.org/licenses/LICENSE-2.0\r\n#\r\n#         Unless required by applicable law or agreed to in writing,\r\n#         software distributed under the License is distributed on an\r\n#         \"AS IS\" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY\r\n#         KIND, either express or implied.  See the License for the\r\n#         specific language governing permissions and limitations\r\n#         under the License.\r\n-->\r\n\r\n|AppVeyor|Travis CI|\r\n|:-:|:-:|\r\n|[![Build status](https://ci.appveyor.com/api/projects/status/github/apache/cordova-plugin-wkwebview-engine?branch=master)](https://ci.appveyor.com/project/ApacheSoftwareFoundation/cordova-plugin-wkwebview-engine)|[![Build Status](https://travis-ci.org/apache/cordova-plugin-wkwebview-engine.svg?branch=master)](https://travis-ci.org/apache/cordova-plugin-wkwebview-engine)|\r\n\r\nCordova WKWebView Engine\r\n======\r\n\r\nThis plugin makes `Cordova` use the `WKWebView` component instead of the default `UIWebView` component, and is installable only on a system with the iOS 9.0 SDK.\r\n\r\nIn iOS 9, Apple has fixed the [issue](http://www.openradar.me/18039024) present through iOS 8 where you cannot load locale files using file://, and must resort to using a local webserver. **However, you are still not able to use XHR from the file:// protocol without [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Access_control_CORS) enabled on your server.**\r\n\r\nInstallation\r\n-----------\r\n\r\nThis plugin needs cordova-ios >4.0.0.\r\n\r\nTo install the current release:\r\n\r\n    cordova create wkwvtest my.project.id wkwvtest\r\n    cd wkwvtest\r\n    cordova platform add ios@4\r\n    cordova plugin add cordova-plugin-wkwebview-engine\r\n\r\nTo test the development version:\r\n\r\n    cordova create wkwvtest my.project.id wkwvtest\r\n    cd wkwvtest\r\n    cordova platform add https://github.com/apache/cordova-ios.git#master\r\n    cordova plugin add https://github.com/apache/cordova-plugin-wkwebview-engine.git#master\r\n\r\nYou also must have at least Xcode 7 (iOS 9 SDK) installed. Check your Xcode version by running:\r\n\r\n    xcode-select --print-path\r\n\r\nRequired Permissions\r\n-----------\r\nWKWebView may not fully launch (the deviceready event may not fire) unless if the following is included in config.xml. This should already be installed by Cordova in your platform config.xml when the plugin is installed.\r\n\r\n#### config.xml\r\n\r\n```xml\r\n<feature name=\"CDVWKWebViewEngine\">\r\n  <param name=\"ios-package\" value=\"CDVWKWebViewEngine\" />\r\n</feature>\r\n\r\n<preference name=\"CordovaWebViewEngine\" value=\"CDVWKWebViewEngine\" />\r\n```\r\n\r\nNotes\r\n------\r\nThis plugin creates a shared `WKProcessPool` which ensures the cookie sharing happens correctly across `WKWebView` instances. `CDVWKProcessPoolFactory` class can be used to obtain the shared `WKProcessPool` instance if app creates `WKWebView` outside of this plugin.\r\n\r\nOn an iOS 8 system, Apache Cordova during runtime will switch to using the UIWebView engine instead of using this plugin. If you want to use WKWebView on both iOS 8 and iOS 9 platforms, you will have to resort to using a local webserver.\r\n\r\nWe have an [experimental plugin](https://github.com/apache/cordova-plugins/tree/wkwebview-engine-localhost) that does this. You would use that plugin instead of this one.\r\n\r\nApplication Transport Security (ATS) in iOS 9\r\n-----------\r\n\r\nStarting with [cordova-cli 5.4.0](https://www.npmjs.com/package/cordova), it will support automatic conversion of the [&lt;access&gt;](http://cordova.apache.org/docs/en/edge/guide/appdev/whitelist/index.html) tags in config.xml to Application Transport Security [ATS](https://developer.apple.com/library/prerelease/ios/documentation/General/Reference/InfoPlistKeyReference/Articles/CocoaKeys.html#//apple_ref/doc/uid/TP40009251-SW33) directives.\r\n\r\nUpgrade to at least version 5.4.0 of the cordova-cli to use this new functionality.\r\n\r\nEnabling Navigation Gestures (\"Swipe Navigation\")\r\n-----------\r\n\r\nIn order to allow swiping backwards and forwards in browser history like Safari does, you can set the following preference in your `config.xml`:\r\n\r\n```xml\r\n<preference name=\"AllowBackForwardNavigationGestures\" value=\"true\" />\r\n```\r\n\r\nYou can also set this preference dynamically from JavaScript:\r\n\r\n```js\r\nwindow.WkWebView.allowsBackForwardNavigationGestures(true)\r\nwindow.WkWebView.allowsBackForwardNavigationGestures(false)\r\n```\r\n\r\nLimitations\r\n--------\r\n\r\nIf you are upgrading from UIWebView, please note the limitations of using WKWebView as outlined in our [issue tracker](https://issues.apache.org/jira/issues/?jql=project%20%3D%20CB%20AND%20labels%20%3D%20wkwebview-known-issues).\r\n\r\nApple Issues\r\n-------\r\n\r\nThe `AllowInlineMediaPlayback` preference will not work because of this [Apple bug](http://openradar.appspot.com/radar?id=6673091526656000). This bug [has been fixed](https://issues.apache.org/jira/browse/CB-11452) in [iOS 10](https://twitter.com/shazron/status/745546355796389889).\r\n\r\n\r\n\r\nSupported Platforms\r\n-------------------\r\n\r\n- iOS\r\n",
+  "readmeFilename": "README.md",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/apache/cordova-plugin-wkwebview-engine.git"
+  },
+  "scripts": {
+    "eslint": "eslint src",
+    "objc-tests": "cd tests/ios && npm test",
+    "preobjc-tests": "cd tests/ios && npm install",
+    "test": "npm run eslint && npm run objc-tests"
+  },
+  "version": "1.1.4-dev"
+}

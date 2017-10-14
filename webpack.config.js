@@ -3,39 +3,61 @@ const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const config = require('config');
-const fs = require('fs');
-const pathIsInside = require('path-is-inside');
-const findRoot = require('find-root');
 
-const PROPKEY_ESNEXT = 'esnext';
 const dirJs = path.resolve(__dirname, 'client/js');
-const dirSoapbubbleComponents = path.resolve(__dirname, '../components');
-const dirNodeModules = path.resolve(__dirname, 'node_modules');
-
-/**
- * Find package.json for file at `filepath`.
- * Return `true` if it has a property whose key is `PROPKEY_ESNEXT`.
- */
-function hasPkgEsnext(filepath) {
-  const pkgRoot = findRoot(filepath);
-  const packageJsonPath = path.resolve(pkgRoot, 'package.json');
-  const packageJsonText = fs.readFileSync(packageJsonPath,
-    { encoding: 'utf-8' });
-  const packageJson = JSON.parse(packageJsonText);
-  const hasNextProp = {}.hasOwnProperty.call(packageJson, PROPKEY_ESNEXT); // (A)
-  if (hasNextProp) {
-    return hasNextProp;
-  }
-  return false;
-}
+const dirParent = path.resolve(__dirname, '../');
+const dirSharedComponents = [
+  path.join(dirParent, 'components'),
+  path.join(dirParent, 'style'),
+];
 
 // cheap-module-eval-source-map
 module.exports = (env) => {
+  const outputPath = (() => {
+    if (env.phonegap) {
+      return path.resolve(__dirname, '../phonegap/www');
+    }
+    if (env.electron) {
+      return path.resolve(__dirname, '../electron/build');
+    }
+    return path.join(__dirname, 'public');
+  })();
+
+  const publicPath = '';
+  const htmlTemplate = (() => {
+    if (env.phonegap) {
+      return 'phonegap.ejs';
+    }
+    if (env.electron) {
+      return 'electron.ejs';
+    }
+    return 'index.ejs';
+  })();
   const cssName = env.production ? 'morpheus.[contenthash].css' : 'morpheus.css';
   const jsName = env.production ? '[name].[hash].js' : '[name].js';
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
+
+  const appConfig = {
+    assetHost: '',
+    apiHost: '',
+  };
+  if (env.phonegap) {
+    if (env.production) {
+      appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
+    } else {
+      appConfig.assetHost = appConfig.apiHost = 'http://192.168.1.5:8050';
+    }
+  } else if (env.electron) {
+    if (env.production) {
+      appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
+    } else {
+      appConfig.assetHost = appConfig.apiHost = 'http://localhost:8050';
+    }
+  }
+  const target = env.electron ? 'electron-renderer' : 'web';
+
   const webpackConfig = {
-    target: 'web',
+    target,
     devtool: env.production ? false : 'source-map',
     entry: {
       app: './client/js/app.jsx',
@@ -63,8 +85,9 @@ module.exports = (env) => {
       ],
     },
     output: {
-      path: path.join(__dirname, 'public'),
+      path: outputPath,
       filename: jsName,
+      publicPath,
     },
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
@@ -74,11 +97,10 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.jsx?$/,
-          include: [
+          include: dirSharedComponents.concat([
             dirJs,
-            filepath =>
-              hasPkgEsnext(filepath),
-          ],
+          ]),
+          exclude: [/node_modules/],
           use: ['babel-loader'],
         },
         {
@@ -109,11 +131,12 @@ module.exports = (env) => {
       new HtmlWebpackPlugin({
         title: 'Morpheus',
         filename: 'index.html',
-        template: 'client/html/index.ejs',
+        template: `client/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
       }),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+        config: JSON.stringify(appConfig),
       }),
     ],
   };

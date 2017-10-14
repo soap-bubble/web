@@ -13,6 +13,9 @@
       "webpack.config.js"
       ]}],
   },
+  "globals": {
+    "config": true,
+  },
   "settings": {
     "import/resolver": {
       "babel-module": {

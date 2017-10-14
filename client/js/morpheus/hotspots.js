@@ -126,7 +126,6 @@ export default function ({
   }
 
   function onMouseMove(mouseEvent) {
-    const { clientX: left, clientY: top } = mouseEvent;
     wasMouseMoved = true;
     rememberEvent(mouseEvent);
   }

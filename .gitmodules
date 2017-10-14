@@ -13,3 +13,6 @@
 [submodule "packages/morpheus"]
 	path = packages/morpheus
 	url = git@github.com:soap-bubble/morpheus.git
+[submodule "packages/phonegap"]
+	path = packages/phonegap
+	url = git@github.com:soap-bubble/phonegap.git

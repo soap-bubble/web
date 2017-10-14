@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "lint": "eslint",
-    "build:client": "webpack --env.production=true",
+    "build:production": "webpack --env.production=true",
     "start:dev": "webpack-dev-server --env"
   },
   "author": "John Dean <john.holmes.dean@gmail.com>",
@@ -47,6 +47,6 @@
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
     "rxjs": "^5.4.3",
-    "service-builder": "^1.0.0"
+    "service-builder": "^1.0.1"
   }
 }

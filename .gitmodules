@@ -16,3 +16,6 @@
 [submodule "packages/phonegap"]
 	path = packages/phonegap
 	url = git@github.com:soap-bubble/phonegap.git
+[submodule "packages/electron"]
+	path = packages/electron
+	url = git@github.com:soap-bubble/electron.git

@@ -5,7 +5,7 @@ lernaExec(`git pull`)
 // lernaExec(`npm run preversion`)
 
 // increment version numbers accross all package.json's
-run(`lerna publish --skip-npm --skip-git --exact`)
+run(`lerna publish --skip-npm --skip-git --exact`, { stdio: 'inherit' });
 const { version, packages } = require('../lerna.json')
 const versionStr = `v${version}`
 

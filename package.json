@@ -8,7 +8,8 @@
     "test": "jest",
     "lint": "eslint",
     "build:production": "webpack --env.production=true",
-    "start:dev": "webpack-dev-server --env"
+    "start:dev": "webpack-dev-server --env",
+    "prepublishOnly": "npm run build:production"
   },
   "author": "John Dean <john.holmes.dean@gmail.com>",
   "license": "MIT",

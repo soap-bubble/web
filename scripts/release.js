@@ -1,17 +1,8 @@
 const { run, lernaExec } = require('./run')
 
-// check that we're not running through `yarn`,
-// which breaks because `npm whoami` returns nil
-try {
-  run(`npm whoami`, { useExec: true })
-} catch (err) {
-  console.warn('Cannot run as `yarn release`, must run as `npm run release`.')
-  process.exit()
-}
-
 // health check
 lernaExec(`git pull`)
-lernaExec(`npm run preversion`)
+// lernaExec(`npm run preversion`)
 
 // increment version numbers accross all package.json's
 run(`lerna publish --skip-npm --skip-git --exact`)

@@ -19,7 +19,8 @@ lernaExec(`git tag ${versionStr} -m ${versionStr}`)
 //   .filter(update => !update.private)
 //   .forEach(update => run(`lerna exec --scope ${update.name} -- npm publish --access=public`));
 
-lernaExec(`git push && git push --tags`)
+lernaExec(`git push`)
+lernaExec(`git push --tags`)
 
 // commit & push version bump at monorepo level
 run(`git add ${packages.join(' ')} lerna.json`)

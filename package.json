@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/components",
-  "version": "0.2.0",
+  "version": "1.1.1",
   "description": "Web Components for Soap Bubble Productions",
   "main": "dist/index.js",
   "esnext": "src/index.js",
@@ -34,7 +34,7 @@
     "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
-    "@soapbubble/style": "0.0.14",
+    "@soapbubble/style": "1.1.1",
     "axios": "^0.16.2",
     "lodash": "^4.17.4",
     "prop-types": "^15.5.10",

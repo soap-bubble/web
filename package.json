@@ -1,7 +1,8 @@
 {
-  "name": "electron-quick-start",
+  "name": "@soapbubble/electron",
   "version": "1.0.0",
   "description": "A minimal Electron application",
+  "private": true,
   "main": "main.js",
   "scripts": {
     "start": "electron ."

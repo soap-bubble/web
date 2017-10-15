@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "main": "lib/index.js",
+  "private": true,
   "scripts": {
     "test": "jest client",
     "build:production": "npm run build:server && npm run build:client:production",

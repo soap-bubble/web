@@ -11,6 +11,7 @@ import {
 } from '../actions';
 import {
   closeMenu,
+  openSettings,
 } from '../commands';
 
 import './MenuList.scss';
@@ -34,8 +35,11 @@ function mapDispatchToPros(dispatch) {
         dispatch(loadGame());
         dispatch(closeMenu());
       } else if (key === 'login') {
-        dispatch(closeMenu());
         dispatch(login());
+        dispatch(closeMenu());
+      } else if (key === 'settings') {
+        dispatch(openSettings());
+        dispatch(closeMenu());
       }
     },
   };

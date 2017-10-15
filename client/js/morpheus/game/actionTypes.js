@@ -8,3 +8,5 @@ export const SAVE = 'GAME_SAVE';
 export const LOAD = 'GAME_LOAD';
 export const LOGIN_START = 'GAME_LOGIN_START';
 export const LOGGED_IN = 'GAME_LOGGED_IN';
+export const SETTINGS_OPEN = 'GAME_SETTINGS_OPEN';
+export const SETTINGS_CLOSE = 'GAME_SETTINGS_CLOSE';

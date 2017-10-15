@@ -6,13 +6,15 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import Menu from '../components/Menu';
-import Login from '../components/Login';
+import Login from './Login';
+import Settings from './Settings';
 
 function mapStateToProps(state) {
   return {
     casts: castFactory(state),
     style: gameSelectors.style(state),
     menuOpen: gameSelectors.menuOpened(state),
+    settingsOpen: gameSelectors.settingsOpened(state),
     isLoggingIn: gameSelectors.isLoggingIn(state),
   };
 }
@@ -21,15 +23,18 @@ const Game = ({
   casts,
   style,
   menuOpen,
+  settingsOpen,
   isLoggingIn,
 }) => {
-  let menu = null;
+  const menu = [];
   if (menuOpen) {
-    if (isLoggingIn) {
-      menu = <Login />;
-    } else {
-      menu = <Menu />;
-    }
+    menu.push(<Menu />);
+  }
+  if (isLoggingIn) {
+    menu.push(<Login />);
+  }
+  if (settingsOpen) {
+    menu.push(<Settings />);
   }
   return (<div style={style}>
     {casts}
@@ -41,6 +46,7 @@ const Game = ({
 Game.propTypes = {
   isLoggingIn: PropTypes.bool.isRequired,
   menuOpen: PropTypes.bool.isRequired,
+  settingsOpen: PropTypes.bool.isRequired,
   casts: PropTypes.arrayOf(PropTypes.element).isRequired,
   style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };

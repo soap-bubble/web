@@ -1,4 +1,4 @@
-.loginModal {
+.settingsModal {
   position: absolute;
   border-radius: 10px;
   padding: 20px;
@@ -8,4 +8,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
+}
+
+.settingsCloseButton {
+  cursor: pointer;
+  user-select: none;
+  font-weight: bold;
+  font-size: 22px;
 }

@@ -3,10 +3,14 @@ import {
 } from 'morpheus/input';
 import {
   menuClosed,
+  settingsClosed,
+  settingsOpened,
 } from './selectors';
 import {
   MENU_OPEN,
   MENU_CLOSE,
+  SETTINGS_OPEN,
+  SETTINGS_CLOSE,
 } from './actionTypes';
 
 export function openMenu() {
@@ -21,12 +25,38 @@ export function closeMenu() {
   };
 }
 
+export function openSettings() {
+  return {
+    type: SETTINGS_OPEN,
+  };
+}
+
+export function closeSettings() {
+  return {
+    type: SETTINGS_CLOSE,
+  };
+}
+
 inputActions.inputHandler({
   key: 'esc',
   down(_, store) {
-    if (menuClosed(store.getState())) {
+    const state = store.getState();
+    if (settingsOpened(state)) {
+      return closeSettings();
+    }
+    if (menuClosed(state)) {
       return openMenu();
     }
     return closeMenu();
+  },
+});
+
+inputActions.inputHandler({
+  key: 's',
+  down(_, store) {
+    if (settingsClosed(store.getState())) {
+      return openSettings();
+    }
+    return closeSettings();
   },
 });

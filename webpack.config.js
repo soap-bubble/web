@@ -40,18 +40,22 @@ module.exports = (env) => {
   const appConfig = {
     assetHost: '',
     apiHost: '',
+    authServer: 'https://auth.soapbubble.online',
   };
+  // authServer: 'https://auth.soapbubble.online',
   if (env.phonegap) {
     if (env.production) {
       appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
     } else {
       appConfig.assetHost = appConfig.apiHost = 'http://192.168.1.5:8050';
+      appConfig.authServer = 'http://192.168.1.5:4000';
     }
   } else if (env.electron) {
     if (env.production) {
       appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
     } else {
       appConfig.assetHost = appConfig.apiHost = 'http://localhost:8050';
+      appConfig.authServer = 'http://localhost:4000';
     }
   }
   const target = env.electron ? 'electron-renderer' : 'web';

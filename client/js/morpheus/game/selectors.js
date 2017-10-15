@@ -2,6 +2,7 @@ import React from 'react';
 import storage from 'local-storage';
 import { createSelector } from 'reselect';
 import { login } from 'soapbubble';
+import VolumeSlider from './containers/VolumeSlider';
 
 export const game = state => state.game;
 export const morpheusCursor = createSelector(
@@ -27,6 +28,10 @@ export const height = createSelector(
 export const location = createSelector(
   game,
   _game => _game.location,
+);
+export const volume = createSelector(
+  game,
+  _game => _game.volume,
 );
 export const style = createSelector(
   width,
@@ -63,6 +68,16 @@ export const menuClosed = createSelector(
   g => !g.menuOpen,
 );
 
+export const settingsClosed = createSelector(
+  game,
+  g => !g.settingsOpen,
+);
+
+export const settingsOpened = createSelector(
+  game,
+  g => g.settingsOpen,
+);
+
 export const saveData = () => storage.get('save');
 
 const menuDefinition = createSelector(
@@ -86,6 +101,10 @@ const menuDefinition = createSelector(
         title: 'Load',
       });
     }
+    menuData.push({
+      key: 'settings',
+      title: 'Settings',
+    });
     return menuData;
   },
 );
@@ -98,7 +117,8 @@ export const menuSize = createSelector(
 export const menuDelegate = createSelector(
   menuDefinition,
   md => (index) => {
-    const { title, key } = md[index];
+    const item = md[index];
+    const { title, key } = item;
     const content = (
       <div className="menuListItem">
         {title}

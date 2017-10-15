@@ -1,6 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { login } from 'soapbubble';
+import './Login.scss';
 
 const Login = ({
   onLogin,

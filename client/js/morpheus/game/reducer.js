@@ -8,6 +8,8 @@ import {
   MENU_CLOSE,
   LOGGED_IN,
   LOGIN_START,
+  SETTINGS_OPEN,
+  SETTINGS_CLOSE,
 } from './actionTypes';
 
 
@@ -21,6 +23,8 @@ const reducer = createReducer(
     height: 480,
     location: { x: 0, y: 0 },
     menuOpen: false,
+    settingsOpen: false,
+    volume: 100,
   }, {
     [MENU_OPEN](game) {
       return {
@@ -32,6 +36,18 @@ const reducer = createReducer(
       return {
         ...game,
         menuOpen: false,
+      };
+    },
+    [SETTINGS_OPEN](game) {
+      return {
+        ...game,
+        settingsOpen: true,
+      };
+    },
+    [SETTINGS_CLOSE](game) {
+      return {
+        ...game,
+        settingsOpen: false,
       };
     },
     [CREATE_CANVAS](game, { payload: canvas }) {

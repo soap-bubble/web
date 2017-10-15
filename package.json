@@ -1,5 +1,5 @@
 {
-  "name": "auth.soapbubble.online",
+  "name": "@soapbubble/auth",
   "version": "1.0.0",
   "description": "Authorization server for soapbubble.online",
   "main": "dist/index.js",

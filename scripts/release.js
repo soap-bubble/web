@@ -14,7 +14,10 @@ lernaExec(`git commit -am v${version}`)
 lernaExec(`git tag ${versionStr} -m ${versionStr}`)
 
 // push packages to npm & github
-lernaExec(`npm publish --access=public`)
+const updated = JSON.parse(run('lerna updated --json'));
+updated
+  .filter(update => !update.private)
+  .forEach(update => run(`lerna exec --scope ${update.name} -- npm publish --access=public`));
 
 lernaExec(`git push && git push --tags`)
 

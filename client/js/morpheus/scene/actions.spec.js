@@ -1,4 +1,5 @@
 import 'morpheus/scene';
+import 'morpheus/game';
 import store from 'store';
 import * as actions from './actions';
 import './matchers';

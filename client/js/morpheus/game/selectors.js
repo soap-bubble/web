@@ -1,12 +1,8 @@
+import React from 'react';
+import storage from 'local-storage';
 import { createSelector } from 'reselect';
-
-const MORPHEUS_TO_HTML_CURSOR = {
-  10001: 'alias',
-  10002: 'pointer',
-  10005: 'alias',
-  10008: '-webkit-grab',
-  10009: '-webkit-grabbing',
-};
+import { login } from 'soapbubble';
+import VolumeSlider from './containers/VolumeSlider';
 
 export const game = state => state.game;
 export const morpheusCursor = createSelector(
@@ -21,10 +17,6 @@ export const canvas = createSelector(
   game,
   _game => _game.canvas,
 );
-export const volume = createSelector(
-  game,
-  _game => _game.volume,
-);
 export const width = createSelector(
   game,
   _game => _game.width,
@@ -33,17 +25,24 @@ export const height = createSelector(
   game,
   _game => _game.height,
 );
-export const sensitivity = createSelector(
+export const location = createSelector(
   game,
-  _game => _game.sensitivity,
+  _game => _game.location,
 );
-export const controlType = createSelector(
+export const volume = createSelector(
   game,
-  _game => _game.controlType,
+  _game => _game.volume,
 );
-export const interactionDebounce = createSelector(
-  game,
-  _game => _game.interactionDebounce,
+export const style = createSelector(
+  width,
+  height,
+  location,
+  (w, h, l) => ({
+    width: `${w}px`,
+    height: `${h}px`,
+    left: `${l.x}px`,
+    top: `${l.y}px`,
+  }),
 );
 export const dimensions = createSelector(
   width,
@@ -52,4 +51,82 @@ export const dimensions = createSelector(
     width: _width,
     height: _height,
   }),
+);
+
+export const isLoggingIn = createSelector(
+  game,
+  g => g.isLoginStart,
+);
+
+export const menuOpened = createSelector(
+  game,
+  g => g.menuOpen,
+);
+
+export const menuClosed = createSelector(
+  game,
+  g => !g.menuOpen,
+);
+
+export const settingsClosed = createSelector(
+  game,
+  g => !g.settingsOpen,
+);
+
+export const settingsOpened = createSelector(
+  game,
+  g => g.settingsOpen,
+);
+
+export const saveData = () => storage.get('save');
+
+const menuDefinition = createSelector(
+  saveData,
+  login.selectors.isLoggedIn,
+  (sd, isLoggedIn) => {
+    const menuData = [];
+    if (!isLoggedIn) {
+      menuData.push({
+        key: 'login',
+        title: 'Login',
+      });
+    }
+    menuData.push({
+      key: 'save',
+      title: 'Save',
+    });
+    if (sd) {
+      menuData.push({
+        key: 'load',
+        title: 'Load',
+      });
+    }
+    menuData.push({
+      key: 'settings',
+      title: 'Settings',
+    });
+    return menuData;
+  },
+);
+
+export const menuSize = createSelector(
+  menuDefinition,
+  md => md.length,
+);
+
+export const menuDelegate = createSelector(
+  menuDefinition,
+  md => (index) => {
+    const item = md[index];
+    const { title, key } = item;
+    const content = (
+      <div className="menuListItem">
+        {title}
+      </div>
+    );
+    return {
+      key,
+      content,
+    };
+  },
 );

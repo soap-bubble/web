@@ -1,18 +1,19 @@
-import { isUndefined, set, mapValues } from 'lodash';
+import { get, set, mapValues } from 'lodash';
 
 const _reducer = {};
+
 export function reducer(state, action) {
-  return mapValues(_reducer, (r, key) => r(state, key, action));
+  return mapValues(_reducer, (r, key) => r(get(state, key), action));
+}
+
+export function install(keyPath, r) {
+  set(_reducer, keyPath, r);
 }
 
 export default function createReducer(keyPath, initialState, handlers) {
-  const r = (parentState = {}, stateKey, action = {}) => {
-    let state = stateKey ? parentState[stateKey] : undefined;
-    if (isUndefined(state)) {
-      state = initialState;
-    }
+  const r = (state = initialState, action = {}) => {
     if (Object.prototype.hasOwnProperty.call(handlers, action.type)) {
-      return handlers[action.type](state, action, parentState);
+      return handlers[action.type](state, action);
     }
     return state;
   };

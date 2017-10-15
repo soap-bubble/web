@@ -1,4 +1,3 @@
-import store from 'store';
 import {
   actions,
 } from 'morpheus/casts';
@@ -6,6 +5,7 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import 'morpheus/scene/reducer';
+import store from 'store';
 
 jest.mock('store/logger');
 jest.mock('service/scene');

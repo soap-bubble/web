@@ -1,8 +1,5 @@
 import { fetchInitial as fetchInitialGameState } from 'service/gameState';
 import {
-  actions as castActions,
-} from 'morpheus/casts';
-import {
   actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
@@ -12,18 +9,24 @@ import {
 } from 'morpheus/gamestate';
 import {
   actions as gameActions,
-  selectors as gameSelectors,
 } from 'morpheus/game';
-import store from 'store';
 
 import {
   API_ERROR,
   LOAD_COMPLETE,
   UPDATE,
+  INJECT,
 } from './actionTypes';
 import {
   ACTION_TYPES,
 } from '../constants';
+
+export function inject(gamestates) {
+  return {
+    type: INJECT,
+    payload: gamestates,
+  };
+}
 
 export function gameStateLoadComplete(responseData) {
   return {
@@ -285,19 +288,3 @@ export function handleHotspot({ hotspot }) {
     return true;
   };
 }
-
-window.updategs = (gamestateId, value) => {
-  store.dispatch(updateGameState(gamestateId, value));
-  store
-    .dispatch(
-      castActions.forScene(
-        sceneSelectors.currentSceneData(
-          store.getState(),
-        ),
-      )
-      .special
-      .update(),
-    );
-};
-
-window.getgs = gamestateId => gameStateSelectors.forState(store.getState()).byId(gamestateId);

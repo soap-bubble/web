@@ -14,8 +14,7 @@ function mapStateToProps(state, { scene }) {
   return {
     canvas: selector.special.canvas(state),
     videos: selector.special.videos(state),
-    width: gameSelectors.width(state),
-    height: gameSelectors.height(state),
+    style: gameSelectors.style(state),
   };
 }
 
@@ -27,10 +26,9 @@ const Special = connect(
   mapStateToProps,
   mapDispatchToProps,
 )(({
+  style,
   canvas,
   videos,
-  width,
-  height,
   onMouseDown,
   onMouseMove,
   onMouseUp,
@@ -59,8 +57,7 @@ const Special = connect(
     onTouchEnd={onTouchEnd}
     onTouchCancel={onTouchCancel}
     style={{
-      width: `${width}px`,
-      height: `${height}px`,
+      ...style,
       cursor: 'none',
     }}
   />

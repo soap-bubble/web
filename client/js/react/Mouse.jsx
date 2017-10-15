@@ -5,20 +5,17 @@ import {
 } from 'morpheus/game';
 
 function mapStateToProps(state) {
-  const width = gameSelectors.width(state);
-  const height = gameSelectors.height(state);
+  const style = gameSelectors.style(state);
   const canvas = gameSelectors.canvas(state);
 
   return {
-    width,
-    height,
+    style,
     canvas,
   };
 }
 
 const MousePresentation = ({
-  width,
-  height,
+  style,
   canvas,
 }) => (
   <div
@@ -29,10 +26,7 @@ const MousePresentation = ({
     }}
     id="mouse"
     style={{
-      width,
-      height,
-      left: '0px',
-      top: '0px',
+      ...style,
       'pointer-events': 'none',
     }}
   />

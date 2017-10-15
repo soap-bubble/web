@@ -15,11 +15,12 @@ const transparentPano = qs.parse(location.search).transparentPano;
 
 function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
+  const canvas = selector.pano.canvas(state);
+  const style = gameSelectors.style(state);
 
   return {
-    canvas: selector.pano.canvas(state),
-    width: gameSelectors.width(state),
-    height: gameSelectors.height(state),
+    canvas,
+    style,
   };
 }
 
@@ -41,13 +42,16 @@ function mapDispatchToProps(dispatch, { scene }) {
       momentumHandler[handler](event);
     };
     return memo;
-  }, {});
+  }, {
+    onKeyDown(event) {
+      dispatch(inputActions.keyPress(event.which));
+    },
+  });
 }
 
 const Pano = ({
   canvas,
-  width,
-  height,
+  style,
   onMouseUp,
   onMouseMove,
   onMouseDown,
@@ -55,6 +59,7 @@ const Pano = ({
   onTouchMove,
   onTouchEnd,
   onTouchCancel,
+  onKeyDown,
 }) => (
   <div
     className={cn('scene')}
@@ -63,6 +68,7 @@ const Pano = ({
         el.appendChild(canvas);
       }
     }}
+    onKeyDown={onKeyDown}
     onMouseDown={onMouseDown}
     onMouseMove={onMouseMove}
     onMouseUp={onMouseUp}
@@ -71,8 +77,7 @@ const Pano = ({
     onTouchEnd={onTouchEnd}
     onTouchCancel={onTouchCancel}
     style={{
-      width: `${width}px`,
-      height: `${height}px`,
+      ...style,
       cursor: 'none',
       opacity: transparentPano ? 0.5 : null,
     }}

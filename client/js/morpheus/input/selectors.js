@@ -10,50 +10,25 @@ export const disabled = createSelector(
   input,
   i => !i.enabled,
 );
-export const onMouseUp = createSelector(
+
+export const interactionDebounce = createSelector(
   input,
-  _input => _input.onMouseUp,
+  i => i.interactionDebounce,
 );
-export const onMouseMove = createSelector(
+
+export const sensitivity = createSelector(
   input,
-  _input => _input.onMouseMove,
+  i => i.sensitivity,
 );
-export const onMouseDown = createSelector(
+
+export const pressedKeys = createSelector(
   input,
-  _input => _input.onMouseDown,
+  i => i.pressedKeys,
 );
-export const onTouchStart = createSelector(
-  input,
-  _input => _input.onTouchStart,
-);
-export const onTouchMove = createSelector(
-  input,
-  _input => _input.onTouchMove,
-);
-export const onTouchEnd = createSelector(
-  input,
-  _input => _input.onTouchEnd,
-);
-export const onTouchCancel = createSelector(
-  input,
-  _input => _input.onTouchCancel,
-);
-export const allMouseEvents = createSelector(
-  onMouseUp,
-  onMouseMove,
-  onMouseDown,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  onTouchCancel,
-  // eslint-disable-next-line no-shadow
-  (onMouseUp, onMouseMove, onMouseDown, onTouchStart, onTouchMove, onTouchEnd, onTouchCancel) => ({
-    onMouseUp,
-    onMouseMove,
-    onMouseDown,
-    onTouchStart,
-    onTouchMove,
-    onTouchEnd,
-    onTouchCancel,
-  }),
-);
+
+export function isKeyPressed(key) {
+  return createSelector(
+    pressedKeys,
+    keys => !!keys[key],
+  );
+}

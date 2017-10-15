@@ -15,12 +15,12 @@ video.MovieSpecialCast {
 }
 
 .scene {
-  position:absolute;
+  position: absolute;
   left: 0;
 }
 
 .fromFade {
-  position:absolute;
+  position: absolute;
   left: 0;
   transition: opacity 0.66s ease-in-out;
   opacity: 1;

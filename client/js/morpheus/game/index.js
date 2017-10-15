@@ -1,9 +1,5 @@
-import * as selectors from './selectors';
-import reducer from './reducer';
-import * as actions from './actions';
-
-export {
-  selectors,
-  reducer,
-  actions,
-};
+import './commands';
+export * as selectors from './selectors';
+export reducer from './reducer';
+export * as actions from './actions';
+export Game from './containers/Game.jsx';

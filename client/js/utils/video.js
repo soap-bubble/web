@@ -10,6 +10,7 @@ export function addSourceToVideo(element, src, type) {
 export function createVideo(url, options) {
   const video = document.createElement('video');
   video.crossOrigin = 'anonymous';
+  video.setAttribute('webkit-playsinline', 'webkit-playsinline');
   Object.assign(video, options);
   addSourceToVideo(video, `${url}.webm`, 'video/webm');
   addSourceToVideo(video, `${url}.mp4`, 'video/mp4');

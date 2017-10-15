@@ -1,4 +1,7 @@
+import storage from 'local-storage';
+import createEpic from 'utils/createEpic';
 import {
+  actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
@@ -8,6 +11,10 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
+  actions as gamestateActions,
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
+import {
   loadAsImage,
 } from 'service/image';
 import {
@@ -15,6 +22,10 @@ import {
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
   CREATE_CANVAS,
+  SAVE,
+  LOAD,
+  LOGGED_IN,
+  LOGIN_START,
 } from './actionTypes';
 
 import cursor10001 from '../../../image/cursors/Bigarrow.png';
@@ -85,6 +96,18 @@ function promiseCursor(id) {
   return loadedCursors[realId] || Promise.resolve(null);
 }
 
+export function login() {
+  return {
+    type: LOGIN_START,
+  };
+}
+
+export function loggedIn() {
+  return {
+    type: LOGGED_IN,
+  };
+}
+
 export function createUIOverlay() {
   return (dispatch, getState) => {
     const { width, height } = gameSelectors.dimensions(getState());
@@ -153,7 +176,29 @@ export function setCursorLocation({ top, left }) {
   };
 }
 
-export function resize({ width, height }) {
+const ORIGINAL_HEIGHT = 400;
+const ORIGINAL_WIDTH = 640;
+const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+
+export function resize({
+  width: reqWidth = null,
+  height: reqHeight = null,
+} = {}) {
+  let horizontalPadding = 0;
+  let verticalPadding = 0;
+  let width = reqWidth || window.innerWidth;
+  let height = reqHeight || window.innerHeight;
+  if (width / height > ORIGINAL_ASPECT_RATIO) {
+    // Need to add padding to sides
+    const widthOffset = width - (height * ORIGINAL_ASPECT_RATIO);
+    width -= widthOffset;
+    horizontalPadding = widthOffset / 2;
+  } else {
+    // Need to add padding to top and bottom
+    const heightOffset = height - (width / ORIGINAL_ASPECT_RATIO);
+    height -= heightOffset;
+    verticalPadding = heightOffset / 2;
+  }
   function setSize({ camera, renderer }) {
     if (camera && renderer) {
       renderer.setSize(width, height);
@@ -167,6 +212,10 @@ export function resize({ width, height }) {
       payload: {
         width,
         height,
+        location: {
+          x: horizontalPadding,
+          y: verticalPadding,
+        },
       },
     });
     const scene = sceneSelectors.currentSceneData(getState());
@@ -174,5 +223,50 @@ export function resize({ width, height }) {
       setSize(castSelectors.forScene(scene).pano.renderElements(getState()));
       setSize(castSelectors.forScene(scene).hotspot.renderElements(getState()));
     }
+    const canvas = gameSelectors.canvas(getState());
+    if (canvas) {
+      canvas.width = width;
+      canvas.height = height;
+    }
   };
 }
+
+export function saveGame() {
+  return (dispatch, getState) => {
+    const gamestate = gamestateSelectors.gamestates(getState()).toJS();
+    const currentSceneId = sceneSelectors.currentSceneId(getState());
+    const previousSceneId = sceneSelectors.previousSceneId(getState());
+    storage.set('save', {
+      gamestate,
+      currentSceneId,
+      previousSceneId,
+    });
+    dispatch({
+      type: SAVE,
+    });
+  };
+}
+
+export function loadGame() {
+  const payload = storage.get('save');
+  return {
+    type: LOAD,
+    payload,
+  };
+}
+
+export const loadGameEpic = createEpic(action$ => action$
+  .ofType(LOAD)
+  .mergeMap((action) => {
+    const {
+      payload: {
+        gamestate,
+        currentSceneId,
+      },
+    } = action;
+    return [
+      gamestateActions.inject(gamestate),
+      sceneActions.goToScene(currentSceneId),
+    ];
+  }),
+);

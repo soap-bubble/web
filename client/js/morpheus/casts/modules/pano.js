@@ -1,4 +1,5 @@
 import {
+  PerspectiveCamera,
   BackSide,
   BufferGeometry,
   Object3D,
@@ -40,9 +41,9 @@ import {
 
 const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
-const sliceHeight = 0.55;
+const sliceHeight = 0.56;
 const sliceDepth = 1.0;
-const X_ROTATION_OFFSET = -0.038;
+const X_ROTATION_OFFSET = 0 * (Math.PI / 180);
 
 function createGeometries() {
   const geometries = [];
@@ -121,7 +122,7 @@ function createMaterial(asset) {
   };
 }
 
-const UP_DOWN_LIMIT = 7.7 * (Math.PI / 180);
+const UP_DOWN_LIMIT = 5 * (Math.PI / 180);
 
 function clamp({ x, y }) {
   if (x > UP_DOWN_LIMIT + X_ROTATION_OFFSET) {
@@ -144,9 +145,11 @@ function createScene(...objects) {
 }
 
 function startRenderLoop({ scene3D, camera, renderer }) {
+  window.camera = camera;
+  window.PerspectiveCamera = PerspectiveCamera;
   const render = () => {
     // orientation.update();
-    renderer.render(scene3D, camera);
+    renderer.render(scene3D, window.camera);
   };
   renderEvents.onRender(render);
   renderEvents.onDestroy(() => {
@@ -319,9 +322,8 @@ export const delegate = memoize((scene) => {
       const renderer = createRenderer({ canvas, width, height });
       positionCamera({
         camera,
-        vector3: { z: -0.1, y: -0.01 },
+        vector3: { z: -0.09 },
       });
-      camera.rotation.x = X_ROTATION_OFFSET;
       startRenderLoop({
         scene3D,
         camera,

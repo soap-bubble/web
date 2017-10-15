@@ -14,7 +14,7 @@ lernaExec(`git commit -am v${version}`)
 lernaExec(`git tag ${versionStr} -m ${versionStr}`)
 
 // push packages to npm & github
-lernaExec(`npm publish`)
+lernaExec(`npm publish --access=public`)
 
 lernaExec(`git push && git push --tags`)
 

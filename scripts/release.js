@@ -24,7 +24,7 @@ lernaExec(`git push --tags`)
 
 // commit & push version bump at monorepo level
 run(`git add ${packages.join(' ')} lerna.json`)
-run(`git commit -m ${versionStr}`)
+run(`git commit -am ${versionStr}`)
 run(`git tag ${versionStr} -m ${versionStr}`)
 run(`git push`)
 run(`git push --tags`)

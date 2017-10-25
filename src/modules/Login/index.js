@@ -1,4 +1,5 @@
 import builder from 'service-builder';
+import epics from './epics';
 import selectorFactory from './selectors';
 import reducer from './reducer';
 import actions from './actions';
@@ -7,6 +8,7 @@ import Google from './containers/Google';
 
 const blueprint = builder({
   selectors: rootSelector => selectorFactory(rootSelector),
+  epics: $ => $(epics),
   actions: $ => $(actions),
   reducer: () => reducer,
   PopOver: $ => $(PopOver),

@@ -37,13 +37,29 @@ export default function (root) {
     u => get(u, 'displayName', 'Anonymous'),
   );
 
+  const gapiConfig = createSelector(
+    root,
+    login => ({
+      ...login.gapiConfig,
+      scope: 'email profile',
+      ux_mode: 'popup',
+    }),
+  );
+
+  const token = createSelector(
+    root,
+    login => get(login, 'googleProfile.tokenId', ''),
+  );
+
   return {
     isCheckingLogin,
     isLoggedIn,
     isLoginStarted,
     isInit,
     googleClientId,
+    gapiConfig,
     user,
     userName,
+    token,
   };
 }

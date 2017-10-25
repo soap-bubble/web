@@ -5,6 +5,8 @@ import {
   LOGOUT,
   SUCCESS,
   FAILURE,
+  GOOGLE_API_INIT,
+  GOOGLE_API_LOGGED_IN,
 } from './actionTypes';
 
 const defaultState = {
@@ -14,6 +16,7 @@ const defaultState = {
   loggedIn: false,
   message: '',
   ended: false,
+  gapiConfig: null,
 };
 
 export default function loginReducer(state = defaultState, { type: action, payload, result }) {
@@ -86,6 +89,18 @@ export default function loginReducer(state = defaultState, { type: action, paylo
         ...state,
         started: false,
         message: payload,
+      };
+    }
+    case GOOGLE_API_INIT: {
+      return {
+        ...state,
+        gapiConfig: payload,
+      };
+    }
+    case GOOGLE_API_LOGGED_IN: {
+      return {
+        ...state,
+        googleProfile: payload,
       };
     }
     default:

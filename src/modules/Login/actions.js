@@ -5,8 +5,9 @@ import {
   START,
   LOGIN,
   LOGOUT,
-  SUCCESS,
-  FAILURE,
+  GOOGLE_API_LOGGED_IN,
+  GOOGLE_API_ERROR,
+  GOOGLE_LOGIN,
 } from './actionTypes';
 
 export default function (selectors) {
@@ -77,8 +78,8 @@ export default function (selectors) {
 
   function init() {
     return {
-      promise: () => axios.get(`${config.authServer}/google/token`),
-      event: INIT,
+      // promise: () => axios.get(`${config.authServer}/google/token`),
+      type: INIT,
     };
   }
 
@@ -100,11 +101,23 @@ export default function (selectors) {
     };
   }
 
-  function googleLogin() {
-    return (dispatch) => {
-      dispatch({
-        type: START,
-      });
+  function googleLogin(payload) {
+    return {
+      type: GOOGLE_API_LOGGED_IN,
+      payload,
+    };
+  }
+
+  function googleLoginError() {
+    return {
+      type: GOOGLE_API_ERROR,
+    };
+  }
+
+  function googleAuthLogin(token) {
+    return {
+      type: GOOGLE_LOGIN,
+      payload: token,
     };
   }
 
@@ -116,5 +129,7 @@ export default function (selectors) {
     tokenLogin,
     tokenAwait,
     googleLogin,
+    googleLoginError,
+    googleAuthLogin,
   };
 }

@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/auth",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Authorization server for soapbubble.online",
   "main": "dist/index.js",
   "scripts": {

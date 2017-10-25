@@ -5,12 +5,16 @@ import {
   menuClosed,
   settingsClosed,
   settingsOpened,
+  saveClosed,
+  saveOpened,
 } from './selectors';
 import {
   MENU_OPEN,
   MENU_CLOSE,
   SETTINGS_OPEN,
   SETTINGS_CLOSE,
+  SAVE_CLOSE,
+  SAVE_OPEN,
 } from './actionTypes';
 
 export function openMenu() {
@@ -37,10 +41,25 @@ export function closeSettings() {
   };
 }
 
+export function openSave() {
+  return {
+    type: SAVE_OPEN,
+  };
+}
+
+export function closeSave() {
+  return {
+    type: SAVE_CLOSE,
+  };
+}
+
 inputActions.inputHandler({
   key: 'esc',
   down(_, store) {
     const state = store.getState();
+    if (saveOpened(state)) {
+      return closeSave();
+    }
     if (settingsOpened(state)) {
       return closeSettings();
     }
@@ -52,11 +71,21 @@ inputActions.inputHandler({
 });
 
 inputActions.inputHandler({
-  key: 's',
+  key: 'p',
   down(_, store) {
     if (settingsClosed(store.getState())) {
       return openSettings();
     }
     return closeSettings();
+  },
+});
+
+inputActions.inputHandler({
+  key: 's',
+  down(_, store) {
+    if (saveClosed(store.getState())) {
+      return openSave();
+    }
+    return closeSave();
   },
 });

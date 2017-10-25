@@ -1,3 +1,4 @@
+import { Observable } from 'rxjs';
 import storage from 'local-storage';
 import createEpic from 'utils/createEpic';
 import {
@@ -17,15 +18,26 @@ import {
 import {
   loadAsImage,
 } from 'service/image';
+import * as userService from 'service/user';
+import {
+  login as loginModule,
+} from 'soapbubble';
 import {
   DIMENSIONS_RESIZE,
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
   CREATE_CANVAS,
   SAVE,
+  SAVE_NEW,
   LOAD,
   LOGGED_IN,
   LOGIN_START,
+  SAVE_ERROR,
+  SAVE_OPEN,
+  SAVE_LOAD,
+  SAVE_LOAD_SUCCESS,
+  SAVE_LOAD_ERROR,
+  SET_SAVE_ID,
 } from './actionTypes';
 
 import cursor10001 from '../../../image/cursors/Bigarrow.png';
@@ -102,9 +114,10 @@ export function login() {
   };
 }
 
-export function loggedIn() {
+export function loggedIn(user) {
   return {
     type: LOGGED_IN,
+    payload: user,
   };
 }
 
@@ -231,42 +244,122 @@ export function resize({
   };
 }
 
-export function saveGame() {
-  return (dispatch, getState) => {
-    const gamestate = gamestateSelectors.gamestates(getState()).toJS();
-    const currentSceneId = sceneSelectors.currentSceneId(getState());
-    const previousSceneId = sceneSelectors.previousSceneId(getState());
-    storage.set('save', {
-      gamestate,
-      currentSceneId,
-      previousSceneId,
-    });
-    dispatch({
-      type: SAVE,
-    });
+export function getAllSaves() {
+  return {
+    type: SAVE_LOAD,
   };
 }
 
-export function loadGame() {
-  const payload = storage.get('save');
+export function newSaveGame() {
+  return {
+    type: SAVE_NEW,
+  };
+}
+
+export function saveGame() {
+  return {
+    type: SAVE,
+  };
+}
+
+export const saveGameEpic = createEpic((action$, store) => action$
+  .ofType(SAVE)
+  .mergeMap(() => {
+    const isOpenSave = gameSelectors.isOpenSave(store.getState());
+    if (isOpenSave) {
+      return Observable.fromPromise(userService.saveGame({
+        token: loginModule.selectors.token(store.getState()),
+        gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
+        currentSceneId: sceneSelectors.currentSceneId(store.getState()),
+        previousSceneId: sceneSelectors.previousSceneId(store.getState()),
+      }))
+        .catch(err => ({
+          type: SAVE_ERROR,
+          payload: err,
+        }));
+    }
+    return Observable.of({
+      type: SAVE_NEW,
+    });
+  }),
+);
+
+export const newSaveGameEpic = createEpic((action$, store) => action$
+  .ofType(SAVE_NEW)
+  .mergeMap(() => userService.newSaveGame({
+    token: loginModule.selectors.token(store.getState()),
+    gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
+    currentSceneId: sceneSelectors.currentSceneId(store.getState()),
+    previousSceneId: sceneSelectors.previousSceneId(store.getState()),
+  }))
+  .map((response) => {
+    const { saveId } = response.data;
+    return {
+      type: SET_SAVE_ID,
+      payload: saveId,
+    };
+  }),
+);
+
+export function loadGame(saveId) {
   return {
     type: LOAD,
-    payload,
+    payload: saveId,
   };
 }
 
-export const loadGameEpic = createEpic(action$ => action$
+export const loadGameEpic = createEpic((action$, store) => action$
   .ofType(LOAD)
-  .mergeMap((action) => {
+  .mergeMap(({
+    payload: saveId,
+  }) => userService.getSaveGame({
+    token: loginModule.selectors.token(store.getState()),
+    saveId: saveId || gameSelectors.saveId(store.getState()),
+  }))
+  .map((response) => {
     const {
-      payload: {
-        gamestate,
-        currentSceneId,
-      },
-    } = action;
-    return [
-      gamestateActions.inject(gamestate),
-      sceneActions.goToScene(currentSceneId),
-    ];
-  }),
+      currentSceneId,
+      previousSceneId,
+      gamestates,
+    } = response.data;
+    return {
+      currentSceneId,
+      previousSceneId,
+      gamestates,
+    };
+  })
+  .map(({
+    currentSceneId,
+    previousSceneId,
+    gamestates,
+  }) => Observable.of([
+    gamestateActions.inject(gamestates),
+    sceneActions.goToScene(currentSceneId, true, previousSceneId),
+  ]))
+  .catch(err => ({
+    type: 'GAME_LOAD_ERROR',
+    payload: err,
+  })),
+);
+
+export const openSaveEpic = createEpic(action$ => action$
+  .ofType(SAVE_OPEN)
+  .map(() => ({
+    type: SAVE_LOAD,
+  })),
+);
+
+export const loadSavesEpic = createEpic((action$, store) => action$
+  .ofType(SAVE_LOAD)
+  .mergeMap(() => Observable.fromPromise(userService.getAllSaves({
+    token: loginModule.selectors.token(store.getState()),
+  })))
+  .map(response => ({
+    type: SAVE_LOAD_SUCCESS,
+    payload: response.data,
+  }))
+  .catch(err => ({
+    type: SAVE_LOAD_ERROR,
+    payload: err,
+  })),
 );

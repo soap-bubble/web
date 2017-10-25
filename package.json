@@ -32,7 +32,6 @@
       "<rootDir>//public"
     ],
     "testMatch": [
-      "<rootDir>/client/js/**/__tests__/**/*.js?(x)",
       "<rootDir>/client/js/**/?(*.)(spec|test).js?(x)"
     ],
     "testEnvironment": "node",

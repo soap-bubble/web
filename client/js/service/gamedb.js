@@ -4,9 +4,7 @@ import { endsWith } from 'lodash';
 const userAgentString = (global.navigator && global.navigator.userAgent) || '';
 const uas = uasParser(userAgentString);
 
-export const url = process.env.NODE_ENV === 'production' ?
-  'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev'
-  : config.assetHost;
+export const url = config.assetHost;
 
 export function getAssetUrl(assetPath, type) {
   const path = assetPath.replace('deck', 'Deck');

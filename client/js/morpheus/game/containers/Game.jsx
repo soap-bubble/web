@@ -8,6 +8,7 @@ import {
 import Menu from '../components/Menu';
 import Login from './Login';
 import Settings from './Settings';
+import SaveList from './SaveList';
 
 function mapStateToProps(state) {
   return {
@@ -15,6 +16,7 @@ function mapStateToProps(state) {
     style: gameSelectors.style(state),
     menuOpen: gameSelectors.menuOpened(state),
     settingsOpen: gameSelectors.settingsOpened(state),
+    saveOpen: gameSelectors.saveOpened(state),
     isLoggingIn: gameSelectors.isLoggingIn(state),
   };
 }
@@ -24,6 +26,7 @@ const Game = ({
   style,
   menuOpen,
   settingsOpen,
+  saveOpen,
   isLoggingIn,
 }) => {
   const menu = [];
@@ -36,6 +39,9 @@ const Game = ({
   if (settingsOpen) {
     menu.push(<Settings />);
   }
+  if (saveOpen) {
+    menu.push(<SaveList />);
+  }
   return (<div style={style}>
     {casts}
     <Mouse />
@@ -47,6 +53,7 @@ Game.propTypes = {
   isLoggingIn: PropTypes.bool.isRequired,
   menuOpen: PropTypes.bool.isRequired,
   settingsOpen: PropTypes.bool.isRequired,
+  saveOpen: PropTypes.bool.isRequired,
   casts: PropTypes.arrayOf(PropTypes.element).isRequired,
   style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };

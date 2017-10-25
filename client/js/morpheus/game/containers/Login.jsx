@@ -10,8 +10,8 @@ function mapStateToProps(state) {
 
 function mapDispatchToPros(dispatch) {
   return {
-    onLogin() {
-      dispatch(loggedIn());
+    onLogin(user) {
+      dispatch(loggedIn(user));
     },
   };
 }

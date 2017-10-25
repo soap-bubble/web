@@ -16,6 +16,9 @@ import {
   selectors as inputSelectors,
   actions as inputActions,
 } from 'morpheus/input';
+import {
+  login,
+} from 'soapbubble';
 import store from 'store';
 
 import '../css/main.scss';
@@ -58,4 +61,6 @@ window.onload = () => {
   document.addEventListener('keyup', (event) => {
     store.dispatch(inputActions.keyUp(keycode.names[event.which]));
   });
+
+  store.dispatch(login.actions.init());
 };

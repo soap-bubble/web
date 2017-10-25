@@ -10,6 +10,12 @@ import {
   LOGIN_START,
   SETTINGS_OPEN,
   SETTINGS_CLOSE,
+  SAVE_OPEN,
+  SAVE_CLOSE,
+  SAVE_LOAD,
+  SAVE_LOAD_SUCCESS,
+  SAVE_LOAD_ERROR,
+  SET_SAVE_ID,
 } from './actionTypes';
 
 
@@ -25,7 +31,50 @@ const reducer = createReducer(
     menuOpen: false,
     settingsOpen: false,
     volume: 100,
+    isLoggingIn: false,
+    saveOpen: false,
+    savesAreLoading: false,
+    savesMeta: [],
+    saveId: null,
   }, {
+    [SET_SAVE_ID](game, { payload: saveId }) {
+      return {
+        ...game,
+        saveId,
+      };
+    },
+    [SAVE_LOAD](game) {
+      return {
+        ...game,
+        savesAreLoading: true,
+      };
+    },
+    [SAVE_LOAD_SUCCESS](game, { payload: savesMeta }) {
+      return {
+        ...game,
+        savesAreLoading: false,
+        savesMeta,
+      };
+    },
+    [SAVE_LOAD_ERROR](game, { payload: err }) {
+      return {
+        ...game,
+        savesAreLoading: false,
+        savesMeta: err,
+      };
+    },
+    [SAVE_OPEN](game) {
+      return {
+        ...game,
+        saveOpen: true,
+      };
+    },
+    [SAVE_CLOSE](game) {
+      return {
+        ...game,
+        saveOpen: false,
+      };
+    },
     [MENU_OPEN](game) {
       return {
         ...game,
@@ -84,10 +133,11 @@ const reducer = createReducer(
         isLoginStart: true,
       };
     },
-    [LOGGED_IN](game) {
+    [LOGGED_IN](game, { payload: user }) {
       return {
         ...game,
         isLoginStart: false,
+        user,
       };
     },
   },

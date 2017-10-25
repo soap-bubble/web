@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const styleLoaders = require('@soapbubble/style').loaders;
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
@@ -38,24 +39,24 @@ module.exports = (env) => {
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
 
   const appConfig = {
-    assetHost: '',
-    apiHost: '',
-    authServer: 'https://auth.soapbubble.online',
+    assetHost: env.production ? 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev' : '',
+    apiHost: env.production ? 'https://morpheus.soapbubble.online' : '',
+    authHost: env.production ? 'https://auth.soapbubble.online' : 'http://localhost:4000',
   };
-  // authServer: 'https://auth.soapbubble.online',
+
   if (env.phonegap) {
     if (env.production) {
       appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
     } else {
       appConfig.assetHost = appConfig.apiHost = 'http://192.168.1.5:8050';
-      appConfig.authServer = 'http://192.168.1.5:4000';
+      appConfig.authHost = 'http://192.168.1.5:4000';
     }
   } else if (env.electron) {
     if (env.production) {
       appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
     } else {
       appConfig.assetHost = appConfig.apiHost = 'http://localhost:8050';
-      appConfig.authServer = 'http://localhost:4000';
+      appConfig.authHost = 'http://localhost:4000';
     }
   }
   const target = env.electron ? 'electron-renderer' : 'web';
@@ -98,7 +99,7 @@ module.exports = (env) => {
       mainFields: ['esnext', 'browser', 'module', 'main'],
     },
     module: {
-      rules: [
+      rules: styleLoaders.concat([
         {
           test: /\.jsx?$/,
           include: dirSharedComponents.concat([
@@ -124,7 +125,7 @@ module.exports = (env) => {
             },
           },
         },
-      ],
+      ]),
     },
     plugins: [
       new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: vendorName }),

@@ -97,7 +97,7 @@ export function startAtScene(id) {
 }
 
 let isTransitioning = false;
-export function goToScene(id, dissolve) {
+export function goToScene(id, dissolve, previousSceneId) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
 

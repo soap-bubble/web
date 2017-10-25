@@ -8,7 +8,9 @@ const user = new Schema({
   }],
   displayName: String,
   profiles: [{ providerType: String, id: String }],
-  settings: Schema.Types.Mixed,
+  settings: {
+    saves: [{ type: Schema.Types.Mixed }],
+  },
 });
 
 export default user;

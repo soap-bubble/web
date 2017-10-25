@@ -2,6 +2,8 @@ import login from './login';
 import google from './google';
 import user from './user';
 import oauth from './oauth';
+import saves from './saves';
+
 import $ from '../factory';
 
 export default function (app, createLogger) {
@@ -14,6 +16,7 @@ export default function (app, createLogger) {
   $(google);
   $(user);
   $(oauth);
+  $(saves);
 
   logger.info('Installing routes -- compelete');
 }

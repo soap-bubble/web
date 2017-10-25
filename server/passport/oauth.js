@@ -6,13 +6,13 @@ import { Strategy as BearerStrategy } from 'passport-http-bearer';
 export default function (db, createLogger) {
   const logger = createLogger('passport:oauth');
 
-  passport.serializeUser((user, done) =>  done(null, user.id));
+  passport.serializeUser((user, done) => done(null, user.id));
 
   passport.deserializeUser((id, done) => {
     db.model('User').findOne({
       id,
     })
-      .then(user => {
+      .then((user) => {
         done(null, user);
       })
       .catch(done);
@@ -35,17 +35,16 @@ export default function (db, createLogger) {
       id: clientId,
       secret: clientSecret,
     })
-      .then(client => {
+      .then((client) => {
         if (!client) return done(null, false);
         if (client.secret !== clientSecret) return done(null, false);
         logger.info('Verify client success', { clientId });
-        done(null, client);
+        return done(null, client);
       })
       .catch(done);
   }
 
   passport.use(new BasicStrategy(verifyClient));
-
   passport.use(new ClientPasswordStrategy(verifyClient));
 
   /**
@@ -56,39 +55,36 @@ export default function (db, createLogger) {
    * application, which is issued an access token to make requests on behalf of
    * the authorizing user.
    */
-  passport.use(new BearerStrategy(
-    (accessToken, done) => {
-      db.model('AccessToken').findOne({
-        token: accessToken,
-      })
-        .then(token => {
-          if (!token) return done(null, false);
-          if (token.user.id) {
-            db.model('User').findOne({
-              id: token.user.id,
+  passport.use(new BearerStrategy((accessToken, done) => {
+    db.model('AccessToken').findOne({
+      token: accessToken,
+    })
+      .then((token) => {
+        if (!token) return done(null, false);
+        if (token.user.id) {
+          return db.model('User').findOne({
+            id: token.user.id,
+          })
+            .then((user) => {
+              if (!user) return done(null, false);
+              // To keep this example simple, restricted scopes are not implemented,
+              // and this is just for illustrative purposes.
+              return done(null, user, { scope: '*' });
             })
-              .then(user => {
-                if (!user) return done(null, false);
-                // To keep this example simple, restricted scopes are not implemented,
-                // and this is just for illustrative purposes.
-                done(null, user, { scope: '*' });
-              })
-              .catch(done);
-          } else {
-            // The request came from a client only since userId is null,
-            // therefore the client is passed back instead of a user.
-            db.model('Client').findOne({
-              id: token.clientId,
-            })
-              .then(client => {
-                if (!client) return done(null, false);
-                // To keep this example simple, restricted scopes are not implemented,
-                // and this is just for illustrative purposes.
-                done(null, client, { scope: '*' });
-              });
-          }
+            .catch(done);
+        }
+        // The request came from a client only since userId is null,
+        // therefore the client is passed back instead of a user.
+        return db.model('Client').findOne({
+          id: token.clientId,
         })
-        .catch(done);
-      }
-  ));
+          .then((client) => {
+            if (!client) return done(null, false);
+            // To keep this example simple, restricted scopes are not implemented,
+            // and this is just for illustrative purposes.
+            return done(null, client, { scope: '*' });
+          });
+      })
+      .catch(done);
+  }));
 }

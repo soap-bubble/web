@@ -53,8 +53,8 @@ export default function (app, db, createLogger) {
     logger.info('Oauth grant', { clientId: client.id, userId: user.id, code });
     const AuthorizationCode = db.model('AuthorizationCode');
     const ac = new AuthorizationCode({
-      client: client,
-      user: user,
+      client,
+      user,
       code,
     });
 
@@ -93,7 +93,7 @@ export default function (app, db, createLogger) {
   server.exchange(oauth2orize.exchange.code((client, code, redirectUri, done) => {
     logger.info('Oauth exchange code', { clientId: client.id, code });
     db.model('AuthorizationCode').findOne({ code })
-      .then(ac => {
+      .then((ac) => {
         if (ac.client.id !== client.id) {
           return done(null, false);
         }
@@ -106,7 +106,7 @@ export default function (app, db, createLogger) {
           user,
         });
 
-        at.save()
+        return at.save()
           .then(() => done(null, token))
           .catch(done);
       });
@@ -122,7 +122,7 @@ export default function (app, db, createLogger) {
     db.model('Client').findOne({
       id: client.id,
     })
-      .then(localClient => {
+      .then((localClient) => {
         if (!localClient) {
           return done(null, false);
         }
@@ -136,7 +136,7 @@ export default function (app, db, createLogger) {
           client,
         });
 
-        at.save()
+        return at.save()
           .then(() => done(null, token))
           .catch(done);
       });
@@ -164,7 +164,7 @@ export default function (app, db, createLogger) {
       db.model('Client').findOne({
         id: clientId,
       })
-        .then(client => {
+        .then((client) => {
           // WARNING: For security purposes, it is highly advisable to check that
           //          redirectUri provided by the client matches one registered with
           //          the server. For simplicity, this example does not. You have
@@ -172,7 +172,7 @@ export default function (app, db, createLogger) {
           logger.info('Found client for oauth authorize', { clientId });
           return done(null, client, redirectUri);
         })
-        .catch(err => {
+        .catch((err) => {
           logger.error('Oauth authorize error', { err });
           done(err);
         });
@@ -184,11 +184,11 @@ export default function (app, db, createLogger) {
       if (client.isTrusted) return done(null, true);
 
       logger.info('Finding access token for oauth authorize', { clientId: client.id });
-      db.model('AccessToken').findOne({
+      return db.model('AccessToken').findOne({
         client,
         user,
       })
-        .then(token => {
+        .then((token) => {
           // Auto-approve
           if (token) return done(null, true);
 

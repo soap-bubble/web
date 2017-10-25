@@ -17,42 +17,48 @@ export default function (app, db, config, createLogger) {
     const { idtoken: token } = req.body;
     logger.info('Requesting login token for google');
     googleClient.verifyIdToken(
-        token,
-        CLIENT_ID,
-        function(err, login) {
-          if (err) {
-            return res.status(403).send('not authorized');
-          }
-          var payload = login.getPayload();
-          const { sub: userid } = payload;
-          db.model('User').findOne({
-            profiles: {
-              $elemMatch: {
-                providerType: 'google',
-                id: userid,
-              },
+      token,
+      CLIENT_ID,
+      (err, login) => {
+        if (err) {
+          return res.status(403).send('not authorized');
+        }
+        const payload = login.getPayload();
+        const { sub: userid } = payload;
+        return db.model('User').findOne({
+          profiles: {
+            $elemMatch: {
+              providerType: 'google',
+              id: userid,
             },
+          },
+        })
+          .then((user) => {
+            logger.info('Found user', { id: user._id });
+            if (user.profiles.find(p => p.providerType === 'google').id === userid) {
+              return res.status(200).send({
+                id: user.id,
+                emails: user.emails,
+                displayName: user.displayName,
+                profiles: user.profiles,
+              });
+            }
+            return res.status(400).send('Token not OK');
           })
-            .then(user => {
-              logger.info('Found user', { id: user._id });
-              if (user.profiles.find(p => p.providerType == 'google').id === userid) {
-                return res.status(200).send({
-                  id: user.id,
-                  emails: user.emails,
-                  displayName: user.displayName,
-                  profiles: user.profiles,
-                });
-              }
-              return res.status(400).send('Token not OK');
-            })
-            .catch(err => {
-              return res.status(500).send('Token not OK');
-            });
-        });
-  })
+          .catch(() => res.status(500).send('Token not OK'));
+      },
+    );
+  });
 
   app.get('/auth/me', passport.authenticate(), (req, res) => {
     res.status(200).send(req.user);
+  });
+
+  app.get('/google/oauth', (req, res) => {
+    res.status(200).send({
+      client_id: config.passport.strategies.google.clientID,
+      redirect_uri: config.passport.strategies.google.callbackURL,
+    });
   });
 
   app.get('/google/token', (req, res) => {
@@ -71,16 +77,16 @@ export default function (app, db, config, createLogger) {
 
   app.get('/google/await', (req, res, next) => {
     function authenticate() {
-      passport.authenticate('google', { scope: ['email'] }, (err, user, info) => {
+      passport.authenticate('google', { scope: ['email'] }, (err, user) => {
         if (err) {
           return next(err);
         }
         if (!user) {
           return process.nextTick(authenticate);
         }
-        req.logIn(user, (err) => {
-          if (err) {
-            return next(err);
+        return req.logIn(user, (logInErr) => {
+          if (logInErr) {
+            return next(logInErr);
           }
           return res.status(200).send('Logged in');
         });
@@ -127,7 +133,7 @@ export default function (app, db, config, createLogger) {
     },
   );
 
-  app.post(
+  app.get(
     '/google/login/token',
     passport.authenticate('google-login-token'),
     (req, res) => {

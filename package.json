@@ -7,7 +7,7 @@
     "build": "babel server -d dist",
     "build:production": "npm run build",
     "start": "node dist/app",
-    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --skip-initial-build --watch\" \"nodemon dist/app\"",
+    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --skip-initial-build --watch\" \"cross-env DEBUG=* nodemon dist/app\"",
     "test": "mocha"
   },
   "repository": {
@@ -23,6 +23,7 @@
     "babel-preset-env": "^1.6.0",
     "babel-preset-stage-0": "^6.24.1",
     "concurrently": "^3.5.0",
+    "cross-env": "^5.1.0",
     "eslint": "^4.6.1",
     "eslint-config-airbnb-base": "^12.0.0",
     "eslint-plugin-import": "^2.7.0",
@@ -40,6 +41,7 @@
     "ejs": "^2.5.7",
     "express": "^4.15.4",
     "express-session": "^1.15.5",
+    "google-auth-library": "^0.11.0",
     "googleapis": "^21.3.0",
     "lodash": "^4.17.4",
     "mongoose": "^4.11.10",

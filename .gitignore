@@ -1,4 +1,4 @@
 node_modules
-soapbubble.css
-dist.js
+dist
 npm-debug.log
+soapbubble.css

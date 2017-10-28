@@ -1,6 +1,7 @@
 /* eslint-disable import/no-extraneous-dependencies, global-require */
 /* global window, document */
 import { jsdom } from 'jsdom';
+import 'rxjs';
 
 if (typeof Promise === 'undefined') {
   // Rejection tracking prevents a common issue where React gets into an
@@ -35,3 +36,8 @@ function copyProps(src, target) {
 copyProps(document.defaultView, global);
 
 global.HTMLCanvasElement = global.HTMLDivElement;
+global.config = {
+  assetHost: 'http://assetHost',
+  apiHost: 'http://apiHost',
+  authHost: 'http://authHost',
+};

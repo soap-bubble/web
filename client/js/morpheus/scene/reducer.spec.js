@@ -14,15 +14,15 @@ import {
 describe('morpheus/scene/reducer', () => {
   describe(SET_NEXT_START_ANGLE, () => {
     it('does nothing on undefined', () => {
-      const oldState = reducer(undefined, 'scene', {});
-      const state = reducer(oldState, 'scene', {
+      const oldState = reducer(undefined, {});
+      const state = reducer(oldState, {
         type: SET_NEXT_START_ANGLE,
         payload: undefined,
       });
       expect(state).toEqual(oldState);
     });
     it('sets on a value', () => {
-      const state = reducer(undefined, 'scene', {
+      const state = reducer(undefined, {
         type: SET_NEXT_START_ANGLE,
         payload: 100,
       });
@@ -35,22 +35,20 @@ describe('morpheus/scene/reducer', () => {
       expect(reducer()).toHaveLoadingScenes(0);
     });
     it('Adds scene to cache if it is not already there', () => {
-      const state = reducer(undefined, 'scene', {
+      const state = reducer(undefined, {
         type: SCENE_LOAD_START,
         payload: 100,
       });
       expect(state).toHaveLoadingScenes(1);
     });
 
-    it('does not add to scene to cache if it is already there', () => {
-      let scene = reducer(undefined, 'scene', {
+    it('does not add scene to cache if it is already there', () => {
+      let scene = reducer(undefined, {
         type: SCENE_LOAD_START,
         payload: 100,
       });
       expect(scene).toHaveLoadingScenes(1);
-      scene = reducer({
-        scene,
-      }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_LOAD_START,
         payload: 100,
       });
@@ -59,12 +57,12 @@ describe('morpheus/scene/reducer', () => {
   });
   describe(SCENE_LOAD_COMPLETE, () => {
     it('sets a scene to loaded', () => {
-      let scene = reducer(undefined, 'scene', {
+      let scene = reducer(undefined, {
         type: SCENE_LOAD_START,
         payload: 100,
       });
       expect(scene).toHaveLoadingScenes(1);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_LOAD_COMPLETE,
         payload: {
           sceneId: 100,
@@ -79,7 +77,7 @@ describe('morpheus/scene/reducer', () => {
       const foo = {
         sceneId: 100,
       };
-      const scene = reducer(undefined, 'scene', {
+      const scene = reducer(undefined, {
         type: SCENE_SET_BACKGROUND_SCENE,
         payload: foo,
       });
@@ -93,7 +91,7 @@ describe('morpheus/scene/reducer', () => {
       const foo = {
         sceneId: 100,
       };
-      const scene = reducer(undefined, 'scene', {
+      const scene = reducer(undefined, {
         type: SCENE_DO_ENTERING,
         payload: foo,
       });
@@ -108,11 +106,11 @@ describe('morpheus/scene/reducer', () => {
       const second = {
         sceneId: 200,
       };
-      let scene = reducer(undefined, 'scene', {
+      let scene = reducer(undefined, {
         type: SCENE_DO_ENTERING,
         payload: first,
       });
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: second,
       });
@@ -134,25 +132,25 @@ describe('morpheus/scene/reducer', () => {
       const fourth = {
         sceneId: 400,
       };
-      let scene = reducer(undefined, 'scene', {
+      let scene = reducer(undefined, {
         type: SCENE_DO_ENTERING,
         payload: first,
       });
       expect(scene).toHaveCurrentScenes(1);
       expect(scene).toHaveCurrentScenes([first]);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: second,
       });
       expect(scene).toHaveCurrentScenes(2);
       expect(scene).toHaveCurrentScenes([second, first]);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: third,
       });
       expect(scene).toHaveCurrentScenes(3);
       expect(scene).toHaveCurrentScenes([third, second, first]);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: fourth,
       });
@@ -170,25 +168,25 @@ describe('morpheus/scene/reducer', () => {
       const third = {
         sceneId: 300,
       };
-      let scene = reducer(undefined, 'scene', {
+      let scene = reducer(undefined, {
         type: SCENE_DO_ENTERING,
         payload: first,
       });
       expect(scene).toHaveCurrentScenes(1);
       expect(scene).toHaveCurrentScenes([first]);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: second,
       });
       expect(scene).toHaveCurrentScenes(2);
       expect(scene).toHaveCurrentScenes([second, first]);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: third,
       });
       expect(scene).toHaveCurrentScenes(3);
       expect(scene).toHaveCurrentScenes([third, second, first]);
-      scene = reducer({ scene }, 'scene', {
+      scene = reducer(scene, {
         type: SCENE_DO_ENTERING,
         payload: second,
       });
@@ -199,7 +197,7 @@ describe('morpheus/scene/reducer', () => {
 
   describe(SCENE_DO_EXITING, () => {
     it('set dissolve to true if undefined', () => {
-      const scene = reducer(undefined, 'scene', {
+      const scene = reducer(undefined, {
         type: SCENE_DO_EXITING,
         payload: {},
       });
@@ -207,7 +205,7 @@ describe('morpheus/scene/reducer', () => {
     });
   });
   it('set dissolve to true if true', () => {
-    const scene = reducer(undefined, 'scene', {
+    const scene = reducer(undefined, {
       type: SCENE_DO_EXITING,
       payload: {
         dissolve: true,
@@ -216,7 +214,7 @@ describe('morpheus/scene/reducer', () => {
     expect(scene).toHaveDissolve(true);
   });
   it('set dissolve to false if false', () => {
-    const scene = reducer(undefined, 'scene', {
+    const scene = reducer(undefined, {
       type: SCENE_DO_EXITING,
       payload: {
         dissolve: false,
@@ -227,7 +225,7 @@ describe('morpheus/scene/reducer', () => {
 
   describe(SCENE_DO_ENTER, () => {
     it('isLive', () => {
-      const scene = reducer(undefined, 'scene', {
+      const scene = reducer(undefined, {
         type: SCENE_DO_ENTER,
       });
       expect(scene).toBeLive();

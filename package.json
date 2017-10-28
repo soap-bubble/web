@@ -99,7 +99,7 @@
     "whatwg-fetch": "^2.0.2"
   },
   "dependencies": {
-    "@soapbubble/components": "1.3.2",
+    "@soapbubble/components": "1.3.3",
     "@soapbubble/style": "1.3.1",
     "axios": "^0.12.0",
     "babel-polyfill": "^6.26.0",

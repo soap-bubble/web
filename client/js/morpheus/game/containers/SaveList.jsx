@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import SaveList from '../components/SaveList';
 import * as gameSelectors from '../selectors';
 import {
-  loadGame,
+  cloudLoad,
 } from '../actions';
 
 import './MenuList.scss';
@@ -32,7 +32,7 @@ function mapStateToProps(state) {
 function mapDispatchToPros(dispatch) {
   return {
     onSelect(saveId) {
-      dispatch(loadGame(saveId));
+      dispatch(cloudLoad(saveId));
     },
   };
 }

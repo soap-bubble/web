@@ -1,5 +1,7 @@
 import createReducer from 'utils/createReducer';
 import {
+  CLOUD_SAVE_OPEN,
+  CLOUD_SAVE_CLOSE,
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
   DIMENSIONS_RESIZE,
@@ -10,8 +12,6 @@ import {
   LOGIN_START,
   SETTINGS_OPEN,
   SETTINGS_CLOSE,
-  SAVE_OPEN,
-  SAVE_CLOSE,
   SAVE_LOAD,
   SAVE_LOAD_SUCCESS,
   SAVE_LOAD_ERROR,
@@ -63,13 +63,13 @@ const reducer = createReducer(
         savesMeta: err,
       };
     },
-    [SAVE_OPEN](game) {
+    [CLOUD_SAVE_OPEN](game) {
       return {
         ...game,
         saveOpen: true,
       };
     },
-    [SAVE_CLOSE](game) {
+    [CLOUD_SAVE_CLOSE](game) {
       return {
         ...game,
         saveOpen: false,

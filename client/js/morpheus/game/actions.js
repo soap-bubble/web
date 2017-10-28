@@ -23,17 +23,19 @@ import {
   login as loginModule,
 } from 'soapbubble';
 import {
+  BROWSER_LOAD,
+  BROWSER_SAVE,
+  CLOUD_LOAD,
+  CLOUD_SAVE_NEW,
+  CLOUD_SAVE_OPEN,
+  CLOUD_SAVE,
   DIMENSIONS_RESIZE,
   GAME_SET_VOLUME,
   GAME_SET_CURSOR,
   CREATE_CANVAS,
-  SAVE,
-  SAVE_NEW,
-  LOAD,
   LOGGED_IN,
   LOGIN_START,
   SAVE_ERROR,
-  SAVE_OPEN,
   SAVE_LOAD,
   SAVE_LOAD_SUCCESS,
   SAVE_LOAD_ERROR,
@@ -112,6 +114,10 @@ export function login() {
   return {
     type: LOGIN_START,
   };
+}
+
+export function logout() {
+  return loginModule.actions.logout();
 }
 
 export function loggedIn(user) {
@@ -250,42 +256,54 @@ export function getAllSaves() {
   };
 }
 
-export function newSaveGame() {
+export function cloudSaveNew() {
   return {
-    type: SAVE_NEW,
+    type: CLOUD_SAVE_NEW,
   };
 }
 
-export function saveGame() {
+export function cloudSave() {
   return {
-    type: SAVE,
+    type: CLOUD_SAVE,
   };
 }
 
-export const saveGameEpic = createEpic((action$, store) => action$
-  .ofType(SAVE)
-  .mergeMap(() => {
-    const isOpenSave = gameSelectors.isOpenSave(store.getState());
-    if (isOpenSave) {
-      return Observable.fromPromise(userService.saveGame({
-        token: loginModule.selectors.token(store.getState()),
-        gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
-        currentSceneId: sceneSelectors.currentSceneId(store.getState()),
-        previousSceneId: sceneSelectors.previousSceneId(store.getState()),
-      }))
-        .catch(err => ({
-          type: SAVE_ERROR,
-          payload: err,
-        }));
-    }
-    return Observable.of({
-      type: SAVE_NEW,
-    });
-  }),
+export function browserSave() {
+  return {
+    type: BROWSER_SAVE,
+  };
+}
+
+export function cloudLoad(saveId) {
+  return {
+    type: CLOUD_LOAD,
+    payload: saveId,
+  };
+}
+
+export function openSave() {
+  return {
+    type: CLOUD_SAVE_OPEN,
+  };
+}
+
+export const cloudSaveEpic = createEpic((action$, store) => action$
+  .ofType(CLOUD_SAVE)
+  .mergeMap(() => userService.saveGame({
+    token: loginModule.selectors.token(store.getState()),
+    gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
+    currentSceneId: sceneSelectors.currentSceneId(store.getState()),
+    previousSceneId: sceneSelectors.previousSceneId(store.getState()),
+    saveId: gameSelectors.saveId(store.getState()),
+  }))
+  .catch(err => ({
+    type: SAVE_ERROR,
+    payload: err,
+  })),
 );
 
 export const newSaveGameEpic = createEpic((action$, store) => action$
-  .ofType(SAVE_NEW)
+  .ofType(CLOUD_SAVE_NEW)
   .mergeMap(() => userService.newSaveGame({
     token: loginModule.selectors.token(store.getState()),
     gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
@@ -301,15 +319,41 @@ export const newSaveGameEpic = createEpic((action$, store) => action$
   }),
 );
 
-export function loadGame(saveId) {
+export const browserSaveEpic = createEpic((action$, store) => action$
+  .ofType(BROWSER_SAVE)
+  .forEach(() => storage.set('save', {
+    gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
+    currentSceneId: sceneSelectors.currentSceneId(store.getState()),
+    previousSceneId: sceneSelectors.previousSceneId(store.getState()),
+    saveId: gameSelectors.saveId(store.getState()),
+  }))
+  .catch(err => ({
+    type: SAVE_ERROR,
+    payload: err,
+  })),
+);
+
+export function browserLoad() {
   return {
-    type: LOAD,
-    payload: saveId,
+    type: BROWSER_LOAD,
   };
 }
 
+export const browserLoadEpic = createEpic(action$ => action$
+  .ofType(BROWSER_LOAD)
+  .map(() => storage.get('save'))
+  .mergeMap(({
+    gamestates,
+    currentSceneId,
+    previousSceneId,
+  }) => Observable.from([
+    gamestateActions.inject(gamestates),
+    sceneActions.goToScene(currentSceneId, true, previousSceneId),
+  ])),
+);
+
 export const loadGameEpic = createEpic((action$, store) => action$
-  .ofType(LOAD)
+  .ofType(CLOUD_LOAD)
   .mergeMap(({
     payload: saveId,
   }) => userService.getSaveGame({
@@ -321,18 +365,25 @@ export const loadGameEpic = createEpic((action$, store) => action$
       currentSceneId,
       previousSceneId,
       gamestates,
+      saveId,
     } = response.data;
     return {
       currentSceneId,
       previousSceneId,
       gamestates,
+      saveId,
     };
   })
-  .map(({
+  .mergeMap(({
     currentSceneId,
     previousSceneId,
     gamestates,
-  }) => Observable.of([
+    saveId,
+  }) => Observable.from([
+    {
+      type: SET_SAVE_ID,
+      payload: saveId,
+    },
     gamestateActions.inject(gamestates),
     sceneActions.goToScene(currentSceneId, true, previousSceneId),
   ]))
@@ -343,7 +394,7 @@ export const loadGameEpic = createEpic((action$, store) => action$
 );
 
 export const openSaveEpic = createEpic(action$ => action$
-  .ofType(SAVE_OPEN)
+  .ofType(CLOUD_SAVE_OPEN)
   .map(() => ({
     type: SAVE_LOAD,
   })),
@@ -351,9 +402,9 @@ export const openSaveEpic = createEpic(action$ => action$
 
 export const loadSavesEpic = createEpic((action$, store) => action$
   .ofType(SAVE_LOAD)
-  .mergeMap(() => Observable.fromPromise(userService.getAllSaves({
+  .mergeMap(() => userService.getAllSaves({
     token: loginModule.selectors.token(store.getState()),
-  })))
+  }))
   .map(response => ({
     type: SAVE_LOAD_SUCCESS,
     payload: response.data,

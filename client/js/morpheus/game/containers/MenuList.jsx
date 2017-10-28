@@ -5,9 +5,13 @@ import {
   menuSize,
 } from '../selectors';
 import {
-  saveGame,
-  loadGame,
+  browserLoad,
+  browserSave,
+  cloudSaveNew,
+  cloudSave,
+  openSave,
   login,
+  logout,
 } from '../actions';
 import {
   closeMenu,
@@ -28,17 +32,30 @@ function mapStateToProps(state) {
 function mapDispatchToPros(dispatch) {
   return {
     onSelect(key) {
-      if (key === 'save') {
-        dispatch(saveGame());
+      if (key === 'cloudSaveNew') {
+        dispatch(cloudSaveNew());
         dispatch(closeMenu());
-      } else if (key === 'load') {
-        dispatch(loadGame());
+      } else if (key === 'cloudSave') {
+        dispatch(cloudSave());
+        dispatch(closeMenu());
+      } else if (key === 'browserLoad') {
+        dispatch(browserLoad());
+        dispatch(closeMenu());
+      } else if (key === 'browserSave') {
+        dispatch(browserSave());
+        dispatch(closeMenu());
+      } else if (key === 'openSave') {
+        dispatch(openSave());
         dispatch(closeMenu());
       } else if (key === 'login') {
         dispatch(login());
         dispatch(closeMenu());
+      } else if (key === 'logout') {
+        dispatch(logout());
       } else if (key === 'settings') {
         dispatch(openSettings());
+        dispatch(closeMenu());
+      } else {
         dispatch(closeMenu());
       }
     },

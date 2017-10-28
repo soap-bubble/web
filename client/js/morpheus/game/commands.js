@@ -13,8 +13,8 @@ import {
   MENU_CLOSE,
   SETTINGS_OPEN,
   SETTINGS_CLOSE,
-  SAVE_CLOSE,
-  SAVE_OPEN,
+  CLOUD_SAVE_CLOSE,
+  CLOUD_SAVE_OPEN,
 } from './actionTypes';
 
 export function openMenu() {
@@ -43,13 +43,13 @@ export function closeSettings() {
 
 export function openSave() {
   return {
-    type: SAVE_OPEN,
+    type: CLOUD_SAVE_OPEN,
   };
 }
 
 export function closeSave() {
   return {
-    type: SAVE_CLOSE,
+    type: CLOUD_SAVE_CLOSE,
   };
 }
 

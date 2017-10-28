@@ -93,6 +93,16 @@ export const savesAreLoading = createSelector(
   g => g.savesAreLoading,
 );
 
+export const saveId = createSelector(
+  game,
+  g => g.saveId,
+);
+
+export const isOpenSave = createSelector(
+  saveId,
+  s => !!s,
+);
+
 export const savesMeta = createSelector(
   game,
   (g) => {
@@ -146,27 +156,49 @@ export const saveSize = createSelector(
   sd => sd.length,
 );
 
-export const saveData = () => storage.get('save');
+export const browserSaveData = () => storage.get('save');
 
 const menuDefinition = createSelector(
-  saveData,
+  browserSaveData,
+  isOpenSave,
   login.selectors.isLoggedIn,
-  (sd, isLoggedIn) => {
+  (bsd, os, isLoggedIn) => {
     const menuData = [];
     if (!isLoggedIn) {
       menuData.push({
         key: 'login',
         title: 'Login',
       });
+    } else {
+      menuData.push({
+        key: 'logout',
+        title: 'Logout',
+      });
+      menuData.push({
+        key: 'cloudSaveNew',
+        title: 'New cloud save',
+      });
+      if (os) {
+        menuData.push({
+          key: 'cloudSave',
+          title: 'Save to cloud',
+        });
+      }
     }
     menuData.push({
-      key: 'save',
-      title: 'Save',
+      key: 'browserSave',
+      title: 'Save to browser',
     });
-    if (sd) {
+    if (isLoggedIn) {
       menuData.push({
-        key: 'load',
-        title: 'Load',
+        key: 'openSave',
+        title: 'Load...',
+      });
+    }
+    if (bsd) {
+      menuData.push({
+        key: 'browserLoad',
+        title: 'Load from browser',
       });
     }
     menuData.push({
@@ -197,14 +229,4 @@ export const menuDelegate = createSelector(
       content,
     };
   },
-);
-
-export const saveId = createSelector(
-  game,
-  g => g.saveId,
-);
-
-export const isOpenSave = createSelector(
-  saveId,
-  s => !!s,
 );

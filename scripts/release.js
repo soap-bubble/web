@@ -4,6 +4,8 @@ const { run, lernaExec } = require('./run')
 lernaExec(`git pull`)
 // lernaExec(`npm run preversion`)
 
+const updated = JSON.parse(run('lerna updated --json'));
+
 // increment version numbers accross all package.json's
 run(`lerna publish --skip-npm --skip-git --exact`, { stdio: 'inherit' });
 const { version, packages } = require('../lerna.json')
@@ -14,7 +16,6 @@ lernaExec(`git commit -am v${version}`, null, true)
 lernaExec(`git tag ${versionStr} -m ${versionStr}`)
 
 // push packages to npm & github (but only non-private repos)
-const updated = JSON.parse(run('lerna updated --json'));
 updated
   .filter(update => !update.private)
   .forEach(update => run(`lerna exec --scope ${update.name} -- npm publish --access=public`));

@@ -14,6 +14,8 @@ const run = (str, opts = {}, ignoreError = false) => {
 module.exports = run;
 module.exports.run = run;
 
-const lernaExec = (cmd, opts, ignoreError) => run(`lerna exec -- ${cmd}`, opts, ignoreError)
+const lernaExec = (cmd, opts, ignoreError) => run(`lerna exec ${
+  !ignoreError ? '--bail=false ' : ''
+}-- ${cmd}`, opts)
 
 module.exports.lernaExec = lernaExec;

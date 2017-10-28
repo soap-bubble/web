@@ -96,7 +96,6 @@ module.exports = (env) => {
     },
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
-      mainFields: ['esnext', 'browser', 'module', 'main'],
     },
     module: {
       rules: styleLoaders.concat([

@@ -6,6 +6,18 @@ import path from 'path';
 import packageJson from './package.json';
 
 module.exports = (env) => {
+  const plugins = [
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify(env.development ? 'development' : 'production'),
+    }),
+  ];
+
+  if (env.production) {
+    plugins.push(new webpack.optimize.UglifyJsPlugin({
+      mangle: false,
+    }));
+  }
+
   const webpackConfig = {
     entry: {
       index: env.development ? './src/dev' : './src/index',
@@ -26,11 +38,7 @@ module.exports = (env) => {
       // Only externalize JS files
       whitelist: [/\.(?!(?:jsx?|json)$).{1,5}$/i],
     })],
-    plugins: [
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': JSON.stringify(env.development ? 'development' : 'production'),
-      }),
-    ],
+    plugins,
   };
 
   if (env.development) {

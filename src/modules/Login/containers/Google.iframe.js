@@ -4,7 +4,7 @@ import config from '../../../config';
 
 const window = global;
 
-export default function (actions) {
+export default ['actions', function module(actions) {
   const loginActions = actions;
 
   class GoogleLogin extends React.Component {
@@ -60,4 +60,4 @@ export default function (actions) {
   }
 
   return connect(mapStateToProps, mapDispatchToProps)(GoogleLogin);
-}
+}];

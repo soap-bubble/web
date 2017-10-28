@@ -53,26 +53,7 @@ export default function (selectors) {
 
   function logout() {
     return {
-      promise: () => new Promise((resolve, reject) => {
-        const loginFrame = document.createElement('iframe');
-        loginFrame.style.display = 'none';
-        loginFrame.src = `${config.authServer}/logout`;
-
-        window.addEventListener('message', function receiveMessage({ origin, data }) {
-          if (origin !== config.authServer) {
-            return;
-          }
-          if (data.isSignedOut) {
-            resolve(true);
-          } else {
-            reject(new Error('Unable to sign out'));
-          }
-          window.removeEventListener('message', receiveMessage);
-          document.body.removeChild(loginFrame);
-        }, false);
-        document.body.appendChild(loginFrame);
-      }),
-      event: LOGOUT,
+      type: LOGOUT,
     };
   }
 

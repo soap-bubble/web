@@ -101,6 +101,7 @@ export default function loginReducer(state = defaultState, { type: action, paylo
       return {
         ...state,
         googleProfile: payload,
+        loggedIn: true,
       };
     }
     default:

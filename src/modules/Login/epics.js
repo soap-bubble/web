@@ -1,7 +1,10 @@
 import { Observable } from 'rxjs';
+import 'rxjs/add/operator/concat';
+
 import axios from 'axios';
 import {
   INIT,
+  LOGOUT,
   GOOGLE_API_INIT,
   GOOGLE_API_LOGGED_IN,
 } from './actionTypes';
@@ -71,5 +74,17 @@ export default function (selectors) {
       };
     });
 
-  return [initEpic, loggedInEpic];
+  const logoutEpic = action$ => action$
+    .ofType(LOGOUT)
+    .mergeMap(() => global.gapi.auth2.getAuthInstance()
+      .signOut())
+    .map(() => ({
+      type: `${LOGOUT}_SUCCESS`,
+    }))
+    .catch(err => ({
+      type: `${LOGOUT}_ERROR`,
+      payload: err,
+    }));
+
+  return [initEpic, loggedInEpic, logoutEpic];
 }

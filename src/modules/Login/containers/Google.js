@@ -74,10 +74,14 @@ export default function (actions) {
     };
   }
 
-  function mapDispatchToProps(dispatch) {
+  function mapDispatchToProps(dispatch, props) {
+    const {
+      onLogin = () => {},
+    } = props;
     return {
       onSuccess(user) {
         dispatch(loginActions.googleLogin(user));
+        onLogin(user);
       },
       onFailure(err) {
         dispatch(loginActions.googleLoginError(err));

@@ -7,7 +7,7 @@ import PopOver from './containers/PopOver';
 import Google from './containers/Google';
 
 const blueprint = builder({
-  selectors: selectorFactory,
+  selectors: ['rootSelector', rootSelector => selectorFactory(rootSelector)],
   epics: ['$', $ => $(epics)],
   actions: ['$', $ => $(actions)],
   reducer: () => reducer,

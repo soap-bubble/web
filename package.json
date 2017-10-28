@@ -7,7 +7,7 @@
     "build": "babel server -d dist",
     "build:production": "npm run build",
     "start": "node dist/app",
-    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --skip-initial-build --watch\" \"cross-env DEBUG=* nodemon dist/app\"",
+    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --skip-initial-build --watch\" \"nodemon dist/app\"",
     "test": "mocha"
   },
   "repository": {

@@ -5,8 +5,8 @@ const save = new Schema({
   saveId: String,
   timestamp: Date,
   gamestates: Schema.Types.Mixed,
-  currentScene: Number,
-  previousScene: Number,
+  currentSceneId: Number,
+  previousSceneId: Number,
   scenestate: Schema.Types.Mixed,
 });
 

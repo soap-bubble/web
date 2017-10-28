@@ -13,7 +13,7 @@ jest.mock('morpheus/casts/modules');
 jest.mock('morpheus/game/actions');
 jest.mock('store/logger');
 jest.mock('service/scene');
-jest.mock('soapbubble');
+jest.mock('soapbubble/login');
 
 const logger = require('store/logger');
 

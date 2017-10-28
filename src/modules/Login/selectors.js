@@ -1,7 +1,7 @@
 import { createSelector } from 'reselect';
 import { get } from 'lodash';
 
-export default ['root', function module(root) {
+export default function (root) {
   const isLoggedIn = createSelector(
     root,
     login => login.loggedIn,
@@ -62,4 +62,4 @@ export default ['root', function module(root) {
     userName,
     token,
   };
-}];
+}

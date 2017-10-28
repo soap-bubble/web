@@ -10,7 +10,7 @@ import {
   GOOGLE_LOGIN,
 } from './actionTypes';
 
-export default ['selectors', function module(selectors) {
+export default function (selectors) {
   const loginSelectors = selectors;
 
   function checkLoginStatus() {
@@ -113,4 +113,4 @@ export default ['selectors', function module(selectors) {
     googleLoginError,
     googleAuthLogin,
   };
-}];
+}

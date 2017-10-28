@@ -12,7 +12,7 @@ import config from '../../config';
 
 const window = global;
 
-export default ['selectors', function module(selectors) {
+export default function (selectors) {
   const windowGapi$ = Observable
     .interval(99)
     .takeUntil(() => !window.gapi)
@@ -87,4 +87,4 @@ export default ['selectors', function module(selectors) {
     }));
 
   return [initEpic, loggedInEpic, logoutEpic];
-}];
+}

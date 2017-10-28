@@ -4,7 +4,7 @@ import { connect } from 'react-redux';
 
 const window = global;
 
-export default ['actions', function module(actions) {
+export default function (actions) {
   const loginActions = actions;
 
   class GoogleLogin extends React.Component {
@@ -90,4 +90,4 @@ export default ['actions', function module(actions) {
   }
 
   return connect(mapStateToProps, mapDispatchToProps)(GoogleLogin);
-}];
+}

@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/style",
-  "version": "1.3.1",
+  "version": "1.3.2",
   "description": "Soap Bubble Production Bootstrap style",
   "main": "index.js",
   "scripts": {

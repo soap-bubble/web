@@ -12,7 +12,7 @@ module.exports = (env) => {
     }),
   ];
 
-  if (env.production) {
+  if (!env.development) {
     plugins.push(new webpack.optimize.UglifyJsPlugin({
       mangle: false,
     }));
@@ -20,7 +20,7 @@ module.exports = (env) => {
 
   const webpackConfig = {
     entry: {
-      index: env.development ? './src/dev' : './src/index',
+      index: './src/index',
     },
     devtool: env.development ? 'inline-source-map' : '',
     output: {

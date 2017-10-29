@@ -8,7 +8,7 @@
     "test": "jest",
     "lint": "eslint",
     "build:production": "webpack --env.production=true",
-    "start:dev": "webpack-dev-server --env",
+    "start:dev": "webpack --env.development=true",
     "prepublishOnly": "npm run build:production"
   },
   "author": "John Dean <john.holmes.dean@gmail.com>",
@@ -35,7 +35,7 @@
     "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
-    "@soapbubble/style": "1.3.1",
+    "@soapbubble/style": "1.3.2",
     "axios": "^0.16.2",
     "create-react-class": "^15.6.2",
     "lodash": "^4.17.4",

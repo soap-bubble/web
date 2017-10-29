@@ -150,6 +150,7 @@ module.exports = (env) => {
       compress: {
         warnings: false,
       },
+      mangle: false,
     }));
   }
 

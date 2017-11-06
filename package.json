@@ -10,6 +10,7 @@
     "build:server": "babel server -d lib --copy-files",
     "build:client": "webpack --env",
     "build:client:production": "webpack --env.production=true",
+    "build:client:staging": "webpack --env.staging=true",
     "build:client:watch": "webpack --env --watch",
     "gulp": "gulp",
     "lint": "eslint client config server",
@@ -17,6 +18,7 @@
     "webpack": "webpack",
     "db:prime": "gulp db:prime | bunyan",
     "start": "npm run build:client:production & npm run build:server && node lib/index",
+    "start:staging": "npm run build:client:staging & npm run build:server && node lib/index",
     "start:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
   "author": "",

@@ -17,8 +17,10 @@ const blueprint = builder({
 
 export default function ({
   rootSelector,
+  googleConfigProvider,
 }) {
   return blueprint.construct({
     rootSelector,
+    googleConfigProvider,
   });
 }

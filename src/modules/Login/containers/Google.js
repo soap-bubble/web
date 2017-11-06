@@ -13,12 +13,6 @@ export default function (actions) {
       this.onClickHandler = this.onClickHandler.bind(this);
     }
 
-    componentWillMount() {
-    }
-
-    componentWillUnmount() {
-    }
-
     onClickHandler() {
       const options = {
         prompt: '',

@@ -1,31 +1,25 @@
 import { Observable } from 'rxjs';
 import 'rxjs/add/operator/concat';
 
-import axios from 'axios';
 import {
   INIT,
   LOGOUT,
   GOOGLE_API_INIT,
   GOOGLE_API_LOGGED_IN,
 } from './actionTypes';
-import config from '../../config';
 
 const window = global;
 
-export default function (selectors) {
+export default function (selectors, googleConfigProvider) {
   const windowGapi$ = Observable
     .interval(99)
     .takeUntil(() => !window.gapi)
     .last();
 
-  const gapiConfig$ = Observable.fromPromise(
-    axios.get(`${config.authServer}/google/oauth`).then(res => res.data),
-  );
-
   const initEpic = action$ => action$
     .ofType(INIT)
     .concat(windowGapi$)
-    .mergeMap(() => gapiConfig$)
+    .mergeMap(() => Observable.fromPromise(googleConfigProvider()))
     .map((gapiConfig) => {
       const dispatch = {
         type: GOOGLE_API_INIT,

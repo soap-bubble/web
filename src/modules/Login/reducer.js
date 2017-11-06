@@ -1,6 +1,5 @@
 import {
   INIT,
-  START,
   LOGIN,
   LOGOUT,
   SUCCESS,
@@ -67,14 +66,6 @@ export default function loginReducer(state = defaultState, { type: action, paylo
         initStatus: false,
         loggedIn: false,
         user: {},
-      };
-    }
-    case START: {
-      return {
-        ...state,
-        started: true,
-        ended: false,
-        message: '',
       };
     }
     case SUCCESS: {

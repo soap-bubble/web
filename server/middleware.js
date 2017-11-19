@@ -42,7 +42,7 @@ export default function installMiddleware(app, db, config, createLogger) {
   app.use(cors(config.cors));
   app.use(bodyParser.json(config.bodyParser.json));
   app.use(bodyParser.urlencoded({
-    extended: true
+    extended: true,
   }));
   app.use(expressSession({
     ...config.session,

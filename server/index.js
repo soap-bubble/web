@@ -17,6 +17,15 @@ if (app.get('env') !== 'production') {
   app.use(require('connect-browser-sync')(bs));
 }
 
+// SSL redirect
+app.use((req, res, next) => {
+  if (req.secure || process.env.NODE_ENV === 'development') {
+    // OK, continue
+    return next();
+  }
+  return res.redirect(`https://${req.hostname}${req.url}`);
+});
+
 const gameDbPath = path.resolve(config.gameDbPath);
 logger.info('static game dir', { gameDbPath });
 app.use('/GameDB', express.static(gameDbPath));

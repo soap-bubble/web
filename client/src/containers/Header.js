@@ -3,8 +3,6 @@ import {
   once,
 } from 'lodash';
 import { connect } from 'react-redux';
-import { LinkContainer } from 'react-router-bootstrap';
-import { NavItem } from 'react-bootstrap';
 import NavBar from '../components/NavBar';
 import LoginStatusNavItem from '../components/LoginStatusNavItem';
 import { changePage } from '../actions';
@@ -37,7 +35,7 @@ const mapStateToProps = (state) => {
   };
 };
 
-const mapDispatchToProps = dispatch => {
+const mapDispatchToProps = (dispatch) => {
   if (!onInit) {
     onInit = once(() => {
       dispatch(loginActions.init());

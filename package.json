@@ -83,7 +83,7 @@
     "react-router-bootstrap": "^0.23.1",
     "react-router-redux": "^4.0.8",
     "redux": "^3.6.0",
-    "redux-logger": "^2.8.1",
+    "redux-logger": "^3.0.6",
     "redux-observable": "https://registry.npmjs.org/redux-observable/-/redux-observable-0.16.0.tgz",
     "redux-promise": "^0.5.3",
     "redux-thunk": "^2.2.0",

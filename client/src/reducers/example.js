@@ -1,4 +1,3 @@
-import config from '../config';
 import createReducer from './createReducer';
 import scene1230 from '../../assets/img/scene_1230.png';
 import scene1050 from '../../assets/img/scene_1050.png';

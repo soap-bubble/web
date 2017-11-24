@@ -39,6 +39,7 @@ configuration.plugins = configuration.plugins.concat(
     compress: {
       warnings: false,
     },
+    mangle: false,
   }),
 );
 

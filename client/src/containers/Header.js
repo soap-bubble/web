@@ -9,9 +9,13 @@ import NavBar from '../components/NavBar';
 import LoginStatusNavItem from '../components/LoginStatusNavItem';
 import { changePage } from '../actions';
 import {
-  selectors as loginSelectors,
-  actions as loginActions,
-} from '../modules/Login';
+  login,
+} from '../modules/soapbubble';
+
+const {
+  selectors: loginSelectors,
+  actions: loginActions,
+} = login;
 
 let onInit;
 
@@ -36,7 +40,7 @@ const mapStateToProps = (state) => {
 const mapDispatchToProps = dispatch => {
   if (!onInit) {
     onInit = once(() => {
-      dispatch(loginActions.checkLoginStatus());
+      dispatch(loginActions.init());
     });
   }
   return {

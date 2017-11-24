@@ -14,7 +14,7 @@ configuration.plugins.push(
       NODE_ENV: JSON.stringify('development'),
       BABEL_ENV: JSON.stringify('development/client'),
     },
-    REDUX_DEVTOOLS: false, // enable/disable redux-devtools
+    REDUX_DEVTOOLS: false, // enable/disable redux-devtools,
   }),
 
   // faster code reload on changes
@@ -26,6 +26,11 @@ configuration.plugins.push(
   // // extracts common javascript into a separate file (works)
   // new webpack.optimize.CommonsChunkPlugin('common', 'common.[hash].js')
 );
+
+configuration.resolve = {
+  extensions: ['.js', '.jsx', '.json'],
+  mainFields: ['esnext', 'browser', 'module', 'main'],
+};
 
 // enable webpack development server
 configuration.entry.main = [

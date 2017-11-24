@@ -1,8 +1,7 @@
 import 'rxjs/add/operator/distinct';
 import 'rxjs/add/operator/map';
 import 'rxjs/add/operator/scan';
-import { combineEpics } from 'redux-observable';
-import { createEpicMiddleware } from 'redux-observable';
+import { combineEpics, createEpicMiddleware } from 'redux-observable';
 
 export const epics = [];
 

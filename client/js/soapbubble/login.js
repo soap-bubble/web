@@ -1,4 +1,3 @@
-import { Observable } from 'rxjs';
 import axios from 'axios';
 import { Login } from '@soapbubble/components';
 import { install } from 'utils/createReducer';

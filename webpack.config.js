@@ -37,12 +37,27 @@ module.exports = (env) => {
   const cssName = env.production ? 'morpheus.[contenthash].css' : 'morpheus.css';
   const jsName = env.production ? '[name].[hash].js' : '[name].js';
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
+  const appConfig = {};
 
-  const appConfig = {
-    assetHost: env.production ? 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev' : '',
-    apiHost: env.production ? 'https://morpheus.soapbubble.online' : '',
-    authHost: env.production ? 'https://auth.soapbubble.online' : 'http://localhost:4000',
-  };
+  if (env.production) {
+    Object.assign(appConfig, {
+      assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
+      apiHost: 'https://morpheus.soapbubble.online',
+      authHost: 'https://auth.soapbubble.online',
+    });
+  } else if (env.staging) {
+    Object.assign(appConfig, {
+      assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
+      apiHost: 'https://morpheus.soapbubble.online',
+      authHost: 'https://auth.soapbubble.online',
+    });
+  } else {
+    Object.assign(appConfig, {
+      assetHost: '',
+      apiHost: '',
+      authHost: 'http://localhost:4000',
+    });
+  }
 
   if (env.phonegap) {
     if (env.production) {
@@ -60,6 +75,9 @@ module.exports = (env) => {
     }
   }
   const target = env.electron ? 'electron-renderer' : 'web';
+  const mainFields = (env.production || env.staging)
+    ? ['browser', 'module', 'main']
+    : ['esnext', 'browser', 'module', 'main'];
 
   const webpackConfig = {
     target,
@@ -96,16 +114,16 @@ module.exports = (env) => {
     },
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
-      mainFields: ['esnext', 'browser', 'module', 'main'],
+      mainFields,
     },
     module: {
       rules: styleLoaders.concat([
         {
           test: /\.jsx?$/,
+          exclude: [/node_modules/],
           include: dirSharedComponents.concat([
             dirJs,
           ]),
-          exclude: [/node_modules/],
           use: ['babel-loader'],
         },
         {
@@ -151,6 +169,7 @@ module.exports = (env) => {
       compress: {
         warnings: false,
       },
+      mangle: false,
     }));
   }
 

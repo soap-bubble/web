@@ -26,7 +26,7 @@ module.exports = (env) => {
     output: {
       path: path.resolve('dist'),
       filename: '[name].js',
-      libraryTarget: env.development ? 'var' : 'umd',
+      libraryTarget: 'umd',
       library: packageJson.name.replace('@', '').replace('/', ''),
     },
     module: {

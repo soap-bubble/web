@@ -540,10 +540,31 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doUnload() {
+    return (dispatch, getState) => {
+      const videos = specialSelectors.videos(getState());
+      const sounds = specialSelectors.sounds(getState());
+
+      Object.keys([...videos, ...sounds]).forEach(({ el, listeners }) => {
+        if (listeners.ended) {
+          el.removeEventListener('ended', listeners.ended);
+        }
+      });
+
+      return Promise.resolve({
+        videos: [],
+        sounds: [],
+        images: [],
+        canvas: null,
+      });
+    };
+  }
+
   return {
     applies,
     doEnter,
     doExit,
+    doUnload,
   };
 });
 

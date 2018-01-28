@@ -225,9 +225,23 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doUnload() {
+    return (dispatch, getState) => {
+      const panoAnimCastMap = panoAnimSelectors.castMap(getState());
+      values(panoAnimCastMap).forEach(({ el: videoEl }) => {
+        videoEl.oncanplaythrough = null;
+        videoEl.onerror = null;
+      });
+      return Promise.resolve({
+        panoAnimCastMap: null,
+      });
+    };
+  }
+
   return {
     applies,
     doEnter,
     onStage,
+    doUnload,
   };
 });

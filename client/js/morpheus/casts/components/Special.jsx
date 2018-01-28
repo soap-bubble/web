@@ -1,6 +1,6 @@
 import { connect } from 'react-redux';
 import cn from 'classnames';
-import React from 'react';
+import React, { Component } from 'react';
 import flatspot from 'morpheus/flatspot';
 import {
   selectors as castSelectors,
@@ -22,45 +22,70 @@ function mapDispatchToProps(dispatch, { scene }) {
   return flatspot({ dispatch, scene });
 }
 
-const Special = connect(
+class Special extends Component {
+  componentDidMount() {
+    const {
+      canvas,
+      videos,
+    } = this.props;
+
+    if (canvas) {
+      this.el.appendChild(canvas);
+    }
+    if (videos) {
+      videos.forEach(video => this.el.appendChild(video.el));
+    }
+  }
+
+  componentWillUnmount() {
+    const {
+      canvas,
+      videos,
+    } = this.props;
+
+    if (canvas) {
+      canvas.remove();
+    }
+    if (videos) {
+      videos.forEach(video => video.el.remove());
+    }
+  }
+
+  render() {
+    const {
+      style,
+      onMouseDown,
+      onMouseMove,
+      onMouseUp,
+      onTouchMove,
+      onTouchStart,
+      onTouchEnd,
+      onTouchCancel,
+    } = this.props;
+
+    return (
+      <div
+        className={cn('scene')}
+        ref={(el) => {
+          this.el = el;
+        }}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchCancel}
+        style={{
+          ...style,
+          cursor: 'none',
+        }}
+      />
+    );
+  }
+}
+
+export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(({
-  style,
-  canvas,
-  videos,
-  onMouseDown,
-  onMouseMove,
-  onMouseUp,
-  onTouchMove,
-  onTouchStart,
-  onTouchEnd,
-  onTouchCancel,
-}) => (
-  <div
-    className={cn('scene')}
-    ref={(el) => {
-      if (el) {
-        if (canvas) {
-          el.appendChild(canvas);
-        }
-        if (videos) {
-          videos.forEach(video => el.appendChild(video.el));
-        }
-      }
-    }}
-    onMouseDown={onMouseDown}
-    onMouseMove={onMouseMove}
-    onMouseUp={onMouseUp}
-    onTouchStart={onTouchStart}
-    onTouchMove={onTouchMove}
-    onTouchEnd={onTouchEnd}
-    onTouchCancel={onTouchCancel}
-    style={{
-      ...style,
-      cursor: 'none',
-    }}
-  />
-));
-
-export default Special;
+)(Special);

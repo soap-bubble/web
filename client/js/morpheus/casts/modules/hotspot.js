@@ -438,7 +438,10 @@ export const delegate = memoize((scene) => {
 
       hotspotsData.forEach((hotspot) => {
         const { gesture } = hotspot;
-        if (GESTURES[gesture] === 'Always') {
+        if (
+          GESTURES[gesture] === 'Always'
+          || GESTURES[gesture] === 'SceneEnter'
+        ) {
           dispatch(gamestateActions.handleHotspot({ hotspot }));
         }
       });

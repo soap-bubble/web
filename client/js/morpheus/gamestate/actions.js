@@ -19,6 +19,7 @@ import {
 } from './actionTypes';
 import {
   ACTION_TYPES,
+  GESTURES,
 } from '../constants';
 
 export function inject(gamestates) {
@@ -281,8 +282,10 @@ export function handleHotspot({ hotspot }) {
         //   break;
         // }
 
-        default:
-          break;
+        default: {
+          const { defaultPass } = hotspot;
+          return defaultPass;
+        }
       }
     }
     return true;

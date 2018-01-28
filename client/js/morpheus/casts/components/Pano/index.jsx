@@ -1,12 +1,16 @@
 import { connect } from 'react-redux';
-import React from 'react';
+import React, { PureComponent } from 'react';
 import cn from 'classnames';
 import {
+  actions as castActions,
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
+import {
+  actions as inputActions,
+} from 'morpheus/input';
 import momentum from 'morpheus/momentum';
 import hotspots from 'morpheus/hotspots';
 import qs from 'query-string';
@@ -19,14 +23,15 @@ function mapStateToProps(state, { scene }) {
   const style = gameSelectors.style(state);
 
   return {
-    canvas,
     style,
+    canvas,
   };
 }
 
 function mapDispatchToProps(dispatch, { scene }) {
   const momentumHandler = momentum({ dispatch, scene });
   const hotspotsHandler = hotspots({ dispatch, scene });
+  const actions = castActions.forScene(scene);
 
   return [
     'onMouseUp',
@@ -46,43 +51,72 @@ function mapDispatchToProps(dispatch, { scene }) {
     onKeyDown(event) {
       dispatch(inputActions.keyPress(event.which));
     },
+    onMount({
+      canvas,
+    }) {
+      dispatch(castActions.lifecycle.onMount({
+        scene,
+        castType: 'pano',
+        canvas,
+      }));
+    },
+    onUnmount() {
+      dispatch(castActions.lifecycle.doUnload(scene));
+    },
   });
 }
 
-const Pano = ({
-  canvas,
-  style,
-  onMouseUp,
-  onMouseMove,
-  onMouseDown,
-  onTouchStart,
-  onTouchMove,
-  onTouchEnd,
-  onTouchCancel,
-  onKeyDown,
-}) => (
-  <div
-    className={cn('scene')}
-    ref={(el) => {
-      if (el) {
-        el.appendChild(canvas);
-      }
-    }}
-    onKeyDown={onKeyDown}
-    onMouseDown={onMouseDown}
-    onMouseMove={onMouseMove}
-    onMouseUp={onMouseUp}
-    onTouchStart={onTouchStart}
-    onTouchMove={onTouchMove}
-    onTouchEnd={onTouchEnd}
-    onTouchCancel={onTouchCancel}
-    style={{
-      ...style,
-      cursor: 'none',
-      opacity: transparentPano ? 0.5 : null,
-    }}
-  />
-  );
+class Pano extends PureComponent {
+
+  componentWillUnmount() {
+    const { onUnmount } = this.props;
+    onUnmount();
+  }
+
+  render() {
+    const {
+      style,
+      canvas,
+      onMouseUp,
+      onMouseMove,
+      onMouseDown,
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
+      onTouchCancel,
+      onKeyDown,
+    } = this.props;
+    return (
+      <div
+        className={cn('scene')}
+        ref={(el) => {
+          if (el) {
+            el.appendChild(canvas);
+          }
+        }}
+
+        style={{
+          ...style,
+          cursor: 'none',
+          opacity: transparentPano ? 0.5 : null,
+        }}
+        onKeyDown={onKeyDown}
+        onMouseDown={onMouseDown}
+        onMouseMove={onMouseMove}
+        onMouseUp={onMouseUp}
+        onTouchStart={onTouchStart}
+        onTouchMove={onTouchMove}
+        onTouchEnd={onTouchEnd}
+        onTouchCancel={onTouchCancel}
+      >
+      </div>
+    );
+  }
+}
+
+Pano.propTypes = {
+
+};
 
 export default connect(
   mapStateToProps,

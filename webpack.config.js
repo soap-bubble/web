@@ -21,7 +21,7 @@ module.exports = (env) => {
     if (env.electron) {
       return path.resolve(__dirname, '../electron/build');
     }
-    return path.join(__dirname, 'public');
+    return path.resolve(__dirname, 'public');
   })();
 
   const publicPath = '';

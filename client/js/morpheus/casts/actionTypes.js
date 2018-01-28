@@ -4,3 +4,4 @@ export const EXITING = 'CAST_EXITING';
 export const ENTER = 'CAST_ENTER';
 export const UNLOADING = 'CAST_UNLOADING';
 export const ON_STAGE = 'CAST_ON_STAGE';
+export const ON_MOUNT = 'CAST_ON_MOUNT';

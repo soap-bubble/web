@@ -91,6 +91,7 @@ export function startAtScene(id) {
               type: SCENE_DO_ENTER,
               payload: scene.sceneId,
             });
+            
             dispatch(inputActions.enableControl());
             return scene;
           }));

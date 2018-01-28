@@ -9,7 +9,8 @@ import keycode from 'keycode';
 import 'morpheus';
 
 // Then pull out the stuff we need
-import { actions as sceneActions } from 'morpheus/scene';
+import { actions as castActions } from 'morpheus/casts';
+import { selectors as sceneSelectors, actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
 import { Game, actions as gameActions } from 'morpheus/game';
 import {
@@ -63,4 +64,10 @@ window.onload = () => {
   });
 
   store.dispatch(login.actions.init());
+
+  window.updateGameState = function updateGameState(gamestateId, value) {
+    store.dispatch(gamestateActions.updateGameState(gamestateId, value));
+    const scene = sceneSelectors.currentSceneData(store.getState());
+    store.dispatch(castActions.forScene(scene).special.update(scene));
+  };
 };

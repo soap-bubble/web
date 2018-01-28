@@ -33,6 +33,10 @@ export const volume = createSelector(
   game,
   _game => _game.volume,
 );
+export const htmlVolume = createSelector(
+  volume,
+  v => v / 100,
+);
 export const style = createSelector(
   width,
   height,

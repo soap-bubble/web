@@ -8,6 +8,7 @@ import {
   ENTERING,
   EXITING,
   ON_STAGE,
+  ON_MOUNT,
 } from './actionTypes';
 
 const reducer = createReducer('casts', {
@@ -33,6 +34,22 @@ const reducer = createReducer('casts', {
           ...state.cache[scene.sceneId],
           status: 'entering',
           [castType]: castData,
+        },
+      },
+    };
+  },
+  [ON_MOUNT](state, { payload: castData, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
+    return {
+      ...state,
+      cache: {
+        ...state.cache,
+        [scene.sceneId]: {
+          ...oldSceneCache,
+          status: 'onMount',
+          [castType]: oldSceneCache ? merge({
+            ...oldSceneCache[castType],
+          }, castData) : castData,
         },
       },
     };

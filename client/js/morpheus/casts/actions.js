@@ -6,18 +6,28 @@ import {
   ENTERING,
   EXITING,
   ON_STAGE,
+  ON_MOUNT,
   UNLOADING,
 } from './actionTypes';
 import * as modules from './modules';
 
 
+function dispatchCastState({ event, castState, castType, scene }) {
+  return {
+    type: event,
+    payload: castState,
+    meta: { type: castType, scene },
+  };
+}
+
 function doActionForCast({ event, scene, castType, action }) {
   return dispatch => dispatch(action())
-    .then(castState => dispatch({
-      type: event,
-      payload: castState,
-      meta: { type: castType, scene },
-    }));
+    .then(castState => dispatch(dispatchCastState({
+      event,
+      castState,
+      castType,
+      scene,
+    })));
 }
 
 export const lifecycle = [{
@@ -54,7 +64,20 @@ export const lifecycle = [{
           .then(() => scene);
     };
     return memo;
-  }, {});
+  }, {
+    onMount({
+      scene,
+      castType,
+      ...castState
+    }) {
+      return dispatchCastState({
+        event: ON_MOUNT,
+        scene,
+        castType,
+        castState,
+      });
+    },
+  });
 
 export const forScene = memoize((scene) => {
   const moduleActions = Object.keys(modules).reduce((memo, name) => {

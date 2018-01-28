@@ -38,6 +38,11 @@ export function forState(state) {
   return {
     byId(id) {
       const gamestate = gamestates(state).get(id);
+
+      if (!gamestate) {
+        throw new Error(`VariableNotFound ${id}`);
+      }
+
       return {
         get value() {
           return gamestate.get('value');

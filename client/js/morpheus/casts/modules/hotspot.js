@@ -460,17 +460,23 @@ export const delegate = memoize((scene) => {
 export const actions = memoize((scene) => {
   function hovered(hoveredHotspots) {
     return (dispatch, getState) => {
+      let cursor;
       hoveredHotspots.every((hotspot) => {
         const gamestates = gamestateSelectors.forState(getState());
         if (isActive({ cast: hotspot, gamestates })) {
-          const { cursorShapeWhenActive: morpheusCursor } = hotspot;
-          dispatch(gameActions.setCursor(morpheusCursor));
-          return false;
+          const {
+            defaultPass,
+            cursorShapeWhenActive: morpheusCursor,
+          } = hotspot;
+          cursor = morpheusCursor;
+          return defaultPass;
         }
         return true;
       });
 
-      if (hoveredHotspots.length === 0) {
+      if (cursor) {
+        dispatch(gameActions.setCursor(cursor));
+      } else if (hoveredHotspots.length === 0) {
         dispatch(gameActions.setCursor(10000));
       }
     };

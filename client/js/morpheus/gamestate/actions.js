@@ -10,7 +10,7 @@ import {
 import {
   actions as gameActions,
 } from 'morpheus/game';
-
+import scripts from 'morpheus/gamestate/scripts';
 import {
   API_ERROR,
   LOAD_COMPLETE,
@@ -283,6 +283,10 @@ export function handleHotspot({ hotspot }) {
         // }
 
         default: {
+          const script = scripts(type);
+          if (script.enabled(hotspot, gamestates)) {
+            dispatch(script.execute(hotspot, gamestates));
+          }
           const { defaultPass } = hotspot;
           return defaultPass;
         }

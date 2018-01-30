@@ -5,8 +5,10 @@ import {
   MeshBasicMaterial,
   LinearFilter,
   VideoTexture,
+  TextureLoader,
   Mesh,
   DoubleSide,
+  BackSide,
 } from 'three';
 import {
   get,
@@ -25,6 +27,7 @@ import {
 } from 'utils/video';
 import {
   getPanoAnimUrl,
+  getAssetUrl,
 } from 'service/gamedb';
 import {
   isActive,
@@ -43,11 +46,10 @@ const SLICE_HEIGHT = 0.55;
 const SLICE_DEPTH = 0.999;
 const SLICE_PIX_WIDTH = 128;
 const SLICE_PIX_HEIGHT = 512;
+const SCENE_WIDTH = SLICE_WIDTH * 24;
 
-function createPositions(panoAnimData) {
-  const { location } = panoAnimData;
-  const { width, height } = panoAnimData;
-  const { x, y } = location;
+function createVideoPositions(panoAnimData) {
+  const { location: { x, y }, width, height } = panoAnimData;
 
   /* eslint-disable no-mixed-operators */
   const right = -((2 * SLICE_WIDTH) * (x / SLICE_PIX_WIDTH) - SLICE_WIDTH);
@@ -64,6 +66,54 @@ function createPositions(panoAnimData) {
   ]), 3);
 
   return panoAnimPositions;
+}
+
+const SCALE_FACTOR = 1.0;
+const HOTSPOT_X_OFFSET = Math.PI / 3;
+const HOTSPOT_X_COORD_FACTOR = Math.PI / -1800;
+const SIZE = 0.99 * SCALE_FACTOR;
+const HOTSPOT_Y_COORD_FACTOR = 0.0022 * SCALE_FACTOR;
+const SCALE_WIDTH_FACTOR = 1.2;
+const SCALE_HEIGHT_FACTOR = 0.95;
+
+
+function cylinderMap(y, x) {
+  return {
+    x: SIZE * Math.sin(x - (Math.PI / 2)),
+    y: -y,
+    z: SIZE * Math.cos(x - (Math.PI / 2)),
+  };
+}
+
+
+function createControlledPositions(controlledCastsData) {
+  const { controlledLocation: { x, y }, width, height } = controlledCastsData;
+
+  let top = y - 250;
+  let bottom = y + (height * SCALE_HEIGHT_FACTOR) - 250;
+  let left = x;
+  let right = x + (width * SCALE_WIDTH_FACTOR);
+
+  top *= HOTSPOT_Y_COORD_FACTOR;
+  bottom *= HOTSPOT_Y_COORD_FACTOR;
+  right = (HOTSPOT_X_COORD_FACTOR * right) + HOTSPOT_X_OFFSET;
+  left = (HOTSPOT_X_COORD_FACTOR * left) + HOTSPOT_X_OFFSET;
+
+  const bottomLeft = cylinderMap(bottom, left);
+  const bottomRight = cylinderMap(bottom, right);
+  const topRight = cylinderMap(top, right);
+  const topLeft = cylinderMap(top, left);
+
+  const positions = new BufferAttribute(
+    new Float32Array(12), 3,
+  );
+
+  positions.setXYZ(0, bottomLeft.x, bottomLeft.y, bottomLeft.z);
+  positions.setXYZ(1, bottomRight.x, bottomRight.y, bottomRight.z);
+  positions.setXYZ(2, topRight.x, topRight.y, topRight.z);
+  positions.setXYZ(3, topLeft.x, topLeft.y, topLeft.z);
+
+  return positions;
 }
 
 function createUvs() {
@@ -92,7 +142,7 @@ function createGeometry(positions, uvs, index) {
   return geometry;
 }
 
-function createMaterial(videoEl) {
+function createVideoMaterial(videoEl) {
   const texture = new VideoTexture(videoEl);
   texture.minFilter = LinearFilter;
   texture.magFilter = LinearFilter;
@@ -103,17 +153,40 @@ function createMaterial(videoEl) {
   });
 }
 
+function createMaterial(asset) {
+  const loader = new TextureLoader();
+  loader.crossOrigin = 'anonymous';
+  let material;
+  return new Promise(
+    (resolve, reject) => {
+      material = new MeshBasicMaterial({
+        side: DoubleSide,
+        map: loader.load(
+         asset,
+         resolve,
+         undefined,
+         reject,
+       ),
+      });
+    },
+  )
+    .then(() => material);
+}
+
 function createObject3D({ geometry, material, frame }) {
   const mesh = new Mesh(geometry, material);
-  mesh.rotation.y = -(frame * ONE_TWENTYFOURTH_RAD);
+  if (frame) {
+    mesh.rotation.y = -(frame * ONE_TWENTYFOURTH_RAD);
+  }
   return mesh;
 }
 
 export const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
+  const allCasts = () => get(scene, 'casts', []);
   const selectPanoAnimData = createSelector(
-    () => scene,
-    s => get(s, 'casts', [])
+    allCasts,
+    casts => casts
       .filter(c => c.__t === 'PanoAnim'),
   );
   const selectEnabledPanoAnimData = createSelector(
@@ -126,9 +199,13 @@ export const selectors = memoize((scene) => {
     selectSceneCache,
     cache => get(cache, 'panoAnim'),
   );
-  const selectPanoAnimCastMap = createSelector(
+  const selectVideoCasts = createSelector(
     selectPanoAnim,
-    panoAnim => panoAnim.panoAnimCastMap,
+    panoAnim => panoAnim.videoCasts,
+  );
+  const selectControlledCasts = createSelector(
+    selectPanoAnim,
+    panoAnim => panoAnim.controlledCasts,
   );
   const mapPanoAnimDataToUniqueFilenames = panoAnimData => uniq(
     panoAnimData
@@ -148,13 +225,27 @@ export const selectors = memoize((scene) => {
     selectEnabledPanoAnimData,
     mapPanoAnimDataToUniqueFilenames,
   );
+  const selectControlledCastsData = createSelector(
+    allCasts,
+    casts => casts.filter(c => c.__t === 'ControlledMovieCast', []),
+  );
+  const selectIsPano = createSelector(
+    () => scene,
+    (sceneData) => {
+      const { casts } = sceneData;
+      return !!(casts.find(c => c.__t === 'PanoCast'));
+    },
+  );
   return {
+    isPano: selectIsPano,
     panoAnimData: selectPanoAnimData,
     enabledPanoAnimData: selectEnabledPanoAnimData,
     filenames: selectPanoAnimFilenames,
     enabledFilenames: selectEnabledFilenames,
-    castMap: selectPanoAnimCastMap,
+    videoCasts: selectVideoCasts,
+    controlledCasts: selectControlledCasts,
     isPanoAnim: selectIsPanoAnim,
+    controlledCastsData: selectControlledCastsData,
   };
 });
 
@@ -176,64 +267,90 @@ export const delegate = memoize((scene) => {
   const panoAnimSelectors = selectors(scene);
 
   function applies(state) {
-    return panoAnimSelectors.panoAnimData(state).length;
+    return (
+      panoAnimSelectors.isPano(state)
+        && ((panoAnimSelectors.panoAnimData(state).length !== 0)
+        || (panoAnimSelectors.controlledCastsData(state).length !== 0)));
   }
 
   function doEnter() {
     return (dispatch, getState) => {
-      const panoAnimCasts = panoAnimSelectors.enabledPanoAnimData(getState());
-      return Promise.props(panoAnimCasts.reduce((memo, curr) => {
-        const name = getPanoAnimUrl(curr.fileName);
-        memo[curr.fileName] = promiseVideoElement(name, { loop: curr.looping })
-          .then(video => ({
-            el: video,
-            data: curr,
-          }));
-        return memo;
-      }, {}))
-        .then(p => ({
-          panoAnimCastMap: p,
+      const videoCastsData = panoAnimSelectors.enabledPanoAnimData(getState());
+      const controlledCastsData = panoAnimSelectors.controlledCastsData(getState());
+
+      return Promise.all(
+        [
+          controlledCastsData.map(
+            curr => createMaterial(getAssetUrl(curr.fileName, 'png'))
+              .then(material => ({
+                material,
+                positions: createControlledPositions(curr),
+                data: curr,
+              })),
+          ),
+          videoCastsData.map(
+            curr => promiseVideoElement(getPanoAnimUrl(curr.fileName), { loop: curr.looping })
+              .then(video => ({
+                el: video,
+                data: curr,
+                positions: createVideoPositions(curr),
+                material: createVideoMaterial(video),
+              }))),
+        ],
+      )
+        .then(([controlledCasts, videoCasts]) => ({
+          videoCasts, controlledCasts,
         }));
     };
   }
 
   function onStage() {
     return (dispatch, getState) => {
-      const filenames = panoAnimSelectors.filenames(getState());
-      if (!filenames.length) {
-        return Promise.resolve();
-      }
-
       const panoObject3D = panoSelectors(scene).panoObject3D(getState());
-      const panoAnimCastMap = panoAnimSelectors.castMap(getState());
-      return Promise.all(values(panoAnimCastMap))
-        .then((panoAnims) => {
-          panoAnims.forEach(({ data: panoAnimCast, el: videoEl }) => {
-            const { frame } = panoAnimCast;
-            const postions = createPositions(panoAnimCast);
-            const uvs = createUvs();
-            const geometry = createGeometry(
-              postions,
-              uvs,
-              createIndex(),
-            );
-            const material = createMaterial(videoEl);
-            const object3D = createObject3D({ geometry, material, frame });
-            panoObject3D.add(object3D);
-          });
-        });
+      const videoCasts = panoAnimSelectors.videoCasts(getState());
+      const controlledCasts = panoAnimSelectors.controlledCasts(getState());
+
+      return Promise.all([
+        Promise.all(controlledCasts)
+          .then((imageCasts) => {
+            imageCasts.forEach(({ material, positions }) => {
+              const uvs = createUvs();
+              const geometry = createGeometry(
+                positions,
+                uvs,
+                createIndex(),
+              );
+              const object3D = createObject3D({ geometry, material });
+              panoObject3D.add(object3D);
+            });
+          }),
+        Promise.all(videoCasts)
+          .then((panoAnims) => {
+            panoAnims.forEach(({ data: panoAnimCast, material, positions }) => {
+              const { frame } = panoAnimCast;
+              const uvs = createUvs();
+              const geometry = createGeometry(
+                positions,
+                uvs,
+                createIndex(),
+              );
+              const object3D = createObject3D({ geometry, material, frame });
+              panoObject3D.add(object3D);
+            });
+          }),
+      ]);
     };
   }
 
   function doUnload() {
     return (dispatch, getState) => {
-      const panoAnimCastMap = panoAnimSelectors.castMap(getState());
-      values(panoAnimCastMap).forEach(({ el: videoEl }) => {
+      const panoAnimCasts = panoAnimSelectors.videoCasts(getState());
+      panoAnimCasts.forEach(({ el: videoEl }) => {
         videoEl.oncanplaythrough = null;
         videoEl.onerror = null;
       });
       return Promise.resolve({
-        panoAnimCastMap: null,
+        panoAnimCasts: null,
       });
     };
   }

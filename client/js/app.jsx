@@ -69,5 +69,6 @@ window.onload = () => {
     store.dispatch(gamestateActions.updateGameState(gamestateId, value));
     const scene = sceneSelectors.currentSceneData(store.getState());
     store.dispatch(castActions.forScene(scene).special.update(scene));
+    store.dispatch(castActions.forScene(scene).controlledMovie.update(scene));
   };
 };

@@ -22,6 +22,7 @@ export default function ({
   const raycaster = new Raycaster();
   const clickStartPos = { left: 0, top: 0 };
   const hotspotsData = castSelectors.forScene(scene).hotspot.hotspotsData(store.getState());
+  const castActionsForScene = castActions.forScene(scene);
   let possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -85,6 +86,8 @@ export default function ({
       wasMouseMoved = false;
       wasMouseUpped = false;
       wasMouseDowned = false;
+
+      dispatch(castActionsForScene.controlledMovie.update(scene));
     }
   }
 

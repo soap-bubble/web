@@ -18,6 +18,9 @@ import {
   getAssetUrl,
 } from 'service/gamedb';
 import {
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
+import {
   selectors as panoSelectors,
 } from 'morpheus/casts/modules/pano';
 import {
@@ -74,15 +77,23 @@ function createControlledPositions(controlledCastsData) {
   return positions;
 }
 
-function createUvs() {
-  const paUvs = new BufferAttribute(new Float32Array(8), 2);
+function createUvs({ cast, gamestates }) {
+  const { controlledMovieCallbacks } = cast;
+  const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
+  const gs = gamestates.byId(gameStateId);
+  const { maxValue } = gs;
+  const value = Math.round(gs.value, 0);
+  const minX = value / (maxValue + 1);
+  const maxX = (value + 1) / (maxValue + 1);
 
-  paUvs.setXY(0, 1.0, 0.0);
-  paUvs.setXY(1, 0.0, 0.0);
-  paUvs.setXY(2, 0.0, 1.0);
-  paUvs.setXY(3, 1.0, 1.0);
+  const uvs = new BufferAttribute(new Float32Array(8), 2);
 
-  return paUvs;
+  uvs.setXY(0, minX, 0.0);
+  uvs.setXY(1, maxX, 0.0);
+  uvs.setXY(2, maxX, 1.0);
+  uvs.setXY(3, minX, 1.0);
+
+  return uvs;
 }
 
 function createIndex() {
@@ -134,7 +145,7 @@ export const selectors = memoize((scene) => {
   );
   const selectControlledCasts = createSelector(
     selectSelfInStore,
-    panoAnim => get(panoAnim, 'controlledCasts'),
+    controlledMovie => get(controlledMovie, 'controlledCasts'),
   );
   const selectControlledCastsData = createSelector(
     allCasts,
@@ -144,6 +155,10 @@ export const selectors = memoize((scene) => {
     () => scene,
     isPano,
   );
+  const objects3D = createSelector(
+    selectSelfInStore,
+    controlledMovie => get(controlledMovie, 'controlledCasts'),
+  )
   return {
     isPano: selectIsPano,
     self: selectSelfInStore,
@@ -185,8 +200,11 @@ export const delegate = memoize((scene) => {
       const panoObject3D = panoSelectors(scene).panoObject3D(getState());
       const controlledCasts = selfSelectors.controlledCasts(getState());
 
-      return Promise.all(controlledCasts.map(({ material, positions }) => {
-        const uvs = createUvs();
+      return Promise.all(controlledCasts.map(({ data, material, positions }) => {
+        const uvs = createUvs({
+          cast: data,
+          gamestates: gamestateSelectors.forState(getState()),
+        });
         const geometry = createGeometry(
           positions,
           uvs,
@@ -194,15 +212,18 @@ export const delegate = memoize((scene) => {
         );
         const object3D = createObject3D({ geometry, material });
         panoObject3D.add(object3D);
-        return object3D;
-      }));
+        return { data, material, positions, object3D };
+      }))
+        .then(c => ({
+          controlledCasts: c,
+        }));
     };
   }
 
   function doUnload() {
     return (dispatch, getState) => {
-      const object3D = selfSelectors.object3D(getState());
-      object3D.dispose();
+      const controlledCasts = selfSelectors.controlledCasts(getState());
+      controlledCasts.forEach(({ object3D }) => object3D.dispose());
     };
   }
 
@@ -211,5 +232,24 @@ export const delegate = memoize((scene) => {
     doEnter,
     onStage,
     doUnload,
+  };
+});
+
+export const actions = memoize((scene) => {
+  const selfSelectors = selectors(scene);
+
+  function update() {
+    return (dispatch, getState) => {
+      const gamestates = gamestateSelectors.forState(getState());
+      const controlledCasts = selfSelectors.controlledCasts(getState());
+      controlledCasts.forEach(({ object3D, data: cast }) => {
+        const uv = createUvs({ cast, gamestates });
+        object3D.geometry.attributes.uv = uv;
+      });
+    };
+  }
+
+  return {
+    update,
   };
 });

@@ -259,29 +259,20 @@ export function handleHotspot({ hotspot }) {
           dispatch(updateGameState(gamestateId, value));
           return defaultPass;
         }
-
-        // case ExchangeState:
-        //   {
-        //     CGameState *	stateVariable2 = CGameState::FindByID (	mParam2	);
-        //     if (	stateVariable2 != nil	) {
-        //       SB_Types::Int32 value1 = stateVariable->GetState ();
-        //       SB_Types::Int32 value2 = stateVariable2->GetState ();
-        //       stateVariable->SetState(value2);
-        //       stateVariable2->SetState(value1);
-        //     }
-        //   }
-        //   break;
-        // case CopyState:
-        //   {
-        //     CGameState *	stateVariable2 = CGameState::FindByID (	mParam2	);
-        //     if (	stateVariable2 != nil	) {
-        //       SB_Types::Int32 value = stateVariable2->GetState ();
-        //       stateVariable->SetState(value);
-        //     }
-        //   }
-        //   break;
-        // }
-
+        case 'ExchangeState': {
+          const { defaultPass, param1: id1, param2: id2 } = hotspot;
+          const { value: value1 } = gamestates.byId(id1);
+          const { value: value2 } = gamestates.byId(id2);
+          dispatch(updateGameState(id2, value1));
+          dispatch(updateGameState(id1, value2));
+          return defaultPass;
+        }
+        case 'CopyState': {
+          const { defaultPass, param1: sourceId, param2: targetId } = hotspot;
+          const { value: source } = gamestates.byId(sourceId);
+          dispatch(updateGameState(targetId, source));
+          return defaultPass;
+        }
         default: {
           const script = scripts(type);
           if (script.enabled(hotspot, gamestates)) {

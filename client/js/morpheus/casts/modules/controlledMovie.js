@@ -145,7 +145,7 @@ export const selectors = memoize((scene) => {
   );
   const selectControlledCasts = createSelector(
     selectSelfInStore,
-    controlledMovie => get(controlledMovie, 'controlledCasts'),
+    controlledMovie => get(controlledMovie, 'controlledCasts', []),
   );
   const selectControlledCastsData = createSelector(
     allCasts,
@@ -155,10 +155,6 @@ export const selectors = memoize((scene) => {
     () => scene,
     isPano,
   );
-  const objects3D = createSelector(
-    selectSelfInStore,
-    controlledMovie => get(controlledMovie, 'controlledCasts'),
-  )
   return {
     isPano: selectIsPano,
     self: selectSelfInStore,

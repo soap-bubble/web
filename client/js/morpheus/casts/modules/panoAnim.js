@@ -150,6 +150,10 @@ export const selectors = memoize((scene) => {
       return !!(casts.find(c => c.__t === 'PanoCast'));
     },
   );
+  const selectObject3D = createSelector(
+    selectPanoAnim,
+    panoAnim => panoAnim.object3D,
+  );
   return {
     isPano: selectIsPano,
     panoAnimData: selectPanoAnimData,
@@ -158,6 +162,7 @@ export const selectors = memoize((scene) => {
     enabledFilenames: selectEnabledFilenames,
     videoCasts: selectVideoCasts,
     isPanoAnim: selectIsPanoAnim,
+    object3D: selectObject3D,
   };
 });
 
@@ -221,6 +226,9 @@ export const delegate = memoize((scene) => {
             );
             const object3D = createObject3D({ geometry, material, frame });
             panoObject3D.add(object3D);
+            return {
+              object3D,
+            };
           });
         });
     };
@@ -235,6 +243,7 @@ export const delegate = memoize((scene) => {
       });
       return Promise.resolve({
         panoAnimCasts: null,
+        object3D: null,
       });
     };
   }

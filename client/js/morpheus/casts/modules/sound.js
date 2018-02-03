@@ -5,7 +5,10 @@ import {
 import {
   createSelector,
 } from 'reselect';
-
+import {
+  selectors as gamestateSelectors,
+  isActive,
+} from 'morpheus/gamestate';
 
 export const selectors = memoize((scene) => {
   const selectCasts = createSelector(
@@ -15,7 +18,16 @@ export const selectors = memoize((scene) => {
 
   const selectSoundCastsData = createSelector(
     selectCasts,
-    casts => casts.filter(cast => cast.__t === 'SoundCast'),
+    gamestateSelectors.forState,
+    (casts, gamestates) => casts.filter((cast) => {
+      if (cast.__t === 'SoundCast') {
+        if (cast.comparators.length) {
+          return isActive({ cast, gamestates });
+        }
+        return true;
+      }
+      return false;
+    }),
   );
 
   const selectAssetsUrl = createSelector(

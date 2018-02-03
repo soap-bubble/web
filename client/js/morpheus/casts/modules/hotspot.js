@@ -450,10 +450,42 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doUnload() {
+    return (dispatch, getState) => {
+      const scene3D = hotspotSelectors.scene3D(getState());
+      const visibleObject3D = hotspotSelectors.visibleObject3D(getState());
+      const hitObject3D = hotspotSelectors.hitObject3D(getState());
+      const { camera, renderer } = hotspotSelectors.renderElements(getState());
+
+      scene3D.children.forEach((child) => {
+        scene3D.remove(child);
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+        if (child.material) {
+          child.material.dispose();
+        }
+      });
+      renderer.dispose();
+      renderer.forceContextLoss();
+      renderer.context = null;
+      renderer.domElement = null;
+
+      return Promise.resolve({
+        scene3D: null,
+        visibleObject3D: null,
+        hitObject3D: null,
+        camera: null,
+        renderer: null,
+      });
+    };
+  }
+
   return {
     applies,
     doEnter,
     onStage,
+    doUnload,
   };
 });
 

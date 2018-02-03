@@ -238,6 +238,7 @@ function generateSpecialImages({ images, controlledFrames, canvas }) {
   if (canvas) {
     const ctx = canvas.getContext('2d');
     images.forEach(op => ctx.drawImage(...op));
+    // ctx.drawImage(...controlledFrames[1]);
     controlledFrames.forEach(op => ctx.drawImage(...op));
   }
 }

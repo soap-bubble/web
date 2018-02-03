@@ -69,21 +69,6 @@ export function handleMouseOver({ hotspot }) {
      true;
 }
 
-export function handleMouseUp({ hotspot }) {
-  return (dispatch, getState) =>
-    // const gamestates = gameStateSelectors.forState(getState());
-    // const {
-    //   type,
-    // } = hotspot;
-    // if (isActive({ cast: hotspot, gamestates })) {
-    //   if (type >= 5 && type <= 8) {
-    //     dispatch(gameActions.setOpenHandCursor());
-    //     return false;
-    //   }
-    //   dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
-    // }
-     true;
-}
 
 export function handleMouseDown({ hotspot }) {
   return (dispatch, getState) =>
@@ -134,13 +119,13 @@ export function handleMouseStillDown({ hotspot, top, left }) {
         const gs = gamestates.byId(hotspot.param1);
         const { maxValue: max } = gs;
         const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
-        dispatch(updateGameState(hotspot.param1, ratio * max));
+        dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
       } else if (actionType === 'HorizSlider') {
         dispatch(gameActions.setCloseHandCursor());
         const gs = gamestates.byId(hotspot.param1);
         const { maxValue: max } = gs;
         const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
-        dispatch(updateGameState(hotspot.param1, ratio * max));
+        dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
       }
     }
     return true;
@@ -282,6 +267,26 @@ export function handleHotspot({ hotspot }) {
           return defaultPass;
         }
       }
+    }
+    return true;
+  };
+}
+
+export function handleMouseUp({ hotspot }) {
+  return (dispatch, getState) => {
+    const gamestates = gameStateSelectors.forState(getState());
+    const {
+      gesture,
+      type,
+    } = hotspot;
+    if (isActive({ cast: hotspot, gamestates })) {
+      if (type >= 5 && type <= 8) {
+        dispatch(gameActions.setOpenHandCursor());
+        return false;
+      } else if (GESTURES[gesture] === 'MouseUp') {
+        handleHotspot({ hotspot });
+      }
+      dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
     }
     return true;
   };

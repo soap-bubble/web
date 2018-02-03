@@ -336,9 +336,39 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doUnload() {
+    return (dispatch, getState) => {
+      const scene3D = panoSelectors.panoScene3D(getState());
+      const { renderer, camera } = panoSelectors.renderElements(getState());
+
+      scene3D.children.forEach((child) => {
+        scene3D.remove(child);
+        if (child.geometry) {
+          child.geometry.dispose();
+        }
+        if (child.material) {
+          child.material.dispose();
+        }
+      });
+      renderer.dispose();
+      renderer.forceContextLoss();
+      renderer.context = null;
+      renderer.domElement = null;
+
+      return Promise.resolve({
+        scene3D: null,
+        object3D: null,
+        renderer: null,
+        camera: null,
+        canvas: null,
+      });
+    };
+  }
+
   return {
     applies,
     doEnter,
     onStage,
+    doUnload,
   };
 });

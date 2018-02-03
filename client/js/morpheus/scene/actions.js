@@ -91,14 +91,14 @@ export function startAtScene(id) {
               type: SCENE_DO_ENTER,
               payload: scene.sceneId,
             });
-            
+
             dispatch(inputActions.enableControl());
             return scene;
           }));
 }
 
 let isTransitioning = false;
-export function goToScene(id, dissolve, previousSceneId) {
+export function goToScene(id, dissolve) {
   return (dispatch, getState) => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
 

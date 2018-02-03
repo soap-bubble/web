@@ -108,17 +108,5 @@ export default function update() {
         logger.info('Patching elevator level 2');
         cast.nextSceneId = 6002;
         return cast.save();
-      }))
-    .then(() => getModel('Cast').find({
-      castId: 241001,
-    }).exec()
-      .map((cast) => {
-        if (cast.nextSceneId === 6002) {
-          return Promise.resolve();
-        }
-        logger.info('Patching elevator level 2');
-        cast.nextSceneId = 6002;
-        return cast.save();
-      }))
-      ;
+      }));
 }

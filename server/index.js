@@ -4,7 +4,7 @@ import bunyan from 'bunyan';
 import config from 'config';
 import routes from './routes';
 import { get as getModel } from './db/install';
-import db, { prime } from './db';
+import db, { prime, update } from './db';
 
 const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
 const app = express();
@@ -26,12 +26,20 @@ app.use('/api', routes);
 app.db = db()
   .then(() => {
     getModel('Scene').find().exec().then((scenes) => {
+      let p = Promise.resolve();
       if (scenes.length === 0 && process.env.MORPHEUS_PRIME_DB) {
         logger.info('Attempting to prime DB');
-        prime()
+        p = p.then(() => prime())
           .then(() => logger.info('db primed'))
           .catch(err => logger.error('Failed to prime db', err));
       }
+      if (process.env.MORPHEUS_UPDATE_DB) {
+        logger.info('Attempting to update DB');
+        p = p.then(() => update())
+        .then(() => logger.info('db updated'))
+        .catch(err => logger.error('Failed to update db', err));
+      }
+      return p;
     });
   });
 

@@ -11,15 +11,15 @@ const LoggedStatusNavItem = ({
   if (isCheckingLogin) {
     return <NavItem>Checking...</NavItem>;
   } else if (isLoggedIn) {
-    return <LinkContainer to={'/settings'}>
+    return (<LinkContainer to={'/settings'}>
       <NavItem>
-        <LoggedIn name={userName}/>
+        <LoggedIn name={userName} />
       </NavItem>
-    </LinkContainer>;
+    </LinkContainer>);
   }
-  return <LinkContainer to={'/login'}>
+  return (<LinkContainer to={'/login'}>
     <NavItem>Login</NavItem>
-  </LinkContainer>;
-}
+  </LinkContainer>);
+};
 
 export default LoggedStatusNavItem;

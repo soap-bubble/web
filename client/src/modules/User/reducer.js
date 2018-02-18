@@ -20,7 +20,7 @@ const defaultState = {
       data: {
         username: '',
         anonymous: false,
-      }
+      },
     },
     saves: {
       title: 'Saves',
@@ -29,30 +29,29 @@ const defaultState = {
       },
     },
   },
-  status: null,
-  fetch: null,
+  requestCount: 0,
 };
 
-export default function reducer(state = defaultState, { action, payload, result }) {
+export default function reducer(state = defaultState, { action, result }) {
   switch (action) {
     case `${FETCH}_PENDING`: {
       return {
         ...state,
-        status: 'fetching',
-        fetch: payload,
+        error: null,
+        requestCount: state.requestCount + 1,
       };
     }
     case `${FETCH}_SUCCESS`: {
       return {
         ...state,
-        status: 'fetched',
-        settings: result,
+        requestCount: state.requestCount - 1,
+        result,
       };
     }
     case `${FETCH}_ERROR`: {
       return {
         ...state,
-        status: 'error',
+        requestCount: state.requestCount - 1,
         error: result,
       };
     }

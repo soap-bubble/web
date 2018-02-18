@@ -10,6 +10,11 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import { Router, Route, IndexRedirect, browserHistory } from 'react-router';
 import { syncHistoryWithStore } from 'react-router-redux';
+import {
+  Page as Admin,
+  Users as AdminUsers,
+  Bot as AdminBot,
+} from 'app/modules/admin';
 import store from './store';
 import '../assets/styles/main.scss';
 import '../assets/styles/main.less';
@@ -42,6 +47,10 @@ window.onload = () => {
           <Route path="settings" component={Settings} />
           <Route path="user/:category" component={User} />
           <Route path="privacy" component={Privacy} />
+          <Route path="admin" component={Admin}>
+            <Route path="users" component={AdminUsers} />
+            <Route path="bot" component={AdminBot} />
+          </Route>
         </Route>
       </Router>
     </Provider>,

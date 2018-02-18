@@ -2,6 +2,16 @@
   "extends": "airbnb",
   "rules": {
     "react/jsx-filename-extension": 0,
-    "linebreak-style": 0
+    "linebreak-style": 0,
+    "import/export": 0
+  },
+  "settings": {
+    "import/resolver": {
+      "babel-module": {
+        "alias": {
+          "app": ["./client/src"]
+        }
+      }
+    }
   }
 }

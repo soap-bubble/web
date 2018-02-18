@@ -21,35 +21,6 @@
     "start:staging": "npm run build:client:staging & npm run build:server && node lib/index",
     "start:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
-  "betterScripts": {
-    "production:client:rendering-service": {
-      "command": "node ./client/rendering-service/entry.js"
-    },
-    "production:api": {
-      "command": "node ./api/entry.js"
-    },
-    "production:webserver": {
-      "command": "node ./webserver/entry.js"
-    },
-    "development:client:rendering-service": {
-      "command": "nodemon ./client/rendering-service/entry.js --watch ./client/rendering-service --watch ./client/build/server",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "development:api": {
-      "command": "nodemon ./api/entry.js --watch ./api",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    },
-    "development:webserver": {
-      "command": "nodemon ./webserver/entry.js --watch ./webserver",
-      "env": {
-        "NODE_ENV": "development"
-      }
-    }
-  },
   "dependencies": {
     "@soapbubble/components": "^1.3.5",
     "@soapbubble/style": "https://registry.npmjs.org/@soapbubble/style/-/style-1.3.2.tgz",
@@ -90,7 +61,8 @@
     "reselect": "^3.0.1",
     "rxjs": "https://registry.npmjs.org/rxjs/-/rxjs-5.5.2.tgz",
     "service-builder": "^1.0.1",
-    "simpler-redux-form": "^0.3.1"
+    "simpler-redux-form": "^0.3.1",
+    "socket.io-client": "^2.0.4"
   },
   "devDependencies": {
     "@soapbubble/style": "https://registry.npmjs.org/@soapbubble/style/-/style-1.3.2.tgz",
@@ -109,7 +81,8 @@
     "css-loader": "^0.28.7",
     "eslint": "^4.5.0",
     "eslint-config-airbnb": "^15.1.0",
-    "eslint-plugin-import": "^2.7.0",
+    "eslint-import-resolver-babel-module": "^4.0.0",
+    "eslint-plugin-import": "^2.8.0",
     "eslint-plugin-jsx-a11y": "^5.1.1",
     "eslint-plugin-react": "^7.3.0",
     "extract-text-webpack-plugin": "^3.0.0",

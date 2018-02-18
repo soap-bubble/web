@@ -2,6 +2,7 @@ import { createLogger } from 'redux-logger';
 import { routerMiddleware } from 'react-router-redux';
 import { createStore, applyMiddleware, combineReducers } from 'redux';
 import { middleware as epicMiddleware } from '../utils/createEpic';
+
 import history from '../routes/history';
 
 

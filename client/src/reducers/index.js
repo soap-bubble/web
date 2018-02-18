@@ -1,8 +1,10 @@
 import { routerReducer as routing } from 'react-router-redux';
+import { reducer as user } from 'app/modules/User';
+import { login } from 'app/modules/soapbubble';
+import { reducer as admin } from 'app/modules/admin';
+import { reducer as users } from 'app/modules/users';
 import examples from './example';
 import page from './page';
-import { reducer as user } from '../modules/User';
-import { login } from '../modules/soapbubble';
 
 export default {
   examples,
@@ -10,4 +12,6 @@ export default {
   routing,
   login: login.reducer,
   user,
+  admin,
+  users,
 };

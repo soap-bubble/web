@@ -24,7 +24,6 @@ module.exports = (env) => {
     return path.join(__dirname, 'public');
   })();
 
-  const publicPath = '';
   const htmlTemplate = 'index.ejs';
   const cssName = env.production ? 'main.[contenthash].css' : 'main.css';
   const jsName = env.production ? '[name].[hash].js' : '[name].js';
@@ -33,21 +32,25 @@ module.exports = (env) => {
 
   if (env.production) {
     Object.assign(appConfig, {
+      self: 'https://soapbubble.online',
       morpheusServer: 'https://morpheus.soapbubble.online',
       authHost: 'https://auth.soapbubble.online',
     });
   } else if (env.staging) {
     Object.assign(appConfig, {
+      self: 'https://staging.soapbubble.online',
       morpheusServer: 'https://morpheus.staging.soapbubble.online',
       authHost: 'https://auth.staging.soapbubble.online',
     });
   } else {
     Object.assign(appConfig, {
+      self: 'http://localhost:8060',
       morpheusServer: 'http://localhost:8050',
       authHost: 'http://localhost:4000',
     });
   }
 
+  const publicPath = `${appConfig.self}/`;
   const target = 'web';
   const mainFields = (env.production || env.staging)
     ? ['browser', 'module', 'main']

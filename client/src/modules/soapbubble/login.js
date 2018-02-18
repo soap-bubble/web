@@ -1,6 +1,6 @@
 import axios from 'axios';
 import { Login } from '@soapbubble/components';
-import createEpic from '../../utils/createEpic';
+import createEpic from 'app/utils/createEpic';
 
 const login = new Login({
   rootSelector: state => state.login,

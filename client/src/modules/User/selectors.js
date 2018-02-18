@@ -5,7 +5,7 @@ import { get, values } from 'lodash';
 export default function (root) {
   const isLoading = createSelector(
     root,
-    user => get(user, 'status') === 'fetching',
+    user => get(user, 'requestCount', 0) > 1,
   );
 
   const settings = createSelector(

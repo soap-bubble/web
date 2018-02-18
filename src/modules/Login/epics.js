@@ -10,7 +10,7 @@ import {
 
 const window = global;
 
-export default function (selectors, googleConfigProvider) {
+export default function (selectors, googleConfigProvider, loggedInDefer) {
   const windowGapi$ = Observable
     .interval(99)
     .takeUntil(() => !window.gapi)
@@ -52,19 +52,20 @@ export default function (selectors, googleConfigProvider) {
       const tokenObj = authResponse;
       const tokenId = tokenObj.id_token;
       const accessToken = tokenObj.access_token;
-
+      const payload = {
+        profile: {
+          googleId: basicProfile.getId(),
+          imageUrl: basicProfile.getImageUrl(),
+          email: basicProfile.getEmail(),
+          name: basicProfile.getName(),
+        },
+        tokenId,
+        accessToken,
+      };
+      loggedInDefer.resolve(payload);
       return {
         type: GOOGLE_API_LOGGED_IN,
-        payload: {
-          profile: {
-            googleId: basicProfile.getId(),
-            imageUrl: basicProfile.getImageUrl(),
-            email: basicProfile.getEmail(),
-            name: basicProfile.getName(),
-          },
-          tokenId,
-          accessToken,
-        },
+        payload,
       };
     });
 

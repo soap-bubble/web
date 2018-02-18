@@ -1,17 +1,12 @@
 import passport from 'passport';
-import config from 'config';
-import uuid from 'uuid';
-import Events from 'events';
 import GoogleAuth from 'google-auth-library';
 
-const CLIENT_ID = config.passport.strategies.google.clientID;
-const auth = new GoogleAuth();
-const googleClient = new auth.OAuth2(CLIENT_ID, '', '');
-
 export default function (app, db, config, createLogger) {
+  const CLIENT_ID = config.passport.strategies.google.clientID;
+  const auth = new GoogleAuth();
+  const googleClient = new auth.OAuth2(CLIENT_ID, '', '');
+
   const logger = createLogger('routes:google');
-  // In memory events.... because I am not in the mood to set up anything better
-  const events = new Events();
 
   app.post('/google/token', (req, res) => {
     const { idtoken: token } = req.body;
@@ -61,74 +56,12 @@ export default function (app, db, config, createLogger) {
     });
   });
 
-  app.get('/google/token', (req, res) => {
-    const awaitKey = uuid();
-    req.session.googleLoginAwait = req.session.googleLoginAwait || awaitKey;
-    logger.info('Getting google client ID', { session: req.session, uuid: req.session.googleLoginAwait });
-    req.session.save((err) => {
-      if (err) {
-        logger.error('Failed to save session', { err });
-        return res.status(500).send({ err });
-      }
-      logger.info('Saving session', { session: req.session });
-      return res.status(200).send(CLIENT_ID);
-    });
-  });
-
-  app.get('/google/await', (req, res, next) => {
-    function authenticate() {
-      passport.authenticate('google', { scope: ['email'] }, (err, user) => {
-        if (err) {
-          return next(err);
-        }
-        if (!user) {
-          return process.nextTick(authenticate);
-        }
-        return req.logIn(user, (logInErr) => {
-          if (logInErr) {
-            return next(logInErr);
-          }
-          return res.status(200).send('Logged in');
-        });
-      })(req, res, next);
-    }
-    authenticate();
-  });
-
-  app.get('/google/login/await', (req, res) => {
-    if (req.session.googleLoginAwait) {
-      return res.status(200).send({
-        displayName: req.user.displayName,
-      });
-    }
-    const awaitKey = uuid();
-    req.session.googleLoginAwait = req.session.googleLoginAwait || awaitKey;
-    logger.info('Getting google client ID', { session: req.session, uuid: req.session.googleLoginAwait });
-    return req.session.save((err) => {
-      if (err) {
-        logger.error('Failed to save session', { err });
-        return res.status(500).send({ err });
-      }
-      logger.info('Waiting for login....', { session: req.session, uuid: req.session.googleLoginAwait });
-      return events.once(req.session.googleLoginAwait, (user) => {
-        res.status(200).send({
-          displayName: user.displayName,
-        });
-      });
-    });
-  });
-
   app.get('/login/google', passport.authenticate('google', { scope: ['email'] }));
   app.get(
     '/google/callback',
     passport.authenticate('google', { failureRedirect: '/login/google' }),
     (req, res) => {
-      const awaitKey = req.session.googleLoginAwait;
-      if (awaitKey) {
-        logger.info('Resolving login/await', { session: req.session, uuid: awaitKey });
-        events.emit(awaitKey, req.user);
-        delete req.session[awaitKey];
-      }
+      logger.info('Received callback from google');
       res.redirect('/usersTest');
     },
   );

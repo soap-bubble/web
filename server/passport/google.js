@@ -1,5 +1,6 @@
 import {
   pick,
+  endsWith,
 } from 'lodash';
 import passport from 'passport';
 import { Strategy as BaseStrategy } from 'passport-strategy';
@@ -36,6 +37,7 @@ function createOrUpdateGoogleUser(req, db, logger, profile, cb) {
             providerType: 'google',
             id: profile.id,
           }],
+          admin: profile.emails.find(email => endsWith(email, '@soapbubble.online')),
         });
         return userModel.save().then(() => {
           logger.info('Saving new user model');
@@ -43,6 +45,13 @@ function createOrUpdateGoogleUser(req, db, logger, profile, cb) {
         });
       }
       logger.info('Found existing user', { user });
+      if (user.admin === false && user.emails.find(email => endsWith(email, '@soapbubble.online'))) {
+        user.save({
+          admin: true,
+        }).exec().then(() => {
+          logger.info('Updated user to admin', { user });
+        });
+      }
       return user;
     }, (err) => {
       logger.error('Failed to find user model', { profile, err });
@@ -114,6 +123,7 @@ export default function (db, createLogger) {
                     providerType: 'google',
                     id: userid,
                   }],
+                  admin: endsWith(email, '@soapbubble.online'),
                 });
                 logger.info('Saving new user', { userModel });
                 return userModel.save().then(() => {

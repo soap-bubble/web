@@ -3,6 +3,7 @@ import google from './google';
 import user from './user';
 import oauth from './oauth';
 import saves from './saves';
+import bot from './bot';
 
 import $ from '../factory';
 
@@ -17,6 +18,7 @@ export default function (app, createLogger) {
   $(user);
   $(oauth);
   $(saves);
+  $(bot);
 
   logger.info('Installing routes -- compelete');
 }

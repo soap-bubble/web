@@ -7,11 +7,13 @@ import routes from './routes';
 import passport from './passport';
 import middleware from './middleware';
 import db, { install as installDb } from './db';
+import permissions from './permissions';
 
 const logger = createLogger('app');
 
 define({
   db,
+  permissions,
   app: () => express(),
   models: () => models,
   config: () => config,

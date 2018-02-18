@@ -11,6 +11,8 @@ const user = new Schema({
   settings: {
     saves: [{ type: Schema.Types.Mixed }],
   },
+  roles: [{ type: String }],
+  admin: Boolean,
 });
 
 export default user;

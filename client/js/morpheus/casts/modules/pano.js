@@ -229,15 +229,17 @@ export const actions = memoize((scene) => {
     };
   }
 
-  function sweepTo(hotspot, callback) {
+  function sweepTo({
+    rectLeft,
+    rectRight,
+  }, callback) {
     return (dispatch, getState) => {
-      const left = hotspot.rectLeft;
-      const right = hotspot.rectRight > hotspot.rectLeft
-        ? hotspot.rectRight : hotspot.rectRight + 3600;
+      const left = rectLeft;
+      const right = rectRight > rectLeft
+        ? rectRight : rectRight + 3600;
 
       const angleAtEnd = left + ((right - left) / 2);
       const startAngle = ((angleAtEnd * Math.PI) / 1800) - (Math.PI - (Math.PI / 6));
-      // const startAngle = ((angleAtEnd * Math.PI) / -1800) + (Math.PI / 3);
       const y = startAngle;
       const x = 0;
       const panoObject3D = panoSelectors.panoObject3D(getState());
@@ -258,17 +260,22 @@ export const actions = memoize((scene) => {
       const distance = Math.sqrt(
         ((x - panoObject3D.rotation.x) ** 2) + ((y - panoObject3D.rotation.y) ** 2),
       );
-      const tween = new Tween(v)
-        .to({
-          x,
-          y,
-        }, Math.sqrt(distance) * 1000)
-        .easing(Easing.Quadratic.Out);
-      tween.onUpdate(() => {
-        dispatch(rotate(v));
-      });
-      tween.onComplete(callback);
-      tween.start();
+      if (distance === 0) {
+        // What do you know... already there
+        callback();
+      } else {
+        const tween = new Tween(v)
+          .to({
+            x,
+            y,
+          }, Math.sqrt(distance) * 1000)
+          .easing(Easing.Quadratic.Out);
+        tween.onUpdate(() => {
+          dispatch(rotate(v));
+        });
+        tween.onComplete(callback);
+        tween.start();
+      }
     };
   }
 

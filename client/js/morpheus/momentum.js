@@ -6,9 +6,10 @@ import {
   selectors as inputSelectors,
 } from 'morpheus/input';
 import raf from 'raf';
-import store from 'store';
+import storeFactory from 'store';
 
 export default function ({ dispatch, scene }) {
+  const store = storeFactory();
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
   const interaction = {
     // If we are in a user interaction

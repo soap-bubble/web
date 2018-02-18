@@ -13,6 +13,7 @@ import { actions as castActions } from 'morpheus/casts';
 import { selectors as sceneSelectors, actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
 import { Game, actions as gameActions } from 'morpheus/game';
+import socketPromise from 'utils/socket';
 import {
   selectors as inputSelectors,
   actions as inputActions,
@@ -20,11 +21,12 @@ import {
 import {
   login,
 } from 'soapbubble';
-import store from 'store';
+import storeFactory from 'store';
 
 import '../css/main.scss';
 
 const qp = qs.parse(location.search);
+const store = storeFactory();
 
 function resizeToWindow() {
   store.dispatch(gameActions.resize({
@@ -51,6 +53,16 @@ window.onload = () => {
   window.addEventListener('resize', () => {
     resizeToWindow();
   });
+
+  if (qp.channel) {
+    socketPromise.then((socket) => {
+      socket.emit('automate', qp.channel);
+      socket.on('CREATE_CHANNEL', (uChannel) => {
+        socket.channel = uChannel;
+        socket.on(uChannel, action => store.dispatch(action));
+      });
+    });
+  }
 
   document.addEventListener('keydown', (event) => {
     const keyName = keycode.names[event.which];

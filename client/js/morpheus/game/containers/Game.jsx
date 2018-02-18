@@ -43,7 +43,7 @@ const Game = ({
     menu.push(<SaveList />);
   }
   return (<div style={style}>
-    {casts}
+    {casts.map(Cast => (<Cast />))}
     <Mouse />
     {menu}
   </div>);
@@ -54,7 +54,7 @@ Game.propTypes = {
   menuOpen: PropTypes.bool.isRequired,
   settingsOpen: PropTypes.bool.isRequired,
   saveOpen: PropTypes.bool.isRequired,
-  casts: PropTypes.arrayOf(PropTypes.element).isRequired,
+  casts: PropTypes.arrayOf(PropTypes.func).isRequired,
   style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
 };
 

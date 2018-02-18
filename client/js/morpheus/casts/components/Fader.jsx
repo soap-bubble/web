@@ -1,7 +1,7 @@
 import React from 'react';
 import cn from 'classnames';
 
-export const decorate = (toComponent =>
+export const decorate = (ToComponent =>
 class Transition extends React.PureComponent {
   constructor(props) {
     super(props);
@@ -27,7 +27,7 @@ class Transition extends React.PureComponent {
   render() {
     return (
       <div ref={(c) => { this.toFader = c; }} className={cn('fader', 'fadeOut')}>
-        {toComponent}
+        <ToComponent />
       </div>
     );
   }

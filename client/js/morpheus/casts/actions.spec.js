@@ -1,4 +1,4 @@
-import store from 'store';
+import storeFactory from 'store';
 import {
   actions,
 } from 'morpheus/casts';
@@ -8,6 +8,8 @@ import mockModules from 'morpheus/casts/modules/index';
 // eslint-disable-next-line global-require
 jest.mock('morpheus/casts/modules/index', () => require('morpheus/casts/modules/__mocks_/index'));
 jest.mock('store/logger');
+
+const store = storeFactory();
 
 describe('casts actions', () => {
   afterAll(() => {

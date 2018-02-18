@@ -5,12 +5,13 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import 'morpheus/scene/reducer';
-import store from 'store';
+import storeFactory from 'store';
 
 jest.mock('store/logger');
 jest.mock('service/scene');
 jest.mock('utils/video');
 
+const store = storeFactory();
 
 describe('sanity', () => {
   beforeAll(() => {

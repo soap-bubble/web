@@ -13,12 +13,13 @@ import {
   actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
-import store from 'store';
+import storeFactory from 'store';
 
 export default function ({
   dispatch,
   scene,
 }) {
+  const store = storeFactory();
   const raycaster = new Raycaster();
   const clickStartPos = { left: 0, top: 0 };
   const hotspotsData = castSelectors.forScene(scene).hotspot.hotspotsData(store.getState());

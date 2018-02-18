@@ -20,7 +20,7 @@ import {
   isActive,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
-import store from 'store';
+import storeFactory from 'store';
 import loggerFactory from 'utils/logger';
 
 const logger = loggerFactory('flatspot');
@@ -30,12 +30,11 @@ const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
 export default function ({ dispatch, scene }) {
-  const clickStartPos = { left: 0, top: 0 };
+  const store = storeFactory();
   const castSelectorForScene = castSelectors.forScene(scene);
   const castActionsForScene = castActions.forScene(scene);
 
   let wasActiveHotspots = [];
-  const possibleValidClick = false;
   let wasMouseDowned = false;
   let wasMouseMoved = false;
   let wasMouseUpped = false;
@@ -46,10 +45,6 @@ export default function ({ dispatch, scene }) {
   let clipHeight;
   let widthScaler;
   let heightScaler;
-  const clip = {
-    horizontal: 100,
-    vertical: 100,
-  };
 
   function handleHotspotDispatches({
     type,

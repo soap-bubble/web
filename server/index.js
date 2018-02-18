@@ -3,6 +3,8 @@ import express from 'express';
 import bunyan from 'bunyan';
 import config from 'config';
 import routes from './routes';
+import socket from './socket';
+
 import { get as getModel } from './db/install';
 import db, { prime, update } from './db';
 
@@ -16,6 +18,8 @@ if (app.get('env') !== 'production') {
   // eslint-disable-next-line import/no-extraneous-dependencies, global-require
   app.use(require('connect-browser-sync')(bs));
 }
+
+const server = socket(app);
 
 const gameDbPath = path.resolve(config.gameDbPath);
 logger.info('static game dir', { gameDbPath });
@@ -43,6 +47,6 @@ app.db = db()
     });
   });
 
-app.listen(8050, () => {
+server.listen(8050, () => {
   logger.info('server up and running on 8050');
 });

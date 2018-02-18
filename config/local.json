@@ -1,5 +1,8 @@
 {
   "mongodb": {
     "uri": "mongodb://localhost/morpheus_dev"
+  },
+  "automation": {
+    "socket": "http://localhost:8040"
   }
 }

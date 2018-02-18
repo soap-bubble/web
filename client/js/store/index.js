@@ -7,26 +7,31 @@ import { middleware as epicMiddleware } from 'utils/createEpic';
 
 import loggingMiddleware from './logger';
 
-let middleware;
+let store;
 
-if (process.env.NODE_ENV === 'production') {
-  middleware = applyMiddleware(
-    epicMiddleware(),
-    thunkMiddleware,
-    promiseMiddleware,
-  );
-} else {
-  middleware = applyMiddleware(
-    epicMiddleware(),
-    thunkMiddleware,
-    promiseMiddleware,
-    loggingMiddleware,
-  );
+export default function () {
+  if (!store) {
+    let middleware;
+
+    if (process.env.NODE_ENV === 'production') {
+      middleware = applyMiddleware(
+        epicMiddleware(),
+        thunkMiddleware,
+        promiseMiddleware,
+      );
+    } else {
+      middleware = applyMiddleware(
+        epicMiddleware(),
+        thunkMiddleware,
+        promiseMiddleware,
+        loggingMiddleware,
+      );
+    }
+
+    store = createStore(
+      reducer,
+      middleware,
+    );
+  }
+  return store;
 }
-
-const store = createStore(
-  reducer,
-  middleware,
-);
-
-export default store;

@@ -1,6 +1,6 @@
 import 'morpheus/scene';
 import 'morpheus/game';
-import store from 'store';
+import storeFactory from 'store';
 import * as actions from './actions';
 import './matchers';
 import {
@@ -16,6 +16,8 @@ jest.mock('service/scene');
 jest.mock('soapbubble/login');
 
 const logger = require('store/logger');
+
+const store = storeFactory();
 
 describe('#fetchScene', () => {
   afterEach(() => {

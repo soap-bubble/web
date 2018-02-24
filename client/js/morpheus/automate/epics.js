@@ -19,7 +19,7 @@ import {
 
 createEpic((action$, { dispatch, getState }) => action$
   .ofType('AUTO_HOTSPOT_LOOK')
-  .subscribe(({ payload: destSceneId, cb }) => {
+  .forEach(({ payload: destSceneId, cb }) => {
     const scene = sceneSelectors.currentSceneData(getState());
     const hotspot = scene.casts.find(cast => cast.param1 === destSceneId);
     if (hotspot) {
@@ -30,7 +30,7 @@ createEpic((action$, { dispatch, getState }) => action$
 
 createEpic((action$, { dispatch, getState }) => action$
   .ofType('AUTO_HOTSPOT_GO')
-  .subscribe(({ payload: destSceneId, cb }) => {
+  .forEach(({ payload: destSceneId, cb }) => {
     const scene = sceneSelectors.currentSceneData(getState());
     const gamestates = gamestateSelectors.forState(getState());
     const cast = scene.casts.find(({ param1 }) => param1 === destSceneId);
@@ -80,7 +80,7 @@ createEpic((action$, { dispatch, getState }) => action$
 
 createEpic(action$ => action$
   .ofType('AUTO_SCENE_WAIT')
-  .subscribe(({ payload: sceneId, cb }) => {
+  .forEach(({ payload: sceneId, cb }) => {
     sceneActions.events.on(`sceneEnter:${sceneId}`, function handleSceneEnd() {
       sceneActions.events.removeListener(`sceneEnter:${sceneId}`, handleSceneEnd);
       cb();
@@ -90,7 +90,7 @@ createEpic(action$ => action$
 
 createEpic((action$, { dispatch, getState }) => action$
   .ofType('AUTO_SLIDE')
-  .subscribe(({ payload: { targetState, targetValue }, cb }) => {
+  .forEach(({ payload: { targetState, targetValue }, cb }) => {
     const scene = sceneSelectors.currentSceneData(getState());
     const gamestates = gamestateSelectors.forState(getState());
     const targetHotspot = scene.casts.find(cast => cast.param1 === targetState && isActive({
@@ -160,7 +160,7 @@ createEpic((action$, { dispatch, getState }) => action$
 
 createEpic((action$, { dispatch }) => action$
   .ofType('AUTO_GAMESTATE_UPDATE')
-  .subscribe(({ payload: { stateId, value }, cb }) => {
+  .forEach(({ payload: { stateId, value }, cb }) => {
     dispatch(gamestateActions.updateGameState(stateId, value));
     cb();
   }),
@@ -168,7 +168,7 @@ createEpic((action$, { dispatch }) => action$
 
 createEpic((action$, { getState }) => action$
   .ofType('AUTO_SAVE')
-  .subscribe(({ cb }) => {
+  .forEach(({ cb }) => {
     cb({
       gamestates: gamestateSelectors.gamestates(getState()).toJS(),
       currentSceneId: sceneSelectors.currentSceneId(getState()),
@@ -179,7 +179,7 @@ createEpic((action$, { getState }) => action$
 
 createEpic((action$, { dispatch }) => action$
   .ofType('AUTO_LOAD')
-  .subscribe(({ payload, cb }) => {
+  .forEach(({ payload, cb }) => {
     const {
       currentSceneId,
       previousSceneId,

@@ -7,7 +7,7 @@ import {
 
 createEpic(action$ => action$
   .ofType(SCENE_DO_ENTER)
-  .subscribe((action) => {
+  .forEach((action) => {
     socketPromise.then((socket) => {
       if (socket.channel) {
         socket.emit(socket.channel, action);

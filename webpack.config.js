@@ -44,18 +44,21 @@ module.exports = (env) => {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://morpheus.soapbubble.online',
       authHost: 'https://auth.soapbubble.online',
+      botHost: 'https://bot.soapbubble.online',
     });
   } else if (env.staging) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://morpheus.soapbubble.online',
       authHost: 'https://auth.soapbubble.online',
+      botHost: 'https://bot.staging.soapbubble.online',
     });
   } else {
     Object.assign(appConfig, {
       assetHost: '',
       apiHost: '',
       authHost: 'http://localhost:4000',
+      botHost: 'http://localhost:8040',
     });
   }
 

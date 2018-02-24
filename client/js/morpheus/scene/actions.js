@@ -1,8 +1,6 @@
 import { reset } from 'utils/render';
+import Events from 'events';
 import { bySceneId } from 'service/scene';
-import {
-  actions as gameActions,
-} from 'morpheus/game';
 import {
   actions as inputActions,
 } from 'morpheus/input';
@@ -23,6 +21,7 @@ import {
   SET_NEXT_START_ANGLE,
 } from './actionTypes';
 
+export const events = new Events();
 
 export function sceneLoadComplete(responseData) {
   return (dispatch) => {
@@ -93,6 +92,7 @@ export function startAtScene(id) {
             });
 
             dispatch(inputActions.enableControl());
+            events.emit(`sceneEnter:${id}`);
             return scene;
           }));
 }

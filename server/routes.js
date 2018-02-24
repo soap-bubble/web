@@ -25,15 +25,12 @@ router
   })
   .get('/scene/:sceneId', (req, res) => {
     const sceneId = Number(req.params.sceneId);
-    logger.info({ req: `/scene/${sceneId}` });
+    logger.info(`/scene/${sceneId}`);
     getModel('Scene').findOne({ sceneId }).exec().then((scene) => {
-      logger.info({ req: `/scene/${sceneId}`, sceneId });
       if (scene) {
         const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
-        logger.info({ req: `/scene/${sceneId}`, castsToLoad });
         if (castsToLoad.length) {
           getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then((casts) => {
-            logger.info({ req: `/scene/${sceneId}`, casts });
             scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
             res.json(scene);
           }, (err) => {
@@ -55,7 +52,6 @@ router
     const castId = Number(req.params.castId);
     logger.info({ req: `/cast/${castId}` });
     getModel('Cast').findOne({ castId }).exec().then((cast) => {
-      logger.info({ req: `/cast/${castId}`, cast });
       if (cast) {
         res.json(cast);
       } else {

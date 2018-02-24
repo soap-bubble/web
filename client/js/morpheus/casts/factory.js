@@ -55,25 +55,25 @@ export default wrap(once(() => createSelector(
     let previousScene;
     if (PreviousScenes.length) {
       previousScene = PreviousScenes.map((PreviousScene, index) => (
-        () => <PreviousScene key={`scene${previouses[index].sceneId}`} scene={previouses[index]} />
+        <PreviousScene key={`scene${previouses[index].sceneId}`} scene={previouses[index]} />
       ));
       scenes = scenes.concat(previousScene);
     }
     if (_isLive && CurrentScene) {
       if (previousScene && dissolve) {
-        const Fader = faderDecorator(() => <CurrentScene scene={current} />);
-        scenes.push(() => <Fader key={`scene${current.sceneId}`} />);
+        const Fader = faderDecorator(<CurrentScene scene={current} />);
+        scenes.push(<Fader key={`scene${current.sceneId}`} />);
       } else {
-        scenes.push(() => <CurrentScene key={`scene${current.sceneId}`} scene={current} />);
+        scenes.push(<CurrentScene key={`scene${current.sceneId}`} scene={current} />);
       }
     }
     if (_isEntering && EnteringScene) {
-      scenes.push(() => <EnteringScene key={`scene${current.sceneId}`} scene={current} />);
+      scenes.push(<EnteringScene key={`scene${current.sceneId}`} scene={current} />);
     }
     if (_isExiting && CurrentExitingScene) {
-      scenes.push(() => <CurrentExitingScene key={`scene${current.sceneId}`} scene={current} />);
+      scenes.push(<CurrentExitingScene key={`scene${current.sceneId}`} scene={current} />);
     }
-    scenes.push(() => <Sound key="sound" scene={current} />);
+    scenes.push(<Sound key="sound" scene={current} />);
     return scenes;
   },
 )), (selectorFactory, state) => selectorFactory()(state));

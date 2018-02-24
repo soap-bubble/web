@@ -1,4 +1,6 @@
-const socket = io('http://localhost:8040');
+import io from 'socket.io-client';
+
+const socket = io(config.botHost);
 
 export default new Promise((resolve) => {
   socket.on('connect', () => {

@@ -9,15 +9,15 @@ import keycode from 'keycode';
 import 'morpheus';
 
 // Then pull out the stuff we need
+import {
+  selectors as inputSelectors,
+  actions as inputActions,
+} from 'morpheus/input';
 import { actions as castActions } from 'morpheus/casts';
 import { selectors as sceneSelectors, actions as sceneActions } from 'morpheus/scene';
 import { actions as gamestateActions } from 'morpheus/gamestate';
 import { Game, actions as gameActions } from 'morpheus/game';
 import socketPromise from 'utils/socket';
-import {
-  selectors as inputSelectors,
-  actions as inputActions,
-} from 'morpheus/input';
 import {
   login,
 } from 'soapbubble';
@@ -56,10 +56,18 @@ window.onload = () => {
 
   if (qp.channel) {
     socketPromise.then((socket) => {
-      socket.emit('automate', qp.channel);
+      socket.emit('letsplay', qp.channel);
       socket.on('CREATE_CHANNEL', (uChannel) => {
         socket.channel = uChannel;
-        socket.on(uChannel, action => store.dispatch(action));
+        socket.on(uChannel, (action, cb) => {
+          if (typeof cb === 'function') {
+            return store.dispatch({
+              ...action,
+              cb,
+            });
+          }
+          return store.dispatch(action);
+        });
       });
     });
   }

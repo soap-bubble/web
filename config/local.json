@@ -2,7 +2,9 @@
   "mongodb": {
     "uri": "mongodb://localhost/morpheus_dev"
   },
-  "automation": {
-    "socket": "http://localhost:8040"
+  "test": {
+    "botToken": "6887dcdf-1a7b-4ed3-8c28-5c02d813c8b3",
+    "botEndpoint": "http://localhost:8040",
+    "launch": "http://localhost:8050/?scene=2000&channel=9d35aa78-6e05-4f1e-a6ae-bf99b88d91d7"
   }
 }

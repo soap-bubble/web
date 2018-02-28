@@ -22,12 +22,11 @@ import {
 } from 'morpheus/gamestate';
 import storeFactory from 'store';
 import loggerFactory from 'utils/logger';
+import {
+  screenToGame,
+} from 'utils/coordinates';
 
 const logger = loggerFactory('flatspot');
-
-const ORIGINAL_HEIGHT = 400;
-const ORIGINAL_WIDTH = 640;
-const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
 
 export default function ({ dispatch, scene }) {
   const store = storeFactory();
@@ -39,12 +38,6 @@ export default function ({ dispatch, scene }) {
   let wasMouseMoved = false;
   let wasMouseUpped = false;
   let mouseDown = false;
-  let width;
-  let height;
-  let clipWidth;
-  let clipHeight;
-  let widthScaler;
-  let heightScaler;
 
   function handleHotspotDispatches({
     type,
@@ -85,35 +78,16 @@ export default function ({ dispatch, scene }) {
     const nowActiveHotspots = [];
     const left = clientX - location.x;
     const top = clientY - location.y;
-    // Update cursor location
-    dispatch(gameActions.setCursorLocation({ top, left }));
 
     const newWidth = gameSelectors.width(store.getState());
     const newHeight = gameSelectors.height(store.getState());
 
-    if (width !== newWidth || height !== newHeight) {
-      width = newWidth;
-      height = newHeight;
-      const onScreenAspectRatio = newWidth / newHeight;
-      if (onScreenAspectRatio > ORIGINAL_ASPECT_RATIO) {
-        const adjustedHeight = width / ORIGINAL_ASPECT_RATIO;
-        clipHeight = adjustedHeight - height;
-        clipWidth = 0;
-        widthScaler = width / ORIGINAL_WIDTH;
-        heightScaler = adjustedHeight / ORIGINAL_HEIGHT;
-      } else {
-        const adjustedWidth = height * ORIGINAL_ASPECT_RATIO;
-        clipWidth = adjustedWidth - width;
-        clipHeight = 0;
-        widthScaler = adjustedWidth / ORIGINAL_WIDTH;
-        heightScaler = height / ORIGINAL_HEIGHT;
-      }
-    }
-
-    const adjustedClickPos = {
-      top: (top + (clipHeight / 2)) / heightScaler,
-      left: (left + (clipWidth / 2)) / widthScaler,
-    };
+    const adjustedClickPos = screenToGame({
+      height: newHeight,
+      width: newWidth,
+      top,
+      left,
+    });
 
     each(hotspots, (hotspot) => {
       const {
@@ -129,19 +103,6 @@ export default function ({ dispatch, scene }) {
         nowActiveHotspots.push(hotspot);
       }
     });
-    // Update our state
-    // logger.info('Handling mouse event', JSON.stringify({
-    //   nowActiveHotspots,
-    //   wasMouseUpped,
-    //   wasMouseMoved,
-    //   wasMouseDowned,
-    //   adjustedClickPos,
-    //   originalClickPos: {
-    //     top,
-    //     left,
-    //   },
-    // }, null, 2));
-    // Events for hotspots we have left
     handleHotspotDispatches({
       type: 'MouseOver',
       top: adjustedClickPos.top,
@@ -257,6 +218,9 @@ export default function ({ dispatch, scene }) {
     wasMouseUpped = false;
     wasMouseDowned = false;
 
+    // Update cursor location and icon
+    dispatch(gameActions.setCursorLocation({ top, left }));
+    // Update scene
     dispatch(castActionsForScene.special.update(scene));
   }
 

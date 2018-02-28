@@ -35,3 +35,7 @@ export const ACTION_TYPES = {
   14: 'NoAction',
   99: 'DoGameAction',
 };
+
+export const ORIGINAL_HEIGHT = 400;
+export const ORIGINAL_WIDTH = 640;
+export const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;

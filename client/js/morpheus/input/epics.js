@@ -11,20 +11,20 @@ import {
 } from './actionTypes';
 
 export default createEpic((action$, store) => action$
-      .ofType(KEY_UP, KEY_DOWN)
-      .mergeMap((action) => {
-        if (inputObservables[action.payload]) {
-          return Observable.of(...inputObservables[action.payload])
-            .map((h) => {
-              if (action.type === KEY_DOWN) {
-                return h.down;
-              }
-              return h.up;
-            })
-            .filter(h => h)
-            .mergeMap(handler => Observable.of(handler(action, store)));
-        }
-        return [];
-      })
-      .filter(a => !!a),
+  .ofType(KEY_UP, KEY_DOWN)
+  .mergeMap((action) => {
+    if (inputObservables[action.payload]) {
+      return Observable.of(...inputObservables[action.payload])
+        .map((h) => {
+          if (action.type === KEY_DOWN) {
+            return h.down;
+          }
+          return h.up;
+        })
+        .filter(h => h)
+        .mergeMap(handler => Observable.of(handler(action, store)));
+    }
+    return [];
+  })
+  .filter(a => !!a),
 );

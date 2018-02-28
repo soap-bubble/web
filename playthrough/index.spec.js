@@ -5,6 +5,10 @@ import puppeteer from 'puppeteer';
 import config from 'config';
 import uuid from 'uuid';
 import Promise from 'bluebird';
+import {
+  without,
+  mapValues,
+} from 'lodash';
 
 Promise.promisifyAll(fs);
 
@@ -69,7 +73,10 @@ describe('playthrough', () => {
   async function saveTest(index) {
     const save = await say('save');
     await fs.writeFileAsync(fileName(index), JSON.stringify(save, null, 2), 'utf8');
-    expect(save).toMatchSnapshot();
+    expect({
+      ...save,
+      gamestates: mapValues(save.gamestates, g => without(g, '_id')),
+    }).toMatchSnapshot();
     lastTest = index;
   }
 
@@ -80,7 +87,7 @@ describe('playthrough', () => {
     }
   }
 
-  describe.skip('Breaching airlock', () => {
+  describe('Breaching airlock', () => {
     it('go to flybridge', async () => {
       await say('go 200001');
       await say('wait 2040');
@@ -148,7 +155,7 @@ describe('playthrough', () => {
     it('save', async () => await saveTest(0));
   });
 
-  describe.skip('Turn on lights', () => {
+  describe('Turn on lights', () => {
     it('load', async () => await loadTest(0));
 
     it('enter ballroom', async () => {
@@ -188,7 +195,7 @@ describe('playthrough', () => {
     it('save', async () => await saveTest(1));
   });
 
-  describe.skip('Enter engine room', () => {
+  describe('Enter engine room', () => {
     it('load', async () => await loadTest(1));
 
     it('see that guy', async () => {

@@ -66,7 +66,7 @@ export function handleMouseOver({ hotspot }) {
     //   }
     //   dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
     // }
-     true;
+     false;
 }
 
 
@@ -85,7 +85,7 @@ export function handleMouseDown({ hotspot }) {
     //     }
     //   }
     // }
-     true;
+     false;
 }
 
 export function handleMouseStillDown({ hotspot, top, left }) {
@@ -93,6 +93,7 @@ export function handleMouseStillDown({ hotspot, top, left }) {
     const gamestates = gameStateSelectors.forState(getState());
     const {
       type,
+      defaultPass,
     } = hotspot;
     if (isActive({ cast: hotspot, gamestates })) {
       const actionType = ACTION_TYPES[type];
@@ -128,7 +129,7 @@ export function handleMouseStillDown({ hotspot, top, left }) {
         dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
       }
     }
-    return true;
+    return !defaultPass;
   };
 }
 
@@ -183,6 +184,7 @@ export function handleHotspot({ hotspot }) {
     const {
       type,
       dissolveToNextScene,
+      defaultPass,
     } = hotspot;
 
     if (isActive({ cast: hotspot, gamestates })) {
@@ -191,16 +193,16 @@ export function handleHotspot({ hotspot }) {
         case 'GoBack': {
           const prevSceneId = sceneSelectors.previousSceneId(getState());
           dispatch(sceneActions.goToScene(prevSceneId));
-          break;
+          return true;
         }
         case 'DissolveTo':
         case 'ChangeScene': {
-          const { defaultPass, param1: nextSceneId } = hotspot;
+          const { param1: nextSceneId } = hotspot;
           if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
           return defaultPass;
         }
         case 'IncrementState': {
-          const { defaultPass, param1: gamestateId } = hotspot;
+          const { param1: gamestateId } = hotspot;
           const gs = gamestates.byId(gamestateId);
           const {
             maxValue,
@@ -217,10 +219,10 @@ export function handleHotspot({ hotspot }) {
             }
           }
           dispatch(updateGameState(gamestateId, value));
-          return defaultPass;
+          return true;
         }
         case 'DecrementState': {
-          const { defaultPass, param1: gamestateId } = hotspot;
+          const { param1: gamestateId } = hotspot;
           const gs = gamestates.byId(gamestateId);
           const {
             maxValue,
@@ -237,38 +239,45 @@ export function handleHotspot({ hotspot }) {
             }
           }
           dispatch(updateGameState(gamestateId, value));
-          return defaultPass;
+          return true;
         }
         case 'SetStateTo': {
-          const { defaultPass, param1: gamestateId, param2: value } = hotspot;
+          const { param1: gamestateId, param2: value } = hotspot;
           dispatch(updateGameState(gamestateId, value));
-          return defaultPass;
+          return true;
         }
         case 'ExchangeState': {
-          const { defaultPass, param1: id1, param2: id2 } = hotspot;
+          const { param1: id1, param2: id2 } = hotspot;
           const { value: value1 } = gamestates.byId(id1);
           const { value: value2 } = gamestates.byId(id2);
           dispatch(updateGameState(id2, value1));
           dispatch(updateGameState(id1, value2));
-          return defaultPass;
+          return true;
         }
         case 'CopyState': {
-          const { defaultPass, param1: sourceId, param2: targetId } = hotspot;
+          const { param1: sourceId, param2: targetId } = hotspot;
           const { value: source } = gamestates.byId(sourceId);
           dispatch(updateGameState(targetId, source));
-          return defaultPass;
+          return true;
         }
+        case 'Rotate':
+        case 'HorizSlider':
+        case 'VertSlider':
+        case 'NoAction': {
+          return true;
+        }
+
         default: {
           const script = scripts(type);
           if (script.enabled(hotspot, gamestates)) {
             dispatch(script.execute(hotspot, gamestates));
+            return !defaultPass;
           }
-          const { defaultPass } = hotspot;
-          return defaultPass;
+          return false;
         }
       }
     }
-    return true;
+    return !defaultPass;
   };
 }
 

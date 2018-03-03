@@ -612,19 +612,15 @@ export const actions = memoize((scene) => {
         gesture,
       } = hotspot;
       const gestureType = GESTURES[gesture];
-      let isIgnored = true;
-      if (type === gestureType) {
-        isIgnored = dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
-      } else if (type === 'MouseDown') {
-        isIgnored = dispatch(gamestateActions.handleMouseDown({ hotspot, top, left }));
-      } else if (type === 'MouseStillDown') {
-        isIgnored = dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
-      } else if (type === 'MouseEnter' || type === 'MouseOver') {
-        isIgnored = dispatch(gamestateActions.handleMouseOver({ hotspot, top, left }));
+      let done = false;
+      if (type === 'MouseStillDown') {
+        done = dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
       } else if (type === 'MouseUp' || type === 'MouseLeave') {
-        isIgnored = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
+        done = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
+      } else if (type === gestureType) {
+        done = dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
       }
-      return isIgnored;
+      return done;
     };
   }
 

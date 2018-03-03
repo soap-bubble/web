@@ -1,12 +1,12 @@
-import bunyan from 'browser-bunyan';
+import { stdSerializers, ConsoleFormattedStream, createLogger } from 'browser-bunyan';
 
 export default function factory(name) {
-  return bunyan.createLogger({
+  return createLogger({
     name,
-    streams: [{
-      level: 'info',
-      stream: new bunyan.ConsoleFormattedStream({ logByLevel: true }),
-    }],
-    serializers: bunyan.stdSerializers,
+    // streams: [{
+    //   level: 'info',
+    //   stream: new ConsoleFormattedStream({ logByLevel: true }),
+    // }],
+    // serializers: stdSerializers,
   });
 }

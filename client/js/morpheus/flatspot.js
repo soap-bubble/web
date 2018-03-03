@@ -38,6 +38,7 @@ export default function ({ dispatch, scene }) {
   let wasMouseMoved = false;
   let wasMouseUpped = false;
   let mouseDown = false;
+  let lastMouseDown;
 
   function handleHotspotDispatches({
     type,
@@ -45,20 +46,15 @@ export default function ({ dispatch, scene }) {
     left,
     hotspots,
   }) {
-    let cursor = 0;
-    hotspots.every((hotspot) => {
+    hotspots.some((hotspot) => {
       const handled = dispatch(castActionsForScene.special.handleMouseEvent({
         type,
         top,
         left,
         hotspot,
       }));
-      if (handled) {
-        cursor = handled;
-      }
       return handled;
     });
-    return cursor;
   }
 
   function updateState({ clientX, clientY }) {
@@ -103,6 +99,46 @@ export default function ({ dispatch, scene }) {
         nowActiveHotspots.push(hotspot);
       }
     });
+
+    const leavingHotspots = difference(wasActiveHotspots, nowActiveHotspots);
+    const enteringHotspot = difference(nowActiveHotspots, wasActiveHotspots);
+    const noInteractionHotspots = difference(hotspots, nowActiveHotspots);
+    const isClick = Date.now() - lastMouseDown < 800;
+
+    logger.info({
+      nowActiveHotspots,
+      leavingHotspots,
+      enteringHotspot,
+      isClick,
+      wasMouseMoved,
+      wasMouseDowned,
+      wasMouseUpped,
+    });
+    handleHotspotDispatches({
+      type: 'Always',
+      top: adjustedClickPos.top,
+      left: adjustedClickPos.left,
+      hotspots: hotspots
+        .filter(h => h.castId === 0),
+    });
+    // User pressed and released mouse button inside a valid hotspot
+    // TODO: debounce??
+    if (wasMouseUpped && nowActiveHotspots.length) {
+      mouseDown = false;
+      handleHotspotDispatches({
+        type: 'MouseUp',
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots,
+      });
+      handleHotspotDispatches({
+        type: 'MouseClick',
+        top: adjustedClickPos.top,
+        left: adjustedClickPos.left,
+        hotspots: nowActiveHotspots,
+      });
+    }
+
     handleHotspotDispatches({
       type: 'MouseOver',
       top: adjustedClickPos.top,
@@ -114,7 +150,7 @@ export default function ({ dispatch, scene }) {
       type: 'MouseLeave',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
-      hotspots: difference(wasActiveHotspots, nowActiveHotspots),
+      hotspots: leavingHotspots,
     });
 
     // Events for hotspots we have entered
@@ -122,12 +158,13 @@ export default function ({ dispatch, scene }) {
       type: 'MouseEnter',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
-      hotspots: difference(nowActiveHotspots, wasActiveHotspots),
+      hotspots: enteringHotspot,
     });
 
     // User initiated event inside a hotspot so could be valid
     if (!mouseDown && wasMouseDowned && nowActiveHotspots.length) {
       mouseDown = true;
+      lastMouseDown = Date.now();
       handleHotspotDispatches({
         type: 'MouseDown',
         top: adjustedClickPos.top,
@@ -154,37 +191,11 @@ export default function ({ dispatch, scene }) {
       });
     }
 
-    // User pressed and released mouse button inside a valid hotspot
-    // TODO: debounce??
-    if (wasMouseUpped && nowActiveHotspots.length) {
-      mouseDown = false;
-      handleHotspotDispatches({
-        type: 'MouseUp',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
-      handleHotspotDispatches({
-        type: 'MouseClick',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
-    }
-
     handleHotspotDispatches({
       type: 'MouseNone',
       top: adjustedClickPos.top,
       left: adjustedClickPos.left,
-      hotspots: difference(hotspots, nowActiveHotspots),
-    });
-
-    handleHotspotDispatches({
-      type: 'Always',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: hotspots
-        .filter(h => h.castId === 0),
+      hotspots: noInteractionHotspots,
     });
 
     nowActiveHotspots.every((hotspot) => {

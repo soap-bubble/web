@@ -1,0 +1,2697 @@
+{
+  "gamestates": {
+    "100": {
+      "_id": "5a9350e60134165af0f46ef4",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "101": {
+      "_id": "5a9350e60134165af0f46ef5",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "102": {
+      "_id": "5a9350e60134165af0f46ef6",
+      "initialValue": 0,
+      "maxValue": 4,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "103": {
+      "_id": "5a9350e60134165af0f46ef7",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "104": {
+      "_id": "5a9350e60134165af0f46ef8",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "496": {
+      "_id": "5a9350e60134165af0f46efe",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "497": {
+      "_id": "5a9350e60134165af0f46efd",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "498": {
+      "_id": "5a9350e60134165af0f46efc",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "499": {
+      "_id": "5a9350e60134165af0f46efb",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "500": {
+      "_id": "5a9350e60134165af0f46f0d",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "525": {
+      "_id": "5a9350e60134165af0f46f09",
+      "initialValue": 7,
+      "maxValue": 8,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 7,
+      "__v": 0
+    },
+    "526": {
+      "_id": "5a9350e60134165af0f46f0a",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "527": {
+      "_id": "5a9350e60134165af0f46f0b",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "528": {
+      "_id": "5a9350e60134165af0f46f00",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "550": {
+      "_id": "5a9350e60134165af0f46f0e",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "551": {
+      "_id": "5a9350e60134165af0f46f0f",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "552": {
+      "_id": "5a9350e60134165af0f46f0c",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "553": {
+      "_id": "5a9350e60134165af0f46f10",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "600": {
+      "_id": "5a9350e60134165af0f46f2f",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "605": {
+      "_id": "5a9350e60134165af0f46f82",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "612": {
+      "_id": "5a9350e60134165af0f46f83",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "615": {
+      "_id": "5a9350e60134165af0f46f84",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "620": {
+      "_id": "5a9350e60134165af0f46f85",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "630": {
+      "_id": "5a9350e60134165af0f46f88",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "635": {
+      "_id": "5a9350e60134165af0f46f86",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "640": {
+      "_id": "5a9350e60134165af0f46f87",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 1,
+      "__v": 0
+    },
+    "800": {
+      "_id": "5a9350e60134165af0f46f96",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 2,
+      "__v": 0
+    },
+    "805": {
+      "_id": "5a9350e60134165af0f46f97",
+      "initialValue": 2,
+      "maxValue": 4,
+      "minValue": 1,
+      "stateWraps": 0,
+      "value": 2,
+      "__v": 0
+    },
+    "820": {
+      "_id": "5a9350e60134165af0f46f31",
+      "initialValue": 0,
+      "maxValue": 14,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "825": {
+      "_id": "5a9350e60134165af0f46f30",
+      "initialValue": 0,
+      "maxValue": 14,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "835": {
+      "_id": "5a9350e60134165af0f46f32",
+      "initialValue": 0,
+      "maxValue": 14,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "860": {
+      "_id": "5a9350e60134165af0f46f33",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "861": {
+      "_id": "5a9350e60134165af0f46f34",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "862": {
+      "_id": "5a9350e60134165af0f46f35",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "863": {
+      "_id": "5a9350e60134165af0f46f36",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "864": {
+      "_id": "5a9350e60134165af0f46f6f",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "865": {
+      "_id": "5a9350e60134165af0f46f70",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "866": {
+      "_id": "5a9350e60134165af0f46f71",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "867": {
+      "_id": "5a9350e60134165af0f46f72",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "868": {
+      "_id": "5a9350e60134165af0f46f73",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "869": {
+      "_id": "5a9350e60134165af0f46f74",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "870": {
+      "_id": "5a9350e60134165af0f46f75",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "871": {
+      "_id": "5a9350e60134165af0f46f76",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "872": {
+      "_id": "5a9350e60134165af0f46f77",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "873": {
+      "_id": "5a9350e60134165af0f46f78",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "874": {
+      "_id": "5a9350e60134165af0f46f79",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "875": {
+      "_id": "5a9350e60134165af0f46f7a",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "876": {
+      "_id": "5a9350e60134165af0f46f6e",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "887": {
+      "_id": "5a9350e60134165af0f46f7b",
+      "initialValue": 0,
+      "maxValue": 8,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "888": {
+      "_id": "5a9350e60134165af0f46f7c",
+      "initialValue": 0,
+      "maxValue": 8,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "889": {
+      "_id": "5a9350e60134165af0f46f7d",
+      "initialValue": 0,
+      "maxValue": 8,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "890": {
+      "_id": "5a9350e60134165af0f46ff0",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "891": {
+      "_id": "5a9350e60134165af0f46fc5",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "892": {
+      "_id": "5a9350e60134165af0f46f9e",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "893": {
+      "_id": "5a9350e60134165af0f4700e",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "900": {
+      "_id": "5a9350e60134165af0f46f98",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "999": {
+      "_id": "5a9350e60134165af0f46ef9",
+      "initialValue": -1,
+      "maxValue": -1,
+      "minValue": -1,
+      "stateWraps": 1,
+      "value": -1,
+      "__v": 0
+    },
+    "1000": {
+      "_id": "5a9350e60134165af0f46f01",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 9,
+      "__v": 0
+    },
+    "1010": {
+      "_id": "5a9350e60134165af0f46f99",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1011": {
+      "_id": "5a9350e60134165af0f46f9a",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1012": {
+      "_id": "5a9350e60134165af0f46f9c",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1013": {
+      "_id": "5a9350e60134165af0f46f9d",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1014": {
+      "_id": "5a9350e60134165af0f46f9b",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1015": {
+      "_id": "5a9350e60134165af0f46eff",
+      "initialValue": 0,
+      "maxValue": 20,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1020": {
+      "_id": "5a9350e60134165af0f46f02",
+      "initialValue": 0,
+      "maxValue": 63,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1021": {
+      "_id": "5a9350e60134165af0f46f06",
+      "initialValue": 0,
+      "maxValue": 63,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1022": {
+      "_id": "5a9350e60134165af0f46f05",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1023": {
+      "_id": "5a9350e60134165af0f46f03",
+      "initialValue": 0,
+      "maxValue": 7,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1024": {
+      "_id": "5a9350e60134165af0f46f04",
+      "initialValue": 0,
+      "maxValue": 7,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1025": {
+      "_id": "5a9350e60134165af0f46f07",
+      "initialValue": 0,
+      "maxValue": 7,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1026": {
+      "_id": "5a9350e60134165af0f46f08",
+      "initialValue": 0,
+      "maxValue": 7,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1027": {
+      "_id": "5a9350e60134165af0f46f14",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1028": {
+      "_id": "5a9350e60134165af0f46efa",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1029": {
+      "_id": "5a9350e60134165af0f46f27",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "1030": {
+      "_id": "5a9350e60134165af0f46f16",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1031": {
+      "_id": "5a9350e60134165af0f46f15",
+      "initialValue": 1,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1032": {
+      "_id": "5a9350e60134165af0f46f18",
+      "initialValue": 1,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 2,
+      "__v": 0
+    },
+    "1033": {
+      "_id": "5a9350e60134165af0f46f19",
+      "initialValue": 1,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1034": {
+      "_id": "5a9350e60134165af0f46f11",
+      "initialValue": 0,
+      "maxValue": 63,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1035": {
+      "_id": "5a9350e60134165af0f46f12",
+      "initialValue": 0,
+      "maxValue": 7,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1036": {
+      "_id": "5a9350e60134165af0f46f13",
+      "initialValue": 0,
+      "maxValue": 9,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1037": {
+      "_id": "5a9350e60134165af0f46f17",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1038": {
+      "_id": "5a9350e60134165af0f46f1b",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1039": {
+      "_id": "5a9350e60134165af0f46f26",
+      "initialValue": 0,
+      "maxValue": 16,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1040": {
+      "_id": "5a9350e60134165af0f46f1c",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1041": {
+      "_id": "5a9350e60134165af0f46f1d",
+      "initialValue": 11,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 11,
+      "__v": 0
+    },
+    "1042": {
+      "_id": "5a9350e60134165af0f46f1e",
+      "initialValue": 11,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 11,
+      "__v": 0
+    },
+    "1043": {
+      "_id": "5a9350e60134165af0f46f1f",
+      "initialValue": 11,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 11,
+      "__v": 0
+    },
+    "1044": {
+      "_id": "5a9350e60134165af0f46f20",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1045": {
+      "_id": "5a9350e60134165af0f46f21",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1046": {
+      "_id": "5a9350e60134165af0f46f22",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1047": {
+      "_id": "5a9350e60134165af0f46f23",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1048": {
+      "_id": "5a9350e60134165af0f46f24",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1049": {
+      "_id": "5a9350e60134165af0f46f25",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1050": {
+      "_id": "5a9350e60134165af0f46f39",
+      "initialValue": 0,
+      "maxValue": 8,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 1,
+      "__v": 0
+    },
+    "1055": {
+      "_id": "5a9350e60134165af0f46f6d",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1056": {
+      "_id": "5a9350e60134165af0f46f1a",
+      "initialValue": 1,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 1,
+      "__v": 0
+    },
+    "1057": {
+      "_id": "5a9350e60134165af0f46f2e",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "1058": {
+      "_id": "5a9350e60134165af0f46f2a",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1059": {
+      "_id": "5a9350e60134165af0f46f2d",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1060": {
+      "_id": "5a9350e60134165af0f46f2b",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1061": {
+      "_id": "5a9350e60134165af0f46f2c",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1062": {
+      "_id": "5a9350e60134165af0f46f29",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1063": {
+      "_id": "5a9350e60134165af0f46f28",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1103": {
+      "_id": "5a9350e60134165af0f46f38",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1104": {
+      "_id": "5a9350e60134165af0f46f37",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1200": {
+      "_id": "5a9350e60134165af0f46f3a",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1205": {
+      "_id": "5a9350e60134165af0f46f3c",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1210": {
+      "_id": "5a9350e60134165af0f46f3b",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1215": {
+      "_id": "5a9350e60134165af0f46f3d",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1217": {
+      "_id": "5a9350e60134165af0f46f3e",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1218": {
+      "_id": "5a9350e60134165af0f46f40",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1219": {
+      "_id": "5a9350e60134165af0f46f3f",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1300": {
+      "_id": "5a9350e60134165af0f46f42",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1301": {
+      "_id": "5a9350e60134165af0f46f43",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1302": {
+      "_id": "5a9350e60134165af0f46f44",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1303": {
+      "_id": "5a9350e60134165af0f46f45",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1304": {
+      "_id": "5a9350e60134165af0f46f46",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1305": {
+      "_id": "5a9350e60134165af0f46f47",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1309": {
+      "_id": "5a9350e60134165af0f46f48",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1310": {
+      "_id": "5a9350e60134165af0f46f49",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1315": {
+      "_id": "5a9350e60134165af0f46f4a",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1320": {
+      "_id": "5a9350e60134165af0f46f4b",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1325": {
+      "_id": "5a9350e60134165af0f46f4c",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1330": {
+      "_id": "5a9350e60134165af0f46f4d",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1331": {
+      "_id": "5a9350e60134165af0f46f4e",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1332": {
+      "_id": "5a9350e60134165af0f46f64",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1333": {
+      "_id": "5a9350e60134165af0f46f65",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1334": {
+      "_id": "5a9350e60134165af0f46f66",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1340": {
+      "_id": "5a9350e60134165af0f46f4f",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1341": {
+      "_id": "5a9350e60134165af0f46f67",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1342": {
+      "_id": "5a9350e60134165af0f46f68",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1343": {
+      "_id": "5a9350e60134165af0f46f69",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1344": {
+      "_id": "5a9350e60134165af0f46f6a",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1345": {
+      "_id": "5a9350e60134165af0f46f50",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1346": {
+      "_id": "5a9350e60134165af0f46f6b",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1349": {
+      "_id": "5a9350e60134165af0f46f6c",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1350": {
+      "_id": "5a9350e60134165af0f46f51",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1355": {
+      "_id": "5a9350e60134165af0f46f52",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1360": {
+      "_id": "5a9350e60134165af0f46f53",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1365": {
+      "_id": "5a9350e60134165af0f46f54",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1370": {
+      "_id": "5a9350e60134165af0f46f55",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1375": {
+      "_id": "5a9350e60134165af0f46f56",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1380": {
+      "_id": "5a9350e60134165af0f46f57",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1385": {
+      "_id": "5a9350e60134165af0f46f58",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1390": {
+      "_id": "5a9350e60134165af0f46f59",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1391": {
+      "_id": "5a9350e60134165af0f46f5b",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1392": {
+      "_id": "5a9350e60134165af0f46f5c",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1393": {
+      "_id": "5a9350e60134165af0f46f5d",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1394": {
+      "_id": "5a9350e60134165af0f46f5e",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1395": {
+      "_id": "5a9350e60134165af0f46f5f",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1396": {
+      "_id": "5a9350e60134165af0f46f60",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1397": {
+      "_id": "5a9350e60134165af0f46f61",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1398": {
+      "_id": "5a9350e60134165af0f46f62",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1399": {
+      "_id": "5a9350e60134165af0f46f63",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1401": {
+      "_id": "5a9350e60134165af0f46f89",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1402": {
+      "_id": "5a9350e60134165af0f46f8a",
+      "initialValue": 16,
+      "maxValue": 12,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 16,
+      "__v": 0
+    },
+    "1403": {
+      "_id": "5a9350e60134165af0f46f8b",
+      "initialValue": 16,
+      "maxValue": 12,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 16,
+      "__v": 0
+    },
+    "1404": {
+      "_id": "5a9350e60134165af0f46f92",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1405": {
+      "_id": "5a9350e60134165af0f46f94",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1406": {
+      "_id": "5a9350e60134165af0f46f93",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1407": {
+      "_id": "5a9350e60134165af0f46f7e",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1435": {
+      "_id": "5a9350e60134165af0f46f5a",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1436": {
+      "_id": "5a9350e60134165af0f46f8c",
+      "initialValue": 0,
+      "maxValue": 50,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1437": {
+      "_id": "5a9350e60134165af0f46f8d",
+      "initialValue": 0,
+      "maxValue": 50,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1438": {
+      "_id": "5a9350e60134165af0f46f8e",
+      "initialValue": 0,
+      "maxValue": 50,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1448": {
+      "_id": "5a9350e60134165af0f46f81",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "1449": {
+      "_id": "5a9350e60134165af0f46f7f",
+      "initialValue": 2,
+      "maxValue": 2,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 2,
+      "__v": 0
+    },
+    "1450": {
+      "_id": "5a9350e60134165af0f46f80",
+      "initialValue": 2,
+      "maxValue": 2,
+      "minValue": 1,
+      "stateWraps": 1,
+      "value": 2,
+      "__v": 0
+    },
+    "1451": {
+      "_id": "5a9350e60134165af0f46f8f",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1452": {
+      "_id": "5a9350e60134165af0f46f90",
+      "initialValue": 0,
+      "maxValue": 10,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 9,
+      "__v": 0
+    },
+    "1453": {
+      "_id": "5a9350e60134165af0f46f91",
+      "initialValue": 0,
+      "maxValue": 15,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "1500": {
+      "_id": "5a9350e60134165af0f46f95",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 1,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2099": {
+      "_id": "5a9350e60134165af0f46fcd",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2100": {
+      "_id": "5a9350e60134165af0f46fcb",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2101": {
+      "_id": "5a9350e60134165af0f46fc6",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2102": {
+      "_id": "5a9350e60134165af0f46fca",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2103": {
+      "_id": "5a9350e60134165af0f46fc7",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2104": {
+      "_id": "5a9350e60134165af0f46fc8",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2105": {
+      "_id": "5a9350e60134165af0f46fc9",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2106": {
+      "_id": "5a9350e60134165af0f46fcc",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2107": {
+      "_id": "5a9350e60134165af0f46fcf",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2108": {
+      "_id": "5a9350e60134165af0f46fce",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2109": {
+      "_id": "5a9350e60134165af0f46fd0",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2110": {
+      "_id": "5a9350e60134165af0f46fde",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2111": {
+      "_id": "5a9350e60134165af0f46fdf",
+      "initialValue": 1,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "2112": {
+      "_id": "5a9350e60134165af0f46fe0",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2113": {
+      "_id": "5a9350e60134165af0f46fe1",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2114": {
+      "_id": "5a9350e60134165af0f46fe2",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2115": {
+      "_id": "5a9350e60134165af0f46fe3",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2116": {
+      "_id": "5a9350e60134165af0f46fe4",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2117": {
+      "_id": "5a9350e60134165af0f46fe5",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2118": {
+      "_id": "5a9350e60134165af0f46fe6",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2119": {
+      "_id": "5a9350e60134165af0f46fe7",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2120": {
+      "_id": "5a9350e60134165af0f46fe8",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2121": {
+      "_id": "5a9350e60134165af0f46fe9",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2122": {
+      "_id": "5a9350e60134165af0f46fea",
+      "initialValue": 1,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 1,
+      "__v": 0
+    },
+    "2123": {
+      "_id": "5a9350e60134165af0f46fd3",
+      "initialValue": 1,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "2124": {
+      "_id": "5a9350e60134165af0f46fd4",
+      "initialValue": 2,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 2,
+      "__v": 0
+    },
+    "2125": {
+      "_id": "5a9350e60134165af0f46fd5",
+      "initialValue": 3,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 3,
+      "__v": 0
+    },
+    "2126": {
+      "_id": "5a9350e60134165af0f46fd6",
+      "initialValue": 4,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 4,
+      "__v": 0
+    },
+    "2127": {
+      "_id": "5a9350e60134165af0f46fd7",
+      "initialValue": 5,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 5,
+      "__v": 0
+    },
+    "2128": {
+      "_id": "5a9350e60134165af0f46fd8",
+      "initialValue": 6,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 6,
+      "__v": 0
+    },
+    "2129": {
+      "_id": "5a9350e60134165af0f46fd9",
+      "initialValue": 7,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 7,
+      "__v": 0
+    },
+    "2130": {
+      "_id": "5a9350e60134165af0f46fda",
+      "initialValue": 8,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 8,
+      "__v": 0
+    },
+    "2131": {
+      "_id": "5a9350e60134165af0f46fdb",
+      "initialValue": 9,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 9,
+      "__v": 0
+    },
+    "2132": {
+      "_id": "5a9350e60134165af0f46fdc",
+      "initialValue": 10,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 10,
+      "__v": 0
+    },
+    "2133": {
+      "_id": "5a9350e60134165af0f46fdd",
+      "initialValue": 11,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 11,
+      "__v": 0
+    },
+    "2134": {
+      "_id": "5a9350e60134165af0f46fd1",
+      "initialValue": 0,
+      "maxValue": 15,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2135": {
+      "_id": "5a9350e60134165af0f46fd2",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2136": {
+      "_id": "5a9350e60134165af0f46feb",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2137": {
+      "_id": "5a9350e60134165af0f46fec",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2138": {
+      "_id": "5a9350e60134165af0f46fed",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2139": {
+      "_id": "5a9350e60134165af0f46fee",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2140": {
+      "_id": "5a9350e60134165af0f46fef",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2400": {
+      "_id": "5a9350e60134165af0f4701f",
+      "initialValue": 1,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 1,
+      "__v": 0
+    },
+    "2401": {
+      "_id": "5a9350e60134165af0f46ff5",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2402": {
+      "_id": "5a9350e60134165af0f46ff4",
+      "initialValue": 0,
+      "maxValue": 4,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2403": {
+      "_id": "5a9350e60134165af0f46ff2",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2404": {
+      "_id": "5a9350e60134165af0f46ff3",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2405": {
+      "_id": "5a9350e60134165af0f46ff1",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2450": {
+      "_id": "5a9350e60134165af0f46ff6",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2451": {
+      "_id": "5a9350e60134165af0f46ff7",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2452": {
+      "_id": "5a9350e60134165af0f46ff8",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2453": {
+      "_id": "5a9350e60134165af0f46ff9",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2454": {
+      "_id": "5a9350e60134165af0f46ffa",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2455": {
+      "_id": "5a9350e60134165af0f46ffb",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2456": {
+      "_id": "5a9350e60134165af0f46ffc",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2457": {
+      "_id": "5a9350e60134165af0f46ffd",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2458": {
+      "_id": "5a9350e60134165af0f47004",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2459": {
+      "_id": "5a9350e60134165af0f47005",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2460": {
+      "_id": "5a9350e60134165af0f47006",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2461": {
+      "_id": "5a9350e60134165af0f47007",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2462": {
+      "_id": "5a9350e60134165af0f47008",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2463": {
+      "_id": "5a9350e60134165af0f47009",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2464": {
+      "_id": "5a9350e60134165af0f46ffe",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2465": {
+      "_id": "5a9350e60134165af0f46fff",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2466": {
+      "_id": "5a9350e60134165af0f47000",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2467": {
+      "_id": "5a9350e60134165af0f47001",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2468": {
+      "_id": "5a9350e60134165af0f47002",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2469": {
+      "_id": "5a9350e60134165af0f47003",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2470": {
+      "_id": "5a9350e60134165af0f4700a",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2471": {
+      "_id": "5a9350e60134165af0f4700b",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2472": {
+      "_id": "5a9350e60134165af0f4700c",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2473": {
+      "_id": "5a9350e60134165af0f4700d",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2600": {
+      "_id": "5a9350e60134165af0f47010",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2601": {
+      "_id": "5a9350e60134165af0f4700f",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2605": {
+      "_id": "5a9350e60134165af0f47013",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2606": {
+      "_id": "5a9350e60134165af0f47011",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2607": {
+      "_id": "5a9350e60134165af0f47012",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "2608": {
+      "_id": "5a9350e60134165af0f47017",
+      "initialValue": 0,
+      "maxValue": 11,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2609": {
+      "_id": "5a9350e60134165af0f47014",
+      "initialValue": 0,
+      "maxValue": 25,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2610": {
+      "_id": "5a9350e60134165af0f47016",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2611": {
+      "_id": "5a9350e60134165af0f47015",
+      "initialValue": 0,
+      "maxValue": 40,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2620": {
+      "_id": "5a9350e60134165af0f47018",
+      "initialValue": 1,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 1,
+      "__v": 0
+    },
+    "2630": {
+      "_id": "5a9350e60134165af0f47019",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2640": {
+      "_id": "5a9350e60134165af0f4701a",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2641": {
+      "_id": "5a9350e60134165af0f4701b",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2642": {
+      "_id": "5a9350e60134165af0f4701c",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2643": {
+      "_id": "5a9350e60134165af0f4701d",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "2644": {
+      "_id": "5a9350e60134165af0f4701e",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8000": {
+      "_id": "5a9350e60134165af0f46fb1",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8001": {
+      "_id": "5a9350e60134165af0f46fb2",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8002": {
+      "_id": "5a9350e60134165af0f46fb3",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8003": {
+      "_id": "5a9350e60134165af0f46fb4",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8004": {
+      "_id": "5a9350e60134165af0f46fb5",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8005": {
+      "_id": "5a9350e60134165af0f46fb6",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8006": {
+      "_id": "5a9350e60134165af0f46fa7",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8007": {
+      "_id": "5a9350e60134165af0f46faa",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8008": {
+      "_id": "5a9350e60134165af0f46fad",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8009": {
+      "_id": "5a9350e60134165af0f46fa9",
+      "initialValue": 0,
+      "maxValue": 9,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8010": {
+      "_id": "5a9350e60134165af0f46fac",
+      "initialValue": 0,
+      "maxValue": 9,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8011": {
+      "_id": "5a9350e60134165af0f46faf",
+      "initialValue": 0,
+      "maxValue": 9,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8012": {
+      "_id": "5a9350e60134165af0f46fb0",
+      "initialValue": 0,
+      "maxValue": 6,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8013": {
+      "_id": "5a9350e60134165af0f46fb7",
+      "initialValue": 0,
+      "maxValue": 8,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8014": {
+      "_id": "5a9350e60134165af0f46fb8",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8015": {
+      "_id": "5a9350e60134165af0f46fb9",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8016": {
+      "_id": "5a9350e60134165af0f46fba",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8017": {
+      "_id": "5a9350e60134165af0f46fbb",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8018": {
+      "_id": "5a9350e60134165af0f46fbe",
+      "initialValue": 0,
+      "maxValue": 5,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8019": {
+      "_id": "5a9350e60134165af0f46fbc",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8020": {
+      "_id": "5a9350e60134165af0f46fbd",
+      "initialValue": 0,
+      "maxValue": 16,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8021": {
+      "_id": "5a9350e60134165af0f46fa8",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8022": {
+      "_id": "5a9350e60134165af0f46fab",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8023": {
+      "_id": "5a9350e60134165af0f46fae",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8027": {
+      "_id": "5a9350e60134165af0f46fbf",
+      "initialValue": 0,
+      "maxValue": 19,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8028": {
+      "_id": "5a9350e60134165af0f46fc1",
+      "initialValue": 0,
+      "maxValue": 19,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8029": {
+      "_id": "5a9350e60134165af0f46fc2",
+      "initialValue": 0,
+      "maxValue": 19,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8030": {
+      "_id": "5a9350e60134165af0f46fc3",
+      "initialValue": 0,
+      "maxValue": 19,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8031": {
+      "_id": "5a9350e60134165af0f46fc4",
+      "initialValue": 0,
+      "maxValue": 19,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8100": {
+      "_id": "5a9350e60134165af0f46f9f",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 1,
+      "value": 0,
+      "__v": 0
+    },
+    "8101": {
+      "_id": "5a9350e60134165af0f46fa0",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8102": {
+      "_id": "5a9350e60134165af0f46fa1",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8103": {
+      "_id": "5a9350e60134165af0f46fa3",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8104": {
+      "_id": "5a9350e60134165af0f46fa5",
+      "initialValue": 0,
+      "maxValue": 3,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8105": {
+      "_id": "5a9350e60134165af0f46fa2",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8106": {
+      "_id": "5a9350e60134165af0f46fa4",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "8107": {
+      "_id": "5a9350e60134165af0f46fa6",
+      "initialValue": 0,
+      "maxValue": 2,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    },
+    "100111": {
+      "_id": "5a9350e60134165af0f46ef3",
+      "initialValue": 0,
+      "maxValue": 1,
+      "minValue": 0,
+      "stateWraps": 0,
+      "value": 0,
+      "__v": 0
+    }
+  },
+  "currentSceneId": 224050,
+  "previousSceneId": 2240
+}

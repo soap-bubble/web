@@ -96,9 +96,7 @@ export default function (db, createLogger) {
           if (err) {
             this.fail('not authorized');
           }
-          // logger.info({ login });
           const payload = login.getPayload();
-          logger.info({ payload });
           const { sub: userid } = payload;
           db.model('User').findOne({
             profiles: {
@@ -131,21 +129,20 @@ export default function (db, createLogger) {
                   this.success(userModel);
                   return userModel;
                 })
-                  .catch((err) => {
+                  .catch(() => {
                     logger.error('Failed to save new user');
                     this.fail(userModel);
                   });
               }
               logger.info('Found user', { id: user.id });
-              if (user.profiles.find(p => p.providerType == 'google').id === userid) {
+              if (user.profiles.find(p => p.providerType === 'google').id === userid) {
                 logger.info('success');
-                this.success(user);
-              } else {
-                logger.info('fail');
-                this.fail('User not found');
+                return this.success(user);
               }
+              logger.info('fail');
+              return this.fail('User not found');
             })
-            .catch((err) => {
+            .catch(() => {
               this.fail('Token error');
             });
         },

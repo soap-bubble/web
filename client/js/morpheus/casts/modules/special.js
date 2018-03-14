@@ -9,6 +9,7 @@ import {
 import {
   createSelector,
 } from 'reselect';
+import loggerFactory from 'utils/logger';
 import {
   actions as gamestateActions,
   selectors as gamestateSelectors,
@@ -40,6 +41,7 @@ import {
   GESTURES,
 } from 'morpheus/constants';
 
+const logger = loggerFactory('cast:special');
 const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
   if (sceneType === 3) {
     return get(scene, 'casts', []).find(c => c.__t === 'MovieSpecialCast');

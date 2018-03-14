@@ -1,4 +1,6 @@
-import inputObservables from './handlers';
+import {
+  inputKeyHandlers as inputObservables,
+} from './handlers';
 import {
   DISABLE_CONTROL,
   ENABLE_CONTROL,

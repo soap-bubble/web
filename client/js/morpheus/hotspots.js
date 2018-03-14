@@ -13,6 +13,9 @@ import {
   actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
+import {
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
 import storeFactory from 'store';
 
 export default function ({

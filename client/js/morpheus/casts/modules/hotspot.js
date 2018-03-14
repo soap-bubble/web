@@ -360,6 +360,7 @@ export const delegate = memoize((scene) => {
               && rectLeft === 0
               && rectRight === 0;
           })
+          .filter(cast => isActive({ cast, gamestates }))
           .forEach((hotspot) => {
             dispatch(gamestateActions.handleHotspot({ hotspot }));
           });
@@ -435,16 +436,18 @@ export const delegate = memoize((scene) => {
           renderer,
         });
       }
-
-      hotspotsData.forEach((hotspot) => {
-        const { gesture } = hotspot;
-        if (
-          GESTURES[gesture] === 'Always'
-          || GESTURES[gesture] === 'SceneEnter'
-        ) {
-          dispatch(gamestateActions.handleHotspot({ hotspot }));
-        }
-      });
+      const gamestates = gamestateSelectors.forState(getState());
+      hotspotsData
+        .filter(cast => isActive({ cast, gamestates }))
+        .forEach((hotspot) => {
+          const { gesture } = hotspot;
+          if (
+            GESTURES[gesture] === 'Always'
+            || GESTURES[gesture] === 'SceneEnter'
+          ) {
+            dispatch(gamestateActions.handleHotspot({ hotspot }));
+          }
+        });
 
       return Promise.resolve();
     };

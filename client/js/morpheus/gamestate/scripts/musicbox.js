@@ -13,10 +13,6 @@ const songLever = 1039;
 
 export const id = 1002;
 
-export function enabled() {
-  return true;
-}
-
 export function execute({ param1: isStart }, gamestates) {
   return (dispatch) => {
     const { value: instTest1 } = gamestates.byId(mbinst1);

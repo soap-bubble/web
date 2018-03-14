@@ -1,3 +1,4 @@
+import scripts from 'morpheus/gamestate/scripts';
 import reducer from './reducer';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -29,7 +30,7 @@ function doCompare({
   }
 }
 
-export function isActive({ cast, gamestates }) {
+export function isCastActive({ cast, gamestates }) {
   const { initiallyEnabled = true, comparators = [] } = cast;
   let result = true;
   for (let i = 0; i < comparators.length; i++) {
@@ -44,6 +45,17 @@ export function isActive({ cast, gamestates }) {
   }
   if (!initiallyEnabled) {
     result = !result;
+  }
+  return result;
+}
+
+export function isActive({ cast, gamestates }) {
+  let result;
+  const script = scripts(cast.type);
+  if (script) {
+    result = script.enabled(cast, gamestates);
+  } else {
+    result = isCastActive({ cast, gamestates });
   }
   return result;
 }

@@ -6,6 +6,7 @@ import {
   actions as gameActions,
 } from 'morpheus/game';
 import {
+  isActive,
   actions as gamestateActions,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
@@ -14,6 +15,7 @@ import {
 } from 'morpheus/casts';
 import loggerFactory from 'utils/logger';
 import {
+  and,
   or,
 } from 'utils/matchers';
 import {
@@ -43,17 +45,34 @@ const gesture = GESTURES.reduce((memo, curr, index) => {
 const actionType = Object.keys(ACTION_TYPES).reduce((memo, curr) => {
   const type = ACTION_TYPES[curr];
   memo[`is${type}`] = function isActionType(hotspot) {
-    return curr === hotspot.type;
+    return Number(curr) === hotspot.type;
   };
   return memo;
 }, {});
 
+function matchesHotspotRect({ top, left }) {
+  return ({
+    rectTop,
+    rectBottom,
+    rectLeft,
+    rectRight,
+  }) => (top > rectTop
+    && top < rectBottom
+    && left > rectLeft
+    && left < rectRight)
+  || (rectTop === 0
+    && rectLeft === 0
+    && rectRight === 0
+    && rectBottom === 0
+  );
+}
+
 export function handleEventFactory() {
   const self = function handleEvent({
-    top,
-    left,
-    enabledHotspots,
-    nowActiveHotspots,
+    currentPosition,
+    startingPosition,
+    hotspots,
+    nowInHotspots,
     leavingHotspots,
     enteringHotspots,
     noInteractionHotspots,
@@ -75,7 +94,13 @@ export function handleEventFactory() {
       let mouseNoneHotspots = [];
       let interactedWithHotspots;
 
-      alwaysExecuteHotspots = enabledHotspots
+      const isHotspotActive = hotspot => isActive({
+        cast: hotspot,
+        gamestates: gamestateSelectors
+          .forState(getState()),
+      });
+
+      alwaysExecuteHotspots = hotspots
         .filter(gesture.isAlways)
         .filter(h => h.castId === 0);
 
@@ -88,32 +113,33 @@ export function handleEventFactory() {
       }
 
       if (wasMouseUpped) {
-        interactedWithHotspots = intersection(nowActiveHotspots, wasMouseDownedInHotspots);
-        mouseUpHotspots = interactedWithHotspots
-          .filter(gesture.isMouseUp);
+        mouseUpHotspots = nowInHotspots
+          .filter(and(matchesHotspotRect(startingPosition), gesture.isMouseUp));
 
         if (isClick) {
-          clickableHotspots = interactedWithHotspots
-            .filter(gesture.isMouseClick);
+          clickableHotspots = nowInHotspots
+            .filter(and(matchesHotspotRect(startingPosition), gesture.isMouseClick));
         }
       }
 
       if (wasMouseMoved && isMouseDown) {
         interactedWithHotspots = interactedWithHotspots
-          || intersection(nowActiveHotspots, wasMouseDownedInHotspots);
+          || intersection(nowInHotspots, wasMouseDownedInHotspots);
         mouseDragHotspots = interactedWithHotspots
           .filter(
-            or(
-              or(gesture.isMouseClick, gesture.isMouseUp),
-              actionType.isHorizSlider,
-              actionType.isVertSlider,
-              actionType.isTwoAxisSlider,
+            and(
+              or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
+              or(
+                actionType.isHorizSlider,
+                actionType.isVertSlider,
+                actionType.isTwoAxisSlider,
+              ),
             ),
           );
       }
 
       if (wasMouseDowned) {
-        mouseDownHotspots = nowActiveHotspots
+        mouseDownHotspots = nowInHotspots
           .filter(gesture.isMouseDown);
       }
 
@@ -136,7 +162,7 @@ export function handleEventFactory() {
         )
       ) {
         logger.info({
-          nowActiveHotspots,
+          nowInHotspots,
           wasMouseDownedInHotspots,
           interactedWithHotspots,
           alwaysExecuteHotspots,
@@ -168,104 +194,118 @@ export function handleEventFactory() {
       self.lastWasMouseDowned = wasMouseDowned;
 
       await forEachSeries(alwaysExecuteHotspots, async (hotspot) => {
-        await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
+        if (isHotspotActive(hotspot)) {
+          await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+        }
       });
 
       await forEachSeries(mouseLeavingHotspots, async (hotspot) => {
-        await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
+        if (isHotspotActive(hotspot)) {
+          await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+        }
       });
 
       await forEachSeries(mouseEnteringHotspots, async (hotspot) => {
-        await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
+        if (isHotspotActive(hotspot)) {
+          await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+        }
       });
 
       await someSeries(mouseUpHotspots, async (hotspot) => {
-        const allDone = await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
-        return allDone;
+        if (isHotspotActive(hotspot)) {
+          const allDone = await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+          return allDone;
+        }
+        return null;
       });
 
       await someSeries(clickableHotspots, async (hotspot) => {
-        const allDone = await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
-        return allDone;
+        if (isHotspotActive(hotspot)) {
+          const allDone = await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+          return allDone;
+        }
+        return null;
       });
 
       await someSeries(mouseDragHotspots, async (hotspot) => {
-        const allDone = await dispatch(gamestateActions.handleHotspot({
-          top,
-          left,
-          hotspot,
-        }));
-        return allDone;
+        if (isHotspotActive(hotspot)) {
+          const allDone = await dispatch(gamestateActions.handleHotspot({
+            ...currentPosition,
+            hotspot,
+          }));
+          return allDone;
+        }
+        return null;
       });
 
       await someSeries(mouseDownHotspots, async (hotspot) => {
-        const allDone = await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
-        return allDone;
+        if (isHotspotActive(hotspot)) {
+          const allDone = await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+          return allDone;
+        }
+        return null;
       });
 
       await forEachSeries(mouseNoneHotspots, async (hotspot) => {
-        const allDone = await dispatch(gamestateActions.handleHotspot({
-          hotspot,
-          top,
-          left,
-        }));
-        return allDone;
+        if (isHotspotActive(hotspot)) {
+          await dispatch(gamestateActions.handleHotspot({
+            hotspot,
+            ...currentPosition,
+          }));
+        }
       });
 
       let cursor;
-      for (let i = 0; i < nowActiveHotspots.length; i++) {
-        const hotspot = nowActiveHotspots[i];
-
-        if (actionType.isChangeCursor(hotspot)) {
-          const {
-            param1,
-            param2,
-          } = hotspot;
-          if (param1) {
-            const gamestate = gamestateSelectors
-              .forState(getState())
-              .byId(param1);
-            if (gamestate) {
-              cursor = gamestate.value + param2;
-              break;
+      for (let i = 0; i < nowInHotspots.length; i++) {
+        const hotspot = nowInHotspots[i];
+        if (isHotspotActive(hotspot)) {
+          if (actionType.isChangeCursor(hotspot)) {
+            const {
+              param1,
+              param2,
+            } = hotspot;
+            if (param1) {
+              const gamestate = gamestateSelectors
+                .forState(getState())
+                .byId(param1);
+              if (gamestate) {
+                cursor = gamestate.value + param2;
+                break;
+              }
             }
-          }
-        } else if (hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND) {
-          if (hotspot.type >= 5 && hotspot.type <= 8) {
-            if (isMouseDown) {
-              cursor = CURSOR_IDS.CLOSED;
+          } else if (hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND) {
+            if (hotspot.type >= 5 && hotspot.type <= 8) {
+              if (isMouseDown) {
+                cursor = CURSOR_IDS.CLOSED;
+              } else {
+                cursor = CURSOR_IDS.OPEN;
+              }
             } else {
-              cursor = CURSOR_IDS.OPEN;
+              cursor = CURSOR_IDS.HAND;
             }
-          } else {
-            cursor = CURSOR_IDS.HAND;
+            break;
+          } else if (hotspot.cursorShapeWhenActive !== 0) {
+            cursor = hotspot.cursorShapeWhenActive;
+            break;
           }
-        } else if (hotspot.cursorShapeWhenActive !== 0) {
-          cursor = hotspot.cursorShapeWhenActive;
         }
       }
 

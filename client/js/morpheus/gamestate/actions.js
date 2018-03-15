@@ -158,16 +158,55 @@ export function handleHotspot({ hotspot, top, left }) {
       }
       case 'VertSlider': {
         const gs = gamestates.byId(hotspot.param1);
-        const { maxValue: max } = gs;
+        let rate = hotspot.param2;
+        const { maxValue: max, minValue: min, stateWraps } = gs;
         const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
-        dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
+        if (rate === 0) {
+          rate = max - min;
+        }
+        let value = rate * ratio;
+        if (value < min) {
+          if (stateWraps) {
+            value += max - min;
+          } else {
+            value = min;
+          }
+        }
+        if (value > max) {
+          if (stateWraps) {
+            value -= max - min;
+          } else {
+            value = max;
+          }
+        }
+        dispatch(updateGameState(hotspot.param1, Math.round(value)));
         break;
       }
       case 'HorizSlider': {
-        const gs = gamestates.byId(hotspot.param1);
-        const { maxValue: max } = gs;
+        const { param1, param2 } = hotspot;
+        let rate = param2;
+        const gs = gamestates.byId(param1);
+        const { maxValue: max, minValue: min, stateWraps } = gs;
         const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
-        dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
+        if (rate === 0) {
+          rate = max - min;
+        }
+        let value = rate * ratio;
+        if (value < min) {
+          if (stateWraps) {
+            value += max - min;
+          } else {
+            value = min;
+          }
+        }
+        if (value > max) {
+          if (stateWraps) {
+            value -= max - min;
+          } else {
+            value = max;
+          }
+        }
+        dispatch(updateGameState(hotspot.param1, Math.round(value)));
         break;
       }
       case 'Rotate':

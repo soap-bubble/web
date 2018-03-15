@@ -37,7 +37,8 @@ export default function ({ dispatch, scene }) {
   const castActionsForScene = castActions.forScene(scene);
   const handleEvent = handleEventFactory();
 
-  let wasActiveHotspots = [];
+  let clickStartPos = { top: -1, left: -1 };
+  let wasInHotspots = [];
   let wasMouseDownedInHotspots = [];
   let wasMouseDowned = false;
   let wasMouseMoved = false;
@@ -59,7 +60,7 @@ export default function ({ dispatch, scene }) {
     if (!acceptsMouseEvents) {
       return;
     }
-    const nowActiveHotspots = [];
+    const nowInHotspots = [];
     const left = clientX - location.x;
     const top = clientY - location.y;
 
@@ -73,10 +74,7 @@ export default function ({ dispatch, scene }) {
       left,
     });
 
-    const gamestates = gamestateSelectors.forState(state);
-    const enabledHotspots = hotspots
-      .filter(cast => isActive({ cast, gamestates }));
-    each(enabledHotspots, (hotspot) => {
+    each(hotspots, (hotspot) => {
       const {
         rectTop,
         rectBottom,
@@ -92,13 +90,13 @@ export default function ({ dispatch, scene }) {
         && rectRight === 0
         && rectBottom === 0
       )) {
-        nowActiveHotspots.push(hotspot);
+        nowInHotspots.push(hotspot);
       }
     });
 
-    const leavingHotspots = difference(wasActiveHotspots, nowActiveHotspots);
-    const enteringHotspots = difference(nowActiveHotspots, wasActiveHotspots);
-    const noInteractionHotspots = difference(enabledHotspots, nowActiveHotspots);
+    const leavingHotspots = difference(wasInHotspots, nowInHotspots);
+    const enteringHotspots = difference(nowInHotspots, wasInHotspots);
+    const noInteractionHotspots = difference(hotspots, nowInHotspots);
     const isClick = Date.now() - lastMouseDown < 800;
 
     if (wasMouseUpped) {
@@ -107,16 +105,17 @@ export default function ({ dispatch, scene }) {
 
     if (!mouseDown && wasMouseDowned) {
       mouseDown = true;
-      wasMouseDownedInHotspots = nowActiveHotspots;
+      wasMouseDownedInHotspots = nowInHotspots;
+      clickStartPos = adjustedClickPos;
       lastMouseDown = Date.now();
     }
     const isMouseDown = mouseDown;
 
     queue.add(() => dispatch(handleEvent({
-      top,
-      left,
-      enabledHotspots,
-      nowActiveHotspots,
+      currentPosition: adjustedClickPos,
+      startingPosition: clickStartPos,
+      hotspots,
+      nowInHotspots,
       leavingHotspots,
       enteringHotspots,
       noInteractionHotspots,
@@ -128,7 +127,7 @@ export default function ({ dispatch, scene }) {
       wasMouseDowned,
     })), 'handle event');
 
-    wasActiveHotspots = nowActiveHotspots;
+    wasInHotspots = nowInHotspots;
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;

@@ -1,5 +1,5 @@
 
-[![Build Status](http://drone.soapbubble.online/api/badges/CaptEmulation/morpheus/status.svg)](http://drone.soapbubble.online/CaptEmulation/morpheus)
+[![Build Status](http://drone.soapbubble.online/api/badges/soap-bubble/morpheus/status.svg)](http://drone.soapbubble.online/soap-bubble/morpheus)
 
 # Morpheus
 Open source implementation of a game engine that can play Morpheus

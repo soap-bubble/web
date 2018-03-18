@@ -134,7 +134,7 @@ export function handleEventFactory() {
       }
 
       if (wasMouseMoved && isMouseDown) {
-        mouseDragHotspots = nowInHotspots
+        mouseDragHotspots = hotspots
           .filter(
             and(
               matchesHotspotRect(startingPosition),

@@ -14,7 +14,11 @@ const reducer = createReducer('gamestate', Immutable.fromJS({
   idMap: {},
 }), {
   [UPDATE](gamestate, { payload: value, meta: gamestateId }) {
-    return gamestate.setIn(['idMap', gamestateId, 'value'], value);
+    const curValue = gamestate.getIn(['idMap', gamestateId, 'value']);
+    if (curValue !== value) {
+      return gamestate.setIn(['idMap', gamestateId, 'value'], value);
+    }
+    return gamestate;
   },
   [LOAD_COMPLETE](gamestate, { payload: gamestates }) {
     return gamestates.reduce((newState, gs) =>

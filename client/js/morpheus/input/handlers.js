@@ -7,7 +7,6 @@ import {
 } from 'morpheus/game';
 import {
   isActive,
-  actions as gamestateActions,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import {
@@ -56,10 +55,13 @@ function matchesHotspotRect({ top, left }) {
     rectBottom,
     rectLeft,
     rectRight,
-  }) => (top > rectTop
-    && top < rectBottom
-    && left > rectLeft
-    && left < rectRight)
+  }) => ((rectLeft > rectRight ?
+    (left > rectLeft
+     || left < rectRight)
+  : (left > rectLeft
+    && left < rectRight))
+    && top > rectTop
+    && top < rectBottom)
   || (rectTop === 0
     && rectLeft === 0
     && rectRight === 0
@@ -76,12 +78,12 @@ export function handleEventFactory() {
     leavingHotspots,
     enteringHotspots,
     noInteractionHotspots,
-    wasMouseDownedInHotspots,
     isClick,
     isMouseDown,
     wasMouseMoved,
     wasMouseUpped,
     wasMouseDowned,
+    handleHotspot,
   }) {
     return async (dispatch, getState) => {
       let alwaysExecuteHotspots = [];
@@ -92,7 +94,6 @@ export function handleEventFactory() {
       let mouseDragHotspots = [];
       let clickableHotspots = [];
       let mouseNoneHotspots = [];
-      let interactedWithHotspots;
 
       const isHotspotActive = hotspot => isActive({
         cast: hotspot,
@@ -114,20 +115,29 @@ export function handleEventFactory() {
 
       if (wasMouseUpped) {
         mouseUpHotspots = nowInHotspots
-          .filter(and(matchesHotspotRect(startingPosition), gesture.isMouseUp));
+          .filter(
+            and(
+              matchesHotspotRect(startingPosition),
+              gesture.isMouseUp,
+            ),
+          );
 
         if (isClick) {
           clickableHotspots = nowInHotspots
-            .filter(and(matchesHotspotRect(startingPosition), gesture.isMouseClick));
+            .filter(
+              and(
+                matchesHotspotRect(startingPosition),
+                gesture.isMouseClick,
+              ),
+            );
         }
       }
 
       if (wasMouseMoved && isMouseDown) {
-        interactedWithHotspots = interactedWithHotspots
-          || intersection(nowInHotspots, wasMouseDownedInHotspots);
-        mouseDragHotspots = interactedWithHotspots
+        mouseDragHotspots = nowInHotspots
           .filter(
             and(
+              matchesHotspotRect(startingPosition),
               or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
               or(
                 actionType.isHorizSlider,
@@ -141,6 +151,21 @@ export function handleEventFactory() {
       if (wasMouseDowned) {
         mouseDownHotspots = nowInHotspots
           .filter(gesture.isMouseDown);
+
+        nowInHotspots.filter(
+          or(
+            actionType.isRotate,
+            actionType.isHorizSlider,
+            actionType.isVertSlider,
+            actionType.isTwoAxisSlider,
+          ),
+        ).forEach((hotspot) => {
+          const { param1 } = hotspot;
+          const gamestate = gamestateSelectors.forState(getState()).byId(param1);
+          if (gamestate) {
+            hotspot.oldValue = gamestate.value;
+          }
+        });
       }
 
       mouseNoneHotspots = noInteractionHotspots
@@ -162,9 +187,9 @@ export function handleEventFactory() {
         )
       ) {
         logger.info({
+          currentPosition,
+          startingPosition,
           nowInHotspots,
-          wasMouseDownedInHotspots,
-          interactedWithHotspots,
           alwaysExecuteHotspots,
           mouseLeavingHotspots,
           mouseEnteringHotspots,
@@ -195,36 +220,40 @@ export function handleEventFactory() {
 
       await forEachSeries(alwaysExecuteHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          await dispatch(gamestateActions.handleHotspot({
+          await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
         }
       });
 
       await forEachSeries(mouseLeavingHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          await dispatch(gamestateActions.handleHotspot({
+          await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
         }
       });
 
       await forEachSeries(mouseEnteringHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          await dispatch(gamestateActions.handleHotspot({
+          await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
         }
       });
 
       await someSeries(mouseUpHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          const allDone = await dispatch(gamestateActions.handleHotspot({
+          const allDone = await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
           return allDone;
         }
@@ -233,9 +262,10 @@ export function handleEventFactory() {
 
       await someSeries(clickableHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          const allDone = await dispatch(gamestateActions.handleHotspot({
+          const allDone = await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
           return allDone;
         }
@@ -244,9 +274,10 @@ export function handleEventFactory() {
 
       await someSeries(mouseDragHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          const allDone = await dispatch(gamestateActions.handleHotspot({
-            ...currentPosition,
+          const allDone = await dispatch(handleHotspot({
             hotspot,
+            currentPosition,
+            startingPosition,
           }));
           return allDone;
         }
@@ -255,9 +286,10 @@ export function handleEventFactory() {
 
       await someSeries(mouseDownHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          const allDone = await dispatch(gamestateActions.handleHotspot({
+          const allDone = await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
           return allDone;
         }
@@ -266,9 +298,10 @@ export function handleEventFactory() {
 
       await forEachSeries(mouseNoneHotspots, async (hotspot) => {
         if (isHotspotActive(hotspot)) {
-          await dispatch(gamestateActions.handleHotspot({
+          await dispatch(handleHotspot({
             hotspot,
-            ...currentPosition,
+            currentPosition,
+            startingPosition,
           }));
         }
       });

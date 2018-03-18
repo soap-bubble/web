@@ -4,13 +4,17 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
-  selectors as gameStateSelectors,
+  selectors as gamestateSelectors,
   isActive,
 } from 'morpheus/gamestate';
 import {
   actions as gameActions,
 } from 'morpheus/game';
 import scripts from 'morpheus/gamestate/scripts';
+import {
+  actions as castActions,
+  selectors as castSelectors,
+} from 'morpheus/casts';
 import {
   API_ERROR,
   LOAD_COMPLETE,
@@ -50,9 +54,9 @@ export function updateGameState(gamestateId, value) {
   };
 }
 
-export function handleHotspot({ hotspot, top, left }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
+export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
+  return async (dispatch, getState) => {
+    const gamestates = gamestateSelectors.forState(getState());
     const {
       type,
       dissolveToNextScene,
@@ -65,17 +69,17 @@ export function handleHotspot({ hotspot, top, left }) {
     switch (actionType) {
       case 'GoBack': {
         const prevSceneId = sceneSelectors.previousSceneId(getState());
-        dispatch(sceneActions.goToScene(prevSceneId));
+        await dispatch(sceneActions.goToScene(prevSceneId));
         break;
       }
       case 'DissolveTo': {
         const { param1: nextSceneId } = hotspot;
-        if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId), true);
+        if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), true);
         break;
       }
       case 'ChangeScene': {
         const { param1: nextSceneId } = hotspot;
-        if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
+        if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
         break;
       }
       case 'IncrementState': {
@@ -144,10 +148,12 @@ export function handleHotspot({ hotspot, top, left }) {
         const maxVert = vertFromState + 1;
         const maxHor = horFromState + 1;
         const verticalRatio = Math.floor(
-          maxVert * ((top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop)),
+          maxVert * ((currentPosition.top - hotspot.rectTop) /
+            (hotspot.rectBottom - hotspot.rectTop)),
         );
         const horizontalRatio = Math.floor(
-          maxHor * ((left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft)),
+          maxHor * ((currentPosition.left - hotspot.rectLeft) /
+            (hotspot.rectRight - hotspot.rectLeft)),
         );
 
         if (gs && maxVert && maxHor) {
@@ -160,11 +166,13 @@ export function handleHotspot({ hotspot, top, left }) {
         const gs = gamestates.byId(hotspot.param1);
         let rate = hotspot.param2;
         const { maxValue: max, minValue: min, stateWraps } = gs;
-        const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
+        const ratio = (currentPosition.top - startingPosition.top) /
+          (hotspot.rectBottom - hotspot.rectTop);
         if (rate === 0) {
           rate = max - min;
         }
-        let value = rate * ratio;
+        const delta = Math.round((rate * ratio) - 0.5);
+        let value = hotspot.oldValue + delta;
         if (value < min) {
           if (stateWraps) {
             value += max - min;
@@ -183,15 +191,17 @@ export function handleHotspot({ hotspot, top, left }) {
         break;
       }
       case 'HorizSlider': {
-        const { param1, param2 } = hotspot;
+        const { param1, param2, oldValue } = hotspot;
         let rate = param2;
         const gs = gamestates.byId(param1);
         const { maxValue: max, minValue: min, stateWraps } = gs;
-        const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
+        const ratio = (currentPosition.left - startingPosition.left) /
+          (hotspot.rectRight - hotspot.rectLeft);
         if (rate === 0) {
           rate = max - min;
         }
-        let value = rate * ratio;
+        const delta = Math.round((rate * ratio) + 0.5);
+        let value = oldValue + delta;
         if (value < min) {
           if (stateWraps) {
             value += max - min;
@@ -206,7 +216,7 @@ export function handleHotspot({ hotspot, top, left }) {
             value = max;
           }
         }
-        dispatch(updateGameState(hotspot.param1, Math.round(value)));
+        dispatch(updateGameState(param1, Math.round(value)));
         break;
       }
       case 'Rotate':
@@ -224,5 +234,18 @@ export function handleHotspot({ hotspot, top, left }) {
       }
     }
     return allDone;
+  };
+}
+
+export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }) {
+  return async (dispatch, getState) => {
+    const currentScene = sceneSelectors.currentSceneData(getState());
+    const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
+    dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
+    if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
+      await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
+      return await dispatch(sceneActions.goToScene(hotspot.param1, false));
+    }
+    return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition }));
   };
 }

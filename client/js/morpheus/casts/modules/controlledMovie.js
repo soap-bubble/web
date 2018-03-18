@@ -242,6 +242,7 @@ export const actions = memoize((scene) => {
         const uv = createUvs({ cast, gamestates });
         object3D.geometry.attributes.uv = uv;
       });
+      return Promise.resolve();
     };
   }
 

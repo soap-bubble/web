@@ -18,8 +18,7 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
-  isActive,
-  selectors as gamestateSelectors,
+  actions as gamestateActions,
 } from 'morpheus/gamestate';
 import Queue from 'promise-queue';
 import storeFactory from 'store';
@@ -39,7 +38,6 @@ export default function ({ dispatch, scene }) {
 
   let clickStartPos = { top: -1, left: -1 };
   let wasInHotspots = [];
-  let wasMouseDownedInHotspots = [];
   let wasMouseDowned = false;
   let wasMouseMoved = false;
   let wasMouseUpped = false;
@@ -97,7 +95,7 @@ export default function ({ dispatch, scene }) {
     const leavingHotspots = difference(wasInHotspots, nowInHotspots);
     const enteringHotspots = difference(nowInHotspots, wasInHotspots);
     const noInteractionHotspots = difference(hotspots, nowInHotspots);
-    const isClick = Date.now() - lastMouseDown < 800;
+    const isClick = wasMouseUpped && Date.now() - lastMouseDown < 800;
 
     if (wasMouseUpped) {
       mouseDown = false;
@@ -105,7 +103,6 @@ export default function ({ dispatch, scene }) {
 
     if (!mouseDown && wasMouseDowned) {
       mouseDown = true;
-      wasMouseDownedInHotspots = nowInHotspots;
       clickStartPos = adjustedClickPos;
       lastMouseDown = Date.now();
     }
@@ -119,12 +116,12 @@ export default function ({ dispatch, scene }) {
       leavingHotspots,
       enteringHotspots,
       noInteractionHotspots,
-      wasMouseDownedInHotspots,
       isClick,
       isMouseDown,
       wasMouseMoved,
       wasMouseUpped,
       wasMouseDowned,
+      handleHotspot: gamestateActions.handleHotspot,
     })), 'handle event');
 
     wasInHotspots = nowInHotspots;

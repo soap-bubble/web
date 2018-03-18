@@ -232,7 +232,7 @@ export const actions = memoize((scene) => {
   function sweepTo({
     rectLeft,
     rectRight,
-  }, callback) {
+  }) {
     return (dispatch, getState) => {
       const left = rectLeft;
       const right = rectRight > rectLeft
@@ -260,22 +260,24 @@ export const actions = memoize((scene) => {
       const distance = Math.sqrt(
         ((x - panoObject3D.rotation.x) ** 2) + ((y - panoObject3D.rotation.y) ** 2),
       );
-      if (distance === 0) {
-        // What do you know... already there
-        callback();
-      } else {
-        const tween = new Tween(v)
-          .to({
-            x,
-            y,
-          }, Math.sqrt(distance) * 1000)
-          .easing(Easing.Quadratic.Out);
-        tween.onUpdate(() => {
-          dispatch(rotate(v));
-        });
-        tween.onComplete(callback);
-        tween.start();
-      }
+      return new Promise((resolve) => {
+        if (distance === 0) {
+          // What do you know... already there
+          resolve();
+        } else {
+          const tween = new Tween(v)
+            .to({
+              x,
+              y,
+            }, Math.sqrt(distance) * 1000)
+            .easing(Easing.Quadratic.Out);
+          tween.onUpdate(() => {
+            dispatch(rotate(v));
+          });
+          tween.onComplete(resolve);
+          tween.start();
+        }
+      });
     };
   }
 

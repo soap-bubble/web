@@ -28,7 +28,7 @@ import {
 } from 'utils/coordinates';
 
 const logger = loggerFactory('flatspot');
-const queue = new Queue(1, 12);
+const queue = new Queue(1, 128);
 
 export default function ({ dispatch, scene }) {
   const store = storeFactory();

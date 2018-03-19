@@ -3,6 +3,7 @@ import {
   memoize,
   isUndefined,
 } from 'lodash';
+import Promise from 'bluebird';
 import {
   Tween,
 } from 'tween';
@@ -163,7 +164,13 @@ function calculateImageOperation({ cast, img, rect }) {
 function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
   const { controlledMovieCallbacks, width, height } = cast;
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
-  const value = Math.round(gamestates.byId(gameStateId).value, 0);
+  const gs = gamestates.byId(gameStateId);
+  const value = Math.round(gs.value, 0);
+  const frames = get(controlledMovieCallbacks, '[0].frames', 1);
+  // if (frames > 1) frames--;
+  const maxValue = ((gs.maxValue * frames) - frames) + 1;
+  const currentOffset = (((value - 1) * frames) + frames);
+  logger.info({ currentOffset, value, currentValue: controlledMovieCallbacks.currentValue });
 
   const source = {
     x: value * width,
@@ -172,17 +179,69 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
     sizeY: height,
   };
 
-  return [
-    img,
-    source.x,
-    source.y,
-    source.sizeX,
-    source.sizeY,
-    rect.x,
-    rect.y,
-    rect.sizeX,
-    rect.sizeY,
-  ];
+  return async (context) => {
+    if (frames <= 1) {
+      logger.info('single frame');
+      return context.drawImage(
+        img,
+        source.x,
+        source.y,
+        source.sizeX,
+        source.sizeY,
+        rect.x,
+        rect.y,
+        rect.sizeX,
+        rect.sizeY,
+      );
+    }
+    if (typeof controlledMovieCallbacks.currentValue === 'undefined') {
+      logger.info('first time');
+      controlledMovieCallbacks.currentValue = currentOffset;
+      return context.drawImage(
+        img,
+        currentOffset * width,
+        source.y,
+        source.sizeX,
+        source.sizeY,
+        rect.x,
+        rect.y,
+        rect.sizeX,
+        rect.sizeY,
+      );
+    }
+    if (controlledMovieCallbacks.currentValue !== currentOffset) {
+      logger.info('changing frame', (((value - 1) * frames)), 'to', ((((value - 1) * frames) + frames) - 1));
+      for (let i = 0; i <= frames; i++) {
+        controlledMovieCallbacks.currentValue = (((value - 1) * frames) + i);
+        console.log(controlledMovieCallbacks.currentValue);
+        context.drawImage(
+          img,
+          controlledMovieCallbacks.currentValue * width,
+          source.y,
+          source.sizeX,
+          source.sizeY,
+          rect.x,
+          rect.y,
+          rect.sizeX,
+          rect.sizeY,
+        );
+        await Promise.delay(60);
+      }
+      return null;
+    }
+    logger.info('same frame', ((((value - 1) * frames) + frames) - 1));
+    return context.drawImage(
+      img,
+      (value ? ((((value - 1) * frames) + frames) - 1) : 0) * width,
+      source.y,
+      source.sizeX,
+      source.sizeY,
+      rect.x,
+      rect.y,
+      rect.sizeX,
+      rect.sizeY,
+    );
+  };
 }
 
 function generateImages({
@@ -240,9 +299,9 @@ function generateSpecialImages({ images, controlledFrames, canvas }) {
   if (canvas) {
     const ctx = canvas.getContext('2d');
     images.forEach(op => ctx.drawImage(...op));
-    // ctx.drawImage(...controlledFrames[1]);
-    controlledFrames.forEach(op => ctx.drawImage(...op));
+    return Promise.all(controlledFrames.map(cf => cf(ctx)));
   }
+  return Promise.resolve();
 }
 
 function createCanvas({ width, height }) {
@@ -481,7 +540,7 @@ export const delegate = memoize((scene) => {
             });
           });
 
-          generateSpecialImages({
+          return generateSpecialImages({
             images: generateImages({
               gamestates,
               images,
@@ -493,14 +552,13 @@ export const delegate = memoize((scene) => {
               dimensions,
             }),
             canvas,
-          });
-          return {
+          }).then(() => ({
             images,
             sounds,
             videos,
             canvas,
             controlledCasts,
-          };
+          }));
         });
     };
   }
@@ -592,7 +650,7 @@ export const actions = memoize((scene) => {
         });
       });
 
-      generateSpecialImages({
+      return generateSpecialImages({
         images: generateImages({
           gamestates,
           images,

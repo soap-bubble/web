@@ -243,8 +243,10 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }
     const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
     dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
     if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
-      await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
-      return await dispatch(sceneActions.goToScene(hotspot.param1, false));
+      if (hotspot.param1) {
+        await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
+        return await dispatch(sceneActions.goToScene(hotspot.param1, false));
+      }
     }
     return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition }));
   };

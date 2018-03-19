@@ -307,9 +307,9 @@ export function handleEventFactory() {
       });
 
       let cursor;
-      for (let i = 0; i < nowInHotspots.length; i++) {
-        const hotspot = nowInHotspots[i];
-        if (isHotspotActive(hotspot)) {
+      for (let i = 0; i < hotspots.length; i++) {
+        const hotspot = hotspots[i];
+        if (isHotspotActive(hotspot) && matchesHotspotRect(currentPosition)(hotspot)) {
           if (actionType.isChangeCursor(hotspot)) {
             const {
               param1,

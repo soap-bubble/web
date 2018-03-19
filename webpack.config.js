@@ -86,7 +86,7 @@ module.exports = (env) => {
     target,
     devtool: env.production ? false : 'source-map',
     entry: {
-      app: './client/js/app.jsx',
+      app: ['babel-polyfill', './client/js/app.jsx'],
       vendor: [
         'axios',
         'lodash',

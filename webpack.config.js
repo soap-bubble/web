@@ -93,6 +93,7 @@ module.exports = (env) => {
         'bluebird',
         'query-string',
         'immutable',
+        'p-iteration',
         'raf',
         'react',
         'redux',
@@ -121,6 +122,11 @@ module.exports = (env) => {
     },
     module: {
       rules: styleLoaders.concat([
+        {
+          test: /\.jsx?$/,
+          include: [/p-iteration/],
+          use: ['babel-loader'],
+        },
         {
           test: /\.jsx?$/,
           exclude: [/node_modules/],

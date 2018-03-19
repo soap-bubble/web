@@ -86,8 +86,9 @@ module.exports = (env) => {
     target,
     devtool: env.production ? false : 'source-map',
     entry: {
-      app: ['babel-polyfill', './client/js/app.jsx'],
+      app: './client/js/app.jsx',
       vendor: [
+        'babel-polyfill',
         'axios',
         'lodash',
         'bluebird',
@@ -108,7 +109,6 @@ module.exports = (env) => {
         'three',
         'user-agent-parser',
         'classnames',
-        'babel-polyfill',
       ],
     },
     output: {

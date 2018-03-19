@@ -31,7 +31,12 @@ router
         const castsToLoad = scene.casts.filter(c => c.ref).map(c => c.ref.castId);
         if (castsToLoad.length) {
           getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then((casts) => {
-            scene.casts = scene.casts.filter(c => !c.ref).concat(casts);
+            scene.casts = scene.casts.map((c) => {
+              if (c.ref) {
+                return casts.find(c1 => c1.castId === c.ref.castId);
+              }
+              return c;
+            });
             res.json(scene);
           }, (err) => {
             res.status(500).send(err);

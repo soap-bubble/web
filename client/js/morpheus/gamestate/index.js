@@ -1,3 +1,4 @@
+import scripts from 'morpheus/gamestate/scripts';
 import reducer from './reducer';
 import * as selectors from './selectors';
 import * as actions from './actions';
@@ -5,35 +6,58 @@ import {
   TEST_TYPES,
 } from '../constants';
 
-export function isActive({ cast, gamestates }) {
-  const { initiallyEnabled = true, comparators = [] } = cast;
-  return comparators.length === 0 || comparators.every(({
+function doCompare({
+  comparator: {
     gameStateId,
     testType,
     value,
-  }) => {
-    const gs = gamestates.byId(gameStateId);
-    const gsValue = gs && gs.value;
-    let retValue;
-    switch (TEST_TYPES[testType]) {
-      case 'EqualTo':
-        retValue = gs && (gsValue === value);
-        break;
-      case 'NotEqualTo':
-        retValue = gs && (gsValue !== value);
-        break;
-      case 'GreaterThan':
-        retValue = gs && (gsValue > value);
-        break;
-      case 'LessThan':
-        retValue = gs && (gsValue < value);
-        break;
-      default:
-        retValue = true;
+  },
+  gamestates,
+}) {
+  const gs = gamestates.byId(gameStateId);
+  const gsValue = gs && gs.value;
+  switch (TEST_TYPES[testType]) {
+    case 'EqualTo':
+      return gs && (gsValue === value);
+    case 'NotEqualTo':
+      return gs && (gsValue !== value);
+    case 'GreaterThan':
+      return gs && (gsValue > value);
+    case 'LessThan':
+      return gs && (gsValue < value);
+    default:
+      return true;
+  }
+}
+
+export function isCastActive({ cast, gamestates }) {
+  const { initiallyEnabled = true, comparators = [] } = cast;
+  let result = true;
+  for (let i = 0; i < comparators.length; i++) {
+    const comparator = comparators[i];
+    if (!doCompare({
+      comparator,
+      gamestates,
+    })) {
+      result = false;
+      break;
     }
-    retValue = initiallyEnabled ? retValue : !retValue;
-    return retValue;
-  });
+  }
+  if (!initiallyEnabled) {
+    result = !result;
+  }
+  return result;
+}
+
+export function isActive({ cast, gamestates }) {
+  let result;
+  const script = scripts(cast.type);
+  if (script) {
+    result = script.enabled(cast, gamestates);
+  } else {
+    result = isCastActive({ cast, gamestates });
+  }
+  return result;
 }
 
 export {

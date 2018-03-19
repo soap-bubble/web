@@ -19,10 +19,6 @@ let numOfIngredients = 0;
 
 export const id = 1001;
 
-export function enabled() {
-  return true;
-}
-
 export function execute({ param1 }, gamestates) {
   return (dispatch) => {
     const indicatorId = LIGHT_IND + (param1 - 1);

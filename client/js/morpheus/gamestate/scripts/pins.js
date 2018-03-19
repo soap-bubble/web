@@ -12,10 +12,6 @@ const AQUA_PUSH_PIN = 2463;
 
 export const id = 1005;
 
-export function enabled() {
-  return true;
-}
-
 function pushPin(dispatch, param, gamestateId, value) {
   if (param !== gamestateId) {
     if (value === 1) {

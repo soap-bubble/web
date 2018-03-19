@@ -360,6 +360,7 @@ export const delegate = memoize((scene) => {
               && rectLeft === 0
               && rectRight === 0;
           })
+          .filter(cast => isActive({ cast, gamestates }))
           .forEach((hotspot) => {
             dispatch(gamestateActions.handleHotspot({ hotspot }));
           });
@@ -435,16 +436,18 @@ export const delegate = memoize((scene) => {
           renderer,
         });
       }
-
-      hotspotsData.forEach((hotspot) => {
-        const { gesture } = hotspot;
-        if (
-          GESTURES[gesture] === 'Always'
-          || GESTURES[gesture] === 'SceneEnter'
-        ) {
-          dispatch(gamestateActions.handleHotspot({ hotspot }));
-        }
-      });
+      const gamestates = gamestateSelectors.forState(getState());
+      hotspotsData
+        .filter(cast => isActive({ cast, gamestates }))
+        .forEach((hotspot) => {
+          const { gesture } = hotspot;
+          if (
+            GESTURES[gesture] === 'Always'
+            || GESTURES[gesture] === 'SceneEnter'
+          ) {
+            dispatch(gamestateActions.handleHotspot({ hotspot }));
+          }
+        });
 
       return Promise.resolve();
     };
@@ -493,7 +496,7 @@ export const actions = memoize((scene) => {
   function hovered(hoveredHotspots) {
     return (dispatch, getState) => {
       let cursor;
-      hoveredHotspots.every((hotspot) => {
+      hoveredHotspots.some((hotspot) => {
         const gamestates = gamestateSelectors.forState(getState());
         if (isActive({ cast: hotspot, gamestates })) {
           const {
@@ -518,14 +521,14 @@ export const actions = memoize((scene) => {
     return (dispatch, getState) => {
       const scene3D = selectors(scene).scene3D(getState());
       dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-      activatedHotspots.every((hotspot) => {
+      activatedHotspots.some((hotspot) => {
         const gamestates = gamestateSelectors.forState(getState());
         if (isActive({ cast: hotspot, gamestates })) {
           if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
             dispatch(castActions.forScene(scene).pano.sweepTo(hotspot, () => {
               dispatch(sceneActions.goToScene(hotspot.param1, false));
             }));
-            return false;
+            return true;
           }
           return dispatch(gamestateActions.handleHotspot({ hotspot }));
         }

@@ -4,13 +4,17 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
-  selectors as gameStateSelectors,
+  selectors as gamestateSelectors,
   isActive,
 } from 'morpheus/gamestate';
 import {
   actions as gameActions,
 } from 'morpheus/game';
 import scripts from 'morpheus/gamestate/scripts';
+import {
+  actions as castActions,
+  selectors as castSelectors,
+} from 'morpheus/casts';
 import {
   API_ERROR,
   LOAD_COMPLETE,
@@ -50,244 +54,200 @@ export function updateGameState(gamestateId, value) {
   };
 }
 
-export function handleMouseOver({ hotspot }) {
-  return (dispatch, getState) =>
-    // const gamestates = gameStateSelectors.forState(getState());
-    // const {
-    //   type,
-    // } = hotspot;
-    // if (isActive({ cast: hotspot, gamestates })) {
-    //   if (type >= 5 && type <= 8) {
-    //     const currentCursor = gameSelectors.morpheusCursor(getState());
-    //     if (currentCursor !== 10009) {
-    //       dispatch(gameActions.setOpenHandCursor());
-    //     }
-    //     return false;
-    //   }
-    //   dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
-    // }
-     true;
-}
-
-
-export function handleMouseDown({ hotspot }) {
-  return (dispatch, getState) =>
-    // const gamestates = gameStateSelectors.forState(getState());
-    // const {
-    //   type,
-    // } = hotspot;
-    // if (isActive({ cast: hotspot, gamestates })) {
-    //   if (type >= 5 && type <= 8) {
-    //     dispatch(gameActions.setCloseHandCursor());
-    //     const gs = gamestates.byId(hotspot.param1);
-    //     if (gs) {
-    //       // gs.oldValue = gs.value;
-    //     }
-    //   }
-    // }
-     true;
-}
-
-export function handleMouseStillDown({ hotspot, top, left }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
+export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
+  return async (dispatch, getState) => {
+    const gamestates = gamestateSelectors.forState(getState());
     const {
       type,
+      dissolveToNextScene,
+      defaultPass,
     } = hotspot;
-    if (isActive({ cast: hotspot, gamestates })) {
-      const actionType = ACTION_TYPES[type];
-      if (actionType === 'TwoAxisSlider') {
-        dispatch(gameActions.setCloseHandCursor());
+
+    let allDone = !defaultPass;
+
+    const actionType = ACTION_TYPES[type];
+    switch (actionType) {
+      case 'GoBack': {
+        const prevSceneId = sceneSelectors.previousSceneId(getState());
+        await dispatch(sceneActions.goToScene(prevSceneId));
+        break;
+      }
+      case 'DissolveTo': {
+        const { param1: nextSceneId } = hotspot;
+        if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), true);
+        break;
+      }
+      case 'ChangeScene': {
+        const { param1: nextSceneId } = hotspot;
+        if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
+        break;
+      }
+      case 'IncrementState': {
+        const { param1: gamestateId } = hotspot;
+        const gs = gamestates.byId(gamestateId);
+        const {
+          maxValue,
+          minValue,
+          stateWraps,
+        } = gs;
+        let { value } = gs;
+        value += 1;
+        if (value > maxValue) {
+          if (stateWraps) {
+            value = minValue;
+          } else {
+            value = maxValue;
+          }
+        }
+        dispatch(updateGameState(gamestateId, value));
+        break;
+      }
+      case 'DecrementState': {
+        const { param1: gamestateId } = hotspot;
+        const gs = gamestates.byId(gamestateId);
+        const {
+          maxValue,
+          minValue,
+          stateWraps,
+        } = gs;
+        let { value } = gs;
+        value -= 1;
+        if (value < minValue) {
+          if (stateWraps) {
+            value = maxValue;
+          } else {
+            value = minValue;
+          }
+        }
+        dispatch(updateGameState(gamestateId, value));
+        break;
+      }
+      case 'SetStateTo': {
+        const { param1: gamestateId, param2: value } = hotspot;
+        dispatch(updateGameState(gamestateId, value));
+        break;
+      }
+      case 'ExchangeState': {
+        const { param1: id1, param2: id2 } = hotspot;
+        const { value: value1 } = gamestates.byId(id1);
+        const { value: value2 } = gamestates.byId(id2);
+        dispatch(updateGameState(id2, value1));
+        dispatch(updateGameState(id1, value2));
+        break;
+      }
+      case 'CopyState': {
+        const { param1: sourceId, param2: targetId } = hotspot;
+        const { value: source } = gamestates.byId(sourceId);
+        dispatch(updateGameState(targetId, source));
+        break;
+      }
+      case 'TwoAxisSlider': {
         const gs = gamestates.byId(hotspot.param1);
         const { maxValue: vertFromState } = gamestates.byId(hotspot.param2);
         const { maxValue: horFromState } = gamestates.byId(hotspot.param3);
         const maxVert = vertFromState + 1;
         const maxHor = horFromState + 1;
         const verticalRatio = Math.floor(
-          maxVert * ((top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop)),
+          maxVert * ((currentPosition.top - hotspot.rectTop) /
+            (hotspot.rectBottom - hotspot.rectTop)),
         );
         const horizontalRatio = Math.floor(
-          maxHor * ((left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft)),
+          maxHor * ((currentPosition.left - hotspot.rectLeft) /
+            (hotspot.rectRight - hotspot.rectLeft)),
         );
 
         if (gs && maxVert && maxHor) {
           const value = (maxVert * verticalRatio) + horizontalRatio;
           dispatch(updateGameState(hotspot.param1, Math.round(value)));
         }
-      } else if (actionType === 'VertSlider') {
-        dispatch(gameActions.setCloseHandCursor());
-        const gs = gamestates.byId(hotspot.param1);
-        const { maxValue: max } = gs;
-        const ratio = (top - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop);
-        dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
-      } else if (actionType === 'HorizSlider') {
-        dispatch(gameActions.setCloseHandCursor());
-        const gs = gamestates.byId(hotspot.param1);
-        const { maxValue: max } = gs;
-        const ratio = (left - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft);
-        dispatch(updateGameState(hotspot.param1, Math.round(ratio * max)));
+        break;
       }
-    }
-    return true;
-  };
-}
+      case 'VertSlider': {
+        const gs = gamestates.byId(hotspot.param1);
+        let rate = hotspot.param2;
+        const { maxValue: max, minValue: min, stateWraps } = gs;
+        const ratio = (currentPosition.top - startingPosition.top) /
+          (hotspot.rectBottom - hotspot.rectTop);
+        if (rate === 0) {
+          rate = max - min;
+        }
+        const delta = Math.round((rate * ratio) - 0.5);
+        let value = hotspot.oldValue + delta;
+        if (value < min) {
+          if (stateWraps) {
+            value += max - min;
+          } else {
+            value = min;
+          }
+        }
+        if (value > max) {
+          if (stateWraps) {
+            value -= max - min;
+          } else {
+            value = max;
+          }
+        }
+        dispatch(updateGameState(hotspot.param1, Math.round(value)));
+        break;
+      }
+      case 'HorizSlider': {
+        const { param1, param2, oldValue } = hotspot;
+        let rate = param2;
+        const gs = gamestates.byId(param1);
+        const { maxValue: max, minValue: min, stateWraps } = gs;
+        const ratio = (currentPosition.left - startingPosition.left) /
+          (hotspot.rectRight - hotspot.rectLeft);
+        if (rate === 0) {
+          rate = max - min;
+        }
+        const delta = Math.round((rate * ratio) + 0.5);
+        let value = oldValue + delta;
+        if (value < min) {
+          if (stateWraps) {
+            value += max - min;
+          } else {
+            value = min;
+          }
+        }
+        if (value > max) {
+          if (stateWraps) {
+            value -= max - min;
+          } else {
+            value = max;
+          }
+        }
+        dispatch(updateGameState(param1, Math.round(value)));
+        break;
+      }
+      case 'Rotate':
+      case 'NoAction': {
+        break;
+      }
 
-// Rotate
-// CCast::DoMouseStillDown	(	inWhere	);
-//
-// switch (	mType	) {
-//
-// case Rotate:
-//   {
-//     SB_Types::Point mousePt 		= inWhere;
-//     CPanoCast::WindowToPano	(	mousePt	);
-//
-//     CGameState *	gameStateVar 	= CGameState::FindByID(mParam1);
-//
-//     if (	gameStateVar != nil	) {
-//
-//       SB_Types::Int32 min = gameStateVar->GetMin();
-//       SB_Types::Int32	max	= gameStateVar->GetMax();
-//       double centerX 		= (mRect.right + mRect.left) / 2;
-//       double centerY 		= (mRect.bottom + mRect.top) / 2;
-//       double angle 		= atan2 (	mousePt.h - centerX,
-//                       centerY - mousePt.v	);
-//       angle 				= 180 * angle/Pi - mParam2;
-//       while (	angle < 0	) {
-//         angle += 360;
-//       }
-//
-//       if (	angle > mParam3 - mParam2	) {
-//
-//         angle = 360 - angle > angle - mParam3 ?
-//               mParam3 - mParam2 :
-//               0;
-//       }
-//
-//       double currAngle =	double(mParam3 - mParam2)*(gameStateVar->GetState() - min) /
-//                 (max - min);
-//
-//       if (	angle - currAngle < 90 && angle - currAngle > -90	) {
-//
-//         double 			ratio	= angle / (mParam3 - mParam2);
-//         SB_Types::Int32 value	= SB_Types::Int32
-//                       ( min + (max - min)*ratio + .5 );
-//         gameStateVar->SetState(value);
-//       }
-//     }
-//   }
-
-export function handleHotspot({ hotspot }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
-    const {
-      type,
-      dissolveToNextScene,
-    } = hotspot;
-
-    if (isActive({ cast: hotspot, gamestates })) {
-      const actionType = ACTION_TYPES[type];
-      switch (actionType) {
-        case 'GoBack': {
-          const prevSceneId = sceneSelectors.previousSceneId(getState());
-          dispatch(sceneActions.goToScene(prevSceneId));
+      default: {
+        const script = scripts(type);
+        if (script) {
+          dispatch(script.execute(hotspot, gamestates));
           break;
         }
-        case 'DissolveTo':
-        case 'ChangeScene': {
-          const { defaultPass, param1: nextSceneId } = hotspot;
-          if (nextSceneId) dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
-          return defaultPass;
-        }
-        case 'IncrementState': {
-          const { defaultPass, param1: gamestateId } = hotspot;
-          const gs = gamestates.byId(gamestateId);
-          const {
-            maxValue,
-            minValue,
-            stateWraps,
-          } = gs;
-          let { value } = gs;
-          value += 1;
-          if (value > maxValue) {
-            if (stateWraps) {
-              value = minValue;
-            } else {
-              value = maxValue;
-            }
-          }
-          dispatch(updateGameState(gamestateId, value));
-          return defaultPass;
-        }
-        case 'DecrementState': {
-          const { defaultPass, param1: gamestateId } = hotspot;
-          const gs = gamestates.byId(gamestateId);
-          const {
-            maxValue,
-            minValue,
-            stateWraps,
-          } = gs;
-          let { value } = gs;
-          value -= 1;
-          if (value < minValue) {
-            if (stateWraps) {
-              value = maxValue;
-            } else {
-              value = minValue;
-            }
-          }
-          dispatch(updateGameState(gamestateId, value));
-          return defaultPass;
-        }
-        case 'SetStateTo': {
-          const { defaultPass, param1: gamestateId, param2: value } = hotspot;
-          dispatch(updateGameState(gamestateId, value));
-          return defaultPass;
-        }
-        case 'ExchangeState': {
-          const { defaultPass, param1: id1, param2: id2 } = hotspot;
-          const { value: value1 } = gamestates.byId(id1);
-          const { value: value2 } = gamestates.byId(id2);
-          dispatch(updateGameState(id2, value1));
-          dispatch(updateGameState(id1, value2));
-          return defaultPass;
-        }
-        case 'CopyState': {
-          const { defaultPass, param1: sourceId, param2: targetId } = hotspot;
-          const { value: source } = gamestates.byId(sourceId);
-          dispatch(updateGameState(targetId, source));
-          return defaultPass;
-        }
-        default: {
-          const script = scripts(type);
-          if (script.enabled(hotspot, gamestates)) {
-            dispatch(script.execute(hotspot, gamestates));
-          }
-          const { defaultPass } = hotspot;
-          return defaultPass;
-        }
+        allDone = false;
       }
     }
-    return true;
+    return allDone;
   };
 }
 
-export function handleMouseUp({ hotspot }) {
-  return (dispatch, getState) => {
-    const gamestates = gameStateSelectors.forState(getState());
-    const {
-      gesture,
-      type,
-    } = hotspot;
-    if (isActive({ cast: hotspot, gamestates })) {
-      if (type >= 5 && type <= 8) {
-        dispatch(gameActions.setOpenHandCursor());
-        return false;
-      } else if (GESTURES[gesture] === 'MouseUp') {
-        handleHotspot({ hotspot });
+export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }) {
+  return async (dispatch, getState) => {
+    const currentScene = sceneSelectors.currentSceneData(getState());
+    const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
+    dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
+    if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
+      if (hotspot.param1) {
+        await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
+        return await dispatch(sceneActions.goToScene(hotspot.param1, false));
       }
-      dispatch(gameActions.setCursor(hotspot.cursorShapeWhenActive));
     }
-    return true;
+    return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition }));
   };
 }

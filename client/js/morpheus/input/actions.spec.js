@@ -3,9 +3,9 @@ import uuid from 'uuid';
 import {
   keyDown,
   keyUp,
-  keyInputEpic,
   inputHandler,
 } from 'morpheus/input/actions';
+import keyInputEpic from 'morpheus/input/epics';
 import { ActionsObservable } from 'redux-observable';
 
 describe('input test suite', () => {

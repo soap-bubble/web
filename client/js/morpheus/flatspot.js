@@ -10,6 +10,7 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
+  handleEventFactory,
   selectors as inputSelectors,
 } from 'morpheus/input';
 import {
@@ -17,9 +18,9 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
-  isActive,
-  selectors as gamestateSelectors,
+  actions as gamestateActions,
 } from 'morpheus/gamestate';
+import Queue from 'promise-queue';
 import storeFactory from 'store';
 import loggerFactory from 'utils/logger';
 import {
@@ -27,39 +28,21 @@ import {
 } from 'utils/coordinates';
 
 const logger = loggerFactory('flatspot');
+const queue = new Queue(1, 128);
 
 export default function ({ dispatch, scene }) {
   const store = storeFactory();
   const castSelectorForScene = castSelectors.forScene(scene);
   const castActionsForScene = castActions.forScene(scene);
+  const handleEvent = handleEventFactory();
 
-  let wasActiveHotspots = [];
+  let clickStartPos = { top: -1, left: -1 };
+  let wasInHotspots = [];
   let wasMouseDowned = false;
   let wasMouseMoved = false;
   let wasMouseUpped = false;
   let mouseDown = false;
-
-  function handleHotspotDispatches({
-    type,
-    top,
-    left,
-    hotspots,
-  }) {
-    let cursor = 0;
-    hotspots.every((hotspot) => {
-      const handled = dispatch(castActionsForScene.special.handleMouseEvent({
-        type,
-        top,
-        left,
-        hotspot,
-      }));
-      if (handled) {
-        cursor = handled;
-      }
-      return handled;
-    });
-    return cursor;
-  }
+  let lastMouseDown;
 
   function updateState({ clientX, clientY }) {
     const state = store.getState();
@@ -75,7 +58,7 @@ export default function ({ dispatch, scene }) {
     if (!acceptsMouseEvents) {
       return;
     }
-    const nowActiveHotspots = [];
+    const nowInHotspots = [];
     const left = clientX - location.x;
     const top = clientY - location.y;
 
@@ -96,132 +79,62 @@ export default function ({ dispatch, scene }) {
         rectLeft,
         rectRight,
       } = hotspot;
-      if (adjustedClickPos.top > rectTop
+      if ((adjustedClickPos.top > rectTop
         && adjustedClickPos.top < rectBottom
         && adjustedClickPos.left > rectLeft
-        && adjustedClickPos.left < rectRight) {
-        nowActiveHotspots.push(hotspot);
+        && adjustedClickPos.left < rectRight)
+      || (rectTop === 0
+        && rectLeft === 0
+        && rectRight === 0
+        && rectBottom === 0
+      )) {
+        nowInHotspots.push(hotspot);
       }
     });
-    handleHotspotDispatches({
-      type: 'MouseOver',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: nowActiveHotspots,
-    });
 
-    handleHotspotDispatches({
-      type: 'MouseLeave',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: difference(wasActiveHotspots, nowActiveHotspots),
-    });
+    const leavingHotspots = difference(wasInHotspots, nowInHotspots);
+    const enteringHotspots = difference(nowInHotspots, wasInHotspots);
+    const noInteractionHotspots = difference(hotspots, nowInHotspots);
+    const isClick = wasMouseUpped && Date.now() - lastMouseDown < 800;
 
-    // Events for hotspots we have entered
-    handleHotspotDispatches({
-      type: 'MouseEnter',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: difference(nowActiveHotspots, wasActiveHotspots),
-    });
-
-    // User initiated event inside a hotspot so could be valid
-    if (!mouseDown && wasMouseDowned && nowActiveHotspots.length) {
-      mouseDown = true;
-      handleHotspotDispatches({
-        type: 'MouseDown',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
-    }
-
-    if (wasMouseMoved) {
-      handleHotspotDispatches({
-        type: 'MouseMove',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
-    }
-
-    if (wasMouseMoved && mouseDown) {
-      handleHotspotDispatches({
-        type: 'MouseStillDown',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
-    }
-
-    // User pressed and released mouse button inside a valid hotspot
-    // TODO: debounce??
-    if (wasMouseUpped && nowActiveHotspots.length) {
+    if (wasMouseUpped) {
       mouseDown = false;
-      handleHotspotDispatches({
-        type: 'MouseUp',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
-      handleHotspotDispatches({
-        type: 'MouseClick',
-        top: adjustedClickPos.top,
-        left: adjustedClickPos.left,
-        hotspots: nowActiveHotspots,
-      });
     }
 
-    handleHotspotDispatches({
-      type: 'MouseNone',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: difference(hotspots, nowActiveHotspots),
-    });
+    if (!mouseDown && wasMouseDowned) {
+      mouseDown = true;
+      clickStartPos = adjustedClickPos;
+      lastMouseDown = Date.now();
+    }
+    const isMouseDown = mouseDown;
 
-    handleHotspotDispatches({
-      type: 'Always',
-      top: adjustedClickPos.top,
-      left: adjustedClickPos.left,
-      hotspots: hotspots
-        .filter(h => h.castId === 0),
-    });
+    queue.add(() => dispatch(handleEvent({
+      currentPosition: adjustedClickPos,
+      startingPosition: clickStartPos,
+      hotspots,
+      nowInHotspots,
+      leavingHotspots,
+      enteringHotspots,
+      noInteractionHotspots,
+      isClick,
+      isMouseDown,
+      wasMouseMoved,
+      wasMouseUpped,
+      wasMouseDowned,
+      handleHotspot: gamestateActions.handleHotspot,
+    })), 'handle event');
 
-    nowActiveHotspots.every((hotspot) => {
-      // Some special cases
-      const gamestates = gamestateSelectors.forState(store.getState());
-      if (isActive({ cast: hotspot, gamestates })) {
-        const {
-          type,
-          cursorShapeWhenActive,
-        } = hotspot;
-        if (wasMouseUpped && type >= 5 && type <= 8) {
-          dispatch(gameActions.setOpenHandCursor());
-          return false;
-        } else if (wasMouseDowned || wasMouseMoved) {
-          if (type >= 5 && type <= 8) {
-            const currentCursor = gameSelectors.morpheusCursor(store.getState());
-            if (currentCursor !== 10009) {
-              dispatch(gameActions.setOpenHandCursor());
-            }
-            return false;
-          } else if (cursorShapeWhenActive) {
-            dispatch(gameActions.setCursor(cursorShapeWhenActive));
-            return false;
-          }
-        }
-      }
-      return true;
-    });
-    wasActiveHotspots = nowActiveHotspots;
+    wasInHotspots = nowInHotspots;
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
 
     // Update cursor location and icon
-    dispatch(gameActions.setCursorLocation({ top, left }));
+    queue.add(() => dispatch(gameActions.setCursorLocation({ top, left })), 'cursor location');
+    // dispatch(gameActions.setCursorLocation({ top, left }));
     // Update scene
-    dispatch(castActionsForScene.special.update(scene));
+    queue.add(() => dispatch(castActionsForScene.special.update(scene)), 'update scene');
+    // dispatch(castActionsForScene.special.update(scene));
   }
 
   function onMouseDown(mouseEvent) {

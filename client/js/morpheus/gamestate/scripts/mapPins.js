@@ -12,15 +12,11 @@ const AQUA_PUSH_PIN = 2463;
 const EGYPT_PIN = 2464;
 const FRANCE_PIN = 2465;
 const NY_PIN = 2466;
-const England_PIN = 2467;
+const ENGLAND_PIN = 2467;
 const CHINA_PIN = 2468;
 const ROME_PIN = 2469;
 
 export const id = 1006;
-
-export function enabled() {
-  return true;
-}
 
 export function execute({ param1 }, gamestates) {
   return (dispatch) => {

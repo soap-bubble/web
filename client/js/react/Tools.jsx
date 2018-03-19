@@ -1,4 +1,5 @@
-import React, { PropTypes } from 'react';
+import React from 'react';
+import PropTypes from 'prop-types';
 import { connect } from 'react-redux';
 import {
   GUI,
@@ -55,7 +56,7 @@ function mapDisptachToProps(dispatch) {
     },
     setVolume(volume) {
       dispatch(setVolume(volume / 100));
-    }
+    },
   };
 }
 
@@ -73,22 +74,22 @@ const Tools = ({
 }) => {
   const cameraTools = [];
   if (camera) {
-    cameraTools.push(<DGNumber label="Translate Z" key="camera:z" value={camera.position.z} min={-5} max={5} step={0.001} onChange={setCameraPositionZ}/>);
+    cameraTools.push(<DGNumber label="Translate Z" key="camera:z" value={camera.position.z} min={-5} max={5} step={0.001} onChange={setCameraPositionZ} />);
   }
   return (
     <GUI expanded={false} style={{ controlWidth: 500 }}>
-      {cameraTools.length ? <Folder label='Camera'>
+      {cameraTools.length ? <Folder label="Camera">
         {cameraTools}
       </Folder> : null}
-      <Folder label='Game'>
-        <DGNumber label='Volume' value={volume} min={0} max={100} step={1} onChange={setVolume} />
+      <Folder label="Game">
+        <DGNumber label="Volume" value={volume} min={0} max={100} step={1} onChange={setVolume} />
       </Folder>
-      <Folder label='Scene'>
-        <DGNumber label='Sensitivity' value={sensitivity} min={20} max={200} step={1} onChange={setSensitivity}/>
+      <Folder label="Scene">
+        <DGNumber label="Sensitivity" value={sensitivity} min={20} max={200} step={1} onChange={setSensitivity} />
       </Folder>
-      <Folder label='Hotspots'>
-        <DGNumber label='Theta' value={hotspotsTheta} min={-Math.PI} max={Math.PI} step={0.0001} onChange={setHotspotsTheta}/>
-        <Checkbox label='Visible' checked={hotspotsVisible} onChange={setHotspotsVisibility}/>
+      <Folder label="Hotspots">
+        <DGNumber label="Theta" value={hotspotsTheta} min={-Math.PI} max={Math.PI} step={0.0001} onChange={setHotspotsTheta} />
+        <Checkbox label="Visible" checked={hotspotsVisible} onChange={setHotspotsVisibility} />
       </Folder>
     </GUI>
   );

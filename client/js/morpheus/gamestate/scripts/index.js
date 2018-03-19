@@ -1,3 +1,7 @@
+import {
+  isCastActive,
+} from 'morpheus/gamestate';
+
 import * as tapestry from './tapestry';
 import * as influxor from './influxor';
 import * as instruments from './instruments';
@@ -15,7 +19,13 @@ const scripts = [
 ];
 
 export default function (type) {
-  return scripts.find(({ id }) => id === type) || {
-    enabled() { return false; },
-  };
+  const script = scripts.find(({ id }) => id === type);
+  if (script) {
+    return Object.assign({
+      enabled(cast, gamestates) {
+        return isCastActive({ cast, gamestates });
+      },
+    }, script);
+  }
+  return null;
 }

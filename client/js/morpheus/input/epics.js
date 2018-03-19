@@ -4,7 +4,9 @@ import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/catch';
 import { Observable } from 'rxjs/Observable';
 import createEpic from 'utils/createEpic';
-import inputObservables from './handlers';
+import {
+  inputKeyHandlers as inputObservables,
+} from './handlers';
 import {
   KEY_DOWN,
   KEY_UP,

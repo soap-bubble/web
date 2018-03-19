@@ -15,7 +15,10 @@ import {
 } from 'morpheus/input';
 import { actions as castActions } from 'morpheus/casts';
 import { selectors as sceneSelectors, actions as sceneActions } from 'morpheus/scene';
-import { actions as gamestateActions } from 'morpheus/gamestate';
+import {
+  actions as gamestateActions,
+  selectors as gamestateSelectors,
+ } from 'morpheus/gamestate';
 import { Game, actions as gameActions } from 'morpheus/game';
 import socketPromise from 'utils/socket';
 import {
@@ -85,10 +88,23 @@ window.onload = () => {
 
   store.dispatch(login.actions.init());
 
-  window.updateGameState = function updateGameState(gamestateId, value) {
-    store.dispatch(gamestateActions.updateGameState(gamestateId, value));
-    const scene = sceneSelectors.currentSceneData(store.getState());
-    store.dispatch(castActions.forScene(scene).special.update(scene));
-    store.dispatch(castActions.forScene(scene).controlledMovie.update(scene));
-  };
+  if (process.env.NODE_ENV !== 'production') {
+    window.updateGameState = function updateGameState(gamestateId, value) {
+      store.dispatch(gamestateActions.updateGameState(gamestateId, value));
+      const scene = sceneSelectors.currentSceneData(store.getState());
+      store.dispatch(castActions.forScene(scene).special.update(scene));
+      store.dispatch(castActions.forScene(scene).controlledMovie.update(scene));
+    };
+
+    window.getGameState = function getgameState(gamestateId) {
+      const state = gamestateSelectors.forState(store.getState()).byId(gamestateId);
+      return {
+        vale: state.value,
+        maxValue: state.maxValue,
+        minValue: state.minValue,
+        stateId: state.stateId,
+        stateWraps: state.stateWraps,
+      };
+    };
+  }
 };

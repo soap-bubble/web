@@ -12,10 +12,6 @@ const MANDOLIN_MSC = 2099;
 
 export const id = 1009;
 
-export function enabled() {
-  return true;
-}
-
 export function execute({ param1, param2 }) {
   return (dispatch) => {
     let instrumentTest1 = 0;

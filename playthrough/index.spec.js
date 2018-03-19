@@ -43,6 +43,7 @@ describe('playthrough', () => {
     .then((p) => {
       page = p;
       page.on('pageerror', (error) => {
+        // eslint-disable-next-line no-console
         console.log('ERROR:', error);
       });
       return page.goto(config.test.launch, {
@@ -287,5 +288,37 @@ describe('playthrough', () => {
     }, 90000);
 
     it('save', async () => await saveTest(3));
+  });
+
+  describe.only('Go to juke box', () => {
+    it('load', async () => await loadTest(3));
+
+    it('play belle\'s music', async () => {
+      await say('go 421012');
+      await say('wait 4220');
+      await say('go 422004');
+      await say('wait 4240');
+      await say('go 424004');
+      await say('wait 4260');
+      await say('go 426001');
+      await say('wait 3760');
+      await say('go 376003');
+      await say('wait 3730');
+      await say('go 373001');
+      await say('wait 3710');
+      await say('go 371005');
+      await say('wait 2330');
+      await say('go 233003');
+      await say('wait 2370');
+      await say('go 237001');
+      await say('wait 2350');
+      await say('go 235001');
+      await say('wait 2270');
+      await say('go 227004');
+      await say('wait 2240');
+      await say('go 224050');
+    }, 45000);
+
+    it('save', async () => await saveTest(4));
   });
 });

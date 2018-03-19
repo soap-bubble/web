@@ -163,6 +163,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
         break;
       }
       case 'VertSlider': {
+        const { oldValue } = hotspot;
         const gs = gamestates.byId(hotspot.param1);
         let rate = hotspot.param2;
         const { maxValue: max, minValue: min, stateWraps } = gs;
@@ -172,7 +173,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
           rate = max - min;
         }
         const delta = Math.round((rate * ratio) - 0.5);
-        let value = hotspot.oldValue + delta;
+        let value = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
         if (value < min) {
           if (stateWraps) {
             value += max - min;
@@ -201,7 +202,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
           rate = max - min;
         }
         const delta = Math.round((rate * ratio) + 0.5);
-        let value = oldValue + delta;
+        let value = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
         if (value < min) {
           if (stateWraps) {
             value += max - min;

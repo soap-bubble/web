@@ -8,7 +8,7 @@ export const url = config.assetHost;
 
 export function getAssetUrl(assetPath, type) {
   const path = assetPath.replace('deck', 'Deck');
-  return `${url}/${path}${type && !endsWith(assetPath, type) ? `.${type}` : ''}`;
+  return `${url}/${path}${type && !endsWith(assetPath, type) ? `.${type}` : ''}`.replace('#', '%23');
 }
 
 export function getPanoAnimUrl(assetPath) {

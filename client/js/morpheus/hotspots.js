@@ -82,7 +82,7 @@ export default function ({
         ) // Map back to hotspot index
           .map(hotspotIndex => hotspots[hotspotIndex]);
 
-        const panoIntersects = raycaster.intersectObjects(panoScene3D.children, true);
+        const panoIntersects = raycaster.intersectObjects(panoScene3D.children[0].children.filter(c => c.name === 'pano'), true);
         const currentPanoPosition = {};
         const panoIntersect = panoIntersects.find((intersect) => {
           if (intersect && intersect.uv) {

@@ -88,13 +88,13 @@ function createObject3D({ theta = 0, geometries, material, startAngle = 0 }) {
   const meshes = geometries.map((g, i) => {
     const mesh = new Mesh(g, material);
     mesh.rotation.y = -(i * twentyFourthRad) + theta;
+    mesh.name = 'pano';
     return mesh;
   });
 
   const object3D = new Object3D();
   meshes.forEach(m => object3D.add(m));
   object3D.rotation.y += startAngle;
-
   return object3D;
 }
 

@@ -94,7 +94,6 @@ module.exports = (env) => {
         'bluebird',
         'query-string',
         'immutable',
-        'p-iteration',
         'raf',
         'react',
         'redux',

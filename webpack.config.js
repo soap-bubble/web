@@ -124,11 +124,6 @@ module.exports = (env) => {
       rules: styleLoaders.concat([
         {
           test: /\.jsx?$/,
-          include: [/p-iteration/],
-          use: ['babel-loader'],
-        },
-        {
-          test: /\.jsx?$/,
           exclude: [/node_modules/],
           include: dirSharedComponents.concat([
             dirJs,

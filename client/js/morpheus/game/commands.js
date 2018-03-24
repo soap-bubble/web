@@ -53,39 +53,42 @@ export function closeSave() {
   };
 }
 
-inputActions.inputHandler({
-  key: 'esc',
-  down(_, store) {
-    const state = store.getState();
-    if (saveOpened(state)) {
-      return closeSave();
-    }
-    if (settingsOpened(state)) {
+// Breaks circular dependency :-(
+setTimeout(() => {
+  inputActions.inputHandler({
+    key: 'esc',
+    down(_, store) {
+      const state = store.getState();
+      if (saveOpened(state)) {
+        return closeSave();
+      }
+      if (settingsOpened(state)) {
+        return closeSettings();
+      }
+      if (menuClosed(state)) {
+        return openMenu();
+      }
+      return closeMenu();
+    },
+  });
+
+  inputActions.inputHandler({
+    key: 'p',
+    down(_, store) {
+      if (settingsClosed(store.getState())) {
+        return openSettings();
+      }
       return closeSettings();
-    }
-    if (menuClosed(state)) {
-      return openMenu();
-    }
-    return closeMenu();
-  },
-});
+    },
+  });
 
-inputActions.inputHandler({
-  key: 'p',
-  down(_, store) {
-    if (settingsClosed(store.getState())) {
-      return openSettings();
-    }
-    return closeSettings();
-  },
-});
-
-inputActions.inputHandler({
-  key: 's',
-  down(_, store) {
-    if (saveClosed(store.getState())) {
-      return openSave();
-    }
-    return closeSave();
-  },
+  inputActions.inputHandler({
+    key: 's',
+    down(_, store) {
+      if (saveClosed(store.getState())) {
+        return openSave();
+      }
+      return closeSave();
+    },
+  });
 });

@@ -20,7 +20,7 @@ import {
 import {
   forEachSeries,
   someSeries,
-} from 'p-iteration';
+} from 'utils/asyncIteration';
 import {
   ACTION_TYPES,
   GESTURES,
@@ -31,7 +31,6 @@ import {
 } from 'morpheus/game/cursors';
 
 const isDebug = process.env.NODE_ENV !== 'production';
-export const inputKeyHandlers = {};
 const logger = loggerFactory('input:handlers');
 
 const gesture = GESTURES.reduce((memo, curr, index) => {

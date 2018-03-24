@@ -118,7 +118,6 @@
     "local-storage": "^1.4.2",
     "lodash": "^4.13.1",
     "mongoose": "^4.5.0",
-    "p-iteration": "^1.1.5",
     "promise-queue": "^2.2.5",
     "prop-types": "https://registry.npmjs.org/prop-types/-/prop-types-15.6.0.tgz",
     "query-string": "^4.2.3",

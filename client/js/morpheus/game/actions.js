@@ -16,6 +16,9 @@ import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import {
+  selectors as titleSelectors,
+} from 'morpheus/title';
+import {
   loadAsImage,
 } from 'service/image';
 import * as userService from 'service/user';
@@ -171,13 +174,6 @@ export function resize({
     height -= heightOffset;
     verticalPadding = heightOffset / 2;
   }
-  function setSize({ camera, renderer }) {
-    if (camera && renderer) {
-      renderer.setSize(width, height);
-      camera.aspect = width / height;
-      camera.updateProjectionMatrix();
-    }
-  }
   return (dispatch, getState) => {
     dispatch({
       type: DIMENSIONS_RESIZE,
@@ -190,10 +186,20 @@ export function resize({
         },
       },
     });
+    function setSize({ camera, renderer, dimensionSelector }) {
+      if (camera && renderer) {
+        const { width: w, height: h }
+          = dimensionSelector ? dimensionSelector(getState()) : { width, height };
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+      }
+    }
     const scene = sceneSelectors.currentSceneData(getState());
     if (scene) {
       setSize(castSelectors.forScene(scene).pano.renderElements(getState()));
       setSize(castSelectors.forScene(scene).hotspot.renderElements(getState()));
+      setSize(titleSelectors.renderElements(getState()));
     }
     const canvas = gameSelectors.canvas(getState());
     if (canvas) {

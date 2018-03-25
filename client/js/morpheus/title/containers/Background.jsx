@@ -2,7 +2,7 @@ import { connect } from 'react-redux';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
-import Title from '../components/Title';
+import Background from '../components/Background';
 
 function mapStateToProps(state) {
   return {
@@ -12,4 +12,4 @@ function mapStateToProps(state) {
 
 export default connect(
   mapStateToProps,
-)(Title);
+)(Background);

@@ -19,7 +19,8 @@ import {
   actions as gamestateActions,
   selectors as gamestateSelectors,
  } from 'morpheus/gamestate';
-import { Game, Title, actions as gameActions } from 'morpheus/game';
+import { Game, actions as gameActions } from 'morpheus/game';
+import { Main } from 'morpheus/title';
 import socketPromise from 'utils/socket';
 import {
   login,
@@ -49,7 +50,7 @@ window.onload = () => {
     .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
   render(
     <Provider store={store}>
-      <Title />
+      <Main />
     </Provider>,
     document.getElementById('root'),
   );

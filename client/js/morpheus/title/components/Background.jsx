@@ -28,7 +28,7 @@ export default class extends Component {
     }
 
     return (<div
-      className={cn('title')}
+      className={cn('background')}
       style={{
         ...style,
       }}

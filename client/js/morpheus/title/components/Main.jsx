@@ -52,9 +52,9 @@ class Main extends React.Component {
         <Background opacity={target} />
         <Title opacity={target} />
         <audio ref={(e) => { this.audio = e; }} autoPlay loop>
-          <source src={getAssetUrl('GameDB/OASounds/claireSRMSC', 'aac')} type="audio/aac" />
-          <source src={getAssetUrl('GameDB/OASounds/claireSRMSC', 'mp3')} type="audio/mp3" />
-          <source src={getAssetUrl('GameDB/OASounds/claireSRMSC', 'ogg')} type="audio/ogg" />
+          <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'aac')} type="audio/aac" />
+          <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'mp3')} type="audio/mp3" />
+          <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'ogg')} type="audio/ogg" />
         </audio>
       </div>
     );

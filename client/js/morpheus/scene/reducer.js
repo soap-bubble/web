@@ -58,7 +58,8 @@ const reducer = createReducer('scene', defaultState, {
     if (existingScene) {
       // Promote existing scene to top...
       currentScenes = currentScenes.remove(currentScenes.indexOf(existingScene));
-    } else if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE) {
+    } else if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE
+      || (currentScenes.count() === 1 && currentScenes.first().sceneId === 100000)) {
       currentScenes = currentScenes.pop();
     }
     currentScenes = currentScenes.unshift(scene);

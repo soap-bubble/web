@@ -4,6 +4,7 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import qs from 'query-string';
 import keycode from 'keycode';
+import Tween from 'tween';
 
 // Loads all modules
 import 'morpheus';
@@ -20,7 +21,6 @@ import {
   selectors as gamestateSelectors,
  } from 'morpheus/gamestate';
 import { Game, actions as gameActions } from 'morpheus/game';
-import { Main } from 'morpheus/title';
 import socketPromise from 'utils/socket';
 import {
   login,
@@ -46,11 +46,11 @@ window.onload = () => {
   }));
   store.dispatch(gameActions.createUIOverlay());
   store.dispatch(gameActions.setCursor(0));
-  store.dispatch(gamestateActions.fetchInitial())
-    .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
+  // store.dispatch(gamestateActions.fetchInitial())
+  //   .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
   render(
     <Provider store={store}>
-      <Main />
+      <Game />
     </Provider>,
     document.getElementById('root'),
   );

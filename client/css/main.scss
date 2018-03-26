@@ -28,12 +28,24 @@ video.MovieSpecialCast {
   left: 0;
 }
 
-.background {
+.main-title {
   position: absolute;
+  background-color: rgb(208, 225, 254);
+}
+
+.background {
+  width: 100%;
+  height: 100%;
+  img {
+    width: 100%;
+    height: 100%;
+  }
 }
 
 .title {
   position: absolute;
+  top: 0;
+  left: 0;
 }
 
 .fromFade {

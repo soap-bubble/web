@@ -12,26 +12,23 @@ export default class extends Component {
 
   render() {
     const {
-      style,
+      opacity,
     } = this.props;
     const { step } = this.state;
     let contents = null;
 
     if (step === 'start') {
       contents = (<img
-        style={{
-          ...style,
-        }}
         role="presentation"
         src={getAssetUrl('GameDB/All/morpheus-background', 'jpg')}
       />);
     }
 
     return (<div
-      className={cn('background')}
       style={{
-        ...style,
+        opacity,
       }}
+      className={cn('background')}
     >
       {contents}
     </div>);

@@ -6,6 +6,10 @@ import castFactory from 'morpheus/casts/factory';
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
+import {
+  Main,
+  selectors as titleSelectors,
+} from 'morpheus/title';
 import Menu from '../components/Menu';
 import Login from './Login';
 import Settings from './Settings';
@@ -13,6 +17,7 @@ import SaveList from './SaveList';
 
 function mapStateToProps(state) {
   return {
+    inTitle: !titleSelectors.isDone(state),
     casts: castFactory(state),
     style: gameSelectors.style(state),
     menuOpen: gameSelectors.menuOpened(state),
@@ -29,6 +34,7 @@ const Game = ({
   settingsOpen,
   saveOpen,
   isLoggingIn,
+  inTitle,
 }) => {
   const menu = [];
   if (menuOpen) {
@@ -44,8 +50,9 @@ const Game = ({
     menu.push(<SaveList />);
   }
   return (<div style={style}>
-    {casts}
-    <Mouse />
+    { inTitle ? null : casts}
+    { inTitle ? <Main /> : null }
+    { inTitle ? null : <Mouse />}
     {menu}
   </div>);
 };

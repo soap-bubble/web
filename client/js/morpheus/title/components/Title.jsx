@@ -4,20 +4,21 @@ import cn from 'classnames';
 export default class Title extends Component {
   render() {
     const {
+      opacity,
       canvasCreated,
       width,
       height,
-      style,
     } = this.props;
     return (
-      <div
+      <canvas
         style={{
-          ...style,
+          opacity,
         }}
         className={cn('title')}
-      >
-        <canvas width={width} height={height} ref={canvasCreated} />
-      </div>
+        width={width}
+        height={height}
+        ref={canvasCreated}
+      />
     );
   }
 }

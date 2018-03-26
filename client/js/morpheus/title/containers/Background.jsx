@@ -4,9 +4,10 @@ import {
 } from 'morpheus/game';
 import Background from '../components/Background';
 
-function mapStateToProps(state) {
+function mapStateToProps(state, { opacity }) {
   return {
     style: gameSelectors.style(state),
+    opacity,
   };
 }
 

@@ -9,7 +9,7 @@ export const titleDimensions = createSelector(
   state => gameSelectors.dimensions(state),
   ({ width, height }) => ({
     width,
-    height: height * 0.5,
+    height,
   }),
 );
 
@@ -20,7 +20,7 @@ export const titleStyle = createSelector(
     width: `${width}px`,
     height: `${height}px`,
     left: `${x}px`,
-    top: `${y + (height / 8)}px`,
+    top: `${y}px`,
   }),
 );
 
@@ -31,4 +31,14 @@ export const renderElements = createSelector(
     renderer,
     dimensionSelector: titleDimensions,
   }),
+);
+
+export const isLeaving = createSelector(
+  root,
+  ({ leaving }) => leaving,
+);
+
+export const isDone = createSelector(
+  root,
+  ({ done }) => done,
 );

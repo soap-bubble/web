@@ -1,2 +1,3 @@
 export const SET_RENDER_ELEMENTS = 'TITLE_SET_RENDER_ELEMENTS';
-export const FOO = 'FOO';
+export const MOUSE_CLICK = 'TITLE_MOUSE_CLICK';
+export const DONE = 'TITLE_DONE';

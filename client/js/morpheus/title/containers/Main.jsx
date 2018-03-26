@@ -1,25 +1,26 @@
 import { connect } from 'react-redux';
 import {
-  titleDimensions,
   titleStyle,
 } from '../selectors';
 import {
-  canvasCreated,
+  done,
+  mouseClick,
 } from '../actions';
-import Title from '../components/Title';
+import Main from '../components/Main';
 
-function mapStateToProps(state, { opacity }) {
+function mapStateToProps(state) {
   return {
-    opacity,
     style: titleStyle(state),
-    ...titleDimensions(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    canvasCreated(canvas) {
-      dispatch(canvasCreated(canvas));
+    mouseClick(canvas) {
+      dispatch(mouseClick(canvas));
+    },
+    done() {
+      dispatch(done());
     },
   };
 }
@@ -27,4 +28,4 @@ function mapDispatchToProps(dispatch) {
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(Title);
+)(Main);

@@ -199,6 +199,7 @@ export function resize({
     if (scene) {
       setSize(castSelectors.forScene(scene).pano.renderElements(getState()));
       setSize(castSelectors.forScene(scene).hotspot.renderElements(getState()));
+    } else {
       setSize(titleSelectors.renderElements(getState()));
     }
     const canvas = gameSelectors.canvas(getState());

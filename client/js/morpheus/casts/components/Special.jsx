@@ -1,7 +1,7 @@
 import { connect } from 'react-redux';
 import cn from 'classnames';
 import React, { Component } from 'react';
-import flatspot from 'morpheus/flatspot';
+import { special as flatspot } from 'morpheus/hotspot';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';

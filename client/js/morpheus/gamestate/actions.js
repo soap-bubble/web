@@ -79,7 +79,9 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
       }
       case 'ChangeScene': {
         const { param1: nextSceneId } = hotspot;
-        if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
+        if (nextSceneId) {
+          await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
+        }
         break;
       }
       case 'IncrementState': {
@@ -147,8 +149,16 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
         const { maxValue: horFromState } = gamestates.byId(hotspot.param3);
         const maxVert = vertFromState + 1;
         const maxHor = horFromState + 1;
+        let vertPos;
+        if (currentPosition.top < hotspot.rectTop) {
+          vertPos = 0;
+        } else if (currentPosition.top > hotspot.rectBottom) {
+          vertPos = hotspot.rectBottom - hotspot.rectTop;
+        } else {
+          vertPos = currentPosition.top - hotspot.rectTop;
+        }
         const verticalRatio = Math.floor(
-          maxVert * ((currentPosition.top - hotspot.rectTop) /
+          maxVert * (vertPos /
             (hotspot.rectBottom - hotspot.rectTop)),
         );
         const horizontalRatio = Math.floor(

@@ -11,8 +11,10 @@ import {
 import {
   actions as inputActions,
 } from 'morpheus/input';
-import momentum from 'morpheus/momentum';
-import hotspots from 'morpheus/hotspots';
+import {
+  momentum,
+  pano as hotspots,
+} from 'morpheus/hotspot';
 import qs from 'query-string';
 
 const transparentPano = qs.parse(location.search).transparentPano;

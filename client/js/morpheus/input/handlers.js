@@ -22,51 +22,16 @@ import {
   someSeries,
 } from 'utils/asyncIteration';
 import {
-  ACTION_TYPES,
-  GESTURES,
-} from 'morpheus/constants';
+  gesture,
+  actionType,
+  hotspotRectMatchesPosition,
+} from 'morpheus/hotspot/matchers';
 import {
   CURSOR_IDS,
-  CURSOR_NAMES,
 } from 'morpheus/game/cursors';
 
 const isDebug = process.env.NODE_ENV !== 'production';
 const logger = loggerFactory('input:handlers');
-
-const gesture = GESTURES.reduce((memo, curr, index) => {
-  memo[`is${curr}`] = function isGestureType(hotspot) {
-    return index === hotspot.gesture;
-  };
-  return memo;
-}, {});
-
-const actionType = Object.keys(ACTION_TYPES).reduce((memo, curr) => {
-  const type = ACTION_TYPES[curr];
-  memo[`is${type}`] = function isActionType(hotspot) {
-    return Number(curr) === hotspot.type;
-  };
-  return memo;
-}, {});
-
-function matchesHotspotRect({ top, left }) {
-  return ({
-    rectTop,
-    rectBottom,
-    rectLeft,
-    rectRight,
-  }) => ((rectLeft > rectRight ?
-    (left > rectLeft
-     || left < rectRight)
-  : (left > rectLeft
-    && left < rectRight))
-    && top > rectTop
-    && top < rectBottom)
-  || (rectTop === 0
-    && rectLeft === 0
-    && rectRight === 0
-    && rectBottom === 0
-  );
-}
 
 const isHotspotActive = ({ hotspot, gamestates }) => isActive({
   cast: hotspot,
@@ -85,7 +50,7 @@ export function resolveCursor({
       if (isHotspotActive({
         hotspot,
         gamestates: gamestateSelectors.forState(getState()),
-      }) && matchesHotspotRect(currentPosition)(hotspot)) {
+      }) && hotspotRectMatchesPosition(currentPosition)(hotspot)) {
         if (actionType.isChangeCursor(hotspot)) {
           const {
             param1,
@@ -167,7 +132,7 @@ export function handleEventFactory() {
         mouseUpHotspots = nowInHotspots
           .filter(
             and(
-              matchesHotspotRect(startingPosition),
+              hotspotRectMatchesPosition(startingPosition),
               gesture.isMouseUp,
             ),
           );
@@ -176,7 +141,7 @@ export function handleEventFactory() {
           clickableHotspots = nowInHotspots
             .filter(
               and(
-                matchesHotspotRect(startingPosition),
+                hotspotRectMatchesPosition(startingPosition),
                 gesture.isMouseClick,
               ),
             );
@@ -187,7 +152,7 @@ export function handleEventFactory() {
         mouseDragHotspots = hotspots
           .filter(
             and(
-              matchesHotspotRect(startingPosition),
+              hotspotRectMatchesPosition(startingPosition),
               or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
               or(
                 actionType.isHorizSlider,
@@ -268,16 +233,17 @@ export function handleEventFactory() {
       self.lastWasMouseMoved = wasMouseMoved;
       self.lastWasMouseDowned = wasMouseDowned;
 
-      await forEachSeries(alwaysExecuteHotspots, async (hotspot) => {
+      await someSeries(alwaysExecuteHotspots, async (hotspot) => {
         if (isHotspotActive({
           hotspot,
           gamestates: gamestateSelectors.forState(getState()),
         })) {
-          await dispatch(handleHotspot({
+          const allDone = await dispatch(handleHotspot({
             hotspot,
             currentPosition,
             startingPosition,
           }));
+          return allDone;
         }
       });
 

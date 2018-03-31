@@ -290,7 +290,7 @@ describe('playthrough', () => {
     it('save', async () => await saveTest(3));
   });
 
-  describe.only('Go to juke box', () => {
+  describe('Go to juke box', () => {
     it('load', async () => await loadTest(3));
 
     it('play belle\'s music', async () => {

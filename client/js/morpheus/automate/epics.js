@@ -1,3 +1,6 @@
+import {
+  difference,
+} from 'lodash';
 import createEpic from 'utils/createEpic';
 import {
   Tween,
@@ -16,10 +19,16 @@ import {
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
-import flatspot from 'morpheus/flatspot';
+import { special as flatspot } from 'morpheus/hotspot';
+import {
+  handleEventFactory,
+} from 'morpheus/input';
 import {
   gameToScreen,
 } from 'utils/coordinates';
+import {
+  hotspotRectMatchesPosition,
+} from 'morpheus/hotspot/matchers';
 import {
   ACTION_TYPES,
 } from 'morpheus/constants';
@@ -35,45 +44,87 @@ createEpic((action$, { dispatch, getState }) => action$
   }),
 );
 
+function getPositionOfHotspot(hotspot) {
+  const {
+    rectTop,
+    rectRight,
+    rectBottom,
+  } = hotspot;
+  let {
+    rectLeft,
+  } = hotspot;
+  if (rectLeft > rectRight) {
+    rectLeft += 3600;
+  }
+  return {
+    top: rectTop + ((rectBottom - rectTop) / 2),
+    left: rectLeft + ((rectRight - rectLeft) / 2),
+  };
+}
+
+function inSceneState({ scene, dispatch, getState }) {
+  const handleEvent = handleEventFactory();
+  const self = {
+    async click(position) {
+      const hotspots = castSelectors.forScene(scene).hotspot.hotspotsData(getState());
+      const isPano = castSelectors.forScene(scene).hotspot.isPano(getState());
+      const nowInHotspots = scene.casts.filter(hotspotRectMatchesPosition(position));
+      const enteringHotspots = nowInHotspots;
+      const leavingHotspots = [];
+      const noInteractionHotspots = difference(hotspots, nowInHotspots);
+
+      await dispatch(handleEvent({
+        currentPosition: position,
+        startingPosition: position,
+        hotspots: scene.casts,
+        nowInHotspots,
+        leavingHotspots,
+        enteringHotspots,
+        noInteractionHotspots,
+        isClick: false,
+        isMouseDown: true,
+        wasMouseMoved: false,
+        wasMouseUpped: false,
+        wasMouseDowned: true,
+        handleHotspot: isPano
+          ? gamestateActions.handlePanoHotspot
+          : gamestateActions.handleHotspot,
+      }));
+      await dispatch(handleEvent({
+        currentPosition: position,
+        startingPosition: position,
+        hotspots: scene.casts,
+        nowInHotspots,
+        leavingHotspots,
+        enteringHotspots,
+        noInteractionHotspots,
+        isClick: true,
+        isMouseDown: true,
+        wasMouseMoved: false,
+        wasMouseUpped: true,
+        wasMouseDowned: false,
+        handleHotspot: isPano
+          ? gamestateActions.handlePanoHotspot
+          : gamestateActions.handleHotspot,
+      }));
+    },
+  };
+
+  return self;
+}
+
 createEpic((action$, { dispatch, getState }) => action$
   .ofType('AUTO_HOTSPOT_GO')
   .forEach(({ payload: destSceneId, cb }) => {
     const scene = sceneSelectors.currentSceneData(getState());
-    const gamestates = gamestateSelectors.forState(getState());
     const cast = scene.casts.find(({ param1, castId }) =>
       param1 === destSceneId
       && castId === 0,
     );
-    // Find other hotspots that overlap
-    const activatedHotspots = scene.casts.filter(
-      ({ rectTop, rectLeft, rectRight, rectBottom }) =>
-        cast && rectTop === cast.rectTop
-        && rectBottom === cast.rectBottom
-        && rectLeft === cast.rectLeft
-        && rectRight === cast.rectRight,
-      );
+
     if (cast) {
-      const isPano = castSelectors.forScene(scene).hotspot.isPano(getState());
-      if (isPano) {
-        dispatch(castActions.forScene(scene).hotspot.activated(activatedHotspots));
-        // const scene3D = castSelectors.forScene(scene).hotspot.scene3D(getState());
-        // dispatch(castActions.forScene(scene).pano.sweepTo(cast, () => {
-        //   dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-        //   dispatch(sceneActions.goToScene(cast.param1, false))
-        //     .then(cb, cb);
-        // }));
-      } else {
-        activatedHotspots.forEach(hotspot => dispatch(
-          castActions.forScene(scene).special.handleMouseEvent({
-            hotspot,
-            type: 'MouseClick',
-            top: cast.rectTop + ((cast.rectBottom - cast.rectTop) / 2),
-            left: cast.rectLeft + ((cast.rectRight - cast.rectLeft) / 2),
-          }),
-        ));
-        // dispatch(sceneActions.goToScene(cast.param1, cast.dissolveToNextScene))
-        //   .then(cb, cb);
-      }
+      const position = getPositionOfHotspot(cast);
+      inSceneState({ scene, dispatch, getState }).click(position);
       sceneActions.events.on(`sceneEnter:${destSceneId}`, function handleSceneEnd() {
         sceneActions.events.removeListener(`sceneEnter:${destSceneId}`, handleSceneEnd);
         cb();
@@ -153,34 +204,13 @@ createEpic((action$, { dispatch, getState }) => action$
         .easing(Easing.Quadratic.InOut);
       tween.onUpdate(() => {
         mouseHandlers.onMouseMove(loc);
-        // dispatch(specialActions.handleMouseEvent({
-        //   type: 'MouseStillDown',
-        //   ...loc,
-        //   hotspot: targetHotspot,
-        // }));
-        // dispatch(specialActions.update());
       });
       tween.onComplete(() => {
         mouseHandlers.onMouseUp(loc);
-        // dispatch(specialActions.handleMouseEvent({
-        //   type: 'MouseUp',
-        //   ...loc,
-        //   hotspot: targetHotspot,
-        // }));
-        // scene.casts.forEach(cast => dispatch(specialActions.handleMouseEvent({
-        //   type: 'Always',
-        //   ...loc,
-        //   hotspot: cast,
-        // })));
         clearInterval(tweenInterval);
         cb();
       });
       mouseHandlers.onMouseDown(loc);
-      // dispatch(specialActions.handleMouseEvent({
-      //   type: 'MouseDown',
-      //   ...loc,
-      //   hotspot: targetHotspot,
-      // }));
       return tween.start();
     } else if (ACTION_TYPES[targetHotspot.type] === 'HorizSlider') {
       const {
@@ -220,35 +250,14 @@ createEpic((action$, { dispatch, getState }) => action$
         .easing(Easing.Quadratic.InOut);
       tween.onUpdate(() => {
         mouseHandlers.onMouseMove(loc);
-        // dispatch(specialActions.handleMouseEvent({
-        //   type: 'MouseStillDown',
-        //   ...loc,
-        //   hotspot: targetHotspot,
-        // }));
-        // dispatch(specialActions.update());
       });
       tween.onComplete(() => {
         mouseHandlers.onMouseUp(loc);
-        // dispatch(specialActions.handleMouseEvent({
-        //   type: 'MouseUp',
-        //   ...loc,
-        //   hotspot: targetHotspot,
-        // }));
-        // scene.casts.forEach(cast => dispatch(specialActions.handleMouseEvent({
-        //   type: 'Always',
-        //   ...loc,
-        //   hotspot: cast,
-        // })));
         clearInterval(tweenInterval);
         cb();
       });
       mouseHandlers.onMouseDown(loc);
       mouseHandlers.onMouseMove(loc);
-      // dispatch(specialActions.handleMouseEvent({
-      //   type: 'MouseDown',
-      //   ...loc,
-      //   hotspot: targetHotspot,
-      // }));
       return tween.start();
     }
     return cb();

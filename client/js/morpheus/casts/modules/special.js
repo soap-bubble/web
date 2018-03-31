@@ -167,10 +167,8 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
   const gs = gamestates.byId(gameStateId);
   const value = Math.round(gs.value, 0);
   const frames = get(controlledMovieCallbacks, '[0].frames', 1);
-  // if (frames > 1) frames--;
   const maxValue = ((gs.maxValue * frames) - frames) + 1;
   const currentOffset = (((value - 1) * frames) + frames);
-  logger.info({ currentOffset, value, currentValue: controlledMovieCallbacks.currentValue });
 
   const source = {
     x: value * width,
@@ -181,7 +179,7 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
 
   return async (context) => {
     if (frames <= 1) {
-      logger.info('single frame');
+      // logger.info('single frame');
       return context.drawImage(
         img,
         source.x,
@@ -195,7 +193,7 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
       );
     }
     if (typeof controlledMovieCallbacks.currentValue === 'undefined') {
-      logger.info('first time');
+      // logger.info('first time');
       controlledMovieCallbacks.currentValue = currentOffset;
       return context.drawImage(
         img,
@@ -210,10 +208,9 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
       );
     }
     if (controlledMovieCallbacks.currentValue !== currentOffset) {
-      logger.info('changing frame', (((value - 1) * frames)), 'to', ((((value - 1) * frames) + frames) - 1));
+      // logger.info('changing frame', (((value - 1) * frames)), 'to', ((((value - 1) * frames) + frames) - 1));
       for (let i = 0; i <= frames; i++) {
         controlledMovieCallbacks.currentValue = (((value - 1) * frames) + i);
-        console.log(controlledMovieCallbacks.currentValue);
         context.drawImage(
           img,
           controlledMovieCallbacks.currentValue * width,

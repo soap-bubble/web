@@ -20,6 +20,9 @@ import {
   actions as gamestateActions,
   selectors as gamestateSelectors,
  } from 'morpheus/gamestate';
+import {
+  actions as titleActions,
+} from 'morpheus/title';
 import { Game, actions as gameActions } from 'morpheus/game';
 import socketPromise from 'utils/socket';
 import {
@@ -46,8 +49,12 @@ window.onload = () => {
   }));
   store.dispatch(gameActions.createUIOverlay());
   store.dispatch(gameActions.setCursor(0));
-  // store.dispatch(gamestateActions.fetchInitial())
-  //   .then(() => store.dispatch(sceneActions.startAtScene(qp.scene || 100000)));
+  if (qp.scene) {
+    store.dispatch(gamestateActions.fetchInitial())
+      .then(() => store.dispatch(sceneActions.startAtScene(qp.scene)));
+  } else {
+    store.dispatch(titleActions.start());
+  }
   render(
     <Provider store={store}>
       <Game />

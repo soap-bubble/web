@@ -1,5 +1,6 @@
 import createReducer from 'utils/createReducer';
 import {
+  START,
   DONE,
   MOUSE_CLICK,
   SET_RENDER_ELEMENTS,
@@ -7,8 +8,16 @@ import {
 
 const reducer = createReducer(
   'title',
-  {},
   {
+    done: true,
+  },
+  {
+    [START](title) {
+      return {
+        ...title,
+        done: false,
+      };
+    },
     [DONE](title) {
       return {
         ...title,

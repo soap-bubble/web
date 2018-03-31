@@ -32,6 +32,7 @@ import {
   DONE,
   MOUSE_CLICK,
   SET_RENDER_ELEMENTS,
+  START,
 } from './actionTypes';
 
 export const vertexShader = `
@@ -215,6 +216,12 @@ export function canvasCreated(canvas) {
 export function mouseClick() {
   return {
     type: MOUSE_CLICK,
+  };
+}
+
+export function start() {
+  return {
+    type: START,
   };
 }
 

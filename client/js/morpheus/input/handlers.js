@@ -41,6 +41,7 @@ const isHotspotActive = ({ hotspot, gamestates }) => isActive({
 export function resolveCursor({
   hotspots,
   currentPosition,
+  startingPosition,
   isMouseDown,
 }) {
   return (dispatch, getState) => {
@@ -50,8 +51,9 @@ export function resolveCursor({
       if (isHotspotActive({
         hotspot,
         gamestates: gamestateSelectors.forState(getState()),
-      }) && hotspotRectMatchesPosition(currentPosition)(hotspot)) {
-        if (actionType.isChangeCursor(hotspot)) {
+      })) {
+        if (hotspotRectMatchesPosition(currentPosition)(hotspot)
+          && actionType.isChangeCursor(hotspot)) {
           const {
             param1,
             param2,
@@ -65,7 +67,20 @@ export function resolveCursor({
               break;
             }
           }
-        } else if (hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND) {
+        } else if (hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND
+          && or(
+            hotspotRectMatchesPosition(currentPosition),
+            and(
+              hotspotRectMatchesPosition(startingPosition),
+              or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
+              or(
+                actionType.isHorizSlider,
+                actionType.isVertSlider,
+                actionType.isTwoAxisSlider,
+              ),
+          ),
+          )(hotspot)
+        ) {
           if (hotspot.type >= 5 && hotspot.type <= 8) {
             if (isMouseDown) {
               cursor = CURSOR_IDS.CLOSED;
@@ -76,7 +91,8 @@ export function resolveCursor({
             cursor = CURSOR_IDS.HAND;
           }
           break;
-        } else if (hotspot.cursorShapeWhenActive !== 0) {
+        } else if (hotspot.cursorShapeWhenActive !== 0
+          && hotspotRectMatchesPosition(currentPosition)(hotspot)) {
           cursor = hotspot.cursorShapeWhenActive;
           break;
         }
@@ -349,6 +365,7 @@ export function handleEventFactory() {
       const cursor = dispatch(resolveCursor({
         hotspots,
         currentPosition,
+        startingPosition,
         isMouseDown,
       }));
       await dispatch(gameActions.setCursor(cursor));

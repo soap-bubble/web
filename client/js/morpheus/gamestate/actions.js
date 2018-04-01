@@ -148,27 +148,35 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
         const { maxValue: vertFromState } = gamestates.byId(hotspot.param2);
         const { maxValue: horFromState } = gamestates.byId(hotspot.param3);
         const maxVert = vertFromState + 1;
-        const maxHor = horFromState + 1;
+        const maxHor = horFromState;
         let vertPos;
         if (currentPosition.top < hotspot.rectTop) {
-          vertPos = 0;
+          vertPos = hotspot.rectTop;
         } else if (currentPosition.top > hotspot.rectBottom) {
-          vertPos = hotspot.rectBottom - hotspot.rectTop;
+          vertPos = hotspot.rectBottom;
         } else {
-          vertPos = currentPosition.top - hotspot.rectTop;
+          vertPos = currentPosition.top;
         }
+
+        let horizPos;
+        if (currentPosition.left < hotspot.rectLeft) {
+          horizPos = hotspot.rectLeft;
+        } else if (currentPosition.left > hotspot.rectRight) {
+          horizPos = hotspot.rectRight;
+        } else {
+          horizPos = currentPosition.left;
+        }
+
         const verticalRatio = Math.floor(
-          maxVert * (vertPos /
+          (maxVert - 1) * ((vertPos - hotspot.rectTop) /
             (hotspot.rectBottom - hotspot.rectTop)),
         );
-        const horizontalRatio = Math.floor(
-          maxHor * ((currentPosition.left - hotspot.rectLeft) /
-            (hotspot.rectRight - hotspot.rectLeft)),
-        );
+        const horizontalRatio = maxHor * ((horizPos - hotspot.rectLeft) /
+          (hotspot.rectRight - hotspot.rectLeft));
 
         if (gs && maxVert && maxHor) {
           const value = (maxVert * verticalRatio) + horizontalRatio;
-          dispatch(updateGameState(hotspot.param1, Math.round(value)));
+          dispatch(updateGameState(hotspot.param1, Math.floor(value)));
         }
         break;
       }
@@ -182,7 +190,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
         if (rate === 0) {
           rate = max - min;
         }
-        const delta = Math.round((rate * ratio) - 0.5);
+        const delta = Math.round((rate * ratio * 2) - 0.5);
         let value = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
         if (value < min) {
           if (stateWraps) {

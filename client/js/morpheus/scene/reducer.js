@@ -13,7 +13,7 @@ import {
   SCENE_LOAD_COMPLETE,
 } from './actionTypes';
 
-const CURRENT_SCENE_STACK_SIZE = 3;
+const CURRENT_SCENE_STACK_SIZE = 5;
 const defaultState = Immutable.fromJS({
   cache: {},
   backgroundScene: null,

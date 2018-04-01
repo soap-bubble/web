@@ -137,5 +137,32 @@ export default function update() {
           scene.casts = scene.casts.filter(cast => removeHotspots.indexOf(cast) === -1);
         }
         return scene.save();
-      }));
+      }))
+    .then(() => getModel('Cast').find({
+      fileName: 'GameDB/carnival/806065ANI',
+    }).exec()
+    .map((cast) => {
+      if (cast) {
+        if (cast.endFrame === 1 || cast.image) {
+          logger.info('Making dials into anim');
+          cast.endFrame = -1;
+          cast.image = false;
+        }
+        return cast.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('GameState').find({
+      stateId: { $gte: 8006, $lte: 8008 },
+    }).exec()
+    .map((gamestate) => {
+      if (gamestate) {
+        if (gamestate.maxValue === 6) {
+          logger.info('Patching weight gamestate');
+          gamestate.maxValue = 5;
+        }
+        return gamestate.save();
+      }
+      return Promise.resolve();
+    }));
 }

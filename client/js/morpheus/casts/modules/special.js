@@ -161,14 +161,35 @@ function calculateImageOperation({ cast, img, rect }) {
   ];
 }
 
+function sdfdfs({
+  cast,
+  gamestates,
+}) {
+  const { controlledMovieCallbacks } = cast;
+  const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
+  const gs = gamestates.byId(gameStateId);
+  const value = Math.round(gs.value, 0);
+  const frames = get(controlledMovieCallbacks, '[0].frames', 1);
+  const currentOffset = value * frames;
+
+  if (typeof controlledMovieCallbacks.currentValue === 'undefined' || frames <= 1) {
+    controlledMovieCallbacks.currentValue = currentOffset;
+  } else if (controlledMovieCallbacks.currentValue < currentOffset) {
+    controlledMovieCallbacks.currentValue++;
+  } else if (controlledMovieCallbacks.currentValue > currentOffset) {
+    controlledMovieCallbacks.currentValue--;
+  }
+
+  return Math.abs(currentOffset - controlledMovieCallbacks.currentValue);
+}
+
 function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
   const { controlledMovieCallbacks, width, height } = cast;
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
   const gs = gamestates.byId(gameStateId);
   const value = Math.round(gs.value, 0);
   const frames = get(controlledMovieCallbacks, '[0].frames', 1);
-  const maxValue = ((gs.maxValue * frames) - frames) + 1;
-  const currentOffset = (((value - 1) * frames) + frames);
+  const currentOffset = value * frames;
 
   const source = {
     x: value * width,
@@ -177,59 +198,19 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
     sizeY: height,
   };
 
-  return async (context) => {
-    if (frames <= 1) {
-      // logger.info('single frame');
-      return context.drawImage(
-        img,
-        source.x,
-        source.y,
-        source.sizeX,
-        source.sizeY,
-        rect.x,
-        rect.y,
-        rect.sizeX,
-        rect.sizeY,
-      );
-    }
-    if (typeof controlledMovieCallbacks.currentValue === 'undefined') {
-      // logger.info('first time');
+  return (context, more) => {
+    if (typeof controlledMovieCallbacks.currentValue === 'undefined' || frames <= 1) {
       controlledMovieCallbacks.currentValue = currentOffset;
-      return context.drawImage(
-        img,
-        currentOffset * width,
-        source.y,
-        source.sizeX,
-        source.sizeY,
-        rect.x,
-        rect.y,
-        rect.sizeX,
-        rect.sizeY,
-      );
+    } else if (controlledMovieCallbacks.currentValue < currentOffset) {
+      controlledMovieCallbacks.currentValue++;
+      more();
+    } else if (controlledMovieCallbacks.currentValue > currentOffset) {
+      controlledMovieCallbacks.currentValue--;
+      more();
     }
-    if (controlledMovieCallbacks.currentValue !== currentOffset) {
-      // logger.info('changing frame', (((value - 1) * frames)), 'to', ((((value - 1) * frames) + frames) - 1));
-      for (let i = 0; i <= frames; i++) {
-        controlledMovieCallbacks.currentValue = (((value - 1) * frames) + i);
-        context.drawImage(
-          img,
-          controlledMovieCallbacks.currentValue * width,
-          source.y,
-          source.sizeX,
-          source.sizeY,
-          rect.x,
-          rect.y,
-          rect.sizeX,
-          rect.sizeY,
-        );
-        await Promise.delay(60);
-      }
-      return null;
-    }
-    logger.info('same frame', ((((value - 1) * frames) + frames) - 1));
-    return context.drawImage(
+    context.drawImage(
       img,
-      (value ? ((((value - 1) * frames) + frames) - 1) : 0) * width,
+      controlledMovieCallbacks.currentValue * width,
       source.y,
       source.sizeX,
       source.sizeY,
@@ -292,13 +273,20 @@ function generateControlledFrames({
   }, {});
 }
 
-function generateSpecialImages({ images, controlledFrames, canvas }) {
+async function generateSpecialImages({ images, controlledFrames, canvas }) {
   if (canvas) {
-    const ctx = canvas.getContext('2d');
-    images.forEach(op => ctx.drawImage(...op));
-    return Promise.all(controlledFrames.map(cf => cf(ctx)));
+    let allDone;
+    const notDone = () => { allDone = false; };
+    do {
+      allDone = true;
+      const ctx = canvas.getContext('2d');
+      images.forEach(op => ctx.drawImage(...op));
+      controlledFrames.map(cf => cf(ctx, notDone));
+      if (!allDone) {
+        await Promise.delay(60);
+      }
+    } while (!allDone);
   }
-  return Promise.resolve();
 }
 
 function createCanvas({ width, height }) {
@@ -468,48 +456,53 @@ export const delegate = memoize((scene) => {
           };
         }));
 
-      const loadMovies = Promise.all(movieCasts.map(movieCast => new Promise((resolve, reject) => {
-        const video = createVideo(getAssetUrl(movieCast.fileName), {
-          loop: movieCast.looping,
-          autoplay: true,
-          onerror: reject,
-        });
-        const {
-          nextSceneId,
-          angleAtEnd,
-          dissolveToNextScene,
-        } = movieCast;
-        video.classList.add('MovieSpecialCast');
-        function onSoundEnded() {
-          let startAngle;
-          video.removeEventListener('ended', onSoundEnded);
-          if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
-              startAngle = (angleAtEnd * Math.PI) / 1800;
-              startAngle -= Math.PI - (Math.PI / 6);
-            }
-            dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
-            dispatch(sceneActions.setNextStartAngle(startAngle));
-          }
-        }
-        function onCanPlayThrough() {
-          video.removeEventListener('canplaythrough', onCanPlayThrough);
-          resolve({
-            el: video,
-            listeners: {
-              ended: onSoundEnded,
-              canplaythrough: onCanPlayThrough,
-            },
+      const loadMovies = Promise.all(movieCasts
+        .filter(cast => isActive({
+          cast,
+          gamestates,
+        }))
+        .map(movieCast => new Promise((resolve, reject) => {
+          const video = createVideo(getAssetUrl(movieCast.fileName), {
+            loop: movieCast.looping,
+            autoplay: true,
+            onerror: reject,
           });
-        }
-        video.addEventListener('ended', onSoundEnded);
-        video.addEventListener('canplaythrough', onCanPlayThrough);
-      })
-        .then(({ el, listeners }) => ({
-          el,
-          data: movieCast,
-          listeners,
-        }))));
+          const {
+            nextSceneId,
+            angleAtEnd,
+            dissolveToNextScene,
+          } = movieCast;
+          video.classList.add('MovieSpecialCast');
+          function onSoundEnded() {
+            let startAngle;
+            video.removeEventListener('ended', onSoundEnded);
+            if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+              if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
+                startAngle = (angleAtEnd * Math.PI) / 1800;
+                startAngle -= Math.PI - (Math.PI / 6);
+              }
+              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
+              dispatch(sceneActions.setNextStartAngle(startAngle));
+            }
+          }
+          function onCanPlayThrough() {
+            video.removeEventListener('canplaythrough', onCanPlayThrough);
+            resolve({
+              el: video,
+              listeners: {
+                ended: onSoundEnded,
+                canplaythrough: onCanPlayThrough,
+              },
+            });
+          }
+          video.addEventListener('ended', onSoundEnded);
+          video.addEventListener('canplaythrough', onCanPlayThrough);
+        })
+          .then(({ el, listeners }) => ({
+            el,
+            data: movieCast,
+            listeners,
+          }))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
         .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))
@@ -679,6 +672,10 @@ export const actions = memoize((scene) => {
       }
       return done;
     };
+  }
+
+  function* canvasOperations() {
+
   }
 
   return {

@@ -28,7 +28,8 @@ import {
 } from 'utils/coordinates';
 
 const logger = loggerFactory('flatspot');
-const queue = new Queue(1, 128);
+const actionQueue = new Queue(1, 128);
+const cursorQueue = new Queue(1, 128);
 
 export default function ({ dispatch, scene }) {
   const store = storeFactory();
@@ -108,33 +109,31 @@ export default function ({ dispatch, scene }) {
     }
     const isMouseDown = mouseDown;
 
-    queue.add(() => dispatch(handleEvent({
-      currentPosition: adjustedClickPos,
-      startingPosition: clickStartPos,
-      hotspots,
-      nowInHotspots,
-      leavingHotspots,
-      enteringHotspots,
-      noInteractionHotspots,
-      isClick,
-      isMouseDown,
-      wasMouseMoved,
-      wasMouseUpped,
-      wasMouseDowned,
-      handleHotspot: gamestateActions.handleHotspot,
-    })), 'handle event');
+    cursorQueue.add(() => dispatch(gameActions.setCursorLocation({ top, left })), 'cursor location');
+    actionQueue.add(async () => {
+      await dispatch(handleEvent({
+        currentPosition: adjustedClickPos,
+        startingPosition: clickStartPos,
+        hotspots,
+        nowInHotspots,
+        leavingHotspots,
+        enteringHotspots,
+        noInteractionHotspots,
+        isClick,
+        isMouseDown,
+        wasMouseMoved,
+        wasMouseUpped,
+        wasMouseDowned,
+        handleHotspot: gamestateActions.handleHotspot,
+      }));
+      await dispatch(gameActions.setCursorLocation({ top, left }));
+      await dispatch(castActionsForScene.special.update(scene));
+    });
 
     wasInHotspots = nowInHotspots;
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
-
-    // Update cursor location and icon
-    queue.add(() => dispatch(gameActions.setCursorLocation({ top, left })), 'cursor location');
-    // dispatch(gameActions.setCursorLocation({ top, left }));
-    // Update scene
-    queue.add(() => dispatch(castActionsForScene.special.update(scene)), 'update scene');
-    // dispatch(castActionsForScene.special.update(scene));
   }
 
   function onMouseDown(mouseEvent) {

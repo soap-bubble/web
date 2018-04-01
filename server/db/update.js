@@ -108,5 +108,34 @@ export default function update() {
         logger.info('Patching elevator level 2');
         cast.nextSceneId = 6002;
         return cast.save();
+      }))
+    .then(() => getModel('Scene').find({
+      sceneId: 415050,
+    }).exec()
+      .map((scene) => {
+        const advanceHotspot = scene.casts.find(cast => cast.param1 === 421040);
+        if (advanceHotspot && advanceHotspot.length === 0) {
+          logger.info('Patching advance while stairs up');
+          advanceHotspot.comparators = [{ gameStateId: 1448, testType: 0, value: 0 }];
+          scene.markModified('casts');
+        }
+        const removeHotspots = scene.casts.filter(({
+          rectTop,
+          rectBottom,
+          rectLeft,
+          rectRight,
+          param1,
+        }) =>
+          rectTop === 0
+          && rectBottom === 400
+          && rectLeft === 0
+          && rectRight === 640
+          && (param1 === 1401 || param1 === 1448),
+        );
+        if (removeHotspots.length) {
+          logger.info('Removing unessecary state changes');
+          scene.casts = scene.casts.filter(cast => removeHotspots.indexOf(cast) === -1);
+        }
+        return scene.save();
       }));
 }

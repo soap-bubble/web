@@ -119,6 +119,150 @@ export const scene1010 = {
   ]
 };
 
+export const scene5555 = {
+  "_id": "5920c621342346d86d42f224",
+  "cdFlags": 2,
+  "palette": 128,
+  "sceneId": 5555,
+  "sceneType": 1,
+  "__v": 0,
+  "casts": [
+    {
+      "castId": 0,
+      "comparators": [
+        {
+          "gameStateId": 860,
+          "testType": 0,
+          "value": 0
+        },
+        {
+          "gameStateId": 862,
+          "testType": 0,
+          "value": 0
+        },
+        {
+          "gameStateId": 861,
+          "testType": 0,
+          "value": 0
+        },
+        {
+          "gameStateId": 863,
+          "testType": 0,
+          "value": 0
+        }
+      ],
+      "cursorShapeWhenActive": 10012,
+      "defaultPass": false,
+      "gesture": 5,
+      "initiallyEnabled": false,
+      "param1": 0,
+      "param2": 0,
+      "param3": -1,
+      "rectBottom": 0,
+      "rectLeft": 0,
+      "rectRight": 0,
+      "rectTop": 0,
+      "type": 0
+    },
+    {
+      "_id": "5920c6bfa0dd06d86d42f225",
+      "castId": 1010,
+      "fileName": "GameDB/Deck1/balcNWPAN",
+      "initiallyEnabled": true,
+      "__v": 0,
+      "__t": "PanoCast"
+    },
+    {
+      "_id": "5920c6c1a0dd06d86d4302ae",
+      "castId": 221099,
+      "fileName": "GameDB/OAsounds/shpamb2MSC",
+      "initiallyEnabled": true,
+      "__v": 0,
+      "__t": "SoundCast"
+    },
+    {
+      "_id": "5920c6c1a0dd06d86d4302af",
+      "castId": 224099,
+      "fileName": "GameDB/OAsounds/MBmusicMSC",
+      "initiallyEnabled": true,
+      "__v": 0,
+      "__t": "SoundCast"
+    }
+  ]
+};
+
+export const scene6666 = {
+  "_id": "5920c621348756d86d42f224",
+  "cdFlags": 2,
+  "palette": 128,
+  "sceneId": 6666,
+  "sceneType": 1,
+  "__v": 0,
+  "casts": [
+    {
+      "castId": 0,
+      "comparators": [
+        {
+          "gameStateId": 860,
+          "testType": 0,
+          "value": 0
+        },
+        {
+          "gameStateId": 862,
+          "testType": 0,
+          "value": 0
+        },
+        {
+          "gameStateId": 861,
+          "testType": 0,
+          "value": 0
+        },
+        {
+          "gameStateId": 863,
+          "testType": 0,
+          "value": 0
+        }
+      ],
+      "cursorShapeWhenActive": 10012,
+      "defaultPass": false,
+      "gesture": 5,
+      "initiallyEnabled": false,
+      "param1": 0,
+      "param2": 0,
+      "param3": -1,
+      "rectBottom": 0,
+      "rectLeft": 0,
+      "rectRight": 0,
+      "rectTop": 0,
+      "type": 0
+    },
+    {
+      "_id": "5920c6bfa0dd06d86d42f225",
+      "castId": 1010,
+      "fileName": "GameDB/Deck1/balcNWPAN",
+      "initiallyEnabled": true,
+      "__v": 0,
+      "__t": "PanoCast"
+    },
+    {
+      "_id": "5920c6c1a0dd06d86d4302ae",
+      "castId": 221099,
+      "fileName": "GameDB/OAsounds/shpamb2MSC",
+      "initiallyEnabled": true,
+      "__v": 0,
+      "__t": "SoundCast"
+    },
+    {
+      "_id": "5920c6c1a0dd06d86d4302af",
+      "castId": 224099,
+      "fileName": "GameDB/OAsounds/MBmusicMSC",
+      "initiallyEnabled": true,
+      "__v": 0,
+      "__t": "SoundCast"
+    }
+  ]
+};
+
 export const scene1020 = {
   "_id": "5920c6bfa0dd06d86d42f226",
   "cdFlags": 2,

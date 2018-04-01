@@ -7,7 +7,13 @@ import {
   SCENE_LOAD_START,
   SCENE_SET_CURRENT_SCENE,
 } from './actionTypes';
-import { scene1010, scene1020, scene101004 } from '../../service/__fixtures__/scenes';
+import {
+  scene1010,
+  scene1020,
+  scene101004,
+  scene5555,
+  scene6666,
+} from '../../service/__fixtures__/scenes';
 
 jest.mock('morpheus/casts/modules');
 jest.mock('morpheus/game/actions');
@@ -78,5 +84,9 @@ describe('goToScene', () => {
         .then(() => store.dispatch(actions.goToScene(1020)))
         .then(() => expect(store.getState().scene).toHaveActiveScenes(3))
         .then(() => store.dispatch(actions.goToScene(2270)))
-        .then(() => expect(store.getState().scene).toHaveActiveScenes(3)));
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(4))
+        .then(() => store.dispatch(actions.goToScene(5555)))
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(5))
+        .then(() => store.dispatch(actions.goToScene(6666)))
+        .then(() => expect(store.getState().scene).toHaveActiveScenes(5)));
 });

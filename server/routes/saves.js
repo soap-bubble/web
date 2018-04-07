@@ -49,7 +49,7 @@ export default function userRoute(app, db, createLogger) {
       .findNewest(saveId)
       .then((save) => {
         if (save) {
-          const newSave = new Save({
+          Object.assign(save, {
             playerId: save.playerId,
             saveId,
             gamestates,
@@ -58,9 +58,9 @@ export default function userRoute(app, db, createLogger) {
             previousSceneId,
             timestamp: Date.now(),
           });
-          return newSave.save().then(() => {
+          return save.save().then(() => {
             logger.info('Updated save');
-            res.status(200).send(newSave.toJSON());
+            res.status(200).send(save.toJSON());
           });
         }
         logger.error('Could not find save to update');

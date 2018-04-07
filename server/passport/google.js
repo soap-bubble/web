@@ -96,55 +96,62 @@ export default function (db, createLogger) {
           if (err) {
             this.fail('not authorized');
           }
-          const payload = login.getPayload();
-          const { sub: userid } = payload;
-          db.model('User').findOne({
-            profiles: {
-              $elemMatch: {
-                providerType: 'google',
-                id: userid,
+          try {
+            const payload = login.getPayload();
+            const { sub: userid } = payload;
+            db.model('User').findOne({
+              profiles: {
+                $elemMatch: {
+                  providerType: 'google',
+                  id: userid,
+                },
               },
-            },
-          })
-            .then((user) => {
-              if (!user) {
-                const { email, name: displayName } = payload;
-                logger.info('No user found', { email, displayName });
-                const User = db.model('User');
-                const userModel = new User({
-                  emails: [{
-                    emailType: 'account',
-                    value: email,
-                  }],
-                  displayName,
-                  profiles: [{
-                    providerType: 'google',
-                    id: userid,
-                  }],
-                  admin: endsWith(email, '@soapbubble.online'),
-                });
-                logger.info('Saving new user', { userModel });
-                return userModel.save().then(() => {
-                  logger.info('Saving new user model -- complete');
-                  this.success(userModel);
-                  return userModel;
-                })
-                  .catch(() => {
-                    logger.error('Failed to save new user');
-                    this.fail(userModel);
-                  });
-              }
-              logger.info('Found user', { id: user.id });
-              if (user.profiles.find(p => p.providerType === 'google').id === userid) {
-                logger.info('success');
-                return this.success(user);
-              }
-              logger.info('fail');
-              return this.fail('User not found');
             })
-            .catch(() => {
-              this.fail('Token error');
-            });
+              .then((user) => {
+                if (!user) {
+                  const { email, name: displayName } = payload;
+                  logger.info('No user found', { email, displayName });
+                  const User = db.model('User');
+                  const userModel = new User({
+                    emails: [{
+                      emailType: 'account',
+                      value: email,
+                    }],
+                    displayName,
+                    profiles: [{
+                      providerType: 'google',
+                      id: userid,
+                    }],
+                    admin: endsWith(email, '@soapbubble.online'),
+                  });
+                  logger.info('Saving new user', { userModel });
+                  return userModel.save().then(() => {
+                    logger.info('Saving new user model -- complete');
+                    this.success(userModel);
+                    return userModel;
+                  })
+                    .catch(() => {
+                      logger.error('Failed to save new user');
+                      this.fail(userModel);
+                    });
+                }
+                logger.info('Found user', { id: user.id });
+                if (user.profiles.find(p => p.providerType === 'google').id === userid) {
+                  logger.info('success');
+                  return this.success(user);
+                }
+                logger.info('fail');
+                return this.fail('User not found');
+              })
+              .catch(() => {
+                this.fail('Token error');
+              });
+          } catch (err1) {
+            if (process.env.NODE_ENV !== 'production') {
+              this.fail({ error: err1 });
+            }
+            this.fail({ error: 'Failed to save' });
+          }
         },
       );
     }

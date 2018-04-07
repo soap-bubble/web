@@ -41,8 +41,8 @@ export default function userRoute(app, db, createLogger) {
       saveId,
       gamestates,
       scenestate,
-      currentScene,
-      previousScene,
+      currentSceneId,
+      previousSceneId,
     } = req.body;
     const Save = db.model('Save');
     Save
@@ -54,8 +54,8 @@ export default function userRoute(app, db, createLogger) {
             saveId,
             gamestates,
             scenestate,
-            currentScene,
-            previousScene,
+            currentSceneId,
+            previousSceneId,
             timestamp: Date.now(),
           });
           return newSave.save().then(() => {

@@ -1,0 +1,14 @@
+{
+  "presets": ["react", ["env", {
+    "targets": {
+        "browsers": ["last 2 versions", "safari >= 7", "not ie <=11"]
+      }
+    }]],
+  "plugins": [
+    "transform-export-extensions",
+    ["transform-object-rest-spread", { "useBuiltIns": true }],
+    ["module-resolver", {
+      "root": ["./client/js"]
+    }]
+  ]
+}

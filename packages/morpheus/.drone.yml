@@ -1,0 +1,39 @@
+pipeline:
+  build:
+    image: node:boron
+    commands:
+      - npm install --quiet
+    when:
+      event: push
+
+  test:
+    image: node:boron
+    commands:
+      - npm test
+    when:
+      event: push
+
+  publish:
+    image: plugins/docker
+    registry: docker.soapbubble.online:5000
+    repo: docker.soapbubble.online:5000/soapbubble/morpheus
+    tag: ${DRONE_COMMIT_SHA:0:7}
+    secrets: [ docker_username, docker_password ]
+    when:
+      branch: master
+      event: push
+
+  publish_to_staging:
+    image: peloton/drone-rancher
+    environment:
+     - RANCHER_ENVIRONMENT=staging
+    url: https://rancher2.soapbubble.online
+    service: www/morpheus
+    timeout: 60
+    confirm: true
+    start_first: true
+    docker_image: docker.soapbubble.online:5000/soapbubble/morpheus:${DRONE_COMMIT_SHA:0:7}
+    secrets: [ rancher_access_key, rancher_secret_key ]
+    when:
+      branch: master
+      event: push

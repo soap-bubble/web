@@ -1,0 +1,72 @@
+@import "~@soapbubble/style/dist/soapbubble.css";
+
+* {
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-user-callout: none;
+  -webkit-touch-callout: none;
+}
+
+body {
+  overflow:hidden;
+}
+
+canvas {
+  position: absolute;
+}
+
+div#mouse {
+  position: absolute;
+}
+
+video.MovieSpecialCast {
+  position: absolute;
+}
+
+.scene {
+  position: absolute;
+  left: 0;
+}
+
+.main-title {
+  position: absolute;
+  background-color: rgb(208, 225, 254);
+}
+
+.background {
+  width: 100%;
+  height: 100%;
+  img {
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.title {
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.fromFade {
+  position: absolute;
+  left: 0;
+  transition: opacity 0.66s ease-in-out;
+  opacity: 1;
+}
+
+.fader {
+  transition: opacity 0.66s ease-in-out;
+}
+
+.fadeOut {
+  opacity: 0;
+}
+
+.fadeIn {
+  opacity: 1;
+}
+
+.hidden {
+  display: none;
+}

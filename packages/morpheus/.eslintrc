@@ -1,0 +1,30 @@
+{
+  "extends": "airbnb",
+  "rules": {
+    "linebreak-style": 0,
+    "no-param-reassign": 0,
+    "no-underscore-dangle": 0,
+    "no-plusplus": 0,
+    "react/jsx-filename-extension": 0,
+    "jsx-a11y/no-static-element-interactions": 0,
+    "import/no-extraneous-dependencies": ["error", {"devDependencies": [
+      "**/*.spec.js",
+      "**/__mocks__/*.js",
+      "**/__mocks_/*.js",
+      "webpack.config.js"
+      ]}],
+  },
+  "globals": {
+    "config": true,
+  },
+  "settings": {
+    "import/resolver": {
+      "babel-module": {
+        "root": ["./client/js"]
+      }
+    }
+  },
+  "env": {
+    "jest": true
+  }
+}

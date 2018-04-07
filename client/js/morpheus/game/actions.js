@@ -256,6 +256,13 @@ export const cloudSaveEpic = createEpic((action$, store) => action$
     previousSceneId: sceneSelectors.previousSceneId(store.getState()),
     saveId: gameSelectors.saveId(store.getState()),
   }))
+  .map((response) => {
+    const { saveId } = response.data;
+    return {
+      type: SET_SAVE_ID,
+      payload: saveId,
+    };
+  })
   .catch(err => ({
     type: SAVE_ERROR,
     payload: err,

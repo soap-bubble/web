@@ -102,7 +102,7 @@ export default function factory() {
           amplitudeTween.stop();
         });
       },
-      createObject3D() {
+      * createObject3D() {
         uniforms = {
           time: { type: 'f', value: 1.0 },
           amplitude: { type: 'f', value: 0.25 },
@@ -116,7 +116,7 @@ export default function factory() {
           }),
           geometry: createGeometry(),
         });
-        return object3D;
+        yield object3D;
       },
     };
     return selfie;

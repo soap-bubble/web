@@ -17,16 +17,17 @@ import {
   titleDimensions,
 } from './selectors';
 import titleActionsFactory from './actions.title';
+import buttonActionsFactory from './actions.buttons';
+import lightActionsFactory from './actions.lights';
 import {
   DONE,
-  MOUSE_CLICK,
+  LEAVING,
   SET_RENDER_ELEMENTS,
   START,
 } from './actionTypes';
 
-function createScene({ object }) {
+function createScene() {
   const scene = new Scene();
-  scene.add(object);
   return scene;
 }
 
@@ -44,6 +45,8 @@ export function canvasCreated(canvas) {
   return (dispatch, getState) => {
     if (canvas) {
       const titleActions = dispatch(titleActionsFactory());
+      const buttonsActions = dispatch(buttonActionsFactory());
+      const lightsActions = dispatch(lightActionsFactory());
       const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
       const renderer = createRenderer({ canvas, width, height });
@@ -51,15 +54,32 @@ export function canvasCreated(canvas) {
         camera,
         vector3: { z: 2 },
       });
-      const scene3D = createScene({
-        object: titleActions.createObject3D(),
-      });
+      const scene3D = createScene();
+
+      for (const object of lightsActions.createObject3D()) {
+        scene3D.add(object);
+      }
+      for (const object of titleActions.createObject3D()) {
+        scene3D.add(object);
+      }
+      for (const object of buttonsActions.createObject3D()) {
+        scene3D.add(object);
+      }
+
+      renderer.shadowMap.enabled = true;
+
       startRenderLoop({
         scene3D,
         camera,
         renderer,
       });
+
       titleActions.start();
+      buttonsActions.start({
+        camera,
+      });
+      lightsActions.start();
+
       dispatch({
         type: SET_RENDER_ELEMENTS,
         payload: {
@@ -71,9 +91,9 @@ export function canvasCreated(canvas) {
   };
 }
 
-export function mouseClick() {
+export function leaving() {
   return {
-    type: MOUSE_CLICK,
+    type: LEAVING,
   };
 }
 

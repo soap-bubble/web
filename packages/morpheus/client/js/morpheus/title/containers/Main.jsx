@@ -1,24 +1,22 @@
 import { connect } from 'react-redux';
 import {
+  isLeaving,
   titleStyle,
 } from '../selectors';
 import {
   done,
-  mouseClick,
 } from '../actions';
 import Main from '../components/Main';
 
 function mapStateToProps(state) {
   return {
+    leaving: isLeaving(state),
     style: titleStyle(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    mouseClick(canvas) {
-      dispatch(mouseClick(canvas));
-    },
     done() {
       dispatch(done());
     },

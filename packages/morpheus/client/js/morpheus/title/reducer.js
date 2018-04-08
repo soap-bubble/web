@@ -2,7 +2,7 @@ import createReducer from 'utils/createReducer';
 import {
   START,
   DONE,
-  MOUSE_CLICK,
+  LEAVING,
   SET_RENDER_ELEMENTS,
 } from './actionTypes';
 
@@ -10,6 +10,7 @@ const reducer = createReducer(
   'title',
   {
     done: true,
+    leaving: false,
   },
   {
     [START](title) {
@@ -24,7 +25,7 @@ const reducer = createReducer(
         done: true,
       };
     },
-    [MOUSE_CLICK](title) {
+    [LEAVING](title) {
       return {
         ...title,
         leaving: true,

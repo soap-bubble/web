@@ -11,10 +11,15 @@ class Main extends React.Component {
       isLeaving: false,
       target: 1,
     };
-    this.mouseClick = this.mouseClick.bind(this);
   }
 
-  mouseClick() {
+  componentWillReceiveProps(nextProps) {
+    if (this.props.leaving === false && nextProps.leaving === true) {
+      this.fadeOut();
+    }
+  }
+
+  fadeOut() {
     const { done } = this.props;
     const { isLeaving } = this.state;
     if (!isLeaving) {
@@ -47,7 +52,6 @@ class Main extends React.Component {
         style={{
           ...style,
         }}
-        onClick={this.mouseClick}
       >
         <Background opacity={target} />
         <Title opacity={target} />

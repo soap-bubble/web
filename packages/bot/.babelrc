@@ -8,7 +8,6 @@
     "transform-class-properties",
     "transform-decorators",
     "transform-react-constant-elements",
-    "transform-react-inline-elements",
-    ["transform-object-rest-spread", { "useBuiltIns": true }]
+    "transform-react-inline-elements"
   ]
 }

@@ -123,10 +123,10 @@ module.exports = (env) => {
       rules: styleLoaders.concat([
         {
           test: /\.jsx?$/,
-          exclude: [/node_modules/],
           include: dirSharedComponents.concat([
             dirJs,
           ]),
+          exclude: [/node_modules/],
           use: ['babel-loader'],
         },
         {

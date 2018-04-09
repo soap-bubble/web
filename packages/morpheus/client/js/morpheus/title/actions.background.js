@@ -73,14 +73,29 @@ export default function factory() {
 
     const selfie = {
       start() {
+        const v = {
+          get opacity() {
+            return uniforms.opacity.value;
+          },
+          set opacity(value) {
+            uniforms.opacity.value = value;
+          },
+        };
         for (let i = 0; i < 5; i++) {
           ripples[i].tween = new Tween(ripples[i])
             .to({
-              freq: 0.05,
-            }, 10000)
-            .easing(Easing.Back.Out)
+              freq: 0.01,
+            }, 7500)
+            .easing(Easing.Exponential.Out)
             .start();
         }
+        const opacityTween = new Tween(v)
+          .to({
+            opacity: 1,
+          }, 2000)
+          .easing(Easing.Sinusoidal.In);
+
+        opacityTween.start();
         const startTime = Date.now();
         renderEvents.onRender(() => {
           const freq = [];
@@ -92,6 +107,9 @@ export default function factory() {
           uniforms.center.value = center;
           uniforms.freq.value = freq;
           uniforms.time.value = (Date.now() - startTime) / 1000;
+        });
+        renderEvents.onDestroy(() => {
+          ripples.forEach(({ tween }) => tween.stop());
         });
       },
       * createObject3D() {
@@ -105,12 +123,13 @@ export default function factory() {
           time: { type: 'f', value: 1.0 },
           center: { type: 'fv2', value: [] },
           freq: { type: 'fv1', value: [] },
+          opacity: { type: 'f', value: 0.0 },
           texture: { type: 't', value: createTexture() },
         };
         for (let i = 0; i < 5; i++) {
           ripples[i] = {
-            pos: new Vector2(Math.random() * 5, Math.random() * 5),
-            freq: 8 + (Math.random() * 8),
+            pos: new Vector2(Math.random(), Math.random()),
+            freq: 5 + (Math.random() * 8),
           };
         }
         const freq = [];

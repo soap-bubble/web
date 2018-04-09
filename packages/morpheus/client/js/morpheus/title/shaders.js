@@ -44,6 +44,7 @@ const int no = 5; //set how many splash-points you want
 
 uniform lowp sampler2D texture;
 uniform highp float time;
+uniform float opacity;
 uniform highp float freq[no];
 uniform lowp vec2 center[no];
 
@@ -56,9 +57,11 @@ void main()
     for (int i=0; i<no; ++i) {
         highp vec2 p = 1.5 * (vUv-center[i]);
         highp float len = length(p);
-        uv[i] = (p/len)*freq[i]*max(0.2, 2.-len)*cos(len*24.0-time*5.0)*0.03;
+        uv[i] = (p/len)*freq[i]*max(0.2, 2.0-len)*cos(len*24.0-time*5.0)*0.02;
         uv[no] += uv[i]; //tally total
     }
-    gl_FragColor = texture2D(texture,fract(vUv + uv[no]));
+    vec4 mapTexel = texture2D(texture,vUv + uv[no]);
+    mapTexel.a *= opacity;
+    gl_FragColor = mapTexel;
 }
 `;

@@ -3,6 +3,7 @@ import {
   PlaneGeometry,
   ShaderMaterial,
   TextureLoader,
+  Vector2,
 } from 'three';
 import {
   Tween,
@@ -14,7 +15,7 @@ import {
 } from 'service/gamedb';
 import {
   basicVertexShader as vertexShader,
-  titleFragmentShader,
+  rippleFragmentShader,
 } from './shaders';
 
 function createGeometry() {
@@ -26,7 +27,7 @@ function createMaterial({ uniforms }) {
   const material = new ShaderMaterial({
     uniforms,
     vertexShader,
-    fragmentShader: titleFragmentShader,
+    fragmentShader: rippleFragmentShader,
     transparent: true,
   });
   return material;
@@ -44,7 +45,8 @@ function createMesh({ material, geometry }) {
     geometry,
     material,
   );
-  mesh.scale.set(3, 2, 1);
+  const size = 1 / 1.8;
+  mesh.scale.set(3 * size, 2 * size, 1);
   mesh.position.y = 0.5;
   window.titleMesh = mesh;
   return mesh;
@@ -54,22 +56,22 @@ export default function factory() {
   return (/* dispatch, getState */) => {
     let uniforms;
     let object3D;
+    const ripples = [];
+
+    function updateRipples() {
+      const freq = [];
+      const center = [];
+      ripples.forEach((v, i) => {
+        freq[i] = v.freq;
+        center[i] = v.pos;
+      });
+      uniforms.center.value = center;
+      uniforms.freq.value = freq;
+    }
 
     const selfie = {
       start() {
         const v = {
-          get amplitude() {
-            return uniforms.amplitude.value;
-          },
-          set amplitude(value) {
-            uniforms.amplitude.value = value;
-          },
-          get intensity() {
-            return uniforms.intensity.value;
-          },
-          set intensity(value) {
-            uniforms.intensity.value = value;
-          },
           get opacity() {
             return uniforms.opacity.value;
           },
@@ -77,39 +79,48 @@ export default function factory() {
             uniforms.opacity.value = value;
           },
         };
+        for (let i = 0; i < 5; i++) {
+          ripples[i].tween = new Tween(ripples[i])
+            .to({
+              freq: 0.001,
+            }, 10000)
+            .easing(Easing.Exponential.Out)
+            .start();
+        }
         const opacityTween = new Tween(v)
           .to({
             opacity: 1,
           }, 10000)
           .easing(Easing.Sinusoidal.In);
 
-        const amplitudeTween = new Tween(v)
-          .to({
-            amplitude: 0,
-          }, 10000)
-          .easing(Easing.Quintic.In);
-
         opacityTween.start();
-        amplitudeTween.start();
 
         const startTime = Date.now();
         const update = () => {
+          updateRipples();
           uniforms.time.value = (Date.now() - startTime) / 1000;
         };
         renderEvents.onRender(update);
         renderEvents.onDestroy(() => {
           opacityTween.stop();
-          amplitudeTween.stop();
+          ripples.forEach(({ tween }) => tween.stop());
         });
       },
       * createObject3D() {
         uniforms = {
           time: { type: 'f', value: 1.0 },
-          amplitude: { type: 'f', value: 0.25 },
-          intensity: { type: 'f', value: 15 },
-          opacity: { type: 'f', value: 0 },
+          center: { type: 'fv2', value: [] },
+          freq: { type: 'fv1', value: [] },
+          opacity: { type: 'f', value: 0.0 },
           texture: { type: 't', value: createTexture() },
         };
+        for (let i = 0; i < 5; i++) {
+          ripples[i] = {
+            pos: new Vector2(Math.random(), Math.random()),
+            freq: 2 + (Math.random() * 3),
+          };
+        }
+        updateRipples();
         object3D = createMesh({
           material: createMaterial({
             uniforms,

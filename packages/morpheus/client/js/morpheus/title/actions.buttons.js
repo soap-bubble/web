@@ -53,7 +53,7 @@ function createButton({
     const material = new MeshPhongMaterial({
       map: createTexture(),
       specular: 0x222222,
-      shininess: 25,
+      shininess: 5,
       bumpMap: createBumpMap(),
       bumpScale: 0.1,
       side: DoubleSide,

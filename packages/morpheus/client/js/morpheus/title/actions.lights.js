@@ -11,7 +11,7 @@ export default function factory() {
       start() {
         const startTime = Date.now();
         renderEvents.onRender(() => {
-          const delta = (Date.now() - startTime) / 1000;
+          const delta = (Date.now() - startTime) / 4000;
           spotLight.position.set(0.5 * Math.sin(delta), 0.5 * Math.cos(delta), 2);
         });
       },

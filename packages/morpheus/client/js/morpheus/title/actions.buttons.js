@@ -34,7 +34,7 @@ function createButton({
   position,
 }) {
   function createGeometry() {
-    const geometry = new PlaneGeometry(1, 0.5, 64, 64);
+    const geometry = new PlaneGeometry(1, 0.5, 1, 1);
     return geometry;
   }
 
@@ -141,8 +141,8 @@ export default function factory() {
           settingsButton: false,
         };
         const slideIn = {
-          newButton: true,
-          settingsButton: true,
+          newButton: false,
+          settingsButton: false,
         };
         const tweens = {
           newButton: null,
@@ -168,8 +168,8 @@ export default function factory() {
             }),
         };
 
-        setTimeout(() => slideInTween.newButton.start(), 2500);
-        setTimeout(() => slideInTween.settingsButton.start(), 2500);
+        setTimeout(() => slideInTween.newButton.start(), 5000);
+        setTimeout(() => slideInTween.settingsButton.start(), 5000);
 
         function updatePositionForEvent(e) {
           const location = gameSelectors.location(getState());

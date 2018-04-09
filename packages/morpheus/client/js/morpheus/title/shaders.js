@@ -38,3 +38,27 @@ void main() {
     }
 }
 `;
+
+export const rippleFragmentShader = `
+const int no = 5; //set how many splash-points you want
+
+uniform lowp sampler2D texture;
+uniform highp float time;
+uniform highp float freq[no];
+uniform lowp vec2 center[no];
+
+varying vec2 vUv;
+
+void main()
+{
+    highp vec2 uv[no+1]; //array is 1 slot longer because...
+    uv[no] = vec2(0.,0.); //last slot will hold the total (nb tables indexed from 0)
+    for (int i=0; i<no; ++i) {
+        highp vec2 p = 1.5 * (vUv-center[i]);
+        highp float len = length(p);
+        uv[i] = (p/len)*freq[i]*max(0.2, 2.-len)*cos(len*24.0-time*5.0)*0.03;
+        uv[no] += uv[i]; //tally total
+    }
+    gl_FragColor = texture2D(texture,fract(vUv + uv[no]));
+}
+`;

@@ -19,6 +19,7 @@ import {
 import titleActionsFactory from './actions.title';
 import buttonActionsFactory from './actions.buttons';
 import lightActionsFactory from './actions.lights';
+import backgroundFactory from './actions.background';
 import {
   DONE,
   LEAVING,
@@ -47,6 +48,7 @@ export function canvasCreated(canvas) {
       const titleActions = dispatch(titleActionsFactory());
       const buttonsActions = dispatch(buttonActionsFactory());
       const lightsActions = dispatch(lightActionsFactory());
+      const backgroundActions = dispatch(backgroundFactory());
       const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
       const renderer = createRenderer({ canvas, width, height });
@@ -56,6 +58,9 @@ export function canvasCreated(canvas) {
       });
       const scene3D = createScene();
 
+      for (const object of backgroundActions.createObject3D()) {
+        scene3D.add(object);
+      }
       for (const object of lightsActions.createObject3D()) {
         scene3D.add(object);
       }
@@ -79,6 +84,7 @@ export function canvasCreated(canvas) {
         camera,
       });
       lightsActions.start();
+      backgroundActions.start();
 
       dispatch({
         type: SET_RENDER_ELEMENTS,

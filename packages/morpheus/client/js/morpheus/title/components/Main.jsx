@@ -53,7 +53,6 @@ class Main extends React.Component {
           ...style,
         }}
       >
-        <Background opacity={target} />
         <Title opacity={target} />
         <audio ref={(e) => { this.audio = e; }} autoPlay loop>
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'aac')} type="audio/aac" />

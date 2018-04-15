@@ -26,6 +26,10 @@ import newMap from '../../../image/texture/new.png';
 import newBumpMap from '../../../image/texture/new-bump.png';
 import settingsMap from '../../../image/texture/settings.png';
 import settingBumpMap from '../../../image/texture/settings-bump.png';
+import exitMap from '../../../image/texture/exit.png';
+import exitBumpMap from '../../../image/texture/exit-bump.png';
+import contMap from '../../../image/texture/cont.png';
+import contBumpMap from '../../../image/texture/cont-bump.png';
 
 
 function createButton({
@@ -119,6 +123,8 @@ export default function factory() {
     const objects = {
       newButton: null,
       settingsButton: null,
+      exitButton: null,
+      contButton: null,
     };
 
     const selfie = {
@@ -135,17 +141,26 @@ export default function factory() {
         const mouseIn = {
           newButton: false,
           settingsButton: false,
+          exitButton: false,
+          contButton: false,
         };
         const clickIn = {
           newButton: false,
           settingsButton: false,
+          exitButton: false,
+          contButton: false,
         };
         const slideIn = {
           newButton: false,
           settingsButton: false,
+          exitButton: false,
+          contButton: false,
         };
         const tweens = {
           newButton: null,
+          settingsButton: null,
+          exitButton: null,
+          contButton: null,
         };
 
         const slideInTween = {
@@ -166,10 +181,30 @@ export default function factory() {
             .onComplete(() => {
               slideIn.settingsButton = false;
             }),
+
+          exitButton: new Tween(objects.exitButton.position)
+            .to({
+              x: 0.75,
+            }, 5000)
+            .easing(Easing.Exponential.InOut)
+            .onComplete(() => {
+              slideIn.exitButton = false;
+            }),
+
+          contButton: new Tween(objects.contButton.position)
+            .to({
+              x: -0.75,
+            }, 5000)
+            .easing(Easing.Exponential.InOut)
+            .onComplete(() => {
+              slideIn.contButton = false;
+            }),
         };
 
         setTimeout(() => slideInTween.newButton.start(), 5000);
         setTimeout(() => slideInTween.settingsButton.start(), 5000);
+        setTimeout(() => slideInTween.exitButton.start(), 5000);
+        setTimeout(() => slideInTween.contButton.start(), 5000);
 
         function updatePositionForEvent(e) {
           const location = gameSelectors.location(getState());
@@ -257,17 +292,17 @@ export default function factory() {
 
         function handler(event) {
           updatePositionForEvent(event);
-          ['newButton', 'settingsButton'].forEach(mouseMoveHandlerForButton);
+          ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseMoveHandlerForButton);
         }
 
         function handleMouseDown(event) {
           updatePositionForEvent(event);
-          ['newButton', 'settingsButton'].forEach(mouseDownHandlerForButton);
+          ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseDownHandlerForButton);
         }
 
         function handleMouseUp(event) {
           updatePositionForEvent(event);
-          ['newButton', 'settingsButton'].forEach(mouseUpHandlerForButton);
+          ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseUpHandlerForButton);
         }
         window.document.addEventListener('mousemove', handler);
         window.document.addEventListener('mousedown', handleMouseDown);
@@ -287,7 +322,7 @@ export default function factory() {
           bumpMap: newBumpMap,
           position: {
             x: -2.0,
-            y: -0.4,
+            y: -0.3,
           },
         });
         yield objects.newButton;
@@ -296,10 +331,28 @@ export default function factory() {
           bumpMap: settingBumpMap,
           position: {
             x: 2,
-            y: -0.4,
+            y: -0.3,
           },
         });
         yield objects.settingsButton;
+        objects.exitButton = createButton({
+          map: exitMap,
+          bumpMap: exitBumpMap,
+          position: {
+            x: 2.0,
+            y: -0.7,
+          },
+        });
+        yield objects.exitButton;
+        objects.contButton = createButton({
+          map: contMap,
+          bumpMap: contBumpMap,
+          position: {
+            x: -2,
+            y: -0.7,
+          },
+        });
+        yield objects.contButton;
       },
     };
     return selfie;

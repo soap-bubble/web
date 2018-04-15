@@ -17,7 +17,7 @@ export default function factory() {
       },
       * createObject3D() {
         yield new HemisphereLight(0x443333, 0x221111);
-        spotLight = new SpotLight(0xaa8888, 3);
+        spotLight = new SpotLight(0x886666, 3);
         spotLight.position.set(-0.5, -0.5, 2);
         spotLight.position.multiplyScalar(700);
         spotLight.castShadow = true;

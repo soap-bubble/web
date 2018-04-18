@@ -5,6 +5,7 @@ import {
   MeshPhongMaterial,
   TextureLoader,
   Raycaster,
+  Vector2,
 } from 'three';
 import {
   selectors as gameSelectors,
@@ -16,8 +17,10 @@ import {
 import renderEvents from 'utils/render';
 
 import {
+  singleRippleVertexShader,
+} from './shaders';
+import {
   leaving,
-  done,
 } from './actions';
 import {
   titleDimensions,
@@ -35,6 +38,7 @@ import contBumpMap from '../../../image/texture/cont-bump.png';
 function createButton({
   map,
   bumpMap,
+  uniforms,
   position,
 }) {
   function createGeometry() {
@@ -62,6 +66,8 @@ function createButton({
       bumpScale: 0.1,
       side: DoubleSide,
       transparent: true,
+      vertexShader: singleRippleVertexShader,
+      uniforms,
     });
     return material;
   }
@@ -126,16 +132,18 @@ export default function factory() {
       exitButton: null,
       contButton: null,
     };
-
     const selfie = {
-      start({ camera }) {
+      start({ camera, buttonCallback }) {
         // const newButtonStopWatch = createStopWatch().start();
         let currentClientX = 0;
         let currentClientY = 0;
         const isReturningTween = Symbol('returningTween');
         const buttonActions = {
-          newButton() {
-            dispatch(leaving());
+          newButton(screen) {
+            buttonCallback({
+              name: 'newButton',
+              screen,
+            });
           },
         };
         const mouseIn = {
@@ -163,11 +171,13 @@ export default function factory() {
           contButton: null,
         };
 
+        const WAIT_TIME = 4000;
+        const SLIDE_IN_TIME = 3000;
         const slideInTween = {
           newButton: new Tween(objects.newButton.position)
             .to({
               x: -0.75,
-            }, 5000)
+            }, SLIDE_IN_TIME)
             .easing(Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.newButton = false;
@@ -176,7 +186,7 @@ export default function factory() {
           settingsButton: new Tween(objects.settingsButton.position)
             .to({
               x: 0.75,
-            }, 5000)
+            }, SLIDE_IN_TIME)
             .easing(Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.settingsButton = false;
@@ -185,7 +195,7 @@ export default function factory() {
           exitButton: new Tween(objects.exitButton.position)
             .to({
               x: 0.75,
-            }, 5000)
+            }, SLIDE_IN_TIME)
             .easing(Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.exitButton = false;
@@ -194,17 +204,17 @@ export default function factory() {
           contButton: new Tween(objects.contButton.position)
             .to({
               x: -0.75,
-            }, 5000)
+            }, SLIDE_IN_TIME)
             .easing(Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.contButton = false;
             }),
         };
 
-        setTimeout(() => slideInTween.newButton.start(), 5000);
-        setTimeout(() => slideInTween.settingsButton.start(), 5000);
-        setTimeout(() => slideInTween.exitButton.start(), 5000);
-        setTimeout(() => slideInTween.contButton.start(), 5000);
+        setTimeout(() => slideInTween.newButton.start(), WAIT_TIME);
+        setTimeout(() => slideInTween.settingsButton.start(), WAIT_TIME);
+        setTimeout(() => slideInTween.exitButton.start(), WAIT_TIME);
+        setTimeout(() => slideInTween.contButton.start(), WAIT_TIME);
 
         function updatePositionForEvent(e) {
           const location = gameSelectors.location(getState());
@@ -220,7 +230,11 @@ export default function factory() {
           raycaster.setFromCamera({ x, y }, camera);
           const intersects = raycaster.intersectObject(object3D);
           const isInstersected = !!intersects.length;
-          return isInstersected;
+          return isInstersected ? {
+            screen: { x, y },
+            camera,
+            ...intersects[0],
+          } : null;
         }
 
         function mouseMoveHandlerForButton(name) {
@@ -229,19 +243,6 @@ export default function factory() {
             mouseIn[name] = true;
           } else {
             mouseIn[name] = false;
-            if (!tweens[name]
-              || (tweens[name] && !tweens[name][isReturningTween])) {
-              if (tweens[name] && !tweens[name][isReturningTween]) {
-                tweens[name].stop();
-              }
-              tweens[name] = new Tween(button.position)
-                .to({
-                  z: 0,
-                })
-                .easing(Easing.Exponential.Out)
-                .start();
-              tweens[name][isReturningTween] = true;
-            }
           }
         }
 
@@ -250,15 +251,6 @@ export default function factory() {
           if (!slideIn[name] && hitCheck(button)) {
             clickIn[name] = true;
             mouseIn[name] = true;
-            if (tweens[name]) {
-              tweens[name].stop();
-            }
-            tweens[name] = new Tween(button.position)
-              .to({
-                z: -0.1,
-              })
-              .easing(Easing.Exponential.Out)
-              .start();
           } else {
             mouseIn[name] = false;
           }
@@ -266,25 +258,13 @@ export default function factory() {
 
         function mouseUpHandlerForButton(name) {
           const button = objects[name];
-          if (!slideIn[name] && hitCheck(button)) {
-            if (tweens[name]) {
-              tweens[name].stop();
-            }
-            tweens[name] = new Tween(button.position)
-              .to({
-                z: 0,
-              })
-              .easing(Easing.Exponential.Out)
-              .start();
-
+          const intersection = hitCheck(button);
+          if (!slideIn[name] && intersection) {
             if (clickIn[name]) {
-              tweens[name].onComplete(() => {
-                if (buttonActions[name]) {
-                  buttonActions[name]();
-                }
-              });
+              if (buttonActions[name]) {
+                buttonActions[name](intersection);
+              }
             }
-            tweens[name][isReturningTween] = true;
           } else {
             mouseIn[name] = false;
           }

@@ -2,7 +2,6 @@ import React from 'react';
 import { Tween, Easing } from 'tween';
 import { getAssetUrl } from 'service/gamedb';
 import Title from '../containers/Title';
-import Background from '../containers/Background';
 
 class Main extends React.Component {
   constructor() {
@@ -43,7 +42,7 @@ class Main extends React.Component {
   }
 
   render() {
-    const { style } = this.props;
+    const { style, children } = this.props;
     const { target } = this.state;
 
     return (

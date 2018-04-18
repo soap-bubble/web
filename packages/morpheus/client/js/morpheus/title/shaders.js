@@ -1,5 +1,24 @@
 
+export const renderVertexShader = `
+varying vec2 vUv;
+void main()
+{
+  vUv = uv;
+  gl_Position = vec4( position, 1.0 );
+}
+`;
+
 export const basicVertexShader = `
+varying vec2 vUv;
+void main()
+{
+  vUv = uv;
+  vec4 mvPosition = modelViewMatrix * vec4( position, 1.0 );
+  gl_Position = projectionMatrix * mvPosition;
+}
+`;
+
+export const zWaveVertexShader = `
 uniform float time;
 varying vec2 vUv;
 void main()
@@ -39,7 +58,48 @@ void main() {
 }
 `;
 
-export const rippleFragmentShader = `
+export const singleRippleVertexShader = `
+uniform highp float time;
+uniform highp float freq;
+uniform lowp vec2 center;
+
+varying vec2 vUv;
+
+void main()
+{
+    vUv = uv;
+    vec3 coord = position;
+    highp vec2 p = 1.5 * (vUv-center);
+    highp float len = length(p);
+    coord.z = coord.z + len*freq*max(0.2, 2.0-len)*cos(len*24.0-time*5.0)*0.02;
+    vec4 mvPosition = modelViewMatrix * vec4( coord, 1.0 );
+
+    gl_Position = projectionMatrix * mvPosition;
+}
+`;
+
+export const singleRippleFragmentShader = `
+uniform lowp sampler2D texture;
+uniform highp float time;
+uniform float opacity;
+uniform highp float freq;
+uniform lowp vec2 center;
+
+varying vec2 vUv;
+
+void main()
+{
+    highp vec2 uv;
+    highp vec2 p = 1.5 * (vUv-center);
+    highp float len = length(p);
+    uv = (p/len)*freq*max(0.2, 2.0-len)*cos(len*24.0-time*5.0)*0.02;
+    vec4 mapTexel = texture2D(texture,vUv + uv);
+    mapTexel.a *= opacity;
+    gl_FragColor = mapTexel;
+}
+`;
+
+export const multiRippleFragmentShader = `
 const int no = 5; //set how many splash-points you want
 
 uniform lowp sampler2D texture;

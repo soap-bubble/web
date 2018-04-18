@@ -15,7 +15,7 @@ import {
 } from 'service/gamedb';
 import {
   basicVertexShader as vertexShader,
-  rippleFragmentShader,
+  multiRippleFragmentShader,
 } from './shaders';
 
 function createGeometry() {
@@ -27,7 +27,7 @@ function createMaterial({ uniforms }) {
   const material = new ShaderMaterial({
     uniforms,
     vertexShader,
-    fragmentShader: rippleFragmentShader,
+    fragmentShader: multiRippleFragmentShader,
     transparent: true,
   });
   return material;
@@ -83,14 +83,14 @@ export default function factory() {
           ripples[i].tween = new Tween(ripples[i])
             .to({
               freq: 0.001,
-            }, 10000)
+            }, 7000)
             .easing(Easing.Exponential.Out)
             .start();
         }
         const opacityTween = new Tween(v)
           .to({
             opacity: 1,
-          }, 10000)
+          }, 7000)
           .easing(Easing.Sinusoidal.In);
 
         opacityTween.start();

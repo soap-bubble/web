@@ -59,6 +59,7 @@ const Game = ({
 
 Game.propTypes = {
   isLoggingIn: PropTypes.bool.isRequired,
+  inTitle: PropTypes.bool.isRequired,
   menuOpen: PropTypes.bool.isRequired,
   settingsOpen: PropTypes.bool.isRequired,
   saveOpen: PropTypes.bool.isRequired,

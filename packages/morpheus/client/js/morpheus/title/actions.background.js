@@ -25,11 +25,10 @@ import {
 } from './selectors';
 import {
   basicVertexShader,
-  rippleFragmentShader,
+  multiRippleFragmentShader,
 } from './shaders';
 
 function createBackground({
-  map,
   position,
   uniforms,
 }) {
@@ -43,7 +42,7 @@ function createBackground({
     const material = new ShaderMaterial({
       uniforms,
       vertexShader: basicVertexShader,
-      fragmentShader: rippleFragmentShader,
+      fragmentShader: multiRippleFragmentShader,
     });
     return material;
   }
@@ -53,7 +52,6 @@ function createBackground({
       geometry,
       material,
     );
-    // mesh.scale.set(1, 0.85 * 0.66, 1);
     Object.assign(mesh.position, position);
     return mesh;
   }
@@ -66,7 +64,6 @@ function createBackground({
 
 export default function factory() {
   return (dispatch, getState) => {
-    const raycaster = new Raycaster();
     let uniforms;
     let backgroundPlane;
     const ripples = [];
@@ -85,8 +82,8 @@ export default function factory() {
           ripples[i].tween = new Tween(ripples[i])
             .to({
               freq: 0.01,
-            }, 7500)
-            .easing(Easing.Exponential.Out)
+            }, 6000)
+            .easing(Easing.Quadratic.Out)
             .start();
         }
         const opacityTween = new Tween(v)
@@ -100,9 +97,9 @@ export default function factory() {
         renderEvents.onRender(() => {
           const freq = [];
           const center = [];
-          ripples.forEach((v, i) => {
-            freq[i] = v.freq;
-            center[i] = v.pos;
+          ripples.forEach((r, i) => {
+            freq[i] = r.freq;
+            center[i] = r.pos;
           });
           uniforms.center.value = center;
           uniforms.freq.value = freq;

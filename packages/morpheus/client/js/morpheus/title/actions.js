@@ -1,4 +1,5 @@
 import {
+  Raycaster,
   Scene,
 } from 'three';
 import {
@@ -20,6 +21,7 @@ import titleActionsFactory from './actions.title';
 import buttonActionsFactory from './actions.buttons';
 import lightActionsFactory from './actions.lights';
 import backgroundFactory from './actions.background';
+import dissolveFactory from './actions.dissolve';
 import {
   DONE,
   LEAVING,
@@ -33,13 +35,17 @@ function createScene() {
 }
 
 function startRenderLoop({ scene3D, camera, renderer }) {
+  let sceneToRender = scene3D;
   const render = () => {
-    renderer.render(scene3D, camera);
+    renderer.render(sceneToRender, camera);
   };
   renderEvents.onRender(render);
   renderEvents.onDestroy(() => {
     renderer.dispose();
   });
+  return (newScene) => {
+    sceneToRender = newScene;
+  };
 }
 
 export function canvasCreated(canvas) {
@@ -49,9 +55,17 @@ export function canvasCreated(canvas) {
       const buttonsActions = dispatch(buttonActionsFactory());
       const lightsActions = dispatch(lightActionsFactory());
       const backgroundActions = dispatch(backgroundFactory());
+      const dissolveActions = dispatch(dissolveFactory({
+        canvas,
+      }));
       const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
-      const renderer = createRenderer({ canvas, width, height });
+      const renderer = createRenderer({
+        canvas,
+        width,
+        height,
+        preserveDrawingBuffer: true,
+      });
       positionCamera({
         camera,
         vector3: { z: 2 },
@@ -70,18 +84,32 @@ export function canvasCreated(canvas) {
       for (const object of buttonsActions.createObject3D()) {
         scene3D.add(object);
       }
+      for (const object of dissolveActions.createObject3D()) {
+        scene3D.add(object);
+      }
 
       renderer.shadowMap.enabled = true;
 
-      startRenderLoop({
+      const setNewScene = startRenderLoop({
         scene3D,
         camera,
         renderer,
       });
 
+      const buttonCallback = ({
+        name,
+        screen,
+      }) => {
+        if (name === 'newButton') {
+          dissolveActions.activate(screen);
+          // setNewScene(dissolveActions.scene3D);
+        }
+      };
+
       titleActions.start();
       buttonsActions.start({
         camera,
+        buttonCallback,
       });
       lightsActions.start();
       backgroundActions.start();

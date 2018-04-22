@@ -11,6 +11,7 @@ export const SCENE_TYPE_LIST = {
   5: 'helpMenu',
   6: 'credits',
   7: 'finalCredits',
+  8: 'title',
 };
 
 export function getSceneType(sceneData) {

@@ -6,6 +6,9 @@ import {
   reverse,
   wrap,
 } from 'lodash';
+import {
+  Main,
+} from 'morpheus/title';
 import { createSelector } from 'reselect';
 import {
   selectors as sceneSelectors,
@@ -25,6 +28,7 @@ function createSceneMapper(map) {
 export const createLiveSceneSelector = createSceneMapper({
   panorama: Pano,
   special: Special,
+  title: Main,
 });
 
 export const createEnteringSceneSelector = createSceneMapper({
@@ -34,6 +38,7 @@ export const createEnteringSceneSelector = createSceneMapper({
 export const createExitingSceneSelector = createSceneMapper({
   panorama: Pano,
   special: Special,
+  title: Main,
 });
 
 // wrap...once creates a lazy init selector to break a circular dependency

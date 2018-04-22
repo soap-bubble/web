@@ -93,14 +93,8 @@ export default function factory({ canvas: sourceCanvas }) {
       },
       activate({
         screen,
-        camera,
       }) {
         object3D.position.z = 0.5;
-        // raycaster.setFromCamera(screen, camera);
-        // const intersection = raycaster.intersectObject(object3D, true);
-        // if (intersection) {
-        //   // uniforms.center.value = intersection.uv;
-        // }
         const { x, y } = screen;
         uniforms.center.value = new Vector2((x + 1) / 2, (y + 1) / 2);
         canvas.width = 1024;

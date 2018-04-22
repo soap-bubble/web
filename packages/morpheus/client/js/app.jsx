@@ -21,6 +21,7 @@ import {
   selectors as gamestateSelectors,
  } from 'morpheus/gamestate';
 import {
+  data as titleSceneData,
   actions as titleActions,
 } from 'morpheus/title';
 import { Game, actions as gameActions } from 'morpheus/game';
@@ -48,13 +49,17 @@ window.onload = () => {
     height: window.innerHeight,
   }));
   store.dispatch(gameActions.createUIOverlay());
-  store.dispatch(gameActions.setCursor(0));
-  if (qp.scene) {
-    store.dispatch(gamestateActions.fetchInitial())
-      .then(() => store.dispatch(sceneActions.startAtScene(qp.scene)));
-  } else {
-    store.dispatch(titleActions.start());
-  }
+  store.dispatch(gameActions.setCursor(10000));
+  store.dispatch(gamestateActions.fetchInitial())
+    .then(() => {
+      if (qp.scene) {
+        store.dispatch(sceneActions.startAtScene(qp.scene));
+      } else {
+        store.dispatch(sceneActions.runScene(titleSceneData))
+          .then(() => store.dispatch(titleActions.start()));
+      }
+    });
+
   render(
     <Provider store={store}>
       <Game />

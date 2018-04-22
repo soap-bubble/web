@@ -76,25 +76,29 @@ export function setNextStartAngle(angle) {
   };
 }
 
+export function runScene(scene) {
+  return dispatch => dispatch(castActions.lifecycle.doLoad(scene))
+        .then(() => dispatch(castActions.lifecycle.doEnter(scene)))
+        .then(() => dispatch({
+          type: SCENE_DO_ENTERING,
+          payload: scene,
+        }))
+        .then(() => dispatch(castActions.lifecycle.onStage(scene)))
+        .then(() => {
+          dispatch({
+            type: SCENE_DO_ENTER,
+            payload: scene.sceneId,
+          });
+
+          dispatch(inputActions.enableControl());
+          events.emit(`sceneEnter:${scene.sceneId}`);
+          return scene;
+        });
+}
+
 export function startAtScene(id) {
   return dispatch => dispatch(fetchScene(id))
-      .then(scene => dispatch(castActions.lifecycle.doLoad(scene))
-          .then(() => dispatch(castActions.lifecycle.doEnter(scene)))
-          .then(() => dispatch({
-            type: SCENE_DO_ENTERING,
-            payload: scene,
-          }))
-          .then(() => dispatch(castActions.lifecycle.onStage(scene)))
-          .then(() => {
-            dispatch({
-              type: SCENE_DO_ENTER,
-              payload: scene.sceneId,
-            });
-
-            dispatch(inputActions.enableControl());
-            events.emit(`sceneEnter:${id}`);
-            return scene;
-          }));
+      .then(scene => dispatch(runScene(scene)));
 }
 
 let isTransitioning = false;

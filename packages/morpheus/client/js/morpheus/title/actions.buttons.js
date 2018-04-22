@@ -126,6 +126,7 @@ function createButton({
 export default function factory() {
   return (dispatch, getState) => {
     const raycaster = new Raycaster();
+    let cleanUp = () => {};
     const objects = {
       newButton: null,
       settingsButton: null,
@@ -287,14 +288,12 @@ export default function factory() {
         window.document.addEventListener('mousemove', handler);
         window.document.addEventListener('mousedown', handleMouseDown);
         window.document.addEventListener('mouseup', handleMouseUp);
-        renderEvents.onRender(() => {
-
-        });
-        renderEvents.onDestroy(() => {
+        cleanUp = () => {
           window.document.removeEventListener('mousemove', handler);
           window.document.removeEventListener('mousedown', handleMouseDown);
           window.document.removeEventListener('mouseup', handleMouseUp);
-        });
+        };
+        renderEvents.onDestroy(cleanUp);
       },
       * createObject3D() {
         objects.newButton = createButton({
@@ -333,6 +332,9 @@ export default function factory() {
           },
         });
         yield objects.contButton;
+      },
+      stop() {
+        cleanUp();
       },
     };
     return selfie;

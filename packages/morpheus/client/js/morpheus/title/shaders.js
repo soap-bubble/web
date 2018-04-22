@@ -78,6 +78,7 @@ void main()
 }
 `;
 
+
 export const singleRippleFragmentShader = `
 uniform lowp sampler2D texture;
 uniform highp float time;
@@ -95,6 +96,28 @@ void main()
     uv = (p/len)*freq*max(0.2, 2.0-len)*cos(len*24.0-time*5.0)*0.02;
     vec4 mapTexel = texture2D(texture,vUv + uv);
     mapTexel.a *= opacity;
+    gl_FragColor = mapTexel;
+}
+`;
+
+export const rippleDissolveFragmentShader = `
+uniform lowp sampler2D textureIn;
+uniform lowp sampler2D textureOut;
+uniform highp float time;
+uniform float dissolve;
+uniform highp float freq;
+uniform lowp vec2 center;
+
+varying vec2 vUv;
+
+void main()
+{
+    highp vec2 uv;
+    highp vec2 p = 1.5 * (vUv-center);
+    highp float len = length(p);
+    uv = (p/len)*freq*max(0.2, 2.0-len)*cos(len*24.0-time*5.0)*0.02;
+    vec4 mapTexel = ((1.0 - dissolve) * texture2D(textureIn, vUv + uv))
+      + (dissolve * texture2D(textureOut, vUv + uv));
     gl_FragColor = mapTexel;
 }
 `;

@@ -7,7 +7,7 @@ export default {
       defaultPass: false,
       gesture: 2,
       initiallyEnabled: true,
-      param1: 100000,
+      param1: 2000,
       param2: 0,
       param3: 0,
       rectBottom: 400,

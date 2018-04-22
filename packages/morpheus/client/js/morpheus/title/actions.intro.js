@@ -1,21 +1,32 @@
 import {
   CanvasTexture,
   Mesh,
+  NearestFilter,
   PlaneGeometry,
   ShaderMaterial,
+  VideoTexture,
   Vector2,
 } from 'three';
+import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
 import {
   Tween,
   Easing,
 } from 'tween';
+import { getAssetUrl } from 'service/gamedb';
 import renderEvents from 'utils/render';
+import { createVideo } from 'utils/video';
 import {
+  leaving,
   done,
 } from './actions';
 import {
+  titleDimensions,
+} from './selectors';
+import {
   basicVertexShader,
-  singleRippleFragmentShader,
+  rippleDissolveFragmentShader,
 } from './shaders';
 
 function createGeometry() {
@@ -27,7 +38,7 @@ function createMaterial({ uniforms }) {
   const material = new ShaderMaterial({
     uniforms,
     vertexShader: basicVertexShader,
-    fragmentShader: singleRippleFragmentShader,
+    fragmentShader: rippleDissolveFragmentShader,
     transparent: true,
   });
   return material;
@@ -69,12 +80,19 @@ export default function factory({ canvas: sourceCanvas }) {
     const texture = new CanvasTexture(
       canvas,
     );
+    const video = createVideo(getAssetUrl('GameDB/Deck1/introMOV'));
+
+    const videoTexture = new VideoTexture(
+      video,
+    );
+    videoTexture.minFilter = NearestFilter;
     const uniforms = {
       time: { type: 'f', value: 1.0 },
       center: { type: 'fv2', value: new Vector2(0.0, 0.0) },
       freq: { type: 'fv1', value: 0.0 },
-      opacity: { type: 'f', value: 1.0 },
-      texture: { type: 't', value: texture },
+      dissolve: { type: 'f', value: 0.0 },
+      textureIn: { type: 't', value: texture },
+      textureOut: { type: 't', value: videoTexture },
     };
     let object3D;
 
@@ -112,14 +130,13 @@ export default function factory({ canvas: sourceCanvas }) {
           1024,
         );
 
-
         texture.needsUpdate = true;
         const v = {
-          get opacity() {
-            return uniforms.opacity.value;
+          get dissolve() {
+            return uniforms.dissolve.value;
           },
-          set opacity(value) {
-            uniforms.opacity.value = value;
+          set dissolve(value) {
+            uniforms.dissolve.value = value;
           },
           get freq() {
             return uniforms.freq.value;
@@ -128,23 +145,29 @@ export default function factory({ canvas: sourceCanvas }) {
             uniforms.freq.value = value;
           },
         };
-        const rippleTween = new Tween(v)
+        let rippleTween = new Tween(v)
           .to({
             freq: 3.0,
-          }, 5000)
+          }, 2000)
           .easing(Easing.Exponential.Out)
           .onComplete(() => {
-            dispatch(done());
+            video.play();
+            rippleTween = new Tween(v)
+              .to({
+                freq: 0.0,
+              }, 2000)
+              .easing(Easing.Exponential.Out);
+            rippleTween.start();
           })
           .start();
-        const opacityTween = new Tween(v)
+        const dissolveTween = new Tween(v)
           .to({
-            opacity: 1.0,
-          }, 2000)
-          .easing(Easing.Sinusoidal.In);
+            dissolve: 1.0,
+          }, 4000)
+          .easing(Easing.Sinusoidal.InOut);
 
         rippleTween.start();
-        opacityTween.start();
+        dissolveTween.start();
 
         const startTime = Date.now();
         renderEvents.onRender(() => {
@@ -152,8 +175,36 @@ export default function factory({ canvas: sourceCanvas }) {
         });
         renderEvents.onDestroy(() => {
           rippleTween.stop();
-          opacityTween.stop();
+          dissolveTween.stop();
         });
+
+        let wasMouseDowned = false;
+        function handleMouseDown() {
+          wasMouseDowned = true;
+        }
+
+        let allDone;
+
+        function handleMouseUp() {
+          if (wasMouseDowned) {
+            allDone();
+          }
+        }
+
+        allDone = () => {
+          video.pause();
+          window.document.removeEventListener('mousedown', handleMouseDown);
+          window.document.removeEventListener('mouseup', handleMouseUp);
+          dispatch(done());
+        };
+
+        video.addEventListener('ended', function videoEnded() {
+          video.removeEventListener('ended', videoEnded);
+          allDone();
+        });
+
+        window.document.addEventListener('mousedown', handleMouseDown);
+        window.document.addEventListener('mouseup', handleMouseUp);
       },
     };
     return selfie;

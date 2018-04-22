@@ -21,7 +21,7 @@ import titleActionsFactory from './actions.title';
 import buttonActionsFactory from './actions.buttons';
 import lightActionsFactory from './actions.lights';
 import backgroundFactory from './actions.background';
-import dissolveFactory from './actions.dissolve';
+import introFactory from './actions.intro';
 import {
   DONE,
   LEAVING,
@@ -48,6 +48,18 @@ function startRenderLoop({ scene3D, camera, renderer }) {
   };
 }
 
+export function leaving() {
+  return {
+    type: LEAVING,
+  };
+}
+
+export function start() {
+  return {
+    type: START,
+  };
+}
+
 export function canvasCreated(canvas) {
   return (dispatch, getState) => {
     if (canvas) {
@@ -55,7 +67,7 @@ export function canvasCreated(canvas) {
       const buttonsActions = dispatch(buttonActionsFactory());
       const lightsActions = dispatch(lightActionsFactory());
       const backgroundActions = dispatch(backgroundFactory());
-      const dissolveActions = dispatch(dissolveFactory({
+      const introActions = dispatch(introFactory({
         canvas,
       }));
       const { width, height } = titleDimensions(getState());
@@ -84,13 +96,13 @@ export function canvasCreated(canvas) {
       for (const object of buttonsActions.createObject3D()) {
         scene3D.add(object);
       }
-      for (const object of dissolveActions.createObject3D()) {
+      for (const object of introActions.createObject3D()) {
         scene3D.add(object);
       }
 
       renderer.shadowMap.enabled = true;
 
-      const setNewScene = startRenderLoop({
+      startRenderLoop({
         scene3D,
         camera,
         renderer,
@@ -101,7 +113,9 @@ export function canvasCreated(canvas) {
         screen,
       }) => {
         if (name === 'newButton') {
-          dissolveActions.activate(screen);
+          introActions.activate(screen);
+          dispatch(leaving());
+          buttonsActions.stop();
           // setNewScene(dissolveActions.scene3D);
         }
       };
@@ -125,22 +139,10 @@ export function canvasCreated(canvas) {
   };
 }
 
-export function leaving() {
-  return {
-    type: LEAVING,
-  };
-}
-
-export function start() {
-  return {
-    type: START,
-  };
-}
-
 export function done() {
   return (dispatch) => {
     dispatch(gamestateActions.fetchInitial())
-      .then(() => dispatch(sceneActions.startAtScene(100000)))
+      .then(() => dispatch(sceneActions.startAtScene(2000)))
       .then(() => {
         dispatch({
           type: DONE,

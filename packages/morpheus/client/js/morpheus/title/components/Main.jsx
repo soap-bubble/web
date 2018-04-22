@@ -19,7 +19,6 @@ class Main extends React.Component {
   }
 
   fadeOut() {
-    const { done } = this.props;
     const { isLeaving } = this.state;
     if (!isLeaving) {
       const v = { target: 1 };
@@ -30,11 +29,10 @@ class Main extends React.Component {
         .easing(Easing.Sinusoidal.Out)
         .onUpdate(() => {
           this.audio.volume = v.target;
-          this.setState({
-            target: v.target,
-          });
-        })
-        .onComplete(done);
+          // this.setState({
+          //   target: v.target,
+          // });
+        });
 
       tween.start();
       this.setState({ isLeaving: true });
@@ -42,7 +40,7 @@ class Main extends React.Component {
   }
 
   render() {
-    const { style, children } = this.props;
+    const { style } = this.props;
     const { target } = this.state;
 
     return (

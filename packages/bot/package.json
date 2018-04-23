@@ -1,10 +1,10 @@
 {
   "name": "@soapbubble/bot",
-  "version": "1.5.0",
+  "version": "1.5.2",
   "description": "Morpheus bot",
   "main": "dist/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "exit 0",
     "build": "babel -d dist lib",
     "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"nodemon dist/index.js --watch dist | bunyan\""
   },

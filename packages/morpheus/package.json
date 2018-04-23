@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/morpheus",
-  "version": "1.5.1",
+  "version": "1.5.2",
   "description": "",
   "main": "lib/index.js",
   "private": true,
@@ -102,8 +102,8 @@
     "whatwg-fetch": "^2.0.2"
   },
   "dependencies": {
-    "@soapbubble/components": "^1.5.1",
-    "@soapbubble/style": "^1.5.0",
+    "@soapbubble/components": "^1.5.2",
+    "@soapbubble/style": "^1.5.2",
     "axios": "^0.12.0",
     "babel-polyfill": "^6.26.0",
     "bluebird": "^3.4.7",

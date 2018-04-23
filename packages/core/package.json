@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/core",
-  "version": "1.5.0",
+  "version": "1.5.1",
   "description": "The root soapbubble.online site",
   "private": true,
   "repository": {
@@ -22,7 +22,7 @@
     "start:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
   "dependencies": {
-    "@soapbubble/components": "^1.5.0",
+    "@soapbubble/components": "^1.5.1",
     "@soapbubble/style": "^1.5.0",
     "axios": "^0.16.2",
     "babel-polyfill": "^6.20.0",

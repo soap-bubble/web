@@ -3,6 +3,9 @@
   "version": "1.5.2",
   "description": "Morpheus bot",
   "main": "dist/index.js",
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "test": "exit 0",
     "build": "babel -d dist lib",

@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/bot",
-  "version": "0.0.1",
+  "version": "1.5.0",
   "description": "Morpheus bot",
   "main": "dist/index.js",
   "scripts": {

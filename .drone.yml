@@ -1,14 +1,15 @@
 pipeline:
-  build:
+  install:
     image: node:boron
     commands:
-      - lerna bootstrap
+      - npm install
+      - npm run bootstrap
     when:
       event: [ push, pull_request ]
 
   test:
     image: node:boron
     commands:
-      - lerna run test
+      - npm test
     when:
       event: [ push, pull_request ]

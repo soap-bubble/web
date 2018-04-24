@@ -5,6 +5,8 @@
     "spawn-sync": "^1.0.15"
   },
   "scripts": {
+    "bootstrap": "lerna bootstrap",
+    "test": "lerna run test",
     "build:production": "lerna exec npm run build:production",
     "start:dev": "lerna exec npm run start:dev --parallel",
     "release": "node ./scripts/release"

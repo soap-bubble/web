@@ -1,0 +1,14 @@
+pipeline:
+  build:
+    image: node:boron
+    commands:
+      - lerna bootstrap
+    when:
+      event: [ push, pull_request ]
+
+  test:
+    image: node:boron
+    commands:
+      - lerna run test
+    when:
+      event: [ push, pull_request ]

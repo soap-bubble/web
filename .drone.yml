@@ -10,6 +10,7 @@ pipeline:
   test:
     image: node:boron
     commands:
-      - npm test
+      - lerna exec --scope=@soapbubble/morpheus -- npm ls @soapbubble/component
+s
     when:
       event: [ push, pull_request ]

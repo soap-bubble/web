@@ -6,7 +6,7 @@
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "test": "lerna run test",
+    "test": "lerna exec --scope=@soapbubble/morpheus -- node -e \"require('@soapbubble/components')\"",
     "build:production": "lerna exec npm run build:production",
     "start:dev": "lerna exec npm run start:dev --parallel",
     "release": "node ./scripts/release"

@@ -7,6 +7,7 @@ pipeline:
     when:
       event: [ push, pull_request ]
 
+
   test:
     image: node:boron
     commands:

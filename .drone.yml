@@ -3,7 +3,7 @@ pipeline:
     image: node:boron
     commands:
       - npm install
-      - npm run bootstrap
+      - ./node_modules/.bin/lerna bootstrap
     when:
       event: [ push, pull_request ]
 

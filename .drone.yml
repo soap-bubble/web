@@ -3,7 +3,7 @@ pipeline:
     image: node:boron
     commands:
       - npm install
-      - ./node_modules/.bin/lerna bootstrap
+      - ./node_modules/.bin/lerna bootstrap --loglevel silly
     when:
       event: [ push, pull_request ]
 

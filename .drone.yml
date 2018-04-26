@@ -3,7 +3,7 @@ pipeline:
     image: node:boron
     commands:
       - npm install
-      - ./node_modules/.bin/lerna bootstrap --loglevel silly
+      - ./node_modules/.bin/lerna bootstrap
     when:
       event: [ push, pull_request ]
 
@@ -11,6 +11,6 @@ pipeline:
   test:
     image: node:boron
     commands:
-      - npm test
+      - ls -la packages/morpheus/node_modules/@soapbubble
     when:
       event: [ push, pull_request ]

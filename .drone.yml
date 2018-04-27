@@ -11,6 +11,7 @@ pipeline:
   test:
     image: node:boron
     commands:
-      - ls -la packages/morpheus/node_modules/@soapbubble
+      - ls -la packages/morpheus/node_modules/@soapbubble/components
+      - cat packages/morpheus/node_modules/@soapbubble/components/package.json
     when:
       event: [ push, pull_request ]

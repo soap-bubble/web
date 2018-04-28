@@ -17,7 +17,6 @@ pipeline:
   test:
     image: node:boron
     commands:
-      - ls -la packages/morpheus/node_modules/@soapbubble/components/dist
-      - cat packages/morpheus/node_modules/@soapbubble/components/package.json
+      - ./node_modules/.bin/lerna run test
     when:
       event: [ push, pull_request ]

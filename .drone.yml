@@ -20,3 +20,10 @@ pipeline:
       - ./node_modules/.bin/lerna run test
     when:
       event: [ push, pull_request ]
+
+  docker:
+    image: node:boron
+    commands:
+      - npm run docker
+    when:
+      event: [ push, pull_request ]

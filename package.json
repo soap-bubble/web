@@ -9,7 +9,8 @@
     "test": "lerna run --scope=@soapbubble/morpheus test",
     "build:production": "lerna exec npm run build:production",
     "start:dev": "lerna exec npm run start:dev --parallel",
-    "release": "node ./scripts/release"
+    "release": "node ./scripts/release",
+    "docker": "node ./scripts/docker"
   },
   "dependencies": {}
 }

@@ -21,9 +21,14 @@ pipeline:
     when:
       event: [ push, pull_request ]
 
-  docker:
-    image: node:boron
-    commands:
-      - npm run docker
+  docker_morpheus:
+    image: plugins/docker
+    registry: docker.soapbubble.online:5000
+    repo: docker.soapbubble.online:5000/soapbubble/morpheus
+    context: packages/morpheus
+    dockerfile: packages/morpheus/Dockerfile
+    tag: ${DRONE_COMMIT_SHA:0:7}
+    secrets: [ docker_username, docker_password ]
     when:
-      event: [ push, pull_request ]
+      branch: master
+      event: push

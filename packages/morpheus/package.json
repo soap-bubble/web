@@ -8,7 +8,7 @@
     "test": "node test",
     "test:play": "jest playthrough",
     "test:play:local": "cross-env NO_LAUNCH=true jest playthrough",
-    "build:production": "npm run build:server && npm run build:client:production",
+    "build": "npm run build:server && npm run build:client:production",
     "build:server": "babel server -d lib --copy-files",
     "build:client": "webpack --env",
     "build:client:production": "webpack --env.production=true",

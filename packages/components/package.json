@@ -10,9 +10,9 @@
   "scripts": {
     "test": "exit 0",
     "lint": "eslint",
-    "build:production": "webpack --env.production=true",
+    "build": "webpack --env.production=true",
     "start:dev": "webpack --env.development=true --watch",
-    "prepublishOnly": "npm run build:production"
+    "prepublishOnly": "npm run build"
   },
   "author": "John Dean <john.holmes.dean@gmail.com>",
   "license": "MIT",

@@ -9,8 +9,8 @@
   "scripts": {
     "test": "exit 0",
     "webpack": "webpack",
-    "build:production": "npm run webpack -- --env.production=true",
-    "prepublishOnly": "npm run build:production",
+    "build": "npm run webpack -- --env.production=true",
+    "prepublishOnly": "npm run build",
     "start:dev": "npm run webpack -- --env --watch"
   },
   "files": [

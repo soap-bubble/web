@@ -32,3 +32,27 @@ pipeline:
     when:
       branch: master
       event: push
+
+  docker_auth:
+    image: plugins/docker
+    registry: docker.soapbubble.online:5000
+    repo: docker.soapbubble.online:5000/soapbubble/auth
+    context: packages/auth
+    dockerfile: packages/auth/Dockerfile
+    tag: ${DRONE_COMMIT_SHA:0:7}
+    secrets: [ docker_username, docker_password ]
+    when:
+      branch: master
+      event: push
+
+  docker_core:
+    image: plugins/docker
+    registry: docker.soapbubble.online:5000
+    repo: docker.soapbubble.online:5000/soapbubble/core
+    context: packages/core
+    dockerfile: packages/core/Dockerfile
+    tag: ${DRONE_COMMIT_SHA:0:7}
+    secrets: [ docker_username, docker_password ]
+    when:
+      branch: master
+      event: push

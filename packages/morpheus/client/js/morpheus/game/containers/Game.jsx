@@ -24,6 +24,7 @@ function mapStateToProps(state) {
 
 const Game = ({
   casts,
+  className,
   style,
   menuOpen,
   settingsOpen,
@@ -43,7 +44,7 @@ const Game = ({
   if (saveOpen) {
     menu.push(<SaveList />);
   }
-  return (<div style={style}>
+  return (<div className={className} style={style}>
     {casts}
     <Mouse />
     {menu}

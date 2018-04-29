@@ -8,7 +8,16 @@
 }
 
 body {
-  overflow:hidden;
+  overflow: hidden;
+}
+
+#root {
+  background-color: rgb(0, 0, 0);
+  height: 100vh;
+}
+
+.game {
+
 }
 
 canvas {
@@ -30,7 +39,7 @@ video.MovieSpecialCast {
 
 .main-title {
   position: absolute;
-  background-color: rgb(208, 225, 254);
+  background-color: rgb(0,0,0);
 }
 
 .background {

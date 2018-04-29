@@ -71,11 +71,11 @@ export default function factory() {
     const selfie = {
       start() {
         const v = {
-          get opacity() {
-            return uniforms.opacity.value;
+          get fade() {
+            return uniforms.fade.value;
           },
-          set opacity(value) {
-            uniforms.opacity.value = value;
+          set fade(value) {
+            uniforms.fade.value = value;
           },
         };
         for (let i = 0; i < 5; i++) {
@@ -86,13 +86,13 @@ export default function factory() {
             .easing(Easing.Quadratic.Out)
             .start();
         }
-        const opacityTween = new Tween(v)
+        const fadeTween = new Tween(v)
           .to({
-            opacity: 1,
+            fade: 1.0,
           }, 2000)
           .easing(Easing.Sinusoidal.In);
 
-        opacityTween.start();
+        fadeTween.start();
         const startTime = Date.now();
         renderEvents.onRender(() => {
           const freq = [];
@@ -120,7 +120,8 @@ export default function factory() {
           time: { type: 'f', value: 1.0 },
           center: { type: 'fv2', value: [] },
           freq: { type: 'fv1', value: [] },
-          opacity: { type: 'f', value: 0.0 },
+          opacity: { type: 'f', value: 1.0 },
+          fade: { type: 'f', value: 0.0 },
           texture: { type: 't', value: createTexture() },
         };
         for (let i = 0; i < 5; i++) {

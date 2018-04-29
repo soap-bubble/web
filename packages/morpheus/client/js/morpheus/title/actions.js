@@ -78,6 +78,7 @@ export function canvasCreated(canvas) {
         height,
         preserveDrawingBuffer: true,
       });
+
       positionCamera({
         camera,
         vector3: { z: 2 },

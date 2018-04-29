@@ -62,7 +62,7 @@ window.onload = () => {
 
   render(
     <Provider store={store}>
-      <Game />
+      <Game className="game" />
     </Provider>,
     document.getElementById('root'),
   );

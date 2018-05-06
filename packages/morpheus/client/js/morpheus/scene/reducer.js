@@ -11,6 +11,7 @@ import {
   SET_NEXT_START_ANGLE,
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
+  SCENE_LOAD_ERROR,
 } from './actionTypes';
 
 const CURRENT_SCENE_STACK_SIZE = 5;
@@ -39,6 +40,12 @@ const reducer = createReducer('scene', defaultState, {
       return state.setIn(['cache', sceneId], {
         status: 'loading',
       });
+    }
+    return state;
+  },
+  [SCENE_LOAD_ERROR](state, { payload: sceneId }) {
+    if (!state.getIn(['cache', sceneId])) {
+      return state.delete(['cache', sceneId]);
     }
     return state;
   },

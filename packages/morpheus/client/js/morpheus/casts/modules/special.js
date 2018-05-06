@@ -467,21 +467,22 @@ export const delegate = memoize((scene) => {
             autoplay: true,
             onerror: reject,
           });
-          const {
-            nextSceneId,
-            angleAtEnd,
-            dissolveToNextScene,
-          } = movieCast;
           video.classList.add('MovieSpecialCast');
           function onSoundEnded() {
             let startAngle;
+            const {
+              nextSceneId,
+              angleAtEnd,
+              dissolveToNextScene,
+            } = movieCast;
             video.removeEventListener('ended', onSoundEnded);
             if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
               if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
                 startAngle = (angleAtEnd * Math.PI) / 1800;
                 startAngle -= Math.PI - (Math.PI / 6);
               }
-              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
+              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
+                .catch(() => console.error('Failed to load scene', nextSceneId));
               dispatch(sceneActions.setNextStartAngle(startAngle));
             }
           }

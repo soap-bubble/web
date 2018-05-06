@@ -106,7 +106,6 @@ export class MovieSpecialCast extends MovieCast {
       },
       startFrame: Number,
       endFrame: Number,
-      actionEnd: Number,
       scale: Number,
       looping: Boolean,
       dissolveToNextScene: Boolean,
@@ -114,6 +113,7 @@ export class MovieSpecialCast extends MovieCast {
       angleAtEnd: Number,
       audioOnly: Boolean,
       image: Boolean,
+      actionAtEnd: Number,
     });
   }
 }

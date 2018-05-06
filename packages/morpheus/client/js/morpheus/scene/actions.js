@@ -13,6 +13,7 @@ import {
 
 import {
   SCENE_LOAD_START,
+  SCENE_LOAD_ERROR,
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
@@ -98,7 +99,14 @@ export function runScene(scene) {
 
 export function startAtScene(id) {
   return dispatch => dispatch(fetchScene(id))
-      .then(scene => dispatch(runScene(scene)));
+      .then(scene => dispatch(runScene(scene)))
+      .catch((error) => {
+        dispatch(inputActions.enableControl());
+        dispatch({
+          type: SCENE_LOAD_ERROR,
+          error,
+        });
+      });
 }
 
 let isTransitioning = false;

@@ -84,6 +84,49 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
         }
         break;
       }
+      case 'Rotate': {
+        const {
+          param1,
+          param2,
+          param3,
+          rectRight,
+          rectLeft,
+          rectBottom,
+          rectTop,
+        } = hotspot;
+        const gs = gamestates.byId(param1);
+        const {
+          maxValue,
+          minValue,
+        } = gs;
+        let {
+          value,
+        } = gs;
+        const centerX = (rectRight + rectLeft) / 2;
+        const centerY = (rectBottom + rectTop) / 2;
+        let angle = Math.atan2(currentPosition.left - centerX,
+                        centerY - currentPosition.top);
+        angle = ((180 * angle) / Math.PI) - param2;
+        while (angle < 0) {
+          angle += 360;
+        }
+
+        if (angle > param3 - param2) {
+          angle = 360 - angle > angle - param3 ?
+                param3 - param2 :
+                0;
+        }
+
+        const currAngle = (param3 - param2) * ((value - minValue) /
+                  (maxValue - minValue));
+
+        if (angle - currAngle < 90 && angle - currAngle > -90) {
+          const ratio = angle / (param3 - param2);
+          value = minValue + ((maxValue - minValue) * ratio) + 0.5;
+          dispatch(updateGameState(param1, Math.floor(value)));
+        }
+        break;
+      }
       case 'IncrementState': {
         const { param1: gamestateId } = hotspot;
         const gs = gamestates.byId(gamestateId);
@@ -238,7 +281,6 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
         dispatch(updateGameState(param1, Math.round(value)));
         break;
       }
-      case 'Rotate':
       case 'NoAction': {
         break;
       }
@@ -259,7 +301,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
 export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }) {
   return async (dispatch, getState) => {
     const currentScene = sceneSelectors.currentSceneData(getState());
-    const scene3D = castSelectors.forScene(currentScene).pano.panoScene3D(getState());
+    const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
     if (scene3D) {
       dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
     }

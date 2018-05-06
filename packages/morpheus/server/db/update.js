@@ -43,6 +43,23 @@ export default function update() {
         cast.nextSceneId = 421065;
         return cast.save();
       }))
+    .then(() => getModel('MovieSpecialCast').find({
+      actionAtEnd: { $lt: -1 },
+    }).exec()
+      .map((cast) => {
+        if (
+          cast.looping === true
+          && cast.nextSceneId === 0
+          && cast.startFrame === -cast.actionAtEnd
+        ) {
+          return Promise.resolve();
+        }
+        logger.info(`Patching negative actionAtEnd cast ${cast.castId}`);
+        cast.looping = true;
+        cast.nextSceneId = 0;
+        cast.startFrame = -cast.actionAtEnd;
+        return cast.save();
+      }))
     .then(() => getModel('Cast').find({
       castId: 421058,
     }).exec()

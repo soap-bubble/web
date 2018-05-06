@@ -130,6 +130,11 @@ export default function ({ dispatch, scene }) {
       await dispatch(castActionsForScene.special.update(scene));
     });
 
+
+    if (wasMouseUpped) {
+      clickStartPos = { top: -1, left: -1 };
+    }
+
     wasInHotspots = nowInHotspots;
     wasMouseMoved = false;
     wasMouseUpped = false;

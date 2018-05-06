@@ -18,7 +18,7 @@ export const actionType = Object.keys(ACTION_TYPES).reduce((memo, curr) => {
   return memo;
 }, {});
 
-export function hotspotRectMatchesPosition({ top, left }) {
+export function hotspotRectMatchesPosition({ top, left } = {}) {
   return ({
     rectTop,
     rectBottom,

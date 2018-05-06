@@ -74,6 +74,7 @@ export function resolveCursor({
               hotspotRectMatchesPosition(startingPosition),
               or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
               or(
+                actionType.isRotate,
                 actionType.isHorizSlider,
                 actionType.isVertSlider,
                 actionType.isTwoAxisSlider,
@@ -84,7 +85,7 @@ export function resolveCursor({
           if (hotspot.type >= 5 && hotspot.type <= 8) {
             if (isMouseDown) {
               cursor = CURSOR_IDS.CLOSED;
-            } else {
+            } else if (!isMouseDown) {
               cursor = CURSOR_IDS.OPEN;
             }
           } else {
@@ -171,6 +172,7 @@ export function handleEventFactory() {
               hotspotRectMatchesPosition(startingPosition),
               or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
               or(
+                actionType.isRotate,
                 actionType.isHorizSlider,
                 actionType.isVertSlider,
                 actionType.isTwoAxisSlider,

@@ -6,7 +6,6 @@ import { get as getModel } from './install';
 
 const logger = bunyan.createLogger({ name: 'primeDb' });
 Promise.promisifyAll(fs);
-
 export default function update() {
   return getModel('Cast').find({
     fileName: { $regex: /(.*\/deck1\/.*)/ },
@@ -24,6 +23,17 @@ export default function update() {
         cast.fileName = cast.fileName.replace('harem', 'Harem');
         return cast.save();
       }))
+      .then(() => getModel('Cast').find({
+        fileName: 'GameDB/Deck3Aft/herbbutTOM',
+      }).exec()
+        .map((cast) => {
+          if (cast.audioOnly) {
+            return Promise.resolve();
+          }
+          logger.info('Patching herbbutTOM to be audio');
+          cast.audioOnly = true;
+          return cast.save();
+        }))
     .then(() => getModel('Cast').find({
       fileName: { $regex: /(.*\/cargoH\/.*)/ },
     }).exec()

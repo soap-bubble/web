@@ -335,7 +335,8 @@ export function selectors(scene) {
 
   const selectSoundCasts = createSelector(
     selectAllMovieCasts,
-    extraCasts => extraCasts.filter(c => c.audioOnly),
+    selectControlledCastsData,
+    (extraCasts, controlledCasts) => controlledCasts.concat(extraCasts).filter(c => c.audioOnly),
   );
 
   const selectHotspotsData = createSelector(
@@ -506,6 +507,7 @@ export const delegate = memoize((scene) => {
           }))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
+        .filter(cast => !cast.audioOnly)
         .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))
           .then(img => ({
             el: img,

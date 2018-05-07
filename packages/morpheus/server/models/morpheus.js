@@ -72,6 +72,7 @@ export class ControlledMovieCast extends MovieCast {
       },
       companionMovieCastId: Number,
       scale: Number,
+      audioOnly: Boolean,
       controlledMovieCallbacks: [{
         frames: Number,
         direction: Number,

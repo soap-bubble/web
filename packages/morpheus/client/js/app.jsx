@@ -4,8 +4,6 @@ import { render } from 'react-dom';
 import { Provider } from 'react-redux';
 import qs from 'query-string';
 import keycode from 'keycode';
-import Tween from 'tween';
-
 // Loads all modules
 import 'morpheus';
 

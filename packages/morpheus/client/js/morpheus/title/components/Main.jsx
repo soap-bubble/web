@@ -1,7 +1,9 @@
 import React from 'react';
+import cx from 'classnames';
 import { Tween, Easing } from 'tween';
 import { getAssetUrl } from 'service/gamedb';
 import Title from '../containers/Title';
+import PlayOverlay from './PlayOverlay';
 
 class Main extends React.Component {
   constructor() {
@@ -9,7 +11,9 @@ class Main extends React.Component {
     this.state = {
       isLeaving: false,
       target: 1,
+      started: false,
     };
+    this.onPlayClicked = this.onPlayClicked.bind(this);
   }
 
   componentWillReceiveProps(nextProps) {
@@ -39,19 +43,32 @@ class Main extends React.Component {
     }
   }
 
+  onPlayClicked() {
+    this.setState({
+      started: true,
+    });
+    this.audio.play();
+  }
+
   render() {
     const { style } = this.props;
-    const { target } = this.state;
+    const {
+      target,
+      started,
+    } = this.state;
 
     return (
       <div
-        className="main-title"
+        className={cx('main-title', {
+          'request-play': started,
+        })}
         style={{
           ...style,
         }}
       >
-        <Title opacity={target} />
-        <audio ref={(e) => { this.audio = e; }} autoPlay loop>
+        {started ? <Title opacity={target} /> : null}
+        {!started ? <PlayOverlay onClick={this.onPlayClicked} /> : null}
+        <audio ref={(e) => { this.audio = e; }} loop>
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'aac')} type="audio/aac" />
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'mp3')} type="audio/mp3" />
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'ogg')} type="audio/ogg" />

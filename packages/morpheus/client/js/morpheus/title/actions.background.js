@@ -63,7 +63,7 @@ function createBackground({
 }
 
 export default function factory() {
-  return (dispatch, getState) => {
+  return () => {
     let uniforms;
     let backgroundPlane;
     const ripples = [];

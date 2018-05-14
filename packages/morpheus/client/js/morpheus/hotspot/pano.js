@@ -47,11 +47,12 @@ export default function ({
   let wasMouseDowned = false;
   let wasMouseMoved = false;
   let wasMouseUpped = false;
+  let lastTouchPosition;
 
-  function update({ clientX, clientY }, isTouch) {
+  function update({ clientX, clientY }, isTouch, isTouchEnd) {
     const location = gameSelectors.location(store.getState());
 
-    const currentSreenPosition = {
+    const currentSreenPosition = isTouchEnd ? lastTouchPosition : {
       top: clientY - location.y,
       left: clientX - location.x,
     };
@@ -153,6 +154,10 @@ export default function ({
         wasMouseUpped = false;
         wasMouseDowned = false;
 
+        if (isTouch) {
+          lastTouchPosition = currentSreenPosition;
+        }
+
         // Update cursor location and icon
         actionQueue.add(() => dispatch(gameActions.setCursorLocation(currentSreenPosition)));
 
@@ -183,12 +188,9 @@ export default function ({
     }
   }
 
-  function onTouchEnd(touchEvent) {
-    const { touches } = touchEvent;
-    if (touches.length) {
-      wasMouseUpped = true;
-      rememberEvent(touches[0], true);
-    }
+  function onTouchEnd() {
+    wasMouseUpped = true;
+    rememberEvent({}, true, true);
   }
 
   function onTouchCancel() {

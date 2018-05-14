@@ -43,9 +43,10 @@ export default function ({ dispatch, scene }) {
   let wasMouseMoved = false;
   let wasMouseUpped = false;
   let mouseDown = false;
+  let lastTouchPosition;
   let lastMouseDown;
 
-  function updateState({ clientX, clientY }) {
+  function updateState({ clientX, clientY }, isTouchEnd) {
     const state = store.getState();
     const inputEnabled = inputSelectors.enabled(state);
     if (!inputEnabled) {
@@ -60,8 +61,8 @@ export default function ({ dispatch, scene }) {
       return;
     }
     const nowInHotspots = [];
-    const left = clientX - location.x;
-    const top = clientY - location.y;
+    const left = isTouchEnd ? lastTouchPosition.left : (clientX - location.x);
+    const top = isTouchEnd ? lastTouchPosition.top : (clientY - location.y);
 
     const newWidth = gameSelectors.width(store.getState());
     const newHeight = gameSelectors.height(store.getState());
@@ -139,6 +140,10 @@ export default function ({ dispatch, scene }) {
     wasMouseMoved = false;
     wasMouseUpped = false;
     wasMouseDowned = false;
+    lastTouchPosition = {
+      top: clientX,
+      left: clientY,
+    };
   }
 
   function onMouseDown(mouseEvent) {
@@ -173,7 +178,7 @@ export default function ({ dispatch, scene }) {
   function onTouchEnd({ touches }) {
     if (touches.length) {
       wasMouseUpped = true;
-      updateState(touches[0]);
+      updateState({}, true);
     }
   }
 

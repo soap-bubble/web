@@ -193,10 +193,6 @@ export default function ({
     rememberEvent({}, true, true);
   }
 
-  function onTouchCancel() {
-
-  }
-
   function onMouseUp(mouseEvent) {
     wasMouseUpped = true;
     rememberEvent(mouseEvent);
@@ -219,6 +215,6 @@ export default function ({
     onTouchStart,
     onTouchMove,
     onTouchEnd,
-    onTouchCancel,
+    onTouchCancel: () => {},
   };
 }

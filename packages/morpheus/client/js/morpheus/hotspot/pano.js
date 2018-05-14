@@ -48,7 +48,7 @@ export default function ({
   let wasMouseMoved = false;
   let wasMouseUpped = false;
 
-  function update({ clientX, clientY }) {
+  function update({ clientX, clientY }, isTouch) {
     const location = gameSelectors.location(store.getState());
 
     const currentSreenPosition = {
@@ -128,8 +128,9 @@ export default function ({
           ((currentSreenPosition.left - startingScreenPosition.left) ** 2)
           + ((currentSreenPosition.top - startingScreenPosition.top) ** 2),
         );
+        const debounceDistance = isTouch ? 80 : 20;
         const isClick = wasMouseUpped
-          && (Date.now() - lastMouseDown < 500) && interactionDistance < 20;
+          && (Date.now() - lastMouseDown < 500) && interactionDistance < debounceDistance;
 
         actionQueue.add(() => dispatch(handleEvent({
           currentPosition: currentPanoPosition,
@@ -162,15 +163,15 @@ export default function ({
     });
   }
 
-  function rememberEvent(mouseEvent) {
-    update(mouseEvent);
+  function rememberEvent(mouseEvent, isTouch) {
+    update(mouseEvent, isTouch);
   }
 
   function onTouchStart(touchEvent) {
     const { touches } = touchEvent;
     if (touches.length) {
       wasMouseDowned = true;
-      rememberEvent(touches[0]);
+      rememberEvent(touches[0], true);
     }
   }
 
@@ -178,7 +179,7 @@ export default function ({
     const { touches } = touchEvent;
     if (touches.length) {
       wasMouseMoved = true;
-      rememberEvent(touches[0]);
+      rememberEvent(touches[0], true);
     }
   }
 
@@ -186,7 +187,7 @@ export default function ({
     const { touches } = touchEvent;
     if (touches.length) {
       wasMouseUpped = true;
-      rememberEvent(touches[0]);
+      rememberEvent(touches[0], true);
     }
   }
 

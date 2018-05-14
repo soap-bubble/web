@@ -285,13 +285,40 @@ export default function factory() {
           updatePositionForEvent(event);
           ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseUpHandlerForButton);
         }
+
+        function onTouchStart({ touches }) {
+          if (touches.length) {
+            updatePositionForEvent(touches[0]);
+            ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseDownHandlerForButton);
+          }
+        }
+
+        function onTouchMove({ touches }) {
+          if (touches.length) {
+            updatePositionForEvent(touches[0]);
+            ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseMoveHandlerForButton);
+          }
+        }
+
+        function onTouchEnd({ touches }) {
+          if (touches.length) {
+            updatePositionForEvent(touches[0]);
+            ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseUpHandlerForButton);
+          }
+        }
         window.document.addEventListener('mousemove', handler);
         window.document.addEventListener('mousedown', handleMouseDown);
         window.document.addEventListener('mouseup', handleMouseUp);
+        window.document.addEventListener('touchstart', onTouchStart);
+        window.document.addEventListener('touchmove', onTouchMove);
+        window.document.addEventListener('touchend', onTouchEnd);
         cleanUp = () => {
           window.document.removeEventListener('mousemove', handler);
           window.document.removeEventListener('mousedown', handleMouseDown);
           window.document.removeEventListener('mouseup', handleMouseUp);
+          window.document.removeEventListener('touchstart', onTouchStart);
+          window.document.removeEventListener('touchmove', onTouchMove);
+          window.document.removeEventListener('touchend', onTouchEnd);
         };
         renderEvents.onDestroy(cleanUp);
       },

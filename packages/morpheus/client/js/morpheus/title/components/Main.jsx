@@ -4,6 +4,9 @@ import { Tween, Easing } from 'tween';
 import { getAssetUrl } from 'service/gamedb';
 import Title from '../containers/Title';
 import PlayOverlay from './PlayOverlay';
+import WhyAmISeeingThis from './WhyAmISeeingThis';
+
+const WHY_DO_I_NEED_TO_CLICK_PLAY = 'Recent changes to Chrome require user interaction before WebAudio can be played.';
 
 class Main extends React.Component {
   constructor() {
@@ -68,6 +71,9 @@ class Main extends React.Component {
       >
         {started ? <Title opacity={target} /> : null}
         {!started ? <PlayOverlay onClick={this.onPlayClicked} /> : null}
+        {!started ? <WhyAmISeeingThis
+          reason={WHY_DO_I_NEED_TO_CLICK_PLAY}
+        /> : null}
         <audio ref={(e) => { this.audio = e; }} loop>
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'aac')} type="audio/aac" />
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'mp3')} type="audio/mp3" />

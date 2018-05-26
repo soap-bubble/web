@@ -7,6 +7,7 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import Menu from '../components/Menu';
+import MenuButton from '../containers/MenuButton';
 import Login from './Login';
 import Settings from './Settings';
 import SaveList from './SaveList';
@@ -53,6 +54,7 @@ const Game = ({
 
 Game.propTypes = {
   isLoggingIn: PropTypes.bool.isRequired,
+  className: PropTypes.string,
   menuOpen: PropTypes.bool.isRequired,
   settingsOpen: PropTypes.bool.isRequired,
   saveOpen: PropTypes.bool.isRequired,

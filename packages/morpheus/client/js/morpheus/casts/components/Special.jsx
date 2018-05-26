@@ -6,6 +6,7 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
+  MenuButton,
   selectors as gameSelectors,
 } from 'morpheus/game';
 
@@ -30,10 +31,10 @@ class Special extends Component {
     } = this.props;
 
     if (canvas) {
-      this.el.appendChild(canvas);
+      this.el.insertBefore(canvas, this.menu);
     }
     if (videos) {
-      videos.forEach(video => this.el.appendChild(video.el));
+      videos.forEach(video => this.el.insertBefore(video.el, this.menu));
     }
   }
 
@@ -80,7 +81,13 @@ class Special extends Component {
           ...style,
           cursor: 'none',
         }}
-      />
+      >
+        <MenuButton
+          el={(el) => {
+            this.menu = el;
+          }}
+        />
+      </div>
     );
   }
 }

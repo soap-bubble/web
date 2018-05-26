@@ -18,6 +18,7 @@ function mapStateToProps(state) {
 const MousePresentation = ({
   style,
   canvas,
+  children,
 }) => (
   <div
     ref={(el) => {
@@ -30,7 +31,9 @@ const MousePresentation = ({
       ...style,
       'pointer-events': 'none',
     }}
-  />
+  >
+    {children}
+  </div>
 );
 
 MousePresentation.propTypes = {

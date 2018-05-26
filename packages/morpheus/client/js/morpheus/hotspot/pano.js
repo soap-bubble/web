@@ -20,7 +20,6 @@ import {
 import Queue from 'promise-queue';
 import {
   handleEventFactory,
-  selectors as inputSelectors,
 } from 'morpheus/input';
 import {
   actions as gamestateActions,

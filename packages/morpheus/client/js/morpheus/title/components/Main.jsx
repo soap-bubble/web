@@ -25,6 +25,13 @@ class Main extends React.Component {
     }
   }
 
+  onPlayClicked() {
+    this.setState({
+      started: true,
+    });
+    this.audio.play();
+  }
+
   fadeOut() {
     const { isLeaving } = this.state;
     if (!isLeaving) {
@@ -44,13 +51,6 @@ class Main extends React.Component {
       tween.start();
       this.setState({ isLeaving: true });
     }
-  }
-
-  onPlayClicked() {
-    this.setState({
-      started: true,
-    });
-    this.audio.play();
   }
 
   render() {

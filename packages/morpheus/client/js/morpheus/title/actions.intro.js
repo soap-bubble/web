@@ -195,6 +195,8 @@ export default function factory({ canvas: sourceCanvas }) {
           video.pause();
           window.document.removeEventListener('mousedown', handleMouseDown);
           window.document.removeEventListener('mouseup', handleMouseUp);
+          window.document.removeEventListener('touchstart', handleMouseDown);
+          window.document.removeEventListener('touchend', handleMouseUp);
           dispatch(done());
         };
 
@@ -205,6 +207,8 @@ export default function factory({ canvas: sourceCanvas }) {
 
         window.document.addEventListener('mousedown', handleMouseDown);
         window.document.addEventListener('mouseup', handleMouseUp);
+        window.document.addEventListener('touchstart', handleMouseDown);
+        window.document.addEventListener('touchend', handleMouseUp);
       },
     };
     return selfie;

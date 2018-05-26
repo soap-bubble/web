@@ -187,9 +187,12 @@ export default function ({
     }
   }
 
-  function onTouchEnd() {
-    wasMouseUpped = true;
-    rememberEvent({}, true, true);
+  function onTouchEnd(touchEvent) {
+    const { changedTouches: touches } = touchEvent;
+    if (touches.length) {
+      wasMouseUpped = true;
+      rememberEvent(touches[0], true);
+    }
   }
 
   function onMouseUp(mouseEvent) {

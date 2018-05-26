@@ -175,7 +175,7 @@ export default function ({ dispatch, scene }) {
     }
   }
 
-  function onTouchEnd({ touches }) {
+  function onTouchEnd({ changedTouches: touches }) {
     if (touches.length) {
       wasMouseUpped = true;
       updateState({}, true);

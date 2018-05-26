@@ -300,18 +300,24 @@ export default function factory() {
           }
         }
 
-        function onTouchEnd({ touches }) {
+        function onTouchEnd({ changedTouches: touches }) {
           if (touches.length) {
             updatePositionForEvent(touches[0]);
             ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseUpHandlerForButton);
           }
         }
+
+        function onTouchCancel() {
+          ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseUpHandlerForButton);
+        }
+
         window.document.addEventListener('mousemove', handler);
         window.document.addEventListener('mousedown', handleMouseDown);
         window.document.addEventListener('mouseup', handleMouseUp);
         window.document.addEventListener('touchstart', onTouchStart);
         window.document.addEventListener('touchmove', onTouchMove);
         window.document.addEventListener('touchend', onTouchEnd);
+        window.document.addEventListener('touchcancel', onTouchCancel);
         cleanUp = () => {
           window.document.removeEventListener('mousemove', handler);
           window.document.removeEventListener('mousedown', handleMouseDown);
@@ -319,6 +325,7 @@ export default function factory() {
           window.document.removeEventListener('touchstart', onTouchStart);
           window.document.removeEventListener('touchmove', onTouchMove);
           window.document.removeEventListener('touchend', onTouchEnd);
+          window.document.removeEventListener('touchcancel', onTouchCancel);
         };
         renderEvents.onDestroy(cleanUp);
       },

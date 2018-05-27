@@ -68,7 +68,14 @@ class Special extends Component {
       <div
         className={cn('scene')}
         ref={(el) => {
-          this.el = el;
+          if (el) {
+            el.addEventListener('touchstart', onTouchStart, { passive: false });
+            el.addEventListener('touchmove', onTouchMove, { passive: false });
+            this.el = el;
+          } else {
+            this.el.removeEventListener('touchstart', onTouchStart);
+            this.el.removeEventListener('touchmove', onTouchMove);
+          }
         }}
         onMouseDown={onMouseDown}
         onMouseMove={onMouseMove}

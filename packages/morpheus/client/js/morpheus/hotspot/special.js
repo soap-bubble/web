@@ -161,14 +161,20 @@ export default function ({ dispatch, scene }) {
     updateState(mouseEvent);
   }
 
-  function onTouchStart({ touches }) {
+  function onTouchStart(touchEvent) {
+    const { touches } = touchEvent;
+    touchEvent.preventDefault();
+    touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseDowned = true;
       updateState(touches[0]);
     }
   }
 
-  function onTouchMove({ touches }) {
+  function onTouchMove(touchEvent) {
+    const { touches } = touchEvent;
+    touchEvent.preventDefault();
+    touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseMoved = true;
       updateState(touches[0]);

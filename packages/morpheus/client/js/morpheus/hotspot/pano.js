@@ -173,6 +173,8 @@ export default function ({
 
   function onTouchStart(touchEvent) {
     const { touches } = touchEvent;
+    touchEvent.preventDefault();
+    touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseDowned = true;
       rememberEvent(touches[0], true);
@@ -181,6 +183,8 @@ export default function ({
 
   function onTouchMove(touchEvent) {
     const { touches } = touchEvent;
+    touchEvent.preventDefault();
+    touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseMoved = true;
       rememberEvent(touches[0], true);

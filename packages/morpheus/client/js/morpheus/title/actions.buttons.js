@@ -286,14 +286,20 @@ export default function factory() {
           ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseUpHandlerForButton);
         }
 
-        function onTouchStart({ touches }) {
+        function onTouchStart(touchEvent) {
+          const { touches } = touchEvent;
+          touchEvent.preventDefault();
+          touchEvent.stopPropagation();
           if (touches.length) {
             updatePositionForEvent(touches[0]);
             ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseDownHandlerForButton);
           }
         }
 
-        function onTouchMove({ touches }) {
+        function onTouchMove(touchEvent) {
+          const { touches } = touchEvent;
+          touchEvent.preventDefault();
+          touchEvent.stopPropagation();
           if (touches.length) {
             updatePositionForEvent(touches[0]);
             ['newButton', 'settingsButton', 'exitButton', 'contButton'].forEach(mouseMoveHandlerForButton);
@@ -314,8 +320,8 @@ export default function factory() {
         window.document.addEventListener('mousemove', handler);
         window.document.addEventListener('mousedown', handleMouseDown);
         window.document.addEventListener('mouseup', handleMouseUp);
-        window.document.addEventListener('touchstart', onTouchStart);
-        window.document.addEventListener('touchmove', onTouchMove);
+        window.document.addEventListener('touchstart', onTouchStart, { passive: false });
+        window.document.addEventListener('touchmove', onTouchMove, { passive: false });
         window.document.addEventListener('touchend', onTouchEnd);
         window.document.addEventListener('touchcancel', onTouchCancel);
         cleanUp = () => {

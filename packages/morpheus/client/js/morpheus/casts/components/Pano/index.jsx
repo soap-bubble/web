@@ -95,6 +95,12 @@ class Pano extends PureComponent {
         ref={(el) => {
           if (el) {
             el.insertBefore(canvas, this.menu);
+            el.addEventListener('touchstart', onTouchStart, { passive: false });
+            el.addEventListener('touchmove', onTouchMove, { passive: false });
+            this.el = el;
+          } else {
+            this.el.removeEventListener('touchstart', onTouchStart);
+            this.el.removeEventListener('touchmove', onTouchMove);
           }
         }}
 

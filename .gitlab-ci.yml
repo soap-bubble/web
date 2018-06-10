@@ -21,9 +21,7 @@ install:
     - npm install
     - ./node_modules/.bin/lerna bootstrap
   artifacts:
-    paths:
-      - node_modules/
-      - packages/
+    untracked: true
 # Job: Test
 # Run tests against our application
 # If this fails, we do not deploy

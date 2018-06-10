@@ -5,9 +5,11 @@ image: node:boron
 # Test - Run tests
 # Deploy - Deploy application to S3/ElasticBeanstalk
 stages:
-  - build
+  - install
   - test
-  - deploy
+  - build-morpheus
+  - build-core
+  - build-auth
 # Configuration
 variables:
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)

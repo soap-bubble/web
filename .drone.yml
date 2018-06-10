@@ -31,7 +31,7 @@ pipeline:
     secrets: [ docker_username, docker_password ]
     when:
       branch: master
-      event: push
+      event: tag
 
   docker_auth:
     image: plugins/docker
@@ -43,7 +43,7 @@ pipeline:
     secrets: [ docker_username, docker_password ]
     when:
       branch: master
-      event: push
+      event: tag
 
   docker_core:
     image: plugins/docker
@@ -55,4 +55,4 @@ pipeline:
     secrets: [ docker_username, docker_password ]
     when:
       branch: master
-      event: push
+      event: tag

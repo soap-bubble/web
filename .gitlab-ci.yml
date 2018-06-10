@@ -7,9 +7,7 @@ image: node:boron
 stages:
   - install
   - test
-  - build-morpheus
-  - build-core
-  - build-auth
+  - build
 # Configuration
 variables:
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
@@ -18,7 +16,7 @@ variables:
 # Installs npm packages, transpiles ES6 -> ES5
 # Passes node_modules/, dist/ onto next steps using artifacts
 install:
-  stage: build
+  stage: install
   script:
     - npm install
     - ./node_modules/.bin/lerna bootstrap
@@ -42,7 +40,7 @@ build-morpheus:
     - docker:dind
   tags:
     - docker
-  stage: publish
+  stage: build
   script:
     - docker build -t docker.soapbubble.online:5000/soapbubble/morpheus -t packages/morpheus
     - docker tag docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/morpheus
@@ -55,7 +53,7 @@ build-core:
     - docker:dind
   tags:
     - docker
-  stage: publish
+  stage: build
   script:
     - docker build -t docker.soapbubble.online:5000/soapbubble/core -t packages/morpheus
     - docker tag docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/core
@@ -68,7 +66,7 @@ build-auth:
     - docker:dind
   tags:
     - docker
-  stage: publish
+  stage: build
   script:
     - docker build -t docker.soapbubble.online:5000/soapbubble/auth -t packages/morpheus
     - docker tag docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/auth

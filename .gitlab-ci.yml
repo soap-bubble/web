@@ -12,9 +12,7 @@ stages:
 variables:
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
-# Job: Build
-# Installs npm packages, transpiles ES6 -> ES5
-# Passes node_modules/, dist/ onto next steps using artifacts
+# Job: Install
 install:
   stage: install
   script:
@@ -30,10 +28,9 @@ test:
   dependencies:
     - install
   script:
+    - ./node_modules/.bin/lerna bootstrap
     - npm test
-# Job: Deploy
-# Zips the contents of our built application, uploads to S3
-# Configures a new EB version and switches to that version
+# Jobs: Builds
 build-morpheus:
   image: docker:stable
   dependencies:
@@ -59,7 +56,7 @@ build-core:
     - docker
   stage: build
   script:
-    - docker build -t docker.soapbubble.online:5000/soapbubble/core -t packages/morpheus
+    - docker build -t docker.soapbubble.online:5000/soapbubble/core -t packages/core
     - docker tag docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/core
     - docker tag docker.soapbubble.online:5000/soapbubble/core:latest docker.soapbubble.online:5000/soapbubble/core
     - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/core:latest
@@ -74,7 +71,7 @@ build-auth:
     - docker
   stage: build
   script:
-    - docker build -t docker.soapbubble.online:5000/soapbubble/auth -t packages/morpheus
+    - docker build -t docker.soapbubble.online:5000/soapbubble/auth -t packages/auth
     - docker tag docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/auth
     - docker tag docker.soapbubble.online:5000/soapbubble/auth:latest docker.soapbubble.online:5000/soapbubble/auth
     - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/auth:latest

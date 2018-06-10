@@ -1,0 +1,74 @@
+# from https://github.com/tlackemann/nodejs-es6-ci/blob/master/.gitlab-ci.yml
+# GitLab CI Docker Image
+image: node:boron
+# Build - Build necessary JS files
+# Test - Run tests
+# Deploy - Deploy application to S3/ElasticBeanstalk
+stages:
+  - build
+  - test
+  - deploy
+# Configuration
+variables:
+  DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
+  DOCKER_PASSWORD: "" # password for private docker repo
+# Job: Build
+# Installs npm packages, transpiles ES6 -> ES5
+# Passes node_modules/, dist/ onto next steps using artifacts
+install:
+  stage: build
+  script:
+    - npm install
+    - ./node_modules/.bin/lerna bootstrap
+  artifacts:
+    paths:
+      - node_modules/
+      - packages/
+# Job: Test
+# Run tests against our application
+# If this fails, we do not deploy
+test:
+  stage: test
+  script:
+    - npm test
+# Job: Deploy
+# Zips the contents of our built application, uploads to S3
+# Configures a new EB version and switches to that version
+build-morpheus:
+  image: docker:stable
+  services:
+    - docker:dind
+  tags:
+    - docker
+  stage: publish
+  script:
+    - docker build -t docker.soapbubble.online:5000/soapbubble/morpheus -t packages/morpheus
+    - docker tag docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/morpheus
+    - docker tag docker.soapbubble.online:5000/soapbubble/morpheus:latest docker.soapbubble.online:5000/soapbubble/morpheus
+    - docker push docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/morpheus:latest
+
+build-core:
+  image: docker:stable
+  services:
+    - docker:dind
+  tags:
+    - docker
+  stage: publish
+  script:
+    - docker build -t docker.soapbubble.online:5000/soapbubble/core -t packages/morpheus
+    - docker tag docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/core
+    - docker tag docker.soapbubble.online:5000/soapbubble/core:latest docker.soapbubble.online:5000/soapbubble/core
+    - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/core:latest
+
+build-auth:
+  image: docker:stable
+  services:
+    - docker:dind
+  tags:
+    - docker
+  stage: publish
+  script:
+    - docker build -t docker.soapbubble.online:5000/soapbubble/auth -t packages/morpheus
+    - docker tag docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/auth
+    - docker tag docker.soapbubble.online:5000/soapbubble/auth:latest docker.soapbubble.online:5000/soapbubble/auth
+    - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/auth:latest

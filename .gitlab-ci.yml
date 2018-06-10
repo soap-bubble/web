@@ -29,6 +29,8 @@ install:
 # If this fails, we do not deploy
 test:
   stage: test
+  dependencies:
+    - install
   script:
     - npm test
 # Job: Deploy
@@ -36,6 +38,8 @@ test:
 # Configures a new EB version and switches to that version
 build-morpheus:
   image: docker:stable
+  dependencies:
+    - install
   services:
     - docker:dind
   tags:
@@ -49,6 +53,8 @@ build-morpheus:
 
 build-core:
   image: docker:stable
+  dependencies:
+    - install
   services:
     - docker:dind
   tags:
@@ -62,6 +68,8 @@ build-core:
 
 build-auth:
   image: docker:stable
+  dependencies:
+    - install
   services:
     - docker:dind
   tags:

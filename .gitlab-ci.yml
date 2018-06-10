@@ -23,13 +23,13 @@ install:
 # Job: Test
 # Run tests against our application
 # If this fails, we do not deploy
-test:
-  stage: test
-  dependencies:
-    - install
-  script:
-    - ./node_modules/.bin/lerna bootstrap
-    - npm test
+# test:
+#   stage: test
+#   dependencies:
+#     - install
+#   script:
+#     - ./node_modules/.bin/lerna bootstrap
+#     - npm test
 # Jobs: Builds
 build-morpheus:
   image: docker:stable

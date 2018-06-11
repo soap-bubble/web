@@ -41,10 +41,11 @@ build-morpheus:
     - docker
   stage: build
   script:
-    - docker build -t docker.soapbubble.online:5000/soapbubble/morpheus packages/morpheus
-    - docker tag docker.soapbubble.online:5000/soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:latest
-    - docker tag docker.soapbubble.online:5000/soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/morpheus:latest
+    - docker build -t soapbubble/morpheus packages/morpheus
+    - docker tag soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:latest
+    - docker tag soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online:5000/soapbubble/morpheus:latest
+    - docker push docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
 
 build-core:
   image: docker:stable
@@ -56,10 +57,11 @@ build-core:
     - docker
   stage: build
   script:
-    - docker build -t docker.soapbubble.online:5000/soapbubble/core packages/core
-    - docker tag docker.soapbubble.online:5000/soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
-    - docker tag docker.soapbubble.online:5000/soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/core:latest
+    - docker build -t soapbubble/core packages/core
+    - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
+    - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online:5000/soapbubble/core:latest
+    - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
 
 build-auth:
   image: docker:stable
@@ -71,7 +73,8 @@ build-auth:
     - docker
   stage: build
   script:
-    - docker build -t docker.soapbubble.online:5000/soapbubble/auth packages/auth
-    - docker tag docker.soapbubble.online:5000/soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:latest
-    - docker tag docker.soapbubble.online:5000/soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7} docker.soapbubble.online:5000/soapbubble/auth:latest
+    - docker build -t soapbubble/auth packages/auth
+    - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:latest
+    - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online:5000/soapbubble/auth:latest
+    - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}

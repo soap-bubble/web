@@ -16,3 +16,17 @@ export function createVideo(url, options) {
   addSourceToVideo(video, `${url}.mp4`, 'video/mp4');
   return video;
 }
+
+export function promiseVideoElement(name, options) {
+  return new Promise((resolve, reject) => {
+    const video = createVideo(name, {
+      ...options,
+      defaultMuted: true,
+      autoplay: true,
+      oncanplaythrough() {
+        resolve(video);
+      },
+      onerror: reject,
+    });
+  });
+}

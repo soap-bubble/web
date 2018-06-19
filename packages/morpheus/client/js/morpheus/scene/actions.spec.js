@@ -2,7 +2,7 @@ import 'morpheus/scene';
 import 'morpheus/game';
 import storeFactory from 'store';
 import * as actions from './actions';
-import './matchers';
+import './__fixtures__/matchers';
 import {
   SCENE_LOAD_START,
   SCENE_SET_CURRENT_SCENE,

@@ -11,4 +11,6 @@ video.createVideo = jest.fn((name, opts) => {
   return fakeVideo;
 });
 
+video.promiseVideoElement = (...args) => Promise.resolve(video.createVideo(...args));
+
 module.exports = video;

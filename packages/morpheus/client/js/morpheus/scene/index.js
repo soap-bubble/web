@@ -1,6 +1,7 @@
 import * as selectors from './selectors';
 import reducer from './reducer';
 import * as actions from './actions';
+import * as matchers from './matchers';
 import './epics';
 
 export const SCENE_TYPE_LIST = {
@@ -25,4 +26,5 @@ export {
   selectors,
   reducer,
   actions,
+  matchers,
 };

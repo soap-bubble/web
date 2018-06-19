@@ -1,5 +1,5 @@
 import reducer from './reducer';
-import './matchers';
+import './__fixtures__/matchers';
 
 import {
   SET_NEXT_START_ANGLE,

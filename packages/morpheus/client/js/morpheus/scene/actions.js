@@ -10,7 +10,6 @@ import {
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
-
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,

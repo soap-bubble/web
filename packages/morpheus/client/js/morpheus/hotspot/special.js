@@ -128,7 +128,7 @@ export default function ({ dispatch, scene }) {
         handleHotspot: gamestateActions.handleHotspot,
       }));
       await dispatch(gameActions.setCursorLocation({ top, left }));
-      await dispatch(castActionsForScene.special.update(scene));
+      await dispatch(castActionsForScene.update());
     });
 
 

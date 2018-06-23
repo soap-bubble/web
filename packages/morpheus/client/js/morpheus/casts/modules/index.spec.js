@@ -10,6 +10,8 @@ import storeFactory from 'store';
 jest.mock('store/logger');
 jest.mock('service/scene');
 jest.mock('utils/video');
+jest.mock('service/image');
+jest.mock('utils/canvas');
 
 const store = storeFactory();
 

@@ -161,7 +161,7 @@ export default function ({
         actionQueue.add(() => dispatch(gameActions.setCursorLocation(currentSreenPosition)));
 
         // Update the PanoAnim
-        return actionQueue.add(() => dispatch(castActionsForScene.controlledMovie.update(scene)));
+        return actionQueue.add(() => dispatch(castActionsForScene.update()));
       }
       return null;
     });

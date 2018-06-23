@@ -614,16 +614,6 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  return {
-    applies,
-    doEnter,
-    doExit,
-    doUnload,
-  };
-});
-
-export const actions = memoize((scene) => {
-  const specialSelectors = selectors(scene);
   function update() {
     return (dispatch, getState) => {
       const gamestates = gamestateSelectors.forState(getState());
@@ -659,6 +649,16 @@ export const actions = memoize((scene) => {
     };
   }
 
+  return {
+    applies,
+    doEnter,
+    doExit,
+    doUnload,
+    update,
+  };
+});
+
+export const actions = memoize(() => {
   function handleMouseEvent({ type, hotspot, top, left }) {
     return (dispatch) => {
       const {
@@ -677,12 +677,7 @@ export const actions = memoize((scene) => {
     };
   }
 
-  function* canvasOperations() {
-
-  }
-
   return {
-    update,
     handleMouseEvent,
   };
 });

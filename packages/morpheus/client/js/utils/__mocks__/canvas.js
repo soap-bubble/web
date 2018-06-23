@@ -14,6 +14,7 @@ exports.default = jest.fn().mockImplementation(() => {
 
   const mockCanvas = {
     getContext: jest.fn().mockReturnValue(mockContext),
+    style: {},
     mockContext,
   };
 

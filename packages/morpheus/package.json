@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "private": true,
   "scripts": {
-    "test": "jest",
+    "test": "jest client",
     "test:play": "jest playthrough",
     "test:play:local": "cross-env NO_LAUNCH=true jest playthrough",
     "build": "npm run build:server && npm run build:client:production",

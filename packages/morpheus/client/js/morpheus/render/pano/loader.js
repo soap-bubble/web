@@ -45,7 +45,9 @@ export default function ({
         ctx.drawImage(image,
           0, 0, image.width, canvas.height, 0, 0, image.width, canvas.height);
         ctx.drawImage(image,
-          image.width, canvas.height, image.width / 2, 0, canvas.height, image.height);
+          image.width, 0, canvas.width, canvas.height,
+          0, image.width / 2, image.height / 2, image.height,
+        );
       },
     }));
   }
@@ -55,10 +57,11 @@ export default function ({
       const {
         fileName,
         looping,
-        position: {
+        location: {
           x,
           y,
         },
+        frame,
       } = videoCastData;
       assets.push(loadAsVideo({
         url: getPanoAnimUrl(fileName),
@@ -67,7 +70,7 @@ export default function ({
           srcContext,
           dstContext,
         }) {
-          dstContext.drawImage(srcContext, x, y);
+          dstContext.drawImage(srcContext, x + (frame * 128), y);
         },
       }));
     });

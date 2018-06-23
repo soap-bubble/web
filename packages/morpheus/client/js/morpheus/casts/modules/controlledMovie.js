@@ -223,17 +223,6 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  return {
-    applies,
-    doEnter,
-    onStage,
-    doUnload,
-  };
-});
-
-export const actions = memoize((scene) => {
-  const selfSelectors = selectors(scene);
-
   function update() {
     return (dispatch, getState) => {
       const gamestates = gamestateSelectors.forState(getState());
@@ -247,6 +236,10 @@ export const actions = memoize((scene) => {
   }
 
   return {
+    applies,
+    doEnter,
+    onStage,
+    doUnload,
     update,
   };
 });

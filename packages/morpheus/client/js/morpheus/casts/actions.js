@@ -27,7 +27,10 @@ function doActionForCast({ event, scene, castType, action }) {
       castState,
       castType,
       scene,
-    })));
+    })))
+    .catch((err) => {
+      console.error(err);
+    });
 }
 
 export const lifecycle = [{
@@ -86,7 +89,27 @@ export const forScene = memoize((scene) => {
     }
     return memo;
   }, {});
-  return Object.defineProperties({}, Object.keys(moduleActions)
+  return Object.defineProperties({
+    update() {
+      return (dispatch) => {
+        Object.keys(modules).forEach((name) => {
+          const module = modules[name];
+          if (module
+            && module.delegate
+          ) {
+            const delegate = module.delegate(scene);
+            if (delegate.update && delegate.applies(scene)) {
+              try {
+                dispatch(delegate.update());
+              } catch (err) {
+                console.error(err);
+              }
+            }
+          }
+        });
+      };
+    },
+  }, Object.keys(moduleActions)
     .reduce((memo, name) => Object.assign(memo, {
       [name]: {
         get() {

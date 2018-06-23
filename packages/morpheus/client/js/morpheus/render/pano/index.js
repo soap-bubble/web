@@ -1,35 +1,49 @@
+import {
+  memoize,
+} from 'lodash';
+import {
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
 import createFactory from '../canvasFactory';
 import loader from './loader';
-import pano from './renderer';
 import selectorsForScene from './selectors';
 
-export default function () {
+export const delegate = memoize((scene) => {
   const canvasFactory = createFactory();
-
-  return (scene) => {
-    let assets;
-    const canvas = canvasFactory();
-    const selectors = selectorsForScene(scene);
-    const selfie = {
-      doEnter() {
-        return (dispatch, getState) => {
-          assets = assets || loader({
-            getState,
-            selectors,
-          });
-          return Promise.all(assets.map(a => a.promise))
-            .then(() => {});
-        };
-      },
-      update() {
-        assets.forEach((contextProvider) => {
-          pano({
-            canvas,
-            contextProvider,
-          });
+  let assets;
+  const canvas = canvasFactory().instance;
+  const selectors = selectorsForScene(scene);
+  const selfie = {
+    applies(state) {
+      return selectors.panoCastData(state);
+    },
+    doEnter() {
+      return (dispatch, getState) => {
+        assets = assets || loader({
+          scene,
+          gamestates: gamestateSelectors.forState(getState()),
         });
-      },
-    };
-    return selfie;
+        // canvas.width = 3072;
+        // canvas.height = 512;
+        // canvas.style.position = 'absolute';
+        // canvas.style.top = '0px';
+        // canvas.style.left = '0px';
+        // document.body.appendChild(canvas);
+        return Promise.all(assets.map(a => a.promise))
+          .then(() => {});
+      };
+    },
+    update() {
+      return () => {
+        assets.forEach((contextProvider) => {
+          const ctx = canvas.getContext('2d');
+          const {
+            render,
+          } = contextProvider;
+          render(ctx);
+        });
+      };
+    },
   };
-}
+  return selfie;
+});

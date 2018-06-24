@@ -8,7 +8,7 @@ import {
   MeshBasicMaterial,
   Mesh,
   Scene,
-  TextureLoader,
+  CanvasTexture,
 } from 'three';
 import {
   Tween,
@@ -34,7 +34,11 @@ import {
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
+import {
+  selectors as gamestateSelectors,
+} from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
+import loader from 'morpheus/render/pano/loader';
 import {
   selectors as hotspotSelectors,
 } from './hotspot';
@@ -44,6 +48,7 @@ const sliceWidth = 0.1325;
 const sliceHeight = 0.56;
 const sliceDepth = 1.0;
 const X_ROTATION_OFFSET = 0 * (Math.PI / 180);
+const uvSliceWidth = 0.0416666666666667;
 
 function createGeometries() {
   const geometries = [];
@@ -61,7 +66,6 @@ function createGeometries() {
     const right = left + 0.0625;
     const top = Math.floor(i / 16) === 0 ? 0.5 : 0.0;
     const bottom = top + 0.5;
-
 
     const uvs = new BufferAttribute(new Float32Array([
       right, top,
@@ -98,21 +102,15 @@ function createObject3D({ theta = 0, geometries, material, startAngle = 0 }) {
   return object3D;
 }
 
-function createMaterial(asset) {
-  const loader = new TextureLoader();
-  loader.crossOrigin = 'anonymous';
+function createMaterial(map) {
   let material;
   const promise = new Promise(
-    (resolve, reject) => {
+    (resolve) => {
       material = new MeshBasicMaterial({
         side: BackSide,
-        map: loader.load(
-         asset,
-         resolve,
-         undefined,
-         reject,
-       ),
+        map,
       });
+      resolve();
     },
   )
     .then(() => material);
@@ -144,11 +142,12 @@ function createScene(...objects) {
   return scene;
 }
 
-function startRenderLoop({ scene3D, camera, renderer }) {
+function startRenderLoop({ scene3D, camera, renderer, update }) {
   window.camera = camera;
   window.PerspectiveCamera = PerspectiveCamera;
   const render = () => {
     // orientation.update();
+    update();
     renderer.render(scene3D, window.camera);
   };
   renderEvents.onRender(render);
@@ -188,6 +187,18 @@ export const selectors = memoize((scene) => {
     selectPanoObject3D,
     panoObject3D => get(panoObject3D, 'rotation'),
   );
+  const selectAssets = createSelector(
+    selectPano,
+    pano => get(pano, 'assets'),
+  );
+  const selectRenderedCanvas = createSelector(
+    selectPano,
+    pano => get(pano, 'renderedCanvas'),
+  );
+  const selectCanvasTexture = createSelector(
+    selectPano,
+    pano => get(pano, 'canvasTexture'),
+  );
   return {
     panoCastData: selectPanoCastData,
     panoScene3D: selectPanoScene3D,
@@ -195,6 +206,9 @@ export const selectors = memoize((scene) => {
     renderElements: selectRenderElements,
     rotation: selectRotation,
     canvas: selectCanvas,
+    renderedCanvas: selectRenderedCanvas,
+    canvasTexture: selectCanvasTexture,
+    assets: selectAssets,
   };
 });
 
@@ -291,16 +305,39 @@ export const actions = memoize((scene) => {
 export const delegate = memoize((scene) => {
   const panoSelectors = selectors(scene);
 
+  function updater() {
+    const assets = panoSelectors.assets(getState());
+    const renderedCanvas = panoSelectors.renderedCanvas(getState());
+    const canvasTexture = panoSelectors.canvasTexture(getState());
+    canvasTexture.needsUpdate = true;
+    assets.forEach((contextProvider) => {
+      const ctx = renderedCanvas.getContext('2d');
+      const {
+        render,
+      } = contextProvider;
+      render(ctx);
+    });
+  }
+
   function doEnter() {
     return (dispatch, getState) => {
       const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {
         const { width, height } = gameSelectors.dimensions(getState());
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-        const { fileName } = panoCastData;
-        const asset = getAssetUrl(`${fileName}.png`);
+
+        const renderedCanvas = createCanvas({
+          width: 2048,
+          height: 1024,
+        });
+        const assets = loader({
+          scene,
+          gamestates: gamestateSelectors.forState(getState()),
+        });
+
         const geometries = createGeometries();
-        const { material, promise: promiseMaterial } = createMaterial(asset);
+        const map = new CanvasTexture(renderedCanvas);
+        const { material, promise: promiseMaterial } = createMaterial(map);
         const object3D = createObject3D({
           material,
           geometries,
@@ -311,6 +348,9 @@ export const delegate = memoize((scene) => {
           .then(() => ({
             object3D,
             scene3D,
+            assets,
+            renderedCanvas,
+            canvasTexture: map,
             canvas: createCanvas({ width, height }),
           }));
       }
@@ -329,14 +369,29 @@ export const delegate = memoize((scene) => {
       const { width, height } = gameSelectors.dimensions(getState());
       const camera = createCamera({ width, height });
       const renderer = createRenderer({ canvas, width, height });
+      const assets = panoSelectors.assets(getState());
+      const renderedCanvas = panoSelectors.renderedCanvas(getState());
+      const canvasTexture = panoSelectors.canvasTexture(getState());
+
       positionCamera({
         camera,
         vector3: { z: -0.09 },
       });
+
       startRenderLoop({
         scene3D,
         camera,
         renderer,
+        update: () => {
+          canvasTexture.needsUpdate = true;
+          assets.forEach((contextProvider) => {
+            const ctx = renderedCanvas.getContext('2d');
+            const {
+              render,
+            } = contextProvider;
+            render(ctx);
+          });
+        },
       });
       return Promise.resolve({
         camera,
@@ -348,7 +403,7 @@ export const delegate = memoize((scene) => {
   function doUnload() {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
-      const { renderer, camera } = panoSelectors.renderElements(getState());
+      const { renderer } = panoSelectors.renderElements(getState());
 
       scene3D.children.forEach((child) => {
         scene3D.remove(child);

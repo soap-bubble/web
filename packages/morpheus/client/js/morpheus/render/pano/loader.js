@@ -39,15 +39,16 @@ export default function ({
         image,
         canvas,
       }) {
-        canvas.width = image.width * 1.5;
-        canvas.height = image.height / 2;
+        canvas.width = image.width;
+        canvas.height = image.height;
         const ctx = canvas.getContext('2d');
-        ctx.drawImage(image,
-          0, 0, image.width, canvas.height, 0, 0, image.width, canvas.height);
-        ctx.drawImage(image,
-          image.width, 0, canvas.width, canvas.height,
-          0, image.width / 2, image.height / 2, image.height,
-        );
+        ctx.drawImage(image, 0, 0);
+        // ctx.drawImage(image,
+        //   0, 0, image.width, canvas.height, 0, 0, image.width, canvas.height);
+        // ctx.drawImage(image,
+        //   image.width, 0, canvas.width, canvas.height,
+        //   0, image.width / 2, image.height / 2, image.height,
+        // );
       },
     }));
   }
@@ -70,7 +71,11 @@ export default function ({
           srcContext,
           dstContext,
         }) {
-          dstContext.drawImage(srcContext, x + (frame * 128), y);
+          if (frame < 16) {
+            dstContext.drawImage(srcContext, x + (frame * 128), y);
+          } else {
+            dstContext.drawImage(srcContext, x + ((frame - 16) * 128), y + 512);
+          }
         },
       }));
     });

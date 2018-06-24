@@ -38,6 +38,7 @@ import {
 import {
   createSound,
 } from 'utils/sound';
+import renderEvents from 'utils/render';
 import {
   GESTURES,
 } from 'morpheus/constants';
@@ -198,19 +199,28 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
     sizeY: height,
   };
 
-  return (context, more) => {
+  return (context) => {
     if (typeof controlledMovieCallbacks.currentValue === 'undefined' || frames <= 1) {
       controlledMovieCallbacks.currentValue = currentOffset;
     } else if (controlledMovieCallbacks.currentValue < currentOffset) {
-      controlledMovieCallbacks.currentValue++;
-      more();
+      controlledMovieCallbacks.ticks = controlledMovieCallbacks.ticks || 0;
+      if (controlledMovieCallbacks.ticks < 4) {
+        controlledMovieCallbacks.ticks++;
+      } else {
+        controlledMovieCallbacks.ticks = 0;
+        controlledMovieCallbacks.currentValue += 1;
+      }
     } else if (controlledMovieCallbacks.currentValue > currentOffset) {
-      controlledMovieCallbacks.currentValue--;
-      more();
+      if (controlledMovieCallbacks.ticks < 4) {
+        controlledMovieCallbacks.ticks++;
+      } else {
+        controlledMovieCallbacks.ticks = 0;
+        controlledMovieCallbacks.currentValue -= 1;
+      }
     }
     context.drawImage(
       img,
-      controlledMovieCallbacks.currentValue * width,
+      Math.floor(controlledMovieCallbacks.currentValue) * width,
       source.y,
       source.sizeX,
       source.sizeY,
@@ -294,6 +304,10 @@ function createCanvas({ width, height }) {
   canvas.width = width;
   canvas.height = height;
   return canvas;
+}
+
+function startRenderLoop({ update }) {
+  renderEvents.onRender(update);
 }
 
 export function selectors(scene) {
@@ -545,13 +559,44 @@ export const delegate = memoize((scene) => {
               dimensions,
             }),
             canvas,
-          }).then(() => ({
-            images,
-            sounds,
-            videos,
-            canvas,
-            controlledCasts,
-          }));
+          }).then(() => {
+            startRenderLoop({
+              update() {
+                const dimensions = gameSelectors.dimensions(getState());
+                const gamestates = gamestateSelectors.forState(getState());
+                videos.forEach(({ el: video, data }) => {
+                  applyTransformToVideo({
+                    transform: generateMovieTransform({
+                      dimensions,
+                      cast: data,
+                    }),
+                    video,
+                  });
+                });
+
+                return generateSpecialImages({
+                  images: generateImages({
+                    gamestates,
+                    images,
+                    dimensions,
+                  }),
+                  controlledFrames: generateControlledFrames({
+                    gamestates,
+                    controlledCasts,
+                    dimensions,
+                  }),
+                  canvas,
+                });
+              },
+            });
+            return {
+              images,
+              sounds,
+              videos,
+              canvas,
+              controlledCasts,
+            };
+          });
         });
     };
   }
@@ -614,47 +659,11 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function update() {
-    return (dispatch, getState) => {
-      const gamestates = gamestateSelectors.forState(getState());
-      const dimensions = gameSelectors.dimensions(getState());
-      const canvas = specialSelectors.canvas(getState());
-      const controlledCasts = specialSelectors.controlledCasts(getState());
-      const images = specialSelectors.images(getState());
-      const videos = specialSelectors.videos(getState());
-
-      videos.forEach(({ el: video, data }) => {
-        applyTransformToVideo({
-          transform: generateMovieTransform({
-            dimensions,
-            cast: data,
-          }),
-          video,
-        });
-      });
-
-      return generateSpecialImages({
-        images: generateImages({
-          gamestates,
-          images,
-          dimensions,
-        }),
-        controlledFrames: generateControlledFrames({
-          gamestates,
-          controlledCasts,
-          dimensions,
-        }),
-        canvas,
-      });
-    };
-  }
-
   return {
     applies,
     doEnter,
     doExit,
     doUnload,
-    update,
   };
 });
 

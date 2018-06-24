@@ -191,5 +191,25 @@ export default function update() {
         return gamestate.save();
       }
       return Promise.resolve();
+    }))
+    .then(() => getModel('Scene').find({
+      sceneId: 415050,
+    }).exec()
+    .map((scene) => {
+      const hotspot = scene.casts.find(c => c.param1 === 421040);
+      if (!hotspot.comparators.length) {
+        const hotspotIndex = scene.casts.indexOf(hotspot);
+        scene.casts = scene.casts.slice(0, hotspotIndex).concat([{
+          ...hotspot,
+          comparators: [{
+            gameStateId: 1448,
+            testType: 0,
+            value: 0,
+          }],
+        }]).concat(scene.casts.slice(hotspotIndex + 1));
+        logger.info('Prevent user from advancing AIV maintenance cart with ladder up');
+        return scene.save();
+      }
+      return Promise.resolve();
     }));
 }

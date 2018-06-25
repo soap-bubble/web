@@ -2,6 +2,9 @@ import {
   memoize,
 } from 'lodash';
 import {
+  forScene as selectorsForScene,
+} from './selectors';
+import {
   LOADING,
   ENTERING,
   EXITING,
@@ -55,11 +58,12 @@ export const lifecycle = [{
         const module = modules[cast];
         const delegate = module.delegate && module.delegate(scene);
         if (delegate && delegate && delegate[action] && delegate.applies(getState())) {
+          const oldState = (selectorsForScene(scene).cache(getState()) || {})[cast];
           return dispatch(doActionForCast({
             event,
             scene,
             castType: cast,
-            action: delegate[action],
+            action: delegate[action].bind(null, oldState),
           }));
         }
         return Promise.resolve();

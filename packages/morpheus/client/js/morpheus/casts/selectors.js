@@ -43,7 +43,6 @@ export function forScene(scene) {
     isEntering: selectCastIsEntering,
     isOnStage: selectCastIsOnStage,
     isExiting: selectCastIsExiting,
-    casts: () => selectCastsFromScene(scene),
   };
   const moduleSelectors = Object.keys(modules).reduce((memo, name) => {
     if (modules[name].selectors) {

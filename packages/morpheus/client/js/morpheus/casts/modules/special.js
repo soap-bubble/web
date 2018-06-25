@@ -562,7 +562,10 @@ export const delegate = memoize((scene) => {
           }).then(() => {
             startRenderLoop({
               update() {
+                // Need update versions of these vars
+                // eslint-disable-next-line no-shadow
                 const dimensions = gameSelectors.dimensions(getState());
+                // eslint-disable-next-line no-shadow
                 const gamestates = gamestateSelectors.forState(getState());
                 videos.forEach(({ el: video, data }) => {
                   applyTransformToVideo({

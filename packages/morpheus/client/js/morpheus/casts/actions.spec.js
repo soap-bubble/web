@@ -15,6 +15,67 @@ describe('casts actions', () => {
   afterAll(() => {
     mockModules.reset();
   });
+
+  it('calls future lifecycle methods with cache', async () => {
+    const enterTestState = {
+      foo: 'bar',
+    };
+    const fakeDelegate = {
+      applies: jest.fn(() => true),
+      doEnter: jest.fn(() => () => Promise.resolve(enterTestState)),
+      onStage: jest.fn(() => () => Promise.resolve({})),
+    };
+
+    mockModules.default.inject('pano', {
+      delegate() {
+        return fakeDelegate;
+      },
+    });
+    await store.dispatch(actions.lifecycle.doEnter({
+      sceneId: 555,
+    }));
+    await store.dispatch(actions.lifecycle.onStage({
+      sceneId: 555,
+    }));
+    expect(fakeDelegate.onStage).toBeCalledWith({
+      foo: 'bar',
+    });
+  });
+
+  it('merges future lifecycle methods with previos cache', async () => {
+    const enterTestState = {
+      foo: 'bar',
+    };
+    const onStageState = {
+      bar: 'foo',
+    };
+    const fakeDelegate = {
+      applies: jest.fn(() => true),
+      doEnter: jest.fn(() => () => Promise.resolve(enterTestState)),
+      onStage: jest.fn(() => () => Promise.resolve(onStageState)),
+      doUnload: jest.fn(() => () => Promise.resolve({})),
+    };
+
+    mockModules.default.inject('pano', {
+      delegate() {
+        return fakeDelegate;
+      },
+    });
+    await store.dispatch(actions.lifecycle.doEnter({
+      sceneId: 555,
+    }));
+    await store.dispatch(actions.lifecycle.onStage({
+      sceneId: 555,
+    }));
+    await store.dispatch(actions.lifecycle.doUnload({
+      sceneId: 555,
+    }));
+    expect(fakeDelegate.doUnload).toBeCalledWith({
+      ...enterTestState,
+      ...onStageState,
+    });
+  });
+
   ['doEnter', 'onStage', 'doExit'].forEach((testAction, index) => {
     describe(testAction, () => {
       it('is only called when applies() => true', () => {

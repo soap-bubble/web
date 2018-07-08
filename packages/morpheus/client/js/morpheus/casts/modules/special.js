@@ -38,6 +38,7 @@ import {
 import {
   createSound,
 } from 'utils/sound';
+import linkPreload from 'utils/linkPreload';
 import renderEvents from 'utils/render';
 import {
   GESTURES,
@@ -416,7 +417,7 @@ export const delegate = memoize((scene) => {
     return specialSelectors.data(state);
   }
 
-  function doEnter() {
+  function doLoad() {
     return (dispatch, getState) => {
       const state = getState();
       const controlledCastsData = specialSelectors.controlledCastsData(state);
@@ -424,8 +425,7 @@ export const delegate = memoize((scene) => {
       const imageCasts = specialSelectors.imageCasts(state);
       const soundCasts = specialSelectors.soundCasts(state);
       const gamestates = gamestateSelectors.forState(state);
-      const dimensions = gameSelectors.dimensions(state);
-      dispatch(gameActions.setCursor(null));
+
       const loadImages = Promise.all(imageCasts.map((imageCast) => {
         const {
           fileName,
@@ -461,7 +461,6 @@ export const delegate = memoize((scene) => {
             }
           }
           sound.addEventListener('ended', onSoundEnded);
-          sound.play();
           return {
             el: sound,
             listeners: {
@@ -476,10 +475,52 @@ export const delegate = memoize((scene) => {
           cast,
           gamestates,
         }))
+        .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, 'webm'))));
+
+      const loadControlledMovies = Promise.all(controlledCastsData
+        .filter(cast => !cast.audioOnly)
+        .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))
+          .then(img => ({
+            el: img,
+            data: cast,
+          })),
+      ));
+
+      return Promise.all([
+        loadImages,
+        loadSounds,
+        loadMovies,
+        loadControlledMovies,
+      ]).then(([images, sounds, videos, controlledCasts]) => ({
+        images,
+        sounds,
+        controlledCasts,
+      }));
+    };
+  }
+
+  function doEnter({
+    images,
+    sounds,
+    controlledCasts,
+  }) {
+    return (dispatch, getState) => {
+      const state = getState();
+      const gamestates = gamestateSelectors.forState(state);
+      const dimensions = gameSelectors.dimensions(state);
+      const movieCasts = specialSelectors.movieCasts(state);
+
+      dispatch(gameActions.setCursor(null));
+
+      return Promise.all(movieCasts
+        .filter(cast => isActive({
+          cast,
+          gamestates,
+        }))
         .map(movieCast => new Promise((resolve, reject) => {
           const video = createVideo(getAssetUrl(movieCast.fileName), {
             loop: movieCast.looping,
-            autoplay: true,
+            autoplay: 'true',
             onerror: reject,
           });
           video.classList.add('MovieSpecialCast');
@@ -518,89 +559,70 @@ export const delegate = memoize((scene) => {
             el,
             data: movieCast,
             listeners,
-          }))));
-
-      const loadControlledMovies = Promise.all(controlledCastsData
-        .filter(cast => !cast.audioOnly)
-        .map(cast => loadAsImage(getAssetUrl(cast.fileName, 'png'))
-          .then(img => ({
-            el: img,
-            data: cast,
-          })),
-      ));
-
-      return Promise.all([
-        loadImages,
-        loadSounds,
-        loadMovies,
-        loadControlledMovies,
-      ])
-        .then(([images, sounds, videos, controlledCasts]) => {
-          const canvas = createCanvas(dimensions);
-          videos.forEach(({ el: video, data }) => {
-            applyTransformToVideo({
-              transform: generateMovieTransform({
-                dimensions,
-                cast: data,
-              }),
-              video,
-            });
-          });
-
-          return generateSpecialImages({
-            images: generateImages({
-              gamestates,
-              images,
+          }))))
+      .then((videos) => {
+        const canvas = createCanvas(dimensions);
+        sounds.forEach(({ el: sound }) => sound.play());
+        videos.forEach(({ el: video, data }) => {
+          applyTransformToVideo({
+            transform: generateMovieTransform({
               dimensions,
+              cast: data,
             }),
-            controlledFrames: generateControlledFrames({
-              gamestates,
-              controlledCasts,
-              dimensions,
-            }),
-            canvas,
-          }).then(() => {
-            startRenderLoop({
-              update() {
-                // Need update versions of these vars
-                // eslint-disable-next-line no-shadow
-                const dimensions = gameSelectors.dimensions(getState());
-                // eslint-disable-next-line no-shadow
-                const gamestates = gamestateSelectors.forState(getState());
-                videos.forEach(({ el: video, data }) => {
-                  applyTransformToVideo({
-                    transform: generateMovieTransform({
-                      dimensions,
-                      cast: data,
-                    }),
-                    video,
-                  });
-                });
-
-                return generateSpecialImages({
-                  images: generateImages({
-                    gamestates,
-                    images,
-                    dimensions,
-                  }),
-                  controlledFrames: generateControlledFrames({
-                    gamestates,
-                    controlledCasts,
-                    dimensions,
-                  }),
-                  canvas,
-                });
-              },
-            });
-            return {
-              images,
-              sounds,
-              videos,
-              canvas,
-              controlledCasts,
-            };
+            video,
           });
         });
+
+        return generateSpecialImages({
+          images: generateImages({
+            gamestates,
+            images,
+            dimensions,
+          }),
+          controlledFrames: generateControlledFrames({
+            gamestates,
+            controlledCasts,
+            dimensions,
+          }),
+          canvas,
+        }).then(() => {
+          startRenderLoop({
+            update() {
+              // Need update versions of these vars
+              // eslint-disable-next-line no-shadow
+              const dimensions = gameSelectors.dimensions(getState());
+              // eslint-disable-next-line no-shadow
+              const gamestates = gamestateSelectors.forState(getState());
+              videos.forEach(({ el: video, data }) => {
+                applyTransformToVideo({
+                  transform: generateMovieTransform({
+                    dimensions,
+                    cast: data,
+                  }),
+                  video,
+                });
+              });
+
+              return generateSpecialImages({
+                images: generateImages({
+                  gamestates,
+                  images,
+                  dimensions,
+                }),
+                controlledFrames: generateControlledFrames({
+                  gamestates,
+                  controlledCasts,
+                  dimensions,
+                }),
+                canvas,
+              });
+            },
+          });
+          return {
+            canvas,
+          };
+        });
+      });
     };
   }
 
@@ -664,6 +686,7 @@ export const delegate = memoize((scene) => {
 
   return {
     applies,
+    doLoad,
     doEnter,
     doExit,
     doUnload,

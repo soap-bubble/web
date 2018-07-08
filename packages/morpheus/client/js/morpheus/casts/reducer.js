@@ -14,13 +14,14 @@ import {
 const reducer = createReducer('casts', {
   cache: {},
 }, {
-  [LOADING](state, { payload: scene }) {
+  [LOADING](state, { payload: castData, meta: { type: castType, scene } }) {
     return {
       ...state,
       cache: {
         ...state.cache,
         [scene.sceneId]: {
           status: 'loading',
+          [castType]: castData,
         },
       },
     };

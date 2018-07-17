@@ -1,12 +1,10 @@
 # from https://github.com/tlackemann/nodejs-es6-ci/blob/master/.gitlab-ci.yml
 # GitLab CI Docker Image
-image: node:boron
+image: node:carbon
 # Build - Build necessary JS files
-# Test - Run tests
 # Deploy - Deploy application to S3/ElasticBeanstalk
 stages:
   - install
-  - test
   - build
 # Configuration
 variables:
@@ -17,29 +15,15 @@ install:
   stage: install
   script:
     - npm install
-    - ./node_modules/.bin/lerna bootstrap
-    - npm test
+    - npm run bootstrap
   artifacts:
     untracked: true
-# Job: Test
-# Run tests against our application
-# If this fails, we do not deploy
-# test:
-#   stage: test
-#   dependencies:
-#     - install
-#   script:
-#     - ./node_modules/.bin/lerna bootstrap
-#     - npm test
-# Jobs: Builds
 build-morpheus:
   image: docker:stable
   dependencies:
     - install
   services:
     - docker:dind
-  tags:
-    - docker
   stage: build
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
@@ -48,7 +32,6 @@ build-morpheus:
     - docker tag soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/morpheus:latest
     - docker push docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
-
 build-core:
   image: docker:stable
   dependencies:
@@ -65,7 +48,6 @@ build-core:
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/core:latest
     - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
-
 build-auth:
   image: docker:stable
   dependencies:

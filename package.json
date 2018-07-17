@@ -2,7 +2,7 @@
   "devDependencies": {
     "axios": "^0.18.0",
     "cross-spawn": "^5.1.0",
-    "lerna": "^2.3.1",
+    "lerna": "^2.11.0",
     "minimist": "^1.2.0",
     "spawn-sync": "^1.0.15"
   },

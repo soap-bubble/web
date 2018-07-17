@@ -475,7 +475,7 @@ export const delegate = memoize((scene) => {
           cast,
           gamestates,
         }))
-        .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, 'webm'))));
+        .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, 'mp4'))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
         .filter(cast => !cast.audioOnly)
@@ -620,6 +620,7 @@ export const delegate = memoize((scene) => {
           });
           return {
             canvas,
+            videos,
           };
         });
       });

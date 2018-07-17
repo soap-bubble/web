@@ -6,7 +6,6 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
-  MenuButton,
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
@@ -94,7 +93,7 @@ class Pano extends PureComponent {
         className={cn('scene')}
         ref={(el) => {
           if (el) {
-            el.insertBefore(canvas, this.menu);
+            el.appendChild(canvas);
             el.addEventListener('touchstart', onTouchStart, { passive: false });
             el.addEventListener('touchmove', onTouchMove, { passive: false });
             this.el = el;
@@ -118,11 +117,6 @@ class Pano extends PureComponent {
         onTouchEnd={onTouchEnd}
         onTouchCancel={onTouchCancel}
       >
-        <MenuButton
-          el={(el) => {
-            this.menu = el;
-          }}
-        />
       </div>
     );
   }

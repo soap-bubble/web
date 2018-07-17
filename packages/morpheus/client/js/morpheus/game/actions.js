@@ -151,6 +151,18 @@ export function setCursorLocation({ top, left }) {
   };
 }
 
+export function setCursorLocationFromPage({ pageX, pageY }) {
+  return (dispatch, getState) => {
+    const location = gameSelectors.location(getState());
+    const top = pageY - location.y;
+    const left = pageX - location.x;
+    dispatch(setCursorLocation({
+      top,
+      left,
+    }))
+  };
+}
+
 const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;

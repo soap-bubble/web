@@ -31,10 +31,10 @@ class Special extends Component {
     } = this.props;
 
     if (canvas) {
-      this.el.insertBefore(canvas, this.menu);
+      this.el.appendChild(canvas);
     }
     if (videos) {
-      videos.forEach(video => this.el.insertBefore(video.el, this.menu));
+      videos.forEach(video => this.el.appendChild(video.el));
     }
   }
 

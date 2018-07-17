@@ -47,6 +47,7 @@ const Game = ({
   }
   return (<div className={className} style={style}>
     {casts}
+    <MenuButton />
     <Mouse />
     {menu}
   </div>);

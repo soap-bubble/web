@@ -1,6 +1,5 @@
 # from https://github.com/tlackemann/nodejs-es6-ci/blob/master/.gitlab-ci.yml
 # GitLab CI Docker Image
-image: node:carbon
 # Build - Build necessary JS files
 # Deploy - Deploy application to S3/ElasticBeanstalk
 stages:
@@ -12,6 +11,7 @@ variables:
   DOCKER_PASSWORD: "" # password for private docker repo
 # Job: Install
 install:
+  image: node:carbon
   stage: install
   script:
     - npm install
@@ -20,10 +20,10 @@ install:
     untracked: true
 build-morpheus:
   image: docker:stable
-  dependencies:
-    - install
   services:
     - docker:dind
+  tags:
+    - docker
   stage: build
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
@@ -34,8 +34,6 @@ build-morpheus:
     - docker push docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
 build-core:
   image: docker:stable
-  dependencies:
-    - install
   services:
     - docker:dind
   tags:
@@ -50,8 +48,6 @@ build-core:
     - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
 build-auth:
   image: docker:stable
-  dependencies:
-    - install
   services:
     - docker:dind
   tags:

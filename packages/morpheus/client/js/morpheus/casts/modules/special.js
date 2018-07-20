@@ -392,9 +392,14 @@ export function selectors(scene) {
     selectSpecial,
     special => get(special, 'controlledCasts', []),
   );
+  const selectIsLoaded = createSelector(
+    selectSpecial,
+    special => get(special, 'isLoaded', false),
+  );
 
   return {
     data: selectSpecialCastData,
+    cache: selectSpecial,
     controlledCastsData: selectControlledCastsData,
     extraCasts: selectExtraCasts,
     controlledCasts: selectControlledCasts,
@@ -407,6 +412,7 @@ export function selectors(scene) {
     videos: selectVideos,
     sounds: selectSounds,
     images: selectImages,
+    isLoaded: selectIsLoaded,
   };
 }
 
@@ -420,6 +426,10 @@ export const delegate = memoize((scene) => {
   function doLoad() {
     return (dispatch, getState) => {
       const state = getState();
+      const isLoaded = specialSelectors.isLoaded(state);
+      if (isLoaded) {
+        return Promise.resolve(specialSelectors.cache(state));
+      }
       const controlledCastsData = specialSelectors.controlledCastsData(state);
       const movieCasts = specialSelectors.movieCasts(state);
       const imageCasts = specialSelectors.imageCasts(state);
@@ -495,6 +505,7 @@ export const delegate = memoize((scene) => {
         images,
         sounds,
         controlledCasts,
+        isLoaded: true,
       }));
     };
   }
@@ -681,6 +692,7 @@ export const delegate = memoize((scene) => {
         sounds: [],
         images: [],
         canvas: null,
+        isLoaded: false,
       });
     };
   }

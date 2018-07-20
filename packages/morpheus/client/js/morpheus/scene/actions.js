@@ -48,18 +48,20 @@ export function fetch(id) {
       return Promise.resolve(cachedScene);
     }
     const fetchPromise = bySceneId(id)
-      .then(response => response.data)
-      .then((sceneData) => {
-        dispatch(sceneLoadComplete(sceneData));
-        return sceneData;
-      });
+      .then(response => response.data);
     dispatch(sceneLoadStarted(id, fetchPromise));
     return fetchPromise;
   };
 }
 
 export function fetchScene(id) {
-  return fetch(id);
+  return (dispatch) => {
+    return dispatch(fetch(id))
+      .then((sceneData) => {
+        dispatch(sceneLoadComplete(sceneData));
+        return sceneData;
+      })
+  };
 }
 
 export function setBackgroundScene(scene) {
@@ -140,3 +142,7 @@ export function goToScene(id, dissolve) {
     return doSceneTransition();
   };
 }
+
+const store = require('store').default;
+window.loadScene = sceneId => store().dispatch(fetch(sceneId))
+  .then(scene => store().dispatch(castActions.lifecycle.doLoad(scene)));

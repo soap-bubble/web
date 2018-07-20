@@ -10,6 +10,8 @@ export const previousSceneData = state => state.scene.get('previousScene');
 export const isEntering = state => state.scene.get('status') === 'entering';
 export const isExiting = state => state.scene.get('status') === 'exiting';
 export const isLive = state => state.scene.get('status') === 'live';
+export const sceneFromCache = sceneId => state => state.scene.get('cache').toIndexedSeq()
+  .find(scene => get(scene, 'data.sceneId') === sceneId);
 export const loadingScenes = state => state.scene.get('cache').toIndexedSeq()
   .filter(scene => scene.status === 'loading');
 export const loadedScenes = state => state.scene.get('cache').toIndexedSeq()

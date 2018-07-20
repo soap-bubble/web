@@ -1,7 +1,14 @@
 import createEpic from 'utils/createEpic';
 import socketPromise from 'utils/socket';
+import {
+  actions as castActions,
+} from 'morpheus/casts';
+// import {
+//   fetch,
+// }
 
 import {
+  CAST_ON_STAGE,
   SCENE_DO_ENTER,
 } from './actionTypes';
 
@@ -15,3 +22,9 @@ createEpic(action$ => action$
     });
   }),
 );
+
+// createEpic(action$ => action$
+//   .ofType(CAST_ON_STAGE)
+//   .forEach(({ meta: { scene }}) => {
+//
+//   }));

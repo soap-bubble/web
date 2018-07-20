@@ -199,6 +199,10 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'canvasTexture'),
   );
+  const selectIsLoaded = createSelector(
+    selectPano,
+    pano => get(pano, 'isLoaded'),
+  );
   return {
     panoCastData: selectPanoCastData,
     panoScene3D: selectPanoScene3D,
@@ -209,6 +213,7 @@ export const selectors = memoize((scene) => {
     renderedCanvas: selectRenderedCanvas,
     canvasTexture: selectCanvasTexture,
     assets: selectAssets,
+    isLoaded: selectIsLoaded,
   };
 });
 
@@ -319,8 +324,11 @@ export const delegate = memoize((scene) => {
     });
   }
 
-  function doEnter() {
+  function doLoad() {
     return (dispatch, getState) => {
+      if (panoSelectors.isLoaded(getState())) {
+        return Promise.resolve();
+      }
       const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {
         const { width, height } = gameSelectors.dimensions(getState());
@@ -352,6 +360,7 @@ export const delegate = memoize((scene) => {
             renderedCanvas,
             canvasTexture: map,
             canvas: createCanvas({ width, height }),
+            isLoaded: true,
           }));
       }
       return Promise.resolve();
@@ -425,13 +434,14 @@ export const delegate = memoize((scene) => {
         renderer: null,
         camera: null,
         canvas: null,
+        isLoaded: false,
       });
     };
   }
 
   return {
     applies,
-    doEnter,
+    doLoad,
     onStage,
     doUnload,
   };

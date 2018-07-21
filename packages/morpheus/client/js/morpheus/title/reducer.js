@@ -31,11 +31,12 @@ const reducer = createReducer(
         leaving: true,
       };
     },
-    [SET_RENDER_ELEMENTS](title, { payload: { camera, renderer } }) {
+    [SET_RENDER_ELEMENTS](title, { payload: { canvas, camera, renderer } }) {
       return {
         ...title,
         camera,
         renderer,
+        canvas,
       };
     },
   },

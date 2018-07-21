@@ -198,7 +198,7 @@ export function resize({
         },
       },
     });
-    function setSize({ camera, renderer, dimensionSelector }) {
+    function setSize({ canvas, camera, renderer, dimensionSelector }) {
       if (camera && renderer) {
         const { width: w, height: h }
           = dimensionSelector ? dimensionSelector(getState()) : { width, height };
@@ -206,18 +206,31 @@ export function resize({
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
       }
+      if (canvas) {
+        canvas.width = width;
+        canvas.height = height;
+      }
     }
-    const scene = sceneSelectors.currentSceneData(getState());
-    if (scene) {
-      setSize(castSelectors.forScene(scene).pano.renderElements(getState()));
-      setSize(castSelectors.forScene(scene).hotspot.renderElements(getState()));
+
+    if (sceneSelectors.currentSceneData(getState())
+      && titleSelectors.isDone(getState())
+    ) {
+      sceneSelectors.currentScenesData(getState()).forEach((scene) => {
+        const canvas = gameSelectors.canvas(getState());
+        setSize({
+          ...castSelectors.forScene(scene).pano.renderElements(getState()),
+          canvas,
+        });
+        setSize({
+          ...castSelectors.forScene(scene).hotspot.renderElements(getState()),
+          canvas,
+        });
+        setSize({
+          canvas: castSelectors.forScene(scene).special.canvas(getState()),
+        });
+      });
     } else {
       setSize(titleSelectors.renderElements(getState()));
-    }
-    const canvas = gameSelectors.canvas(getState());
-    if (canvas) {
-      canvas.width = width;
-      canvas.height = height;
     }
   };
 }

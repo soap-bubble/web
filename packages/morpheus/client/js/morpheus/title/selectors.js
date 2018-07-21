@@ -26,7 +26,8 @@ export const titleStyle = createSelector(
 
 export const renderElements = createSelector(
   root,
-  ({ camera, renderer }) => ({
+  ({ canvas, camera, renderer }) => ({
+    canvas,
     camera,
     renderer,
     dimensionSelector: titleDimensions,

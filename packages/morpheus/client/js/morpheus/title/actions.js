@@ -12,6 +12,9 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import {
+  actions as gameActions,
+} from 'morpheus/game';
+import {
   actions as gamestateActions,
 } from 'morpheus/gamestate';
 import {
@@ -69,6 +72,10 @@ export function canvasCreated(canvas) {
       const backgroundActions = dispatch(backgroundFactory());
       const introActions = dispatch(introFactory({
         canvas,
+      }));
+      dispatch(gameActions.resize({
+        width: window.innerWidth,
+        height: window.innerHeight,
       }));
       const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
@@ -134,6 +141,7 @@ export function canvasCreated(canvas) {
         payload: {
           camera,
           renderer,
+          canvas,
         },
       });
     }

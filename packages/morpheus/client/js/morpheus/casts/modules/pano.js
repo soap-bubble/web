@@ -207,6 +207,7 @@ export const selectors = memoize((scene) => {
     panoCastData: selectPanoCastData,
     panoScene3D: selectPanoScene3D,
     panoObject3D: selectPanoObject3D,
+    cache: selectPano,
     renderElements: selectRenderElements,
     rotation: selectRotation,
     canvas: selectCanvas,
@@ -327,7 +328,7 @@ export const delegate = memoize((scene) => {
   function doLoad() {
     return (dispatch, getState) => {
       if (panoSelectors.isLoaded(getState())) {
-        return Promise.resolve();
+        return Promise.resolve(panoSelectors.cache(getState()));
       }
       const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {

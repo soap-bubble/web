@@ -20,6 +20,15 @@ function mapDispatchToProps(dispatch) {
     done() {
       dispatch(done());
     },
+    onFullscreen() {
+      if (root.requestFullscreen) {
+        root.requestFullscreen();
+      } else if (root.webkitRequestFullScreen) {
+        root.webkitRequestFullScreen();
+        root.style.width = '100%';
+        root.style.height = '100%';
+      }
+    }
   };
 }
 

@@ -1,6 +1,7 @@
 import { connect } from 'react-redux';
 import {
   closeSettings,
+  fullscreen,
 } from '../commands';
 import Settings from '../components/Settings';
 
@@ -12,6 +13,9 @@ function mapDispatchToPros(dispatch) {
   return {
     onClose() {
       dispatch(closeSettings());
+    },
+    onFullscreen() {
+      dispatch(fullscreen());
     },
   };
 }

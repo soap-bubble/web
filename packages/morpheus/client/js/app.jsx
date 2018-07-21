@@ -58,16 +58,15 @@ window.onload = () => {
       }
     });
 
+  const root = document.getElementById('root');
   render(
     <Provider store={store}>
       <Game className="game" />
     </Provider>,
-    document.getElementById('root'),
+    root,
   );
-  window.addEventListener('resize', () => {
-    resizeToWindow();
-  });
-
+  window.addEventListener('resize', resizeToWindow);
+  
   if (qp.channel) {
     socketPromise.then((socket) => {
       socket.emit('letsplay', qp.channel);

@@ -79,8 +79,6 @@ function createButton({
     );
     mesh.scale.set(1, 0.85 * 0.66, 1);
     Object.assign(mesh.position, position);
-    // mesh.position.y = -0.40;
-    // mesh.position.x = -2;
     return mesh;
   }
 
@@ -89,39 +87,6 @@ function createButton({
     geometry: createGeometry(),
   });
 }
-
-
-// function createStopWatch() {
-//   let lastStoppedTime = Date.now();
-//   let startTime = lastStoppedTime;
-//   let isRunning = false;
-//   const selfie = {
-//     start() {
-//       if (!isRunning) {
-//         startTime = Date.now() - selfie.value;
-//         isRunning = true;
-//       }
-//       return selfie;
-//     },
-//     stop() {
-//       if (isRunning) {
-//         isRunning = false;
-//         lastStoppedTime = Date.now();
-//       }
-//       return selfie;
-//     },
-//     get fakeTime() {
-//       if (isRunning) {
-//         return Date.now();
-//       }
-//       return lastStoppedTime;
-//     },
-//     get value() {
-//       return selfie.fakeTime - startTime;
-//     },
-//   };
-//   return selfie;
-// }
 
 export default function factory() {
   return (dispatch, getState) => {
@@ -340,7 +305,7 @@ export default function factory() {
           map: newMap,
           bumpMap: newBumpMap,
           position: {
-            x: -2.0,
+            x: -2.5,
             y: -0.3,
           },
         });
@@ -349,7 +314,7 @@ export default function factory() {
           map: settingsMap,
           bumpMap: settingBumpMap,
           position: {
-            x: 2,
+            x: 2.5,
             y: -0.3,
           },
         });
@@ -358,7 +323,7 @@ export default function factory() {
           map: exitMap,
           bumpMap: exitBumpMap,
           position: {
-            x: 2.0,
+            x: 2.5,
             y: -0.7,
           },
         });
@@ -367,7 +332,7 @@ export default function factory() {
           map: contMap,
           bumpMap: contBumpMap,
           position: {
-            x: -2,
+            x: -2.5,
             y: -0.7,
           },
         });

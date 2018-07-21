@@ -30,6 +30,7 @@ class Main extends React.Component {
       started: true,
     });
     this.audio.play();
+    this.props.onFullscreen();
   }
 
   fadeOut() {

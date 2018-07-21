@@ -6,6 +6,7 @@ import './Settings.scss';
 
 const Settings = ({
   onClose,
+  onFullscreen,
 }) => (<div className="settingsModal">
 
   <span
@@ -15,8 +16,9 @@ const Settings = ({
       <span aria-hidden="true">&times;</span>
     </button>
   </span>
-
-
+  <button onClick={onFullscreen} type="button" className="btn" aria-label="Fullscreen">
+    Fullscreen
+  </button>
   <h4>Volume</h4>
   <VolumeSlider />
 </div>);

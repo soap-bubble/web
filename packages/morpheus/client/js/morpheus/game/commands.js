@@ -53,6 +53,19 @@ export function closeSave() {
   };
 }
 
+export function fullscreen() {
+  return (dispatch, getState) => {
+    const root = document.getElementById('root');
+    if (root.requestFullscreen) {
+      root.requestFullscreen();
+    } else if (root.webkitRequestFullScreen) {
+      root.webkitRequestFullScreen();
+      root.style.width = '100%';
+      root.style.height = '100%';
+    }
+  };
+}
+
 // Breaks circular dependency :-(
 setTimeout(() => {
   inputActions.inputHandler({

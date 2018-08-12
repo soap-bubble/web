@@ -53,6 +53,13 @@ module.exports = (env) => {
       authHost: 'https://auth.soapbubble.online',
       botHost: 'https://bot.staging.soapbubble.online',
     });
+  } else if (env.electron) {
+    Object.assign(appConfig, {
+      assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
+      apiHost: 'morpheus://',
+      authHost: 'https://auth.soapbubble.online',
+      botHost: 'https://bot.soapbubble.online',
+    });
   } else {
     Object.assign(appConfig, {
       assetHost: '',
@@ -70,19 +77,25 @@ module.exports = (env) => {
       appConfig.authHost = 'http://192.168.1.5:4000';
     }
   } else if (env.electron) {
-    if (env.production) {
-      appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
-    } else {
-      appConfig.assetHost = appConfig.apiHost = 'http://localhost:8050';
-      appConfig.authHost = 'http://localhost:4000';
-    }
+    // if (env.production) {
+    //   appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
+    // } else {
+    //   appConfig.assetHost = appConfig.apiHost = 'http://localhost:8050';
+    //   appConfig.authHost = 'http://localhost:4000';
+    // }
   }
   const target = env.electron ? 'electron-renderer' : 'web';
   const mainFields = (env.production || env.staging)
     ? ['browser', 'module', 'main']
     : ['esnext', 'browser', 'module', 'main'];
 
-  const webpackConfig = {
+  const webpackDefineConfig = {
+    'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+    'process.env.ELECTRON_ENV': `${env.electron}`,
+    config: JSON.stringify(appConfig),
+  };
+
+  let webpackConfig = {
     target,
     devtool: env.production ? false : 'source-map',
     entry: {
@@ -160,10 +173,7 @@ module.exports = (env) => {
         template: `client/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
       }),
-      new webpack.DefinePlugin({
-        'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
-        config: JSON.stringify(appConfig),
-      }),
+      new webpack.DefinePlugin(webpackDefineConfig),
     ],
   };
 
@@ -174,6 +184,45 @@ module.exports = (env) => {
       },
       mangle: false,
     }));
+  }
+
+  if (env.electron) {
+    const {
+      output,
+      devtool,
+    } = webpackConfig;
+
+    // convert to an array to also build service worker
+    webpackConfig = [
+      webpackConfig,
+      {
+        target,
+        devtool,
+        output,
+        entry: {
+          sw: './client/js/sw.js',
+        },
+        resolve: {
+          extensions: ['.js', '.json'],
+          mainFields,
+        },
+        module: {
+          rules: styleLoaders.concat([
+            {
+              test: /\.js?$/,
+              include: dirSharedComponents.concat([
+                dirJs,
+              ]),
+              exclude: [/node_modules/],
+              use: ['babel-loader'],
+            },
+          ]),
+        },
+        plugins: [
+          new webpack.DefinePlugin(webpackDefineConfig),
+        ],
+      },
+    ];
   }
 
   return webpackConfig;

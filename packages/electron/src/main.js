@@ -1,26 +1,33 @@
-const electron = require('electron')
-// Module to control application life.
-const app = electron.app
-// Module to create native browser window.
-const BrowserWindow = electron.BrowserWindow
+import 'regenerator-runtime/runtime';
+import path from 'path';
+import fs from 'fs';
+import url from 'url';
+import { protocol, app, BrowserWindow } from 'electron';
+import initService from './service';
 
-const path = require('path')
-const url = require('url')
+// On windows use the local app data folder for local storage because we will store alot of userData
+if (process.platform == 'win32') {
+    app.setPath('appData', process.env.LOCALAPPDATA);
+    app.setPath('userData', path.join(process.env.LOCALAPPDATA, app.getName()));
+}
 
 // Keep a global reference of the window object, if you don't, the window will
 // be closed automatically when the JavaScript object is garbage collected.
 let mainWindow
 
 function createWindow () {
+  initService();
   // Create the browser window.
   mainWindow = new BrowserWindow({width: 800, height: 600})
 
   // and load the index.html of the app.
   mainWindow.loadURL(url.format({
-    pathname: path.join(__dirname, 'build/index.html'),
+    pathname: 'build/index.html',
     protocol: 'file:',
     slashes: true
   }))
+
+  mainWindow.setFullScreen(true);
 
   // Open the DevTools.
   // mainWindow.webContents.openDevTools()
@@ -33,6 +40,8 @@ function createWindow () {
     mainWindow = null
   })
 }
+
+protocol.registerStandardSchemes(['morpheus'], { secure: true });
 
 // This method will be called when Electron has finished
 // initialization and is ready to create browser windows.

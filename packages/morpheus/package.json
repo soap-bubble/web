@@ -12,6 +12,7 @@
     "build:server": "babel server -d lib --copy-files",
     "build:client": "webpack --env",
     "build:client:production": "webpack --env.production=true",
+    "build:client:electron": "webpack --env.electron=true",
     "build:client:staging": "webpack --env.staging=true",
     "build:client:watch": "webpack --env --watch",
     "gulp": "gulp",

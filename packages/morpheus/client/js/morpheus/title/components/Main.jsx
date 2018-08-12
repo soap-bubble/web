@@ -14,7 +14,7 @@ class Main extends React.Component {
     this.state = {
       isLeaving: false,
       target: 1,
-      started: false,
+      started: process.env.ELECTRON_ENV,
     };
     this.onPlayClicked = this.onPlayClicked.bind(this);
   }
@@ -22,6 +22,12 @@ class Main extends React.Component {
   componentWillReceiveProps(nextProps) {
     if (this.props.leaving === false && nextProps.leaving === true) {
       this.fadeOut();
+    }
+  }
+
+  componentDidMount() {
+    if (process.env.ELECTRON_ENV && this.audio) {
+      this.audio.play();
     }
   }
 

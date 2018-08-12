@@ -66,7 +66,7 @@ window.onload = () => {
     root,
   );
   window.addEventListener('resize', resizeToWindow);
-  
+
   if (qp.channel) {
     socketPromise.then((socket) => {
       socket.emit('letsplay', qp.channel);
@@ -118,3 +118,22 @@ window.onload = () => {
     };
   }
 };
+
+if (process.env.ELECTRON_ENV) {
+  if ('serviceWorker' in navigator) {
+    const fileUrl = document.location.href.substring(0, document.location.href.length - 10);
+    const swOptions = { scope: './GameDB/' };
+    navigator.serviceWorker.register('sw.js', swOptions).then((reg) => {
+      if (reg.installing) {
+        console.log('Service worker installing');
+      } else if (reg.waiting) {
+        console.log('Service worker installed');
+      } else if (reg.active) {
+        console.log('Service worker active');
+      }
+    }).catch((error) => {
+      // registration failed
+      console.log(`Registration failed with ${error}`);
+    });
+  }
+}

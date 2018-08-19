@@ -68,7 +68,7 @@ window.onload = () => {
   window.addEventListener('resize', resizeToWindow);
 
   if (qp.channel) {
-    socketPromise.then((socket) => {
+    socketPromise().then((socket) => {
       socket.emit('letsplay', qp.channel);
       socket.on('CREATE_CHANNEL', (uChannel) => {
         socket.channel = uChannel;

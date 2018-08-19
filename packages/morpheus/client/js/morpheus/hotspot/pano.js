@@ -161,7 +161,7 @@ export default function ({
         // Update cursor location and icon
         await dispatch(gameActions.setCursorLocation(currentSreenPosition));
         // Update the PanoAnim
-        await dispatch(castActionsForScene.update());
+        await dispatch(castActionsForScene.update(eventOptions));
       });
     }
   }

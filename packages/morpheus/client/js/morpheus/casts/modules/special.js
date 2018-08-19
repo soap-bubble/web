@@ -396,6 +396,10 @@ export function selectors(scene) {
     selectSpecial,
     special => get(special, 'isLoaded', false),
   );
+  const selectIsLoading = createSelector(
+    selectSpecial,
+    special => get(special, 'isLoading', false),
+  );
 
   return {
     data: selectSpecialCastData,
@@ -413,6 +417,7 @@ export function selectors(scene) {
     sounds: selectSounds,
     images: selectImages,
     isLoaded: selectIsLoaded,
+    isLoading: selectIsLoading,
   };
 }
 
@@ -423,12 +428,16 @@ export const delegate = memoize((scene) => {
     return specialSelectors.data(state);
   }
 
-  function doLoad() {
+  function doLoad(setState) {
     return (dispatch, getState) => {
       const state = getState();
       const isLoaded = specialSelectors.isLoaded(state);
+      const isLoading = specialSelectors.isLoading(state);
       if (isLoaded) {
         return Promise.resolve(specialSelectors.cache(state));
+      }
+      if (isLoading) {
+        return isLoading;
       }
       const controlledCastsData = specialSelectors.controlledCastsData(state);
       const movieCasts = specialSelectors.movieCasts(state);
@@ -496,7 +505,7 @@ export const delegate = memoize((scene) => {
           })),
       ));
 
-      return Promise.all([
+      const promise = Promise.all([
         loadImages,
         loadSounds,
         loadMovies,
@@ -507,19 +516,22 @@ export const delegate = memoize((scene) => {
         controlledCasts,
         isLoaded: true,
       }));
+      setState({
+        isLoading: promise,
+      });
+      return promise;
     };
   }
 
-  function doEnter({
-    images,
-    sounds,
-    controlledCasts,
-  }) {
+  function doEnter() {
     return (dispatch, getState) => {
       const state = getState();
       const gamestates = gamestateSelectors.forState(state);
       const dimensions = gameSelectors.dimensions(state);
       const movieCasts = specialSelectors.movieCasts(state);
+      const images = specialSelectors.images(state);
+      const sounds = specialSelectors.sounds(state);
+      const controlledCasts = specialSelectors.controlledCasts(state);
 
       dispatch(gameActions.setCursor(null));
 

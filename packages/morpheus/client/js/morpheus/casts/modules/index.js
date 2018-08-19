@@ -1,3 +1,5 @@
+// Preload in front so it can play with cast state
+exports.preload = require('./preload');
 exports.hotspot = require('./hotspot');
 exports.pano = require('./pano');
 exports.controlledMovie = require('./controlledMovie');

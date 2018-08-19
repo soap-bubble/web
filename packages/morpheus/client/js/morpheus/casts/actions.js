@@ -15,7 +15,7 @@ import {
 import * as modules from './modules';
 
 
-function dispatchCastState({ event, castState, castType, scene }) {
+export function dispatchCastState({ event, castState, castType, scene }) {
   return {
     type: event,
     payload: castState,
@@ -24,16 +24,21 @@ function dispatchCastState({ event, castState, castType, scene }) {
 }
 
 function doActionForCast({ event, scene, castType, action }) {
-  return dispatch => dispatch(action())
-    .then(castState => dispatch(dispatchCastState({
-      event,
-      castState,
-      castType,
-      scene,
-    })))
-    .catch((err) => {
-      console.error(err);
-    });
+  return (dispatch) => {
+    function setState(state) {
+      return dispatch(dispatchCastState({
+        event,
+        castState: state,
+        castType,
+        scene,
+      }));
+    }
+    return dispatch(action(setState))
+      .then(setState)
+      .catch((err) => {
+        console.error(err);
+      });
+  };
 }
 
 export const lifecycle = [{
@@ -54,16 +59,15 @@ export const lifecycle = [{
 }]
   .reduce((memo, { action, event }) => {
     memo[action] = function moduleAction(scene) {
-      return (dispatch, getState) => Promise.all(Object.keys(modules).map((cast) => {
-        const module = modules[cast];
+      return (dispatch, getState) => Promise.all(Object.keys(modules.default).map((cast) => {
+        const module = modules.default[cast];
         const delegate = module.delegate && module.delegate(scene);
         if (delegate && delegate && delegate[action] && delegate.applies(getState())) {
-          const oldState = (selectorsForScene(scene).cache(getState()) || {})[cast];
           return dispatch(doActionForCast({
             event,
             scene,
             castType: cast,
-            action: delegate[action].bind(null, oldState),
+            action: delegate[action],
           }));
         }
         return Promise.resolve();
@@ -87,24 +91,24 @@ export const lifecycle = [{
   });
 
 export const forScene = memoize((scene) => {
-  const moduleActions = Object.keys(modules).reduce((memo, name) => {
-    if (modules[name].actions) {
-      memo[name] = modules[name].actions;
+  const moduleActions = Object.keys(modules.default).reduce((memo, name) => {
+    if (modules.default[name].actions) {
+      memo[name] = modules.default[name].actions;
     }
     return memo;
   }, {});
   return Object.defineProperties({
-    update() {
+    update(payload) {
       return (dispatch) => {
-        Object.keys(modules).forEach((name) => {
-          const module = modules[name];
+        Object.keys(modules.default).forEach((name) => {
+          const module = modules.default[name];
           if (module
             && module.delegate
           ) {
             const delegate = module.delegate(scene);
             if (delegate.update && delegate.applies(scene)) {
               try {
-                dispatch(delegate.update());
+                dispatch(delegate.update(payload));
               } catch (err) {
                 console.error(err);
               }

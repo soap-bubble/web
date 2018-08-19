@@ -155,9 +155,19 @@ export const selectors = memoize((scene) => {
     () => scene,
     isPano,
   );
+  const selectIsLoaded = createSelector(
+    selectSelfInStore,
+    controlledMovie => get(controlledMovie, 'isLoaded'),
+  );
+  const selectIsLoading = createSelector(
+    selectSelfInStore,
+    controlledMovie => get(controlledMovie, 'isLoading'),
+  );
   return {
-    isPano: selectIsPano,
     self: selectSelfInStore,
+    isLoaded: selectIsLoaded,
+    isLoading: selectIsLoading,
+    isPano: selectIsPano,
     controlledCasts: selectControlledCasts,
     controlledCastsData: selectControlledCastsData,
   };
@@ -171,11 +181,16 @@ export const delegate = memoize((scene) => {
       && (selfSelectors.controlledCastsData(state).length !== 0));
   }
 
-  function doEnter() {
+  function doLoad(setState) {
     return (dispatch, getState) => {
       const controlledCastsData = selfSelectors.controlledCastsData(getState());
-
-      return Promise.all(
+      if (selfSelectors.isLoaded(getState())) {
+        return Promise.resolve(selfSelectors.self(getState()));
+      }
+      if (selfSelectors.isLoading(getState())) {
+        return selfSelectors.isLoading(getState());
+      }
+      const promise = Promise.all(
         controlledCastsData.map(
           curr => createMaterial(getAssetUrl(curr.fileName, 'png'))
             .then(material => ({
@@ -187,11 +202,19 @@ export const delegate = memoize((scene) => {
       )
         .then(controlledCasts => ({
           controlledCasts,
+          isLoaded: true,
+          isLoading: false,
         }));
+
+      setState({
+        isLoading: promise,
+      });
+
+      return promise;
     };
   }
 
-  function onStage() {
+  function doEnter() {
     return (dispatch, getState) => {
       const panoObject3D = panoSelectors(scene).panoObject3D(getState());
       const controlledCasts = selfSelectors.controlledCasts(getState());
@@ -220,6 +243,9 @@ export const delegate = memoize((scene) => {
     return (dispatch, getState) => {
       const controlledCasts = selfSelectors.controlledCasts(getState());
       controlledCasts.forEach(({ object3D }) => object3D.dispose());
+      return Promise.resolve({
+        isLoaded: false,
+      });
     };
   }
 
@@ -237,8 +263,8 @@ export const delegate = memoize((scene) => {
 
   return {
     applies,
+    doLoad,
     doEnter,
-    onStage,
     doUnload,
     update,
   };

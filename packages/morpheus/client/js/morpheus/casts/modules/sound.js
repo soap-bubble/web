@@ -44,7 +44,7 @@ export const selectors = memoize((scene) => {
 export const delegate = memoize((scene) => {
   const soundSelectors = selectors(scene);
   function applies(state) {
-    return soundSelectors.soundCastsData(state).lenth;
+    return soundSelectors.soundCastsData(state).length;
   }
 
   return {

@@ -1,14 +1,27 @@
 import io from 'socket.io-client';
+import qs from 'query-string';
 
-const socket = io(config.botHost);
+export default (function promiseSingleton() {
+  let p;
 
-export default new Promise((resolve) => {
-  socket.on('connect', () => {
-    const selfie = {
-      emit: socket.emit.bind(socket),
-      on: socket.on.bind(socket),
-      token: '',
-    };
-    resolve(selfie);
-  });
-});
+  return () => {
+    if (!p) {
+      p = new Promise((resolve) => {
+        const qp = qs.parse(location.search);
+
+        if (qp.channel) {
+          const socket = io(config.botHost);
+          socket.on('connect', () => {
+            const selfie = {
+              emit: socket.emit.bind(socket),
+              on: socket.on.bind(socket),
+              token: '',
+            };
+            resolve(selfie);
+          });
+        }
+      });
+    }
+    return p;
+  };
+}());

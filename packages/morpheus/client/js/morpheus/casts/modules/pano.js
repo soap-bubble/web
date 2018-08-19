@@ -203,6 +203,10 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'isLoaded'),
   );
+  const selectIsLoading = createSelector(
+    selectPano,
+    pano => get(pano, 'isLoading'),
+  );
   return {
     panoCastData: selectPanoCastData,
     panoScene3D: selectPanoScene3D,
@@ -215,6 +219,7 @@ export const selectors = memoize((scene) => {
     canvasTexture: selectCanvasTexture,
     assets: selectAssets,
     isLoaded: selectIsLoaded,
+    isLoading: selectIsLoading,
   };
 });
 
@@ -311,24 +316,13 @@ export const actions = memoize((scene) => {
 export const delegate = memoize((scene) => {
   const panoSelectors = selectors(scene);
 
-  function updater() {
-    const assets = panoSelectors.assets(getState());
-    const renderedCanvas = panoSelectors.renderedCanvas(getState());
-    const canvasTexture = panoSelectors.canvasTexture(getState());
-    canvasTexture.needsUpdate = true;
-    assets.forEach((contextProvider) => {
-      const ctx = renderedCanvas.getContext('2d');
-      const {
-        render,
-      } = contextProvider;
-      render(ctx);
-    });
-  }
-
-  function doLoad() {
+  function doLoad(setState) {
     return (dispatch, getState) => {
       if (panoSelectors.isLoaded(getState())) {
         return Promise.resolve(panoSelectors.cache(getState()));
+      }
+      if (panoSelectors.isLoading(getState())) {
+        return panoSelectors.isLoading(getState());
       }
       const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {
@@ -353,7 +347,7 @@ export const delegate = memoize((scene) => {
           startAngle: nextStartAngle,
         });
         const scene3D = createScene(object3D);
-        return promiseMaterial
+        const promise = promiseMaterial
           .then(() => ({
             object3D,
             scene3D,
@@ -363,6 +357,10 @@ export const delegate = memoize((scene) => {
             canvas: createCanvas({ width, height }),
             isLoaded: true,
           }));
+        setState({
+          isLoading: promise,
+        });
+        return promise;
       }
       return Promise.resolve();
     };

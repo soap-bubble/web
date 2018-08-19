@@ -6,9 +6,10 @@
   "main": "dist/main.js",
   "scripts": {
     "start": "electron .",
+    "start:watch": "cross-env NODE_ENV=development electromon .",
     "build": "babel src -d dist",
     "build:watch": "npm run build -- --watch",
-    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"electromon .\""
+    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"npm run start:watch\""
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [

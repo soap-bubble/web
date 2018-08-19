@@ -1,7 +1,7 @@
 import { last } from 'lodash';
 import {
-  actions as castActions,
-} from 'morpheus/casts';
+  forScene,
+} from 'morpheus/casts/actions';
 import {
   selectors as inputSelectors,
 } from 'morpheus/input';
@@ -60,8 +60,8 @@ export default function ({ dispatch, scene }) {
         momentum.speed.x = 0;
         momentum.enabled = false;
       }
-
-      dispatch(castActions.forScene(scene).pano.rotateBy(momentum.speed));
+      const castActions = forScene(scene);
+      dispatch(castActions.pano.rotateBy(momentum.speed));
     }
     momentum.abort = false;
     if (momentum.enabled) {
@@ -103,8 +103,8 @@ export default function ({ dispatch, scene }) {
       if (interaction.positions.length > 5) {
         interaction.positions.shift();
       }
-
-      dispatch(castActions.forScene(scene).pano.rotateBy({
+      const castActions = forScene(scene);
+      dispatch(castActions.pano.rotateBy({
         x: delta.vertical,
         y: delta.horizontal,
       }));

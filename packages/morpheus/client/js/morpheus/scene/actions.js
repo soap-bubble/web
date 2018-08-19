@@ -55,13 +55,11 @@ export function fetch(id) {
 }
 
 export function fetchScene(id) {
-  return (dispatch) => {
-    return dispatch(fetch(id))
+  return dispatch => dispatch(fetch(id))
       .then((sceneData) => {
         dispatch(sceneLoadComplete(sceneData));
         return sceneData;
-      })
-  };
+      });
 }
 
 export function setBackgroundScene(scene) {
@@ -144,5 +142,6 @@ export function goToScene(id, dissolve) {
 }
 
 const store = require('store').default;
+
 window.loadScene = sceneId => store().dispatch(fetch(sceneId))
   .then(scene => store().dispatch(castActions.lifecycle.doLoad(scene)));

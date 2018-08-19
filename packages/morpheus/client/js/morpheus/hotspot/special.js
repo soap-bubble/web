@@ -131,6 +131,7 @@ export default function ({ dispatch, scene }) {
         const promise = actionQueue.add(async () => {
           await dispatch(handleEvent(eventOptions));
           await dispatch(gameActions.setCursorLocation({ top, left }));
+          await dispatch(castActionsForScene.update(eventOptions));
         });
 
         if (wasMouseUpped) {

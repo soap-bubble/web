@@ -2,6 +2,7 @@ import {
   get,
 } from 'lodash';
 import { createSelector } from 'reselect';
+import { isActive } from 'morpheus/gamestate';
 
 export const backgroundSceneData = state => state.scene.get('backgroundScene');
 export const currentScenesData = state => state.scene.get('currentScenes');

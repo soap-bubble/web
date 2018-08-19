@@ -15,7 +15,7 @@ import {
 createEpic(action$ => action$
   .ofType(SCENE_DO_ENTER)
   .forEach((action) => {
-    socketPromise.then((socket) => {
+    socketPromise().then((socket) => {
       if (socket.channel) {
         socket.emit(socket.channel, action);
       }

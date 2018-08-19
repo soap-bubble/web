@@ -1,3 +1,6 @@
+import {
+  isUndefined,
+} from 'lodash';
 import { fetchInitial as fetchInitialGameState } from 'service/gameState';
 import {
   actions as sceneActions,
@@ -54,6 +57,21 @@ export function updateGameState(gamestateId, value) {
   };
 }
 
+function nextSceneAngle(hotspot) {
+  const {
+    nextSceneId,
+    angleAtEnd,
+  } = hotspot;
+  let startAngle;
+  if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+    if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+      startAngle = (angleAtEnd * Math.PI) / 1800;
+      startAngle -= Math.PI - (Math.PI / 6);
+    }
+  }
+  return startAngle;
+}
+
 export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
   return async (dispatch, getState) => {
     const gamestates = gamestateSelectors.forState(getState());
@@ -69,17 +87,29 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
     switch (actionType) {
       case 'GoBack': {
         const prevSceneId = sceneSelectors.previousSceneId(getState());
+        const nAngle = nextSceneAngle(hotspot);
+        if (nAngle) {
+          dispatch(sceneActions.setNextStartAngle(nAngle));
+        }
         await dispatch(sceneActions.goToScene(prevSceneId));
         break;
       }
       case 'DissolveTo': {
         const { param1: nextSceneId } = hotspot;
+        const nAngle = nextSceneAngle(hotspot);
+        if (nAngle) {
+          dispatch(sceneActions.setNextStartAngle(nAngle));
+        }
         if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), true);
         break;
       }
       case 'ChangeScene': {
         const { param1: nextSceneId } = hotspot;
         if (nextSceneId) {
+          const nAngle = nextSceneAngle(hotspot);
+          if (nAngle) {
+            dispatch(sceneActions.setNextStartAngle(nAngle));
+          }
           await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
         }
         break;

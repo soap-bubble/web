@@ -95,12 +95,12 @@ export const selectors = memoize((scene) => {
 
   const selectScene3D = createSelector(
     selectHotspot,
-    hotspot => hotspot.scene3D,
+    hotspot => get(hotspot, 'scene3D'),
   );
 
   const selectCamera = createSelector(
     selectHotspot,
-    hotspot => hotspot.camera,
+    hotspot => get(hotspot, 'camera'),
   );
 
   return {
@@ -489,56 +489,5 @@ export const delegate = memoize((scene) => {
     doEnter,
     onStage,
     doUnload,
-  };
-});
-
-export const actions = memoize((scene) => {
-  function hovered(hoveredHotspots) {
-    return (dispatch, getState) => {
-      let cursor;
-      hoveredHotspots.some((hotspot) => {
-        const gamestates = gamestateSelectors.forState(getState());
-        if (isActive({ cast: hotspot, gamestates })) {
-          const {
-            defaultPass,
-            cursorShapeWhenActive: morpheusCursor,
-          } = hotspot;
-          cursor = morpheusCursor;
-          return defaultPass;
-        }
-        return true;
-      });
-
-      if (cursor) {
-        dispatch(gameActions.setCursor(cursor));
-      } else if (hoveredHotspots.length === 0) {
-        dispatch(gameActions.setCursor(10000));
-      }
-    };
-  }
-
-  function activated(activatedHotspots) {
-    return (dispatch, getState) => {
-      const scene3D = selectors(scene).scene3D(getState());
-      dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-      activatedHotspots.some((hotspot) => {
-        const gamestates = gamestateSelectors.forState(getState());
-        if (isActive({ cast: hotspot, gamestates })) {
-          if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
-            dispatch(castActions.forScene(scene).pano.sweepTo(hotspot, () => {
-              dispatch(sceneActions.goToScene(hotspot.param1, false));
-            }));
-            return true;
-          }
-          return dispatch(gamestateActions.handleHotspot({ hotspot }));
-        }
-        return true;
-      });
-    };
-  }
-
-  return {
-    hovered,
-    activated,
   };
 });

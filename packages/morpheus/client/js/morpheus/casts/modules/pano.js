@@ -316,6 +316,10 @@ export const actions = memoize((scene) => {
 export const delegate = memoize((scene) => {
   const panoSelectors = selectors(scene);
 
+  function applies(state) {
+    return panoSelectors.panoCastData(state);
+  }
+
   function doLoad(setState) {
     return (dispatch, getState) => {
       if (panoSelectors.isLoaded(getState())) {
@@ -366,10 +370,6 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function applies(state) {
-    return panoSelectors.panoCastData(state);
-  }
-
   function onStage() {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
@@ -380,6 +380,12 @@ export const delegate = memoize((scene) => {
       const assets = panoSelectors.assets(getState());
       const renderedCanvas = panoSelectors.renderedCanvas(getState());
       const canvasTexture = panoSelectors.canvasTexture(getState());
+
+      const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
+      const panoObject3D = panoSelectors.panoObject3D(getState());
+      if (panoObject3D) {
+        panoObject3D.rotation.y = nextStartAngle;
+      }
 
       positionCamera({
         camera,

@@ -10,6 +10,7 @@ import {
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
+import Queue from 'promise-queue';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,

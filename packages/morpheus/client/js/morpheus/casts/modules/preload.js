@@ -15,14 +15,10 @@ import {
   isActive,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
-import Queue from 'promise-queue';
+import createLoader from 'utils/loader';
 import {
   ACTION_TYPES,
 } from 'morpheus/constants';
-
-
-export const scenesToLoad = [];
-export const loadingQueue = new Queue(3, Infinity);
 
 export const selectors = memoize((scene) => {
   const sceneToLoad = (cast) => {
@@ -48,7 +44,7 @@ export const selectors = memoize((scene) => {
       gamestates,
     })),
   );
-  const selectNewScenesToLoad = () => scene.casts
+  const selectNewScenesToLoad = scenesToLoad => scene.casts
     .map(sceneToLoad)
     .filter(sceneId =>
       sceneId && !scenesToLoad.find(
@@ -62,8 +58,9 @@ export const selectors = memoize((scene) => {
   };
 });
 
+const loader = createLoader();
 
-export function delegate(scene) {
+export const delegate = memoize((scene) => {
   const preloadSelectors = selectors(scene);
   return {
     applies() {
@@ -73,16 +70,16 @@ export function delegate(scene) {
       return (dispatch, getState) => {
         // const angle = panoSelectors(scene).rotation(getState());
         // console.log(angle.y, position);
-        const newScenesToLoad = preloadSelectors.newScenesToLoad(getState());
-        newScenesToLoad.forEach((sceneIdToLoad) => {
-          scenesToLoad.push(sceneIdToLoad);
-          loadingQueue.add(async () => {
-            const sceneToLoad = await dispatch(sceneActions.fetch(sceneIdToLoad));
+        loader.load({
+          item: scene,
+          filter: ({ toLoad }) => preloadSelectors.newScenesToLoad(toLoad),
+          loader: async (id) => {
+            const sceneToLoad = await dispatch(sceneActions.fetch(id));
             await dispatch(lifecycle.doLoad(sceneToLoad));
-            console.log(`Preloaded ${sceneIdToLoad}`);
-          });
+            console.log(`Preloaded ${id}`);
+          },
         });
       };
     },
   };
-}
+});

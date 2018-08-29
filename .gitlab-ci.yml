@@ -60,3 +60,8 @@ build-auth:
     - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/auth:latest
     - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
+build-electron:
+  image: docker:stable
+  stage: build
+  script:
+    - npm build:electron

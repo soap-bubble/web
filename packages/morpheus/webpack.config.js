@@ -53,13 +53,6 @@ module.exports = (env) => {
       authHost: 'https://auth.soapbubble.online',
       botHost: 'https://bot.staging.soapbubble.online',
     });
-  } else if (env.electron) {
-    Object.assign(appConfig, {
-      assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
-      apiHost: 'morpheus://',
-      authHost: 'https://auth.soapbubble.online',
-      botHost: 'https://bot.soapbubble.online',
-    });
   } else {
     Object.assign(appConfig, {
       assetHost: '',
@@ -77,6 +70,10 @@ module.exports = (env) => {
       appConfig.authHost = 'http://192.168.1.5:4000';
     }
   } else if (env.electron) {
+    appConfig.assetHost = appConfig.assetHost || 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev';
+    appConfig.apiHost = 'morpheus://';
+    appConfig.authHost = appConfig.authHost || 'https://auth.soapbubble.online';
+    appConfig.botHost = appConfig.botHost || 'https://bot.soapbubble.online';
     // if (env.production) {
     //   appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
     // } else {

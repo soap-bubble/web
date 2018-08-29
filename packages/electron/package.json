@@ -1,15 +1,17 @@
 {
-  "name": "morpheus-electron",
+  "name": "Morpheus",
   "version": "1.5.0",
   "description": "A minimal Electron application",
   "private": true,
-  "main": "dist/main.js",
+  "main": "src/main.js",
   "scripts": {
-    "start": "electron .",
+    "start": "electron-forge start",
     "start:watch": "cross-env NODE_ENV=development electromon .",
     "build": "babel src -d dist",
     "build:watch": "npm run build -- --watch",
-    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"npm run start:watch\""
+    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"npm run start:watch\"",
+    "package": "electron-forge package",
+    "make": "electron-forge make"
   },
   "repository": "https://github.com/electron/electron-quick-start",
   "keywords": [
@@ -19,19 +21,56 @@
     "tutorial",
     "demo"
   ],
-  "author": "GitHub",
-  "license": "CC0-1.0",
+  "author": "Soapbubble Productions",
+  "license": "MIT",
   "devDependencies": {
     "babel-cli": "^6.26.0",
+    "babel-plugin-transform-async-to-generator": "^6.24.1",
     "babel-preset-env": "^1.7.0",
+    "babel-preset-react": "^6.24.1",
     "concurrently": "^3.6.1",
     "electromon": "^1.0.10",
-    "electron": "^1.8.4"
+    "electron-forge": "^5.2.2",
+    "electron-prebuilt-compile": "1.8.4"
   },
   "dependencies": {
+    "electron-compile": "^6.4.3",
+    "electron-squirrel-startup": "^1.0.0",
     "mkdirp": "^0.5.1",
     "path-to-regexp": "^2.2.1",
     "regenerator-runtime": "^0.12.0",
     "request": "^2.87.0"
+  },
+  "config": {
+    "forge": {
+      "make_targets": {
+        "win32": [
+          "squirrel"
+        ],
+        "darwin": [
+          "zip"
+        ],
+        "linux": [
+          "deb",
+          "rpm"
+        ]
+      },
+      "electronPackagerConfig": {
+        "packageManager": "npm"
+      },
+      "electronWinstallerConfig": {
+        "name": "Morpheus"
+      },
+      "electronInstallerDebian": {},
+      "electronInstallerRedhat": {},
+      "github_repository": {
+        "owner": "",
+        "name": ""
+      },
+      "windowsStoreConfig": {
+        "packageName": "",
+        "name": "Morpheus"
+      }
+    }
   }
 }

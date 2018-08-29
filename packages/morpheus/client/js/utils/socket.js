@@ -1,4 +1,3 @@
-import io from 'socket.io-client';
 import qs from 'query-string';
 
 export default (function promiseSingleton() {

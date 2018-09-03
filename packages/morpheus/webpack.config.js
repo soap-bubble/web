@@ -15,8 +15,8 @@ const dirSharedComponents = [
 // cheap-module-eval-source-map
 module.exports = (env) => {
   const outputPath = (() => {
-    if (env.phonegap) {
-      return path.resolve(__dirname, '../phonegap/www');
+    if (env.cordova) {
+      return path.resolve(__dirname, '../cordova/www');
     }
     if (env.electron) {
       return path.resolve(__dirname, '../electron/build');
@@ -26,8 +26,8 @@ module.exports = (env) => {
 
   const publicPath = '';
   const htmlTemplate = (() => {
-    if (env.phonegap) {
-      return 'phonegap.ejs';
+    if (env.cordova) {
+      return 'cordova.ejs';
     }
     if (env.electron) {
       return 'electron.ejs';
@@ -62,14 +62,7 @@ module.exports = (env) => {
     });
   }
 
-  if (env.phonegap) {
-    if (env.production) {
-      appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
-    } else {
-      appConfig.assetHost = appConfig.apiHost = 'http://192.168.1.5:8050';
-      appConfig.authHost = 'http://192.168.1.5:4000';
-    }
-  } else if (env.electron) {
+  if (env.electron) {
     appConfig.assetHost = appConfig.assetHost || 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev';
     appConfig.apiHost = 'morpheus://';
     appConfig.authHost = appConfig.authHost || 'https://auth.soapbubble.online';

@@ -81,13 +81,13 @@ module.exports = (env) => {
 
   const webpackDefineConfig = {
     'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
-    'process.env.ELECTRON_ENV': `${env.electron}`,
+    'process.env.AUTOSTART': `${env.electron || env.cordova}`,
     config: JSON.stringify(appConfig),
   };
 
   let webpackConfig = {
     target,
-    devtool: env.production ? false : 'source-map',
+    devtool: 'source-map', // env.production ? false : 'source-map',
     entry: {
       app: './client/js/app.jsx',
       vendor: [

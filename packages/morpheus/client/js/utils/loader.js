@@ -1,5 +1,5 @@
 import {
-  remove,
+  pull,
 } from 'lodash';
 import Queue from 'promise-queue';
 
@@ -9,10 +9,11 @@ export default function ({
   loader,
 } = {}) {
   const toLoad = [];
+  const loaded = [];
   const loadingQueue = new Queue(concurrent, Infinity);
 
   function getNextItem() {
-    return toLoad.reduce((curr, memo) => {
+    return toLoad.reduce((memo, curr) => {
       if (!memo) {
         return curr;
       }
@@ -20,7 +21,7 @@ export default function ({
         return curr;
       }
       return memo;
-    });
+    }, null);
   }
 
   function load({
@@ -34,21 +35,33 @@ export default function ({
       item,
     });
     const promises = [];
-    newItemsToLoad.forEach((id) => {
-      toLoad.push({
-        id,
-        priority,
+    newItemsToLoad
+      .filter(id =>
+        !toLoad.find(q => q.id === id)
+        && loaded.indexOf(id) === -1,
+      )
+      .forEach((id) => {
+        toLoad.push({
+          id,
+          priority,
+        });
+        promises.push(loadingQueue.add(async () => {
+          const idToLoad = getNextItem();
+          pull(toLoad, idToLoad);
+          loaded.push(id);
+          await _loader(idToLoad);
+        }));
       });
-      promises.push(loadingQueue.add(async () => {
-        const idToLoad = getNextItem();
-        remove(toLoad, n => n.id === idToLoad.id);
-        await _loader(idToLoad);
-      }));
-    });
+
     return Promise.all(promises);
+  }
+
+  function unload(item) {
+    pull(loaded, item);
   }
 
   return {
     load,
+    unload,
   };
 }

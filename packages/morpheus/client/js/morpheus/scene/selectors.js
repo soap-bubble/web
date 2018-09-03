@@ -2,7 +2,6 @@ import {
   get,
 } from 'lodash';
 import { createSelector } from 'reselect';
-import { isActive } from 'morpheus/gamestate';
 
 export const backgroundSceneData = state => state.scene.get('backgroundScene');
 export const currentScenesData = state => state.scene.get('currentScenes');
@@ -15,8 +14,7 @@ export const sceneFromCache = sceneId => state => state.scene.get('cache').toInd
   .find(scene => get(scene, 'data.sceneId') === sceneId);
 export const loadingScenes = state => state.scene.get('cache').toIndexedSeq()
   .filter(scene => scene.status === 'loading');
-export const loadedScenes = state => state.scene.get('cache').toIndexedSeq()
-  .filter(scene => !(scene.status === 'loading' || scene.status === 'unloaded'));
+export const loadedScenes = state => state.scene.get('loadedScenes').toJS();
 export const currentSceneId = createSelector(
   currentSceneData,
   cs => get(cs, 'sceneId'),

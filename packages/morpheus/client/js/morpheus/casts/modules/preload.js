@@ -48,7 +48,7 @@ export const selectors = memoize((scene) => {
     .map(sceneToLoad)
     .filter(sceneId =>
       sceneId && !scenesToLoad.find(
-        s => s === sceneId,
+        s => s.id === sceneId,
       ),
     );
   return {
@@ -73,7 +73,7 @@ export const delegate = memoize((scene) => {
         loader.load({
           item: scene,
           filter: ({ toLoad }) => preloadSelectors.newScenesToLoad(toLoad),
-          loader: async (id) => {
+          loader: async ({ id }) => {
             const sceneToLoad = await dispatch(sceneActions.fetch(id));
             await dispatch(lifecycle.doLoad(sceneToLoad));
             console.log(`Preloaded ${id}`);

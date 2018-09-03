@@ -26,7 +26,7 @@ class Main extends React.Component {
   }
 
   componentDidMount() {
-    if (process.env.ELECTRON_ENV && this.audio) {
+    if (process.env.AUTOSTART && this.audio) {
       this.audio.play();
     }
   }

@@ -18,6 +18,7 @@ const CURRENT_SCENE_STACK_SIZE = 5;
 const defaultState = Immutable.fromJS({
   cache: {},
   backgroundScene: null,
+  loadedScenes: [],
   currentScenes: [],
   currentScene: null,
   previousScene: null,
@@ -53,7 +54,8 @@ const reducer = createReducer('scene', defaultState, {
     return state.setIn(['cache', scene.sceneId], {
       data: scene,
       status: 'loaded',
-    });
+    })
+      .setIn(['loadedScenes'], state.getIn(['loadedScenes']).push(scene));
   },
   [SCENE_SET_BACKGROUND_SCENE](state, { payload: scene }) {
     return state.set('backgroundScene', scene);

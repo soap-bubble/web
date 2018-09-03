@@ -19,6 +19,12 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
+    <access origin="https://morpheus.soapbubble.online" subdomains="true" />
+    <access origin="https://auth.soapbubble.online" subdomains="true" />
+    <access origin="https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev" subdomains="true" />
     <allow-intent href="market:*" />
     <preference name="loglevel" value="DEBUG" />
+    <preference name="Orientation" value="landscape" />
+    <preference name="Fullscreen" value="true" />
+    <preference name="DisallowOverscroll" value="true" />
 </widget>

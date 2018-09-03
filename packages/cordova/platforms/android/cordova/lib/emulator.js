@@ -187,7 +187,7 @@ module.exports.list_images = function () {
                 var api_level = avd.target.match(/\d+/);
                 if (api_level) {
                     var level = android_versions.get(api_level);
-                    avd.target = 'Android ' + level.semver + ' (API level ' + api_level + ')';
+                    avd.target = 'Android ' + (level ? level.semver : '') + ' (API level ' + api_level + ')';
                 }
             }
             return avd;

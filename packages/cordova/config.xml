@@ -1,12 +1,13 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="io.cordova.hellocordova" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <name>HelloCordova</name>
+    <name>Morpheus</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
+    <author email="morpheus.dev@soapbubble.online" href="https://soapbubble.online">
+        Soapbubble Productions
     </author>
+    <icon density="mdpi" height="57" platform="ios" src="res/ios/icon.png" width="57" />
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -17,6 +18,12 @@
     <allow-intent href="geo:*" />
     <platform name="android">
         <allow-intent href="market:*" />
+        <icon density="ldpi" src="../morpheus/client/image/icon/icon36.png" />
+        <icon density="mdpi" src="../morpheus/client/image/icon/icon48.png" />
+        <icon density="hdpi" src="../morpheus/client/image/icon/icon72.png" />
+        <icon density="xhdpi" src="../morpheus/client/image/icon/icon96.png" />
+        <icon density="xxhdpi" src="../morpheus/client/image/icon/icon144.png" />
+        <icon density="xxxhdpi" src="../morpheus/client/image/icon/icon192.png" />
     </platform>
     <platform name="ios">
         <allow-intent href="itms:*" />

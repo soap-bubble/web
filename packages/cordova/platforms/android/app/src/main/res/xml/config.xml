@@ -4,13 +4,14 @@
         <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
         <param name="onload" value="true" />
     </feature>
-    <name>HelloCordova</name>
+    <name>Morpheus</name>
     <description>
         A sample Apache Cordova application that responds to the deviceready event.
     </description>
-    <author email="dev@cordova.apache.org" href="http://cordova.io">
-        Apache Cordova Team
+    <author email="morpheus.dev@soapbubble.online" href="https://soapbubble.online">
+        Soapbubble Productions
     </author>
+    <icon density="mdpi" height="57" platform="ios" src="res/ios/icon.png" width="57" />
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -23,6 +24,12 @@
     <access origin="https://auth.soapbubble.online" subdomains="true" />
     <access origin="https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev" subdomains="true" />
     <allow-intent href="market:*" />
+    <icon density="ldpi" src="../morpheus/client/image/icon/icon36.png" />
+    <icon density="mdpi" src="../morpheus/client/image/icon/icon48.png" />
+    <icon density="hdpi" src="../morpheus/client/image/icon/icon72.png" />
+    <icon density="xhdpi" src="../morpheus/client/image/icon/icon96.png" />
+    <icon density="xxhdpi" src="../morpheus/client/image/icon/icon144.png" />
+    <icon density="xxxhdpi" src="../morpheus/client/image/icon/icon192.png" />
     <preference name="loglevel" value="DEBUG" />
     <preference name="Orientation" value="landscape" />
     <preference name="Fullscreen" value="true" />

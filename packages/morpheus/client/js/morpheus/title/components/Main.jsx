@@ -14,7 +14,7 @@ class Main extends React.Component {
     this.state = {
       isLeaving: false,
       target: 1,
-      started: process.env.ELECTRON_ENV,
+      started: process.env.AUTOSTART,
     };
     this.onPlayClicked = this.onPlayClicked.bind(this);
   }

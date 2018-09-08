@@ -57,10 +57,14 @@
         ]
       },
       "electronPackagerConfig": {
-        "packageManager": "npm"
+        "packageManager": "npm",
+        "icon":"res/icon.ico"
       },
       "electronWinstallerConfig": {
-        "name": "Morpheus"
+        "name": "Morpheus",
+        "author": "Soapbubble Productions",
+        "iconUrl": "https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev/icon.ico",
+        "loadingGif": "res/globe.gif"
       },
       "electronInstallerDebian": {},
       "electronInstallerRedhat": {},

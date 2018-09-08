@@ -6,18 +6,18 @@
                 {
                     "source": "C:\\Users\\johnh\\Development\\web\\packages\\cordova\\platforms\\android\\app\\src\\main\\res\\values\\strings.xml",
                     "from": {
-                        "startLines": "4,2,3",
-                        "startColumns": "4,4,4",
-                        "startOffsets": "164,55,105",
-                        "endColumns": "63,49,58",
-                        "endOffsets": "223,100,159"
+                        "startLines": "-1,2,-1",
+                        "startColumns": "-1,4,-1",
+                        "startOffsets": "-1,55,-1",
+                        "endColumns": "-1,45,-1",
+                        "endOffsets": "-1,96,-1"
                     },
                     "to": {
                         "startLines": "2,3,4",
                         "startColumns": "4,4,4",
-                        "startOffsets": "55,119,169",
-                        "endColumns": "63,49,58",
-                        "endOffsets": "114,164,223"
+                        "startOffsets": "55,119,165",
+                        "endColumns": "63,45,58",
+                        "endOffsets": "114,160,219"
                     }
                 }
             ]

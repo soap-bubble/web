@@ -57,7 +57,7 @@ export default function factory(callback) {
       rotationSensor.on('reading', sensorCallback);
     },
     off() {
-      rotationSensor.off('reading', sensorCallback);
+      rotationSensor.removeListener('reading', sensorCallback);
     },
   };
 

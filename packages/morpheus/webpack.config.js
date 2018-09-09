@@ -39,7 +39,7 @@ module.exports = (env) => {
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
   const appConfig = {};
 
-  if (env.production) {
+  if (env.production || env.cordova || env.electron) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://morpheus.soapbubble.online',
@@ -63,16 +63,7 @@ module.exports = (env) => {
   }
 
   if (env.electron) {
-    appConfig.assetHost = appConfig.assetHost || 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev';
     appConfig.apiHost = 'morpheus://';
-    appConfig.authHost = appConfig.authHost || 'https://auth.soapbubble.online';
-    appConfig.botHost = appConfig.botHost || 'https://bot.soapbubble.online';
-    // if (env.production) {
-    //   appConfig.assetHost = appConfig.apiHost = 'https://morpheus.soapbubble.online';
-    // } else {
-    //   appConfig.assetHost = appConfig.apiHost = 'http://localhost:8050';
-    //   appConfig.authHost = 'http://localhost:4000';
-    // }
   }
   const target = env.electron ? 'electron-renderer' : 'web';
   const mainFields = (env.production || env.staging)
@@ -85,9 +76,14 @@ module.exports = (env) => {
     config: JSON.stringify(appConfig),
   };
 
+  let devtool = (env.production) ? false : 'source-map';
+  if (env.cordova && !env.production) {
+    devtool = 'inline-source-map';
+  }
+
   let webpackConfig = {
     target,
-    devtool: 'source-map', // env.production ? false : 'source-map',
+    devtool,
     entry: {
       app: './client/js/app.jsx',
       vendor: [

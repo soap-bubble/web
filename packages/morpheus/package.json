@@ -13,6 +13,7 @@
     "build:client": "webpack --env",
     "build:client:production": "webpack --env.production=true",
     "build:client:electron": "webpack --env.electron=true",
+    "build:client:cordova:dev": "webpack --env.cordova=true --env.dev=true --watch",
     "build:client:cordova:production": "webpack --env.cordova=true --env.production=true",
     "build:client:electron:production": "webpack --env.electron=true --env.production=true",
     "build:client:staging": "webpack --env.staging=true",

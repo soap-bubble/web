@@ -45,7 +45,7 @@ export default function factory() {
 
   if (supportsGyro()) {
     const gyroscope = createGyro();
-    gyroscope.addEventListener('reading', () => event.emit(
+    gyroscope.addEventListener('reading', () => events.emit(
       'reading',
       {
         x: gyroscope.x,
@@ -64,7 +64,7 @@ export default function factory() {
       },
     ));
   } else if ('DeviceMotionEvent' in window) {
-    deviceMotion(e => event.emit(
+    deviceMotion(e => events.emit(
       'reading',
       {
         x: e.alpha,

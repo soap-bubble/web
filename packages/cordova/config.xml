@@ -7,7 +7,7 @@
     <author email="morpheus.dev@soapbubble.online" href="https://soapbubble.online">
         Soapbubble Productions
     </author>
-    <icon density="mdpi" height="57" platform="ios" src="res/ios/icon.png" width="57" />
+    <icon density="mdpi" height="72" platform="ios" src="../morpheus/client/image/icon/icon72.png" width="72" />
     <content src="index.html" />
     <access origin="*" />
     <allow-intent href="http://*/*" />
@@ -36,8 +36,8 @@
     <access origin="https://morpheus.soapbubble.online" subdomains="true" />
     <access origin="https://auth.soapbubble.online" subdomains="true" />
     <access origin="https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev" subdomains="true" />
+    <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
     <engine name="ios" spec="^4.5.5" />
     <engine name="android" spec="^7.0.0" />
     <engine name="browser" spec="^5.0.4" />
-    <plugin name="cordova-plugin-whitelist" spec="^1.3.3" />
 </widget>

@@ -39,6 +39,7 @@ import {
 } from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
 import loader from 'morpheus/render/pano/loader';
+import createOrientation from 'morpheus/input/orientation';
 import {
   selectors as hotspotSelectors,
 } from './hotspot';
@@ -225,6 +226,7 @@ export const selectors = memoize((scene) => {
 
 export const actions = memoize((scene) => {
   const panoSelectors = selectors(scene);
+  let isSweeping = false;
 
   function rotate({ x, y }) {
     return (dispatch, getState) => {
@@ -241,16 +243,18 @@ export const actions = memoize((scene) => {
 
   function rotateBy({ x: deltaX, y: deltaY }) {
     return (dispatch, getState) => {
-      const panoObject3D = panoSelectors.panoObject3D(getState());
-      let {
-        x,
-        y,
-      } = panoObject3D.rotation;
+      if (!isSweeping) {
+        const panoObject3D = panoSelectors.panoObject3D(getState());
+        let {
+          x,
+          y,
+        } = panoObject3D.rotation;
 
-      x += deltaX;
-      y += deltaY;
+        x += deltaX;
+        y += deltaY;
 
-      dispatch(rotate({ x, y }));
+        dispatch(rotate({ x, y }));
+      }
     };
   }
 
@@ -290,6 +294,7 @@ export const actions = memoize((scene) => {
           // What do you know... already there
           resolve();
         } else {
+          isSweeping = true;
           const tween = new Tween(v)
             .to({
               x,
@@ -299,7 +304,10 @@ export const actions = memoize((scene) => {
           tween.onUpdate(() => {
             dispatch(rotate(v));
           });
-          tween.onComplete(resolve);
+          tween.onComplete(() => {
+            isSweeping = false;
+            resolve();
+          });
           tween.start();
         }
       });
@@ -315,6 +323,9 @@ export const actions = memoize((scene) => {
 
 export const delegate = memoize((scene) => {
   const panoSelectors = selectors(scene);
+  const panoActions = actions(scene);
+
+  let orientation;
 
   function applies(state) {
     return panoSelectors.panoCastData(state);
@@ -407,11 +418,24 @@ export const delegate = memoize((scene) => {
           });
         },
       });
+
+      orientation = createOrientation(rotation =>
+        dispatch(panoActions.rotateBy({
+          x: rotation.y,
+          y: rotation.x,
+        })));
+
       return Promise.resolve({
         camera,
         renderer,
       });
     };
+  }
+
+  function doExit() {
+    orientation.off();
+    orientation = null;
+    return Promise.resolve();
   }
 
   function doUnload() {
@@ -448,6 +472,7 @@ export const delegate = memoize((scene) => {
     applies,
     doLoad,
     onStage,
+    doExit,
     doUnload,
   };
 });

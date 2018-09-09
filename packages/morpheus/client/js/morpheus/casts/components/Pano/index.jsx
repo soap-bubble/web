@@ -33,7 +33,6 @@ function mapStateToProps(state, { scene }) {
 function mapDispatchToProps(dispatch, { scene }) {
   const momentumHandler = momentum({ dispatch, scene });
   const hotspotsHandler = hotspots({ dispatch, scene });
-  const actions = castActions.forScene(scene);
 
   return [
     'onMouseUp',
@@ -116,8 +115,7 @@ class Pano extends PureComponent {
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onTouchCancel={onTouchCancel}
-      >
-      </div>
+      />
     );
   }
 }

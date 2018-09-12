@@ -150,12 +150,14 @@ export function canvasCreated(canvas) {
 
 export function done() {
   return (dispatch) => {
-    dispatch(gamestateActions.fetchInitial())
-      .then(() => dispatch(sceneActions.startAtScene(2000)))
-      .then(() => {
-        dispatch({
-          type: DONE,
-        });
-      });
+    dispatch({
+      type: DONE,
+    });
+    // dispatch(sceneActions.startAtScene(2000))
+    //   .then(() => {
+    //     dispatch({
+    //       type: DONE,
+    //     });
+    //   });
   };
 }

@@ -1,15 +1,19 @@
 import createEpic from 'utils/createEpic';
 import socketPromise from 'utils/socket';
 import {
-  actions as castActions,
-} from 'morpheus/casts';
+  actions as gameActions,
+} from 'morpheus/game';
+// import {
+//   actions as castActions,
+// } from 'morpheus/casts';
 // import {
 //   fetch,
 // }
 
 import {
-  CAST_ON_STAGE,
+// CAST_ON_STAGE,
   SCENE_DO_ENTER,
+  SCENE_DO_ENTERING,
 } from './actionTypes';
 
 createEpic(action$ => action$
@@ -21,6 +25,12 @@ createEpic(action$ => action$
       }
     });
   }),
+);
+
+createEpic(action$ => action$
+  .ofType(SCENE_DO_ENTERING)
+  .filter(({ payload: { sceneId } }) => !!sceneId && sceneId !== 1)
+  .map(gameActions.browserSave),
 );
 
 // createEpic(action$ => action$

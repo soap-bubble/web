@@ -159,7 +159,7 @@ export function setCursorLocationFromPage({ pageX, pageY }) {
     dispatch(setCursorLocation({
       top,
       left,
-    }))
+    }));
   };
 }
 
@@ -326,18 +326,25 @@ export const browserSaveEpic = createEpic((action$, store) => action$
 );
 
 export function browserLoad() {
-  return {
-    type: BROWSER_LOAD,
+  return (dispatch) => {
+    const payload = storage.get('save');
+    dispatch({
+      type: BROWSER_LOAD,
+      payload,
+    });
+    return !!payload;
   };
 }
 
 export const browserLoadEpic = createEpic(action$ => action$
   .ofType(BROWSER_LOAD)
-  .map(() => storage.get('save'))
+  .filter(({ payload: data }) => !!data)
   .mergeMap(({
-    gamestates,
-    currentSceneId,
-    previousSceneId,
+    payload: {
+      gamestates,
+      currentSceneId,
+      previousSceneId,
+    },
   }) => Observable.from([
     gamestateActions.inject(gamestates),
     sceneActions.goToScene(currentSceneId, true, previousSceneId),

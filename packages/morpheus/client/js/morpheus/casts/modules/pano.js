@@ -419,11 +419,12 @@ export const delegate = memoize((scene) => {
         },
       });
 
-      orientation = createOrientation(rotation =>
+      orientation = createOrientation((rotation) => {
         dispatch(panoActions.rotateBy({
           x: rotation.y,
           y: rotation.x,
-        })));
+        }));
+      });
 
       return Promise.resolve({
         camera,

@@ -1,11 +1,51 @@
-import createRotation from './rotation';
 import {
+  Vector2,
   Vector3,
 } from 'three';
+import createRotation from './rotation';
+
 
 export function prepare(context, rot) {
-  context.nRotation = rot.vec3.normalize();
-  context.rotation = rot.vec3;
+  context.startingRotation = context.startingRotation || rot.rot3;
+  // context.deltaRotation = rot.vec3.sub(context.startingRotation);
+}
+
+const locationBias = 0.01;
+
+export function updateDirection(context, rot) {
+  context.direction.add(new Vector2({
+    x: rot.y,
+    y: rot.x,
+  }));
+}
+
+export function updateSpeed(context, rot) {
+  const loc3 = new Vector3(
+    0,
+    rot.x,
+    -rot.y,
+  );
+  const length = loc3.length();
+  if (length !== 0) {
+    loc3.multiplyScalar(Math.PI / (2 * loc3.length()));
+  }
+
+  const rot3 =
+    rot.rot3.lerp(
+      loc3,
+      locationBias,
+    );
+  context.speed.add(rot3);
+}
+
+const SPEED_MAX = 0.1;
+
+export function dampenSpeed(context) {
+  context.speed.lerp(new Vector3(), 0.01).clampLength(0, SPEED_MAX);
+}
+
+export function applySpeed(context) {
+  context.result = context.speed;
 }
 
 export function createUpdater(context, callbacks) {
@@ -34,8 +74,8 @@ export function createUpdater(context, callbacks) {
 
 export function createContext() {
   const context = {
-
-
+    speed: new Vector3(),
+    direction: new Vector2(),
   };
   return context;
 }
@@ -46,10 +86,13 @@ export default function factory(callback) {
   const context = createContext();
   const update = createUpdater(context, [
     prepare,
+    updateSpeed,
+    dampenSpeed,
+    applySpeed,
   ]);
   const sensorCallback = (rot) => {
     update(rot);
-    callback(context.rotation);
+    callback(context.result);
   };
 
   const selfie = {

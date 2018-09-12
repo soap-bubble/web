@@ -53,8 +53,11 @@ window.onload = () => {
       if (qp.scene) {
         store.dispatch(sceneActions.startAtScene(qp.scene));
       } else {
-        store.dispatch(sceneActions.runScene(titleSceneData))
-          .then(() => store.dispatch(titleActions.start()));
+        const savedGame = store.dispatch(gameActions.browserLoad());
+        if (!savedGame) {
+          store.dispatch(sceneActions.runScene(titleSceneData))
+            .then(() => store.dispatch(titleActions.start()));
+        }
       }
     });
 

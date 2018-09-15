@@ -7,6 +7,7 @@ import createRotation from './rotation';
 
 export function prepare(context, rot) {
   context.startingRotation = context.startingRotation || rot.rot3;
+  context.rotSpeed = context.rotSpeed || new Vector3();
   // context.deltaRotation = rot.vec3.sub(context.startingRotation);
 }
 
@@ -19,6 +20,10 @@ export function updateDirection(context, rot) {
   }));
 }
 
+export function updateRotationSpeed(context, rot) {
+  context.rotSpeed.add(rot.rot3.multiplyScalar(0.25));
+}
+
 export function updateSpeed(context, rot) {
   const loc3 = new Vector3(
     0,
@@ -27,11 +32,11 @@ export function updateSpeed(context, rot) {
   );
   const length = loc3.length();
   if (length !== 0) {
-    loc3.multiplyScalar(Math.PI / (2 * loc3.length()));
+    loc3.multiplyScalar(Math.PI / (2 * length));
   }
 
   const rot3 =
-    rot.rot3.lerp(
+    context.speed.lerp(
       loc3,
       locationBias,
     );
@@ -41,11 +46,11 @@ export function updateSpeed(context, rot) {
 const SPEED_MAX = 0.1;
 
 export function dampenSpeed(context) {
-  context.speed.lerp(new Vector3(), 0.01).clampLength(0, SPEED_MAX);
+  context.speed.lerp(new Vector3(), 0.005).clampLength(0, SPEED_MAX);
 }
 
 export function applySpeed(context) {
-  context.result = context.speed;
+  context.result = context.rotSpeed;
 }
 
 export function createUpdater(context, callbacks) {
@@ -75,6 +80,7 @@ export function createUpdater(context, callbacks) {
 export function createContext() {
   const context = {
     speed: new Vector3(),
+    rotSpeed: new Vector3(),
     direction: new Vector2(),
   };
   return context;
@@ -86,6 +92,7 @@ export default function factory(callback) {
   const context = createContext();
   const update = createUpdater(context, [
     prepare,
+    updateRotationSpeed,
     updateSpeed,
     dampenSpeed,
     applySpeed,

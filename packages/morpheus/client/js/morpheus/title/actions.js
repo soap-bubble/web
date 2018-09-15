@@ -153,11 +153,11 @@ export function done() {
     dispatch({
       type: DONE,
     });
-    // dispatch(sceneActions.startAtScene(2000))
-    //   .then(() => {
-    //     dispatch({
-    //       type: DONE,
-    //     });
-    //   });
+    dispatch(sceneActions.startAtScene(2000))
+      .then(() => {
+        dispatch({
+          type: DONE,
+        });
+      });
   };
 }

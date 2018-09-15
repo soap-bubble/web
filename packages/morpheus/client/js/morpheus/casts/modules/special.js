@@ -626,6 +626,8 @@ export const delegate = memoize((scene) => {
                 });
               });
 
+              dispatch(gameActions.drawCursor());
+
               return generateSpecialImages({
                 images: generateImages({
                   gamestates,

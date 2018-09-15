@@ -11,10 +11,10 @@ import {
 } from 'morpheus/scene';
 import {
   handleEventFactory,
+  actions as inputActions,
   selectors as inputSelectors,
 } from 'morpheus/input';
 import {
-  actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
@@ -64,8 +64,8 @@ export default function ({ dispatch, scene }) {
           return null;
         }
         const nowInHotspots = [];
-        const left = isTouchEnd ? lastTouchPosition.left : (clientX - location.x);
-        const top = isTouchEnd ? lastTouchPosition.top : (clientY - location.y);
+        const left = clientX - location.x;
+        const top = clientY - location.y;
 
         const newWidth = gameSelectors.width(store.getState());
         const newHeight = gameSelectors.height(store.getState());
@@ -130,7 +130,7 @@ export default function ({ dispatch, scene }) {
 
         const promise = actionQueue.add(async () => {
           await dispatch(handleEvent(eventOptions));
-          await dispatch(gameActions.setCursorLocation({ top, left }));
+          await dispatch(inputActions.cursorSetPosition({ top, left }));
           await dispatch(castActionsForScene.update(eventOptions));
         });
 
@@ -170,20 +170,22 @@ export default function ({ dispatch, scene }) {
 
   function onTouchStart(touchEvent) {
     const { touches } = touchEvent;
-    touchEvent.preventDefault();
-    touchEvent.stopPropagation();
+    // touchEvent.preventDefault();
+    // touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseDowned = true;
+      console.log('onTouchStart', touches[0]);
       updateState(touches[0]);
     }
   }
 
   function onTouchMove(touchEvent) {
     const { touches } = touchEvent;
-    touchEvent.preventDefault();
-    touchEvent.stopPropagation();
+    // touchEvent.preventDefault();
+    // touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseMoved = true;
+      console.log('onTouchMove', touches[0]);
       updateState(touches[0]);
     }
   }
@@ -191,7 +193,8 @@ export default function ({ dispatch, scene }) {
   function onTouchEnd({ changedTouches: touches }) {
     if (touches.length) {
       wasMouseUpped = true;
-      updateState({}, true);
+      console.log('onTouchEnd', touches[0]);
+      updateState(touches[0], true);
     }
   }
 

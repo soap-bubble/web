@@ -14,11 +14,11 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
-  actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
 import Queue from 'promise-queue';
 import {
+  actions as inputActions,
   handleEventFactory,
 } from 'morpheus/input';
 import {
@@ -37,6 +37,7 @@ export default function ({
   const raycaster = new Raycaster();
   const hotspots = castSelectors.forScene(scene).hotspot.hotspotsData(store.getState());
   const castActionsForScene = castActions.forScene(scene);
+
   let startingPanoPosition;
   let startingScreenPosition;
   let wasInHotspots = [];
@@ -46,17 +47,16 @@ export default function ({
   let wasMouseMoved = false;
   let wasMouseUpped = false;
   let lastTouchPosition;
+  let lastUpdatePostion;
 
   function update({ clientX, clientY }, isTouch, isTouchEnd) {
     const location = gameSelectors.location(store.getState());
-
+    lastUpdatePostion = { clientX, clientY };
     const currentSreenPosition = isTouchEnd ? lastTouchPosition : {
       top: clientY - location.y,
       left: clientX - location.x,
     };
-    // if (mouseEventQueue.getPendingLength()) {
-    //   dispatch(gameActions.setCursorLocation(currentSreenPosition));
-    // }
+
     const state = store.getState();
     const currentScene = sceneSelectors.currentSceneData(state);
     if (currentScene === scene && !document.hidden) {
@@ -159,7 +159,7 @@ export default function ({
         // Update gamestate
         await dispatch(handleEvent(eventOptions));
         // Update cursor location and icon
-        await dispatch(gameActions.setCursorLocation(currentSreenPosition));
+        await dispatch(inputActions.cursorSetPosition(currentSreenPosition));
         // Update the PanoAnim
         await dispatch(castActionsForScene.update(eventOptions));
       });
@@ -172,8 +172,6 @@ export default function ({
 
   function onTouchStart(touchEvent) {
     const { touches } = touchEvent;
-    touchEvent.preventDefault();
-    touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseDowned = true;
       rememberEvent(touches[0], true);
@@ -182,8 +180,6 @@ export default function ({
 
   function onTouchMove(touchEvent) {
     const { touches } = touchEvent;
-    touchEvent.preventDefault();
-    touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseMoved = true;
       rememberEvent(touches[0], true);

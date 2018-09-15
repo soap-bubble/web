@@ -17,4 +17,5 @@ export default createLogger({
   stateTransformer: immutableConverter,
   actionTransformer: immutableConverter,
   errorTransformer: immutableConverter,
+  predicate: (getState, action) => action && action.logging !== false,
 });

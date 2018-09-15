@@ -12,6 +12,10 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
+  actions as inputActions,
+  selectors as inputSelectors,
+} from 'morpheus/input';
+import {
   actions as gamestateActions,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
@@ -130,10 +134,16 @@ export function setCloseHandCursor() {
   return dispatch => dispatch(setCursor(10009));
 }
 
-export function setCursorLocation({ top, left }) {
+// dispatch(inputActions.cursorSetPosition(screenPos));
+export function drawCursor() {
   return (dispatch, getState) => {
     const canvas = gameSelectors.canvas(getState());
     const cursor = gameSelectors.cursorImg(getState());
+    const cursorPos = inputSelectors.cursorPosition(getState());
+    const screenPos = {
+      x: cursorPos.left - (cursor.width / 2),
+      y: cursorPos.top - (cursor.height / 2),
+    };
     const ctx = canvas.getContext('2d');
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (cursor) {
@@ -142,8 +152,9 @@ export function setCursorLocation({ top, left }) {
         0,
         0,
         cursor.width,
-        cursor.height, left - (cursor.width / 2),
-        top - (cursor.height / 2),
+        cursor.height,
+        screenPos.x,
+        screenPos.y,
         cursor.width,
         cursor.height,
       );
@@ -156,7 +167,7 @@ export function setCursorLocationFromPage({ pageX, pageY }) {
     const location = gameSelectors.location(getState());
     const top = pageY - location.y;
     const left = pageX - location.x;
-    dispatch(setCursorLocation({
+    dispatch(inputActions.cursorSetPosition({
       top,
       left,
     }));

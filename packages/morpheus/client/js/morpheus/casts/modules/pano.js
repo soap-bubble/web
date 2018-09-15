@@ -32,6 +32,7 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts';
 import {
+  actions as gameActions,
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
@@ -147,7 +148,6 @@ function startRenderLoop({ scene3D, camera, renderer, update }) {
   window.camera = camera;
   window.PerspectiveCamera = PerspectiveCamera;
   const render = () => {
-    // orientation.update();
     update();
     renderer.render(scene3D, window.camera);
   };
@@ -416,6 +416,7 @@ export const delegate = memoize((scene) => {
             } = contextProvider;
             render(ctx);
           });
+          dispatch(gameActions.drawCursor());
         },
       });
 

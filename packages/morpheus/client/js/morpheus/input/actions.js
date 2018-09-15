@@ -4,6 +4,7 @@ import {
   ENABLE_CONTROL,
   KEY_DOWN,
   KEY_UP,
+  CURSOR_SET_POS,
 } from './actionTypes';
 
 export function inputHandler({
@@ -55,5 +56,20 @@ export function disableControl() {
 export function enableControl() {
   return {
     type: ENABLE_CONTROL,
+  };
+}
+
+export function cursorSetPosition({
+  top,
+  left,
+}) {
+  console.log(left, top);
+  return {
+    type: CURSOR_SET_POS,
+    payload: {
+      top,
+      left,
+    },
+    logging: false,
   };
 }

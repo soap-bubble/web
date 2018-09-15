@@ -32,3 +32,8 @@ export function isKeyPressed(key) {
     keys => !!keys[key],
   );
 }
+
+export const cursorPosition = createSelector(
+  input,
+  i => i.cursorScreenPos,
+);

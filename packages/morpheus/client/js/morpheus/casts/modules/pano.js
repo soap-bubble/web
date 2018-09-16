@@ -435,7 +435,7 @@ export const delegate = memoize((scene) => {
   }
 
   function doExit() {
-    orientation.off();
+    if (orientation) { orientation.off(); }
     orientation = null;
     return Promise.resolve();
   }

@@ -1,4 +1,4 @@
-import uasParser from 'user-agent-parser';
+import uasParser from 'ua-parser-js';
 import { endsWith } from 'lodash';
 
 const userAgentString = (global.navigator && global.navigator.userAgent) || '';

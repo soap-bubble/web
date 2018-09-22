@@ -36,11 +36,17 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
+  selectors as inputSelectors,
+} from 'morpheus/input';
+import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
 import loader from 'morpheus/render/pano/loader';
-import createOrientation from 'morpheus/input/orientation';
+import {
+  momentum as momentumFactory,
+  pano as inputHandlerFactory,
+} from 'morpheus/hotspot';
 import {
   selectors as hotspotSelectors,
 } from './hotspot';
@@ -208,6 +214,14 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'isLoading'),
   );
+  const selectPanoHandler = createSelector(
+    selectPano,
+    pano => get(pano, 'panoHandler'),
+  );
+  const selectInputHandler = createSelector(
+    selectPano,
+    pano => get(pano, 'inputHandler'),
+  );
   return {
     panoCastData: selectPanoCastData,
     panoScene3D: selectPanoScene3D,
@@ -221,6 +235,8 @@ export const selectors = memoize((scene) => {
     assets: selectAssets,
     isLoaded: selectIsLoaded,
     isLoading: selectIsLoading,
+    panoHandler: selectPanoHandler,
+    inputHandler: selectInputHandler,
   };
 });
 
@@ -272,45 +288,49 @@ export const actions = memoize((scene) => {
       const y = startAngle;
       const x = 0;
       const panoObject3D = panoSelectors.panoObject3D(getState());
-      const v = {
-        x: panoObject3D.rotation.x,
-        y: panoObject3D.rotation.y,
-      };
-      if (Math.abs(v.y - y) > Math.PI) {
-                // Travelling more than half way around the axis, so instead let's go the other way
-        if (v.y > y) {
-          v.y -= 2 * Math.PI;
-          panoObject3D.rotation.y -= 2 * Math.PI;
-        } else {
-          v.y += 2 * Math.PI;
-          panoObject3D.rotation.y += 2 * Math.PI;
+      if (panoObject3D) {
+        const v = {
+          x: panoObject3D.rotation.x,
+          y: panoObject3D.rotation.y,
+        };
+        if (Math.abs(v.y - y) > Math.PI) {
+          // Travelling more than half way around the axis, so instead let's go the other way
+          if (v.y > y) {
+            v.y -= 2 * Math.PI;
+            panoObject3D.rotation.y -= 2 * Math.PI;
+          } else {
+            v.y += 2 * Math.PI;
+            panoObject3D.rotation.y += 2 * Math.PI;
+          }
         }
-      }
-      const distance = Math.sqrt(
-        ((x - panoObject3D.rotation.x) ** 2) + ((y - panoObject3D.rotation.y) ** 2),
-      );
-      return new Promise((resolve) => {
-        if (distance === 0) {
-          // What do you know... already there
-          resolve();
-        } else {
-          isSweeping = true;
-          const tween = new Tween(v)
-            .to({
-              x,
-              y,
-            }, Math.sqrt(distance) * 1000)
-            .easing(Easing.Quadratic.Out);
-          tween.onUpdate(() => {
-            dispatch(rotate(v));
-          });
-          tween.onComplete(() => {
-            isSweeping = false;
+        const distance = Math.sqrt(
+          ((x - panoObject3D.rotation.x) ** 2) + ((y - panoObject3D.rotation.y) ** 2),
+        );
+        return new Promise((resolve) => {
+          if (distance === 0) {
+            // What do you know... already there
             resolve();
-          });
-          tween.start();
-        }
-      });
+          } else {
+            isSweeping = true;
+            const tween = new Tween(v)
+              .to({
+                x,
+                y,
+              }, Math.sqrt(distance) * 1000)
+              .easing(Easing.Quadratic.Out);
+            tween.onUpdate(() => {
+              dispatch(rotate(v));
+            });
+            tween.onComplete(() => {
+              isSweeping = false;
+              resolve();
+            });
+            tween.start();
+          }
+        });
+      }
+      console.error('panoObject3D not defined');
+      return Promise.resolve();
     };
   }
 
@@ -323,9 +343,6 @@ export const actions = memoize((scene) => {
 
 export const delegate = memoize((scene) => {
   const panoSelectors = selectors(scene);
-  const panoActions = actions(scene);
-
-  let orientation;
 
   function applies(state) {
     return panoSelectors.panoCastData(state);
@@ -381,6 +398,54 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doEnter() {
+    return (dispatch) => {
+      const panoHandler = inputHandlerFactory({
+        dispatch,
+        scene,
+      });
+
+      const momentumHandler = momentumFactory({
+        dispatch,
+        scene,
+      });
+
+      return Promise.resolve({
+        panoHandler,
+        inputHandler: inputSelectors.inputHandler({
+          onMouseUp(event) {
+            panoHandler.handlers.onMouseUp(event);
+            momentumHandler.onMouseUp(event);
+          },
+          onMouseMove(event) {
+            panoHandler.handlers.onMouseMove(event);
+            momentumHandler.onMouseMove(event);
+          },
+          onMouseDown(event) {
+            panoHandler.handlers.onMouseDown(event);
+            momentumHandler.onMouseDown(event);
+          },
+          onTouchStart(event) {
+            panoHandler.handlers.onTouchStart(event);
+            momentumHandler.onTouchStart(event);
+          },
+          onTouchMove(event) {
+            panoHandler.handlers.onTouchMove(event);
+            momentumHandler.onTouchMove(event);
+          },
+          onTouchEnd(event) {
+            panoHandler.handlers.onTouchEnd(event);
+            momentumHandler.onTouchEnd(event);
+          },
+          onTouchCancel(event) {
+            panoHandler.handlers.onTouchCancel(event);
+            momentumHandler.onTouchCancel(event);
+          },
+        }),
+      });
+    };
+  }
+
   function onStage() {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
@@ -420,13 +485,6 @@ export const delegate = memoize((scene) => {
         },
       });
 
-      orientation = createOrientation((rotation) => {
-        dispatch(panoActions.rotateBy({
-          x: rotation.y,
-          y: rotation.x,
-        }));
-      });
-
       return Promise.resolve({
         camera,
         renderer,
@@ -435,9 +493,14 @@ export const delegate = memoize((scene) => {
   }
 
   function doExit() {
-    if (orientation) { orientation.off(); }
-    orientation = null;
-    return Promise.resolve();
+    return (dispatch, getState) => {
+      const panoHandler = panoSelectors.panoHandler(getState());
+      panoHandler.off();
+      return Promise.resolve({
+        panoHandler: null,
+        inputHandler: null,
+      });
+    };
   }
 
   function doUnload() {
@@ -473,6 +536,7 @@ export const delegate = memoize((scene) => {
   return {
     applies,
     doLoad,
+    doEnter,
     onStage,
     doExit,
     doUnload,

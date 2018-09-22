@@ -21,6 +21,7 @@ import {
   actions as inputActions,
   handleEventFactory,
 } from 'morpheus/input';
+import createOrientation from 'morpheus/input/orientation';
 import {
   actions as gamestateActions,
 } from 'morpheus/gamestate';
@@ -49,9 +50,8 @@ export default function ({
   let lastTouchPosition;
   let lastUpdatePostion;
 
-  function update({ clientX, clientY }, isTouch, isTouchEnd) {
+  function updateGame({ clientX, clientY }, isTouch, isTouchEnd) {
     const location = gameSelectors.location(store.getState());
-    lastUpdatePostion = { clientX, clientY };
     const currentSreenPosition = isTouchEnd ? lastTouchPosition : {
       top: clientY - location.y,
       left: clientX - location.x,
@@ -166,6 +166,25 @@ export default function ({
     }
   }
 
+  const orientation = createOrientation((rotation) => {
+    dispatch(castActionsForScene.pano.rotateBy({
+      x: rotation.y,
+      y: rotation.x,
+    }));
+    updateGame(lastUpdatePostion);
+  });
+
+  function update({ clientX, clientY }, isTouch, isTouchEnd) {
+    lastUpdatePostion = { clientX, clientY };
+    updateGame({ clientX, clientY }, isTouch, isTouchEnd);
+  }
+
+  function off() {
+    if (orientation) {
+      orientation.off();
+    }
+  }
+
   function rememberEvent(mouseEvent, isTouch) {
     update(mouseEvent, isTouch);
   }
@@ -210,12 +229,15 @@ export default function ({
   }
 
   return {
-    onMouseUp,
-    onMouseMove,
-    onMouseDown,
-    onTouchStart,
-    onTouchMove,
-    onTouchEnd,
-    onTouchCancel: () => {},
+    off,
+    handlers: {
+      onMouseUp,
+      onMouseMove,
+      onMouseDown,
+      onTouchStart,
+      onTouchMove,
+      onTouchEnd,
+      onTouchCancel: () => {},
+    },
   };
 }

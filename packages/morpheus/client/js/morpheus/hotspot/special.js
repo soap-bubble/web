@@ -170,22 +170,16 @@ export default function ({ dispatch, scene }) {
 
   function onTouchStart(touchEvent) {
     const { touches } = touchEvent;
-    // touchEvent.preventDefault();
-    // touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseDowned = true;
-      console.log('onTouchStart', touches[0]);
       updateState(touches[0]);
     }
   }
 
   function onTouchMove(touchEvent) {
     const { touches } = touchEvent;
-    // touchEvent.preventDefault();
-    // touchEvent.stopPropagation();
     if (touches.length) {
       wasMouseMoved = true;
-      console.log('onTouchMove', touches[0]);
       updateState(touches[0]);
     }
   }
@@ -193,7 +187,6 @@ export default function ({ dispatch, scene }) {
   function onTouchEnd({ changedTouches: touches }) {
     if (touches.length) {
       wasMouseUpped = true;
-      console.log('onTouchEnd', touches[0]);
       updateState(touches[0], true);
     }
   }

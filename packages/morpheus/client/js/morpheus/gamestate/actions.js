@@ -199,7 +199,9 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
       }
       case 'SetStateTo': {
         const { param1: gamestateId, param2: value } = hotspot;
-        dispatch(updateGameState(gamestateId, value));
+        if (gamestates.byId(gamestateId).value !== value) {
+          dispatch(updateGameState(gamestateId, value));
+        }
         break;
       }
       case 'ExchangeState': {
@@ -213,7 +215,9 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
       case 'CopyState': {
         const { param1: sourceId, param2: targetId } = hotspot;
         const { value: source } = gamestates.byId(sourceId);
-        dispatch(updateGameState(targetId, source));
+        if (gamestates.byId(targetId).value !== gamestates.byId(sourceId).value) {
+          dispatch(updateGameState(targetId, source));
+        }
         break;
       }
       case 'TwoAxisSlider': {
@@ -248,8 +252,10 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
           (hotspot.rectRight - hotspot.rectLeft));
 
         if (gs && maxVert && maxHor) {
-          const value = (maxVert * verticalRatio) + horizontalRatio;
-          dispatch(updateGameState(hotspot.param1, Math.floor(value)));
+          const value = Math.floor((maxVert * verticalRatio) + horizontalRatio);
+          if (gamestates.byId(hotspot.param1).value !== value) {
+            dispatch(updateGameState(hotspot.param1, value));
+          }
         }
         break;
       }
@@ -264,22 +270,25 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
           rate = max - min;
         }
         const delta = Math.round((rate * ratio * 2) - 0.5);
-        let value = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
-        if (value < min) {
+        let vertValue = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
+        if (vertValue < min) {
           if (stateWraps) {
-            value += max - min;
+            vertValue += max - min;
           } else {
-            value = min;
+            vertValue = min;
           }
         }
-        if (value > max) {
+        if (vertValue > max) {
           if (stateWraps) {
-            value -= max - min;
+            vertValue -= max - min;
           } else {
-            value = max;
+            vertValue = max;
           }
         }
-        dispatch(updateGameState(hotspot.param1, Math.round(value)));
+        const value = Math.floor(vertValue);
+        if (gamestates.byId(hotspot.param1).value !== value) {
+          dispatch(updateGameState(hotspot.param1, value));
+        }
         break;
       }
       case 'HorizSlider': {
@@ -293,22 +302,25 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
           rate = max - min;
         }
         const delta = Math.round((rate * ratio) + 0.5);
-        let value = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
-        if (value < min) {
+        let horzValue = (typeof oldValue === 'undefined' ? gs.value : oldValue) + delta;
+        if (horzValue < min) {
           if (stateWraps) {
-            value += max - min;
+            horzValue += max - min;
           } else {
-            value = min;
+            horzValue = min;
           }
         }
-        if (value > max) {
+        if (horzValue > max) {
           if (stateWraps) {
-            value -= max - min;
+            horzValue -= max - min;
           } else {
-            value = max;
+            horzValue = max;
           }
         }
-        dispatch(updateGameState(param1, Math.round(value)));
+        const value = Math.floor(horzValue);
+        if (gamestates.byId(hotspot.param1).value !== value) {
+          dispatch(updateGameState(hotspot.param1, value));
+        }
         break;
       }
       case 'NoAction': {
@@ -330,12 +342,15 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
 
 export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }) {
   return async (dispatch, getState) => {
-    const currentScene = sceneSelectors.currentSceneData(getState());
-    const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
-    if (scene3D) {
-      dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-    }
-    if (ACTION_TYPES[hotspot.type] === 'ChangeScene') {
+    if (hotspot.param1 !== 0
+      && (ACTION_TYPES[hotspot.type] === 'ChangeScene'
+      || ACTION_TYPES[hotspot.type] === 'DissolveTo')
+    ) {
+      const currentScene = sceneSelectors.currentSceneData(getState());
+      const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
+      if (scene3D) {
+        dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
+      }
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
         return await dispatch(sceneActions.goToScene(hotspot.param1, false));

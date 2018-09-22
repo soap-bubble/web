@@ -1,7 +1,6 @@
 import { connect } from 'react-redux';
 import cn from 'classnames';
 import React, { Component } from 'react';
-import { special as flatspot } from 'morpheus/hotspot';
 import {
   selectors as castSelectors,
 } from 'morpheus/casts';
@@ -16,11 +15,8 @@ function mapStateToProps(state, { scene }) {
     canvas: selector.special.canvas(state),
     videos: selector.special.videos(state),
     style: gameSelectors.style(state),
+    ...selector.special.inputHandler(state),
   };
-}
-
-function mapDispatchToProps(dispatch, { scene }) {
-  return flatspot({ dispatch, scene });
 }
 
 class Special extends Component {
@@ -101,5 +97,4 @@ class Special extends Component {
 
 export default connect(
   mapStateToProps,
-  mapDispatchToProps,
 )(Special);

@@ -23,32 +23,17 @@ function mapStateToProps(state, { scene }) {
   const selector = castSelectors.forScene(scene);
   const canvas = selector.pano.canvas(state);
   const style = gameSelectors.style(state);
+  const inputHandler = selector.pano.inputHandler(state);
 
   return {
     style,
     canvas,
+    ...inputHandler,
   };
 }
 
 function mapDispatchToProps(dispatch, { scene }) {
-  const momentumHandler = momentum({ dispatch, scene });
-  const hotspotsHandler = hotspots({ dispatch, scene });
-
-  return [
-    'onMouseUp',
-    'onMouseMove',
-    'onMouseDown',
-    'onTouchStart',
-    'onTouchMove',
-    'onTouchEnd',
-    'onTouchCancel',
-  ].reduce((memo, handler) => {
-    memo[handler] = (event) => {
-      hotspotsHandler[handler](event);
-      momentumHandler[handler](event);
-    };
-    return memo;
-  }, {
+  return {
     onKeyDown(event) {
       dispatch(inputActions.keyPress(event.which));
     },
@@ -64,7 +49,7 @@ function mapDispatchToProps(dispatch, { scene }) {
     onUnmount() {
       // dispatch(castActions.lifecycle.doUnload(scene));
     },
-  });
+  };
 }
 
 class Pano extends PureComponent {

@@ -70,8 +70,13 @@ module.exports = (env) => {
     ? ['browser', 'module', 'main']
     : ['esnext', 'browser', 'module', 'main'];
 
+  let nodeEnv = 'development';
+  if (env.production) {
+    nodeEnv = 'production';
+  }
+
   const webpackDefineConfig = {
-    'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+    'process.env.NODE_ENV': `"${nodeEnv}"`,
     'process.env.AUTOSTART': `${env.electron || env.cordova}`,
     config: JSON.stringify(appConfig),
   };
@@ -89,10 +94,13 @@ module.exports = (env) => {
       vendor: [
         'babel-polyfill',
         'axios',
+        'classnames',
         'lodash',
         'bluebird',
-        'query-string',
         'immutable',
+        'local-storage',
+        'promise-queue',
+        'query-string',
         'raf',
         'react',
         'redux',
@@ -105,8 +113,7 @@ module.exports = (env) => {
         'reselect',
         'tween',
         'three',
-        'user-agent-parser',
-        'classnames',
+        'ua-parser-js',
       ],
     },
     output: {

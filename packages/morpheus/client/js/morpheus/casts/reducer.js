@@ -27,6 +27,7 @@ const reducer = createReducer('casts', {
     };
   },
   [ENTERING](state, { payload: castData, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
     return {
       ...state,
       cache: {
@@ -34,7 +35,9 @@ const reducer = createReducer('casts', {
         [scene.sceneId]: {
           ...state.cache[scene.sceneId],
           status: 'entering',
-          [castType]: castData,
+          [castType]: oldSceneCache ? merge({
+            ...oldSceneCache[castType],
+          }, castData) : castData,
         },
       },
     };

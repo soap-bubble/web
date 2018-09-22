@@ -27,6 +27,12 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import {
+  selectors as inputSelectors,
+} from 'morpheus/input';
+import {
+  special as inputHandlerFactory,
+} from 'morpheus/hotspot';
+import {
   getAssetUrl,
 } from 'service/gamedb';
 import {
@@ -201,27 +207,27 @@ function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
   };
 
   return (context) => {
-    if (typeof controlledMovieCallbacks.currentValue === 'undefined' || frames <= 1) {
-      controlledMovieCallbacks.currentValue = currentOffset;
-    } else if (controlledMovieCallbacks.currentValue < currentOffset) {
-      controlledMovieCallbacks.ticks = controlledMovieCallbacks.ticks || 0;
-      if (controlledMovieCallbacks.ticks < 4) {
-        controlledMovieCallbacks.ticks++;
+    if (typeof controlledMovieCallbacks[0].currentValue === 'undefined' || frames <= 1) {
+      controlledMovieCallbacks[0].currentValue = currentOffset;
+    } else if (controlledMovieCallbacks[0].currentValue < currentOffset) {
+      controlledMovieCallbacks[0].ticks = controlledMovieCallbacks[0].ticks || 0;
+      if (controlledMovieCallbacks[0].ticks < 4) {
+        controlledMovieCallbacks[0].ticks++;
       } else {
-        controlledMovieCallbacks.ticks = 0;
-        controlledMovieCallbacks.currentValue += 1;
+        controlledMovieCallbacks[0].ticks = 0;
+        controlledMovieCallbacks[0].currentValue += 1;
       }
-    } else if (controlledMovieCallbacks.currentValue > currentOffset) {
-      if (controlledMovieCallbacks.ticks < 4) {
-        controlledMovieCallbacks.ticks++;
+    } else if (controlledMovieCallbacks[0].currentValue > currentOffset) {
+      if (controlledMovieCallbacks[0].ticks < 4) {
+        controlledMovieCallbacks[0].ticks++;
       } else {
-        controlledMovieCallbacks.ticks = 0;
-        controlledMovieCallbacks.currentValue -= 1;
+        controlledMovieCallbacks[0].ticks = 0;
+        controlledMovieCallbacks[0].currentValue -= 1;
       }
     }
     context.drawImage(
       img,
-      Math.floor(controlledMovieCallbacks.currentValue) * width,
+      Math.floor(controlledMovieCallbacks[0].currentValue) * width,
       source.y,
       source.sizeX,
       source.sizeY,
@@ -400,6 +406,10 @@ export function selectors(scene) {
     selectSpecial,
     special => get(special, 'isLoading', false),
   );
+  const selectInputHandler = createSelector(
+    selectSpecial,
+    special => get(special, 'specialHandler'),
+  );
 
   return {
     data: selectSpecialCastData,
@@ -418,6 +428,7 @@ export function selectors(scene) {
     images: selectImages,
     isLoaded: selectIsLoaded,
     isLoading: selectIsLoading,
+    inputHandler: selectInputHandler,
   };
 }
 
@@ -609,6 +620,11 @@ export const delegate = memoize((scene) => {
           }),
           canvas,
         }).then(() => {
+          const specialHandler = inputSelectors.inputHandler(inputHandlerFactory({
+            dispatch,
+            scene,
+          }));
+
           startRenderLoop({
             update() {
               // Need updated versions of these vars
@@ -646,6 +662,7 @@ export const delegate = memoize((scene) => {
           return {
             canvas,
             videos,
+            specialHandler,
           };
         });
       });
@@ -686,6 +703,18 @@ export const delegate = memoize((scene) => {
           }
         });
       });
+      // Reset animated controlledMovieCallbacks
+      const controlledCasts = specialSelectors.controlledCasts(getState());
+      controlledCasts
+        .map(ref => ref.data)
+        .filter(cast => cast.controlledMovieCallbacks && cast.controlledMovieCallbacks.length)
+        .forEach(({ controlledMovieCallbacks }) => controlledMovieCallbacks.forEach(
+          (controlledMovieCallback) => {
+            delete controlledMovieCallback.currentValue;
+            delete controlledMovieCallback.tick;
+          },
+        ));
+
       return Promise.resolve();
     };
   }

@@ -139,14 +139,14 @@ export function drawCursor() {
   return (dispatch, getState) => {
     const canvas = gameSelectors.canvas(getState());
     const cursor = gameSelectors.cursorImg(getState());
-    const cursorPos = inputSelectors.cursorPosition(getState());
-    const screenPos = {
-      x: cursorPos.left - (cursor.width / 2),
-      y: cursorPos.top - (cursor.height / 2),
-    };
-    const ctx = canvas.getContext('2d');
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
     if (cursor) {
+      const cursorPos = inputSelectors.cursorPosition(getState());
+      const screenPos = {
+        x: cursorPos.left - (cursor.width / 2),
+        y: cursorPos.top - (cursor.height / 2),
+      };
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
       ctx.drawImage(
         cursor,
         0,

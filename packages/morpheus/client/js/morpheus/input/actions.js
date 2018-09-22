@@ -63,7 +63,6 @@ export function cursorSetPosition({
   top,
   left,
 }) {
-  console.log(left, top);
   return {
     type: CURSOR_SET_POS,
     payload: {

@@ -46,7 +46,7 @@ export function updateSpeed(context, rot) {
 const SPEED_MAX = 0.1;
 
 export function dampenSpeed(context) {
-  context.speed.lerp(new Vector3(), 0.005).clampLength(0, SPEED_MAX);
+  context.rotSpeed.lerp(new Vector3(), 0.005).clampLength(0, SPEED_MAX);
 }
 
 export function applySpeed(context) {

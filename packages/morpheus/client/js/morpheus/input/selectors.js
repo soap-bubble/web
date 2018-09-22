@@ -37,3 +37,39 @@ export const cursorPosition = createSelector(
   input,
   i => i.cursorScreenPos,
 );
+
+export const inputHandler = (delegate) => {
+  let isTouch = false;
+  return {
+    onMouseUp(event) {
+      if (!isTouch) {
+        delegate.onMouseUp(event);
+      }
+    },
+    onMouseMove(event) {
+      if (!isTouch) {
+        delegate.onMouseMove(event);
+      }
+    },
+    onMouseDown(event) {
+      if (!isTouch) {
+        delegate.onMouseDown(event);
+      }
+    },
+    onTouchStart(event) {
+      isTouch = true;
+      delegate.onTouchStart(event);
+    },
+    onTouchMove(event) {
+      isTouch = true;
+      delegate.onTouchMove(event);
+    },
+    onTouchEnd(event) {
+      isTouch = true;
+      delegate.onTouchEnd(event);
+    },
+    onTouchCancel(event) {
+      delegate.onTouchCancel(event);
+    },
+  };
+};

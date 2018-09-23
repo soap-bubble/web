@@ -23,6 +23,7 @@ import {
 } from './actionTypes';
 
 export const events = new Events();
+const sceneLoadQueue = new Queue(1, 3);
 
 export function sceneLoadComplete(responseData) {
   return (dispatch) => {
@@ -111,35 +112,35 @@ export function startAtScene(id) {
 
 let isTransitioning = false;
 export function goToScene(id, dissolve) {
-  return (dispatch, getState) => {
+  return (dispatch, getState) => sceneLoadQueue.add(() => {
     const currentSceneData = sceneSelectors.currentSceneData(getState());
 
     function doSceneTransition() {
       isTransitioning = true;
       return dispatch(castActions.lifecycle.doExit(currentSceneData))
-        .then(() => {
-          dispatch({
-            type: SCENE_DO_EXITING,
-            payload: {
-              sceneId: currentSceneData && currentSceneData.sceneId,
-              dissolve,
-            },
-          });
-          dispatch(inputActions.disableControl());
-          reset();
-          return dispatch(startAtScene(id))
-            .then((scene) => {
-              isTransitioning = false;
-              return scene;
+          .then(() => {
+            dispatch({
+              type: SCENE_DO_EXITING,
+              payload: {
+                sceneId: currentSceneData && currentSceneData.sceneId,
+                dissolve,
+              },
             });
-        });
+            dispatch(inputActions.disableControl());
+            reset();
+            return dispatch(startAtScene(id))
+              .then((scene) => {
+                isTransitioning = false;
+                return scene;
+              });
+          });
     }
 
     if (isTransitioning || (currentSceneData && currentSceneData.sceneId === id)) {
       return Promise.resolve(currentSceneData);
     }
     return doSceneTransition();
-  };
+  });
 }
 
 const store = require('store').default;

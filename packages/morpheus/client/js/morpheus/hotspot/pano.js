@@ -171,10 +171,13 @@ export default function ({
       x: rotation.y,
       y: rotation.x,
     }));
-    updateGame(lastUpdatePostion);
+    if (lastUpdatePostion) {
+      updateGame(lastUpdatePostion);
+    }
   });
 
-  function update({ clientX, clientY }, isTouch, isTouchEnd) {
+  function update(event, isTouch, isTouchEnd) {
+    const { clientX, clientY } = event;
     lastUpdatePostion = { clientX, clientY };
     updateGame({ clientX, clientY }, isTouch, isTouchEnd);
   }

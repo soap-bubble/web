@@ -36,8 +36,9 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
-  selectors as inputSelectors,
-} from 'morpheus/input';
+  composeMouseTouch,
+  touchDisablesMouse,
+} from 'morpheus/hotspot/eventInterface';
 import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
@@ -411,37 +412,14 @@ export const delegate = memoize((scene) => {
       });
 
       return Promise.resolve({
+        // Hold on to panohandler separately because it needs to be turned off
         panoHandler,
-        inputHandler: inputSelectors.inputHandler({
-          onMouseUp(event) {
-            panoHandler.handlers.onMouseUp(event);
-            momentumHandler.onMouseUp(event);
-          },
-          onMouseMove(event) {
-            panoHandler.handlers.onMouseMove(event);
-            momentumHandler.onMouseMove(event);
-          },
-          onMouseDown(event) {
-            panoHandler.handlers.onMouseDown(event);
-            momentumHandler.onMouseDown(event);
-          },
-          onTouchStart(event) {
-            panoHandler.handlers.onTouchStart(event);
-            momentumHandler.onTouchStart(event);
-          },
-          onTouchMove(event) {
-            panoHandler.handlers.onTouchMove(event);
-            momentumHandler.onTouchMove(event);
-          },
-          onTouchEnd(event) {
-            panoHandler.handlers.onTouchEnd(event);
-            momentumHandler.onTouchEnd(event);
-          },
-          onTouchCancel(event) {
-            panoHandler.handlers.onTouchCancel(event);
-            momentumHandler.onTouchCancel(event);
-          },
-        }),
+        inputHandler: touchDisablesMouse(
+          composeMouseTouch(
+            panoHandler.handlers,
+            momentumHandler,
+          ),
+        ),
       });
     };
   }

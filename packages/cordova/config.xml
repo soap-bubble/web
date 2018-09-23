@@ -16,15 +16,15 @@
     <allow-intent href="sms:*" />
     <allow-intent href="mailto:*" />
     <allow-intent href="geo:*" />
-    <platform name="android">
-        <allow-intent href="market:*" />
+    <platform name="android">0000000000
+                                                <allow-intent href="market:*" />
         <icon density="ldpi" src="../morpheus/client/image/icon/icon36.png" />
         <icon density="mdpi" src="../morpheus/client/image/icon/icon48.png" />
         <icon density="hdpi" src="../morpheus/client/image/icon/icon72.png" />
         <icon density="xhdpi" src="../morpheus/client/image/icon/icon96.png" />
         <icon density="xxhdpi" src="../morpheus/client/image/icon/icon144.png" />
         <icon density="xxxhdpi" src="../morpheus/client/image/icon/icon192.png" />
-    </platform>
+</platform>
     <platform name="ios">
         <allow-intent href="itms:*" />
         <allow-intent href="itms-apps:*" />

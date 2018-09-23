@@ -39,7 +39,22 @@ export function positionCameraForType({ camera, type, vector3 }) {
 }
 
 export function createRenderer({ canvas, width, height, alpha = true, preserveDrawingBuffer }) {
-  const renderer = new WebGLRenderer({ canvas, alpha, preserveDrawingBuffer });
+  let renderer;
+  try {
+    renderer = new WebGLRenderer({
+      canvas,
+      alpha,
+      preserveDrawingBuffer,
+    });
+  } catch (error) {
+    console.error('Error creating WebGLRenderer', error);
+    renderer = new WebGLRenderer({
+      canvas,
+      alpha,
+      preserveDrawingBuffer,
+      precision: 'mediump',
+    });
+  }
   renderer.setSize(width, height);
   renderer.setClearColor(0x000000, 0);
   return renderer;

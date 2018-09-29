@@ -5,6 +5,7 @@ import {
   difference,
   sortBy,
   uniq,
+  get,
 } from 'lodash';
 import {
   selectors as castSelectors,
@@ -79,8 +80,8 @@ export default function ({
         ),
       ) // Map back to hotspot index
         .map(hotspotIndex => hotspots[hotspotIndex]);
-
-      const panoIntersects = raycaster.intersectObjects(panoScene3D.children[0].children.filter(c => c.name === 'pano'), true);
+      const hotspotObject3Ds = get(panoScene3D, 'children[0].children', []);
+      const panoIntersects = raycaster.intersectObjects(hotspotObject3Ds.filter(c => c.name === 'pano'), true);
       const currentPanoPosition = {};
       const panoIntersect = panoIntersects.find((intersect) => {
         if (intersect && intersect.uv) {

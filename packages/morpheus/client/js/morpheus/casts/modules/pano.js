@@ -183,13 +183,13 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'object3D'),
   );
-  const selectCanvas = createSelector(
-    selectPano,
-    pano => get(pano, 'canvas'),
-  );
   const selectRenderElements = createSelector(
     selectPano,
-    pano => pick(pano, ['camera', 'renderer']),
+    pano => get(pano, 'webgl'),
+  );
+  const selectCanvas = createSelector(
+    selectRenderElements,
+    re => get(re, 'canvas'),
   );
   const selectRotation = createSelector(
     selectPanoObject3D,
@@ -349,7 +349,7 @@ export const delegate = memoize((scene) => {
     return panoSelectors.panoCastData(state);
   }
 
-  function doLoad(setState) {
+  function doLoad({ setState }) {
     return (dispatch, getState) => {
       if (panoSelectors.isLoaded(getState())) {
         return Promise.resolve(panoSelectors.cache(getState()));
@@ -359,7 +359,6 @@ export const delegate = memoize((scene) => {
       }
       const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {
-        const { width, height } = gameSelectors.dimensions(getState());
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
 
         const renderedCanvas = createCanvas({
@@ -387,7 +386,6 @@ export const delegate = memoize((scene) => {
             assets,
             renderedCanvas,
             canvasTexture: map,
-            canvas: createCanvas({ width, height }),
             isLoaded: true,
           }));
         setState({
@@ -399,8 +397,10 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doEnter() {
-    return (dispatch) => {
+  function doEnter({
+    webGlPool,
+  }) {
+    return (dispatch, getState) => {
       const panoHandler = inputHandlerFactory({
         dispatch,
         scene,
@@ -410,28 +410,26 @@ export const delegate = memoize((scene) => {
         dispatch,
         scene,
       });
-
-      return Promise.resolve({
-        // Hold on to panohandler separately because it needs to be turned off
+      return webGlPool.acquire().then(webgl => ({
+        webgl,
+          // Hold on to panohandler separately because it needs to be turned off
         panoHandler,
         inputHandler: touchDisablesMouse(
-          composeMouseTouch(
-            panoHandler.handlers,
-            momentumHandler,
+            composeMouseTouch(
+              panoHandler.handlers,
+              momentumHandler,
+            ),
           ),
-        ),
-      });
+      }));
     };
   }
 
   function onStage() {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
-      const canvas = panoSelectors.canvas(getState());
-      const { width, height } = gameSelectors.dimensions(getState());
-      const camera = createCamera({ width, height });
-      const renderer = createRenderer({ canvas, width, height });
+      const { camera, renderer, setSize } = panoSelectors.renderElements(getState());
       const assets = panoSelectors.assets(getState());
+      const { width, height } = gameSelectors.dimensions(getState());
       const renderedCanvas = panoSelectors.renderedCanvas(getState());
       const canvasTexture = panoSelectors.canvasTexture(getState());
 
@@ -440,6 +438,8 @@ export const delegate = memoize((scene) => {
       if (panoObject3D) {
         panoObject3D.rotation.y = nextStartAngle;
       }
+
+      setSize({ width, height });
 
       positionCamera({
         camera,
@@ -481,10 +481,12 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doUnload() {
+  function doUnload({
+    webGlPool,
+  }) {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
-      const { renderer } = panoSelectors.renderElements(getState());
+      const webgl = panoSelectors.renderElements(getState());
 
       scene3D.children.forEach((child) => {
         scene3D.remove(child);
@@ -495,19 +497,12 @@ export const delegate = memoize((scene) => {
           child.material.dispose();
         }
       });
-      renderer.dispose();
-      renderer.forceContextLoss();
-      renderer.context = null;
-      renderer.domElement = null;
-
-      return Promise.resolve({
+      return webGlPool.release(webgl).then(() => ({
         scene3D: null,
         object3D: null,
-        renderer: null,
-        camera: null,
-        canvas: null,
+        webgl: null,
         isLoaded: false,
-      });
+      }));
     };
   }
 

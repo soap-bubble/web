@@ -52,11 +52,6 @@ export const selectors = memoize((scene) => {
     cache => get(cache, 'hotspot'),
   );
 
-  const selectCanvas = createSelector(
-    selectHotspot,
-    cache => get(cache, 'canvas'),
-  );
-
   const selectHotspotsData = createSelector(
     () => scene,
     s => get(s, 'casts', [])
@@ -77,12 +72,19 @@ export const selectors = memoize((scene) => {
     hotspot => hotspot.visibleObject3D,
   );
 
-  const selectRenderElements = createSelector(
+  const selectWebgl = createSelector(
     selectHotspot,
-    hotspot => ({
-      camera: get(hotspot, 'camera'),
-      renderer: get(hotspot, 'renderer'),
-    }),
+    hotspot => get(hotspot, 'webgl'),
+  );
+
+  const selectRenderElements = createSelector(
+    selectWebgl,
+    ({ camera, renderer }) => ({ camera, renderer }),
+  );
+
+  const selectCanvas = createSelector(
+    selectWebgl,
+    ({ canvas }) => canvas,
   );
 
   const selectIsPano = createSelector(
@@ -99,8 +101,8 @@ export const selectors = memoize((scene) => {
   );
 
   const selectCamera = createSelector(
-    selectHotspot,
-    hotspot => get(hotspot, 'camera'),
+    selectWebgl,
+    ({ camera }) => camera,
   );
 
   return {
@@ -110,6 +112,7 @@ export const selectors = memoize((scene) => {
     hitObject3D: selectHotspotHitObject3D,
     hitColorList: selectHitColorList,
     renderElements: selectRenderElements,
+    webgl: selectWebgl,
     hotspotsData: selectHotspotsData,
     canvas: selectCanvas,
     camera: selectCamera,
@@ -343,7 +346,9 @@ export const delegate = memoize((scene) => {
     return hotspotSelectors.hotspotsData(state).length;
   }
 
-  function doEnter() {
+  function doEnter({
+    webGlPool,
+  }) {
     return (dispatch, getState) => {
       const hotspotsData = hotspotSelectors.hotspotsData(getState());
       const isPano = hotspotSelectors.isPano(getState());
@@ -366,7 +371,6 @@ export const delegate = memoize((scene) => {
           });
         // 3D hotspots
         const positionsList = createPositions(hotspotsData);
-        const { width, height } = gameSelectors.dimensions(getState());
         const uvsList = createUvs(hotspotsData.length);
         const indexList = createIndex(hotspotsData.length);
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
@@ -398,14 +402,14 @@ export const delegate = memoize((scene) => {
         hitObject.add(hitMesh);
         const scene3D = createScene(hitObject);
         scene3D.rotation.y = nextStartAngle;
-        const canvas = createCanvas({ width, height });
-        return Promise.resolve({
-          canvas,
+
+        return webGlPool.acquire().then(webgl => ({
+          webgl,
           scene3D,
           hitObject3D,
           visibleObject3D,
           hitColorList,
-        });
+        }));
       }
       return Promise.resolve();
     };
@@ -418,9 +422,14 @@ export const delegate = memoize((scene) => {
       const isPano = hotspotSelectors.isPano(getState());
       if (isPano) {
         const scene3D = hotspotSelectors.scene3D(getState());
-        const canvas = hotspotSelectors.canvas(getState());
-        const camera = createCamera({ width, height });
-        const renderer = createRenderer({ canvas, width, height });
+
+        const {
+          camera,
+          renderer,
+          setSize,
+        } = hotspotSelectors.webgl(getState());
+        setSize({ width, height });
+
         positionCamera({
           camera,
           vector3: { z: -0.325, y: -0.01 },
@@ -431,10 +440,7 @@ export const delegate = memoize((scene) => {
           camera,
           renderer,
         });
-        return Promise.resolve({
-          camera,
-          renderer,
-        });
+        return Promise.resolve();
       }
       const gamestates = gamestateSelectors.forState(getState());
       hotspotsData
@@ -453,34 +459,32 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doUnload() {
+  function doUnload({
+    webGlPool,
+  }) {
     return (dispatch, getState) => {
       const scene3D = hotspotSelectors.scene3D(getState());
-      const visibleObject3D = hotspotSelectors.visibleObject3D(getState());
-      const hitObject3D = hotspotSelectors.hitObject3D(getState());
-      const { camera, renderer } = hotspotSelectors.renderElements(getState());
+      if (scene3D) {
+        scene3D.children.forEach((child) => {
+          scene3D.remove(child);
+          if (child.geometry) {
+            child.geometry.dispose();
+          }
+          if (child.material) {
+            child.material.dispose();
+          }
+        });
 
-      scene3D.children.forEach((child) => {
-        scene3D.remove(child);
-        if (child.geometry) {
-          child.geometry.dispose();
-        }
-        if (child.material) {
-          child.material.dispose();
-        }
-      });
-      renderer.dispose();
-      renderer.forceContextLoss();
-      renderer.context = null;
-      renderer.domElement = null;
-
-      return Promise.resolve({
-        scene3D: null,
-        visibleObject3D: null,
-        hitObject3D: null,
-        camera: null,
-        renderer: null,
-      });
+        const webgl = hotspotSelectors.webgl(getState());
+        return webGlPool.release(webgl).then(() => ({
+          scene3D: null,
+          visibleObject3D: null,
+          hitObject3D: null,
+          webgl: null,
+          isLoaded: false,
+        }));
+      }
+      return Promise.resolve();
     };
   }
 

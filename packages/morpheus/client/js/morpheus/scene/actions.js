@@ -11,6 +11,7 @@ import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import Queue from 'promise-queue';
+import loggerFactory from 'utils/logger';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,
@@ -22,11 +23,13 @@ import {
   SET_NEXT_START_ANGLE,
 } from './actionTypes';
 
+const logger = loggerFactory('scene:actions');
 export const events = new Events();
 const sceneLoadQueue = new Queue(1, 3);
 
 export function sceneLoadComplete(responseData) {
   return (dispatch) => {
+    logger.info('sceneLoadComplete', responseData.sceneId);
     dispatch({
       type: SCENE_SET_CURRENT_SCENE,
       payload: responseData,
@@ -35,6 +38,7 @@ export function sceneLoadComplete(responseData) {
 }
 
 export function sceneLoadStarted(id, fetchPromise) {
+  logger.info('sceneLoadStarted', id);
   return {
     type: SCENE_LOAD_START,
     payload: id,
@@ -44,6 +48,7 @@ export function sceneLoadStarted(id, fetchPromise) {
 
 export function fetch(id) {
   return (dispatch, getState) => {
+    logger.info('fetch', id);
     const loadedScenes = sceneSelectors.loadedScenes(getState());
     const cachedScene = loadedScenes.find(scene => scene.sceneId === id);
     if (cachedScene) {
@@ -57,6 +62,7 @@ export function fetch(id) {
 }
 
 export function fetchScene(id) {
+  logger.info('fetchScene', id);
   return dispatch => dispatch(fetch(id))
       .then((sceneData) => {
         dispatch(sceneLoadComplete(sceneData));
@@ -79,23 +85,26 @@ export function setNextStartAngle(angle) {
 }
 
 export function runScene(scene) {
-  return dispatch => dispatch(castActions.lifecycle.doLoad(scene))
-        .then(() => dispatch(castActions.lifecycle.doEnter(scene)))
-        .then(() => dispatch({
-          type: SCENE_DO_ENTERING,
-          payload: scene,
-        }))
-        .then(() => dispatch(castActions.lifecycle.onStage(scene)))
-        .then(() => {
-          dispatch({
-            type: SCENE_DO_ENTER,
-            payload: scene.sceneId,
-          });
-
-          dispatch(inputActions.enableControl());
-          events.emit(`sceneEnter:${scene.sceneId}`);
-          return scene;
+  return (dispatch) => {
+    logger.info('runScene', scene.sceneId);
+    return dispatch(castActions.lifecycle.doLoad(scene))
+      .then(() => dispatch(castActions.lifecycle.doEnter(scene)))
+      .then(() => dispatch({
+        type: SCENE_DO_ENTERING,
+        payload: scene,
+      }))
+      .then(() => dispatch(castActions.lifecycle.onStage(scene)))
+      .then(() => {
+        dispatch({
+          type: SCENE_DO_ENTER,
+          payload: scene.sceneId,
         });
+
+        dispatch(inputActions.enableControl());
+        events.emit(`sceneEnter:${scene.sceneId}`);
+        return scene;
+      });
+  };
 }
 
 export function startAtScene(id) {
@@ -112,13 +121,16 @@ export function startAtScene(id) {
 
 let isTransitioning = false;
 export function goToScene(id, dissolve) {
+  logger.info('goToScene:queue', id);
   return (dispatch, getState) => sceneLoadQueue.add(() => {
+    logger.info('goToScene:start', id);
     const currentSceneData = sceneSelectors.currentSceneData(getState());
 
     function doSceneTransition() {
       isTransitioning = true;
       return dispatch(castActions.lifecycle.doExit(currentSceneData))
           .then(() => {
+            logger.info('goToScene:exiting', id);
             dispatch({
               type: SCENE_DO_EXITING,
               payload: {
@@ -130,6 +142,7 @@ export function goToScene(id, dissolve) {
             reset();
             return dispatch(startAtScene(id))
               .then((scene) => {
+                logger.info('goToScene:isTransitioning', isTransitioning, id);
                 isTransitioning = false;
                 return scene;
               });
@@ -137,6 +150,7 @@ export function goToScene(id, dissolve) {
     }
 
     if (isTransitioning || (currentSceneData && currentSceneData.sceneId === id)) {
+      logger.warn(`goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData}`);
       return Promise.resolve(currentSceneData);
     }
     return doSceneTransition();

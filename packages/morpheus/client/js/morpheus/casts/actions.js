@@ -1,6 +1,7 @@
 import {
   memoize,
 } from 'lodash';
+import createWebGLRendererPool from './webglPool';
 import {
   forScene as selectorsForScene,
 } from './selectors';
@@ -14,6 +15,10 @@ import {
 } from './actionTypes';
 import * as modules from './modules';
 
+const webGlPool = createWebGLRendererPool({
+  width: window.innerWidth,
+  height: window.innerHeight,
+});
 
 export function dispatchCastState({ event, castState, castType, scene }) {
   return {
@@ -33,7 +38,10 @@ function doActionForCast({ event, scene, castType, action }) {
         scene,
       }));
     }
-    return dispatch(action(setState))
+    return dispatch(action({
+      setState,
+      webGlPool,
+    }))
       .then(setState)
       .catch((err) => {
         console.error(err);

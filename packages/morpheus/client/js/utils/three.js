@@ -3,7 +3,7 @@ import {
   WebGLRenderer,
 } from 'three';
 
-export function createCamera({ position }) {
+export function createCamera({ position } = {}) {
   const camera = new PerspectiveCamera(51.75, 640 / 420, 0.01, 1000);
   if (position) {
     ['x', 'y', 'z'].forEach((axis) => {

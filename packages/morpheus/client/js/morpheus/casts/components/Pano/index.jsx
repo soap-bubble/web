@@ -47,7 +47,7 @@ function mapDispatchToProps(dispatch, { scene }) {
       }));
     },
     onUnmount() {
-      // dispatch(castActions.lifecycle.doUnload(scene));
+      dispatch(castActions.lifecycle.doUnload(scene));
     },
   };
 }

@@ -437,7 +437,7 @@ export const delegate = memoize((scene) => {
     return specialSelectors.data(state);
   }
 
-  function doLoad(setState) {
+  function doLoad({ setState }) {
     return (dispatch, getState) => {
       const state = getState();
       const isLoaded = specialSelectors.isLoaded(state);

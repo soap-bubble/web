@@ -6,6 +6,7 @@
   "private": true,
   "scripts": {
     "test": "jest client",
+    "test:dev": "cross-env NODE_ENV=development jest client --watch",
     "test:play": "jest playthrough",
     "test:play:local": "cross-env NO_LAUNCH=true jest playthrough",
     "build": "npm run build:server && npm run build:client:production",

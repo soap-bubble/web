@@ -50,14 +50,12 @@ window.onload = () => {
   store.dispatch(gameActions.setCursor(10000));
   store.dispatch(gamestateActions.fetchInitial())
     .then(() => {
+      const savedGame = store.dispatch(gameActions.browserLoad());
       if (qp.scene) {
         store.dispatch(sceneActions.startAtScene(qp.scene));
-      } else {
-        const savedGame = store.dispatch(gameActions.browserLoad());
-        if (!savedGame) {
-          store.dispatch(sceneActions.runScene(titleSceneData))
-            .then(() => store.dispatch(titleActions.start()));
-        }
+      } else if (!savedGame) {
+        store.dispatch(sceneActions.runScene(titleSceneData))
+          .then(() => store.dispatch(titleActions.start()));
       }
     });
 

@@ -26,8 +26,8 @@ const reducer = createReducer('casts', {
       },
     };
   },
-  [ENTERING](state, { payload: castData, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
+  [ENTERING](state, { payload: castData = {}, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
     return {
       ...state,
       cache: {
@@ -35,15 +35,16 @@ const reducer = createReducer('casts', {
         [scene.sceneId]: {
           ...state.cache[scene.sceneId],
           status: 'entering',
-          [castType]: oldSceneCache ? merge({
+          [castType]: {
             ...oldSceneCache[castType],
-          }, castData) : castData,
+            ...castData,
+          },
         },
       },
     };
   },
-  [ON_MOUNT](state, { payload: castData, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
+  [ON_MOUNT](state, { payload: castData = {}, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
     return {
       ...state,
       cache: {
@@ -51,15 +52,16 @@ const reducer = createReducer('casts', {
         [scene.sceneId]: {
           ...oldSceneCache,
           status: 'onMount',
-          [castType]: oldSceneCache ? merge({
+          [castType]: {
             ...oldSceneCache[castType],
-          }, castData) : castData,
+            ...castData,
+          },
         },
       },
     };
   },
-  [ON_STAGE](state, { payload: castData, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
+  [ON_STAGE](state, { payload: castData = {}, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
     return {
       ...state,
       cache: {
@@ -67,15 +69,16 @@ const reducer = createReducer('casts', {
         [scene.sceneId]: {
           ...oldSceneCache,
           status: 'onStage',
-          [castType]: oldSceneCache ? merge({
+          [castType]: {
             ...oldSceneCache[castType],
-          }, castData) : castData,
+            ...castData,
+          },
         },
       },
     };
   },
-  [EXITING](state, { payload: castData, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : null;
+  [EXITING](state, { payload: castData = {}, meta: { type: castType, scene } }) {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
     return {
       ...state,
       cache: {
@@ -83,9 +86,10 @@ const reducer = createReducer('casts', {
         [scene.sceneId]: {
           ...oldSceneCache,
           status: 'exiting',
-          [castType]: oldSceneCache ? merge({
+          [castType]: {
             ...oldSceneCache[castType],
-          }, castData) : castData,
+            ...castData,
+          },
         },
       },
     };

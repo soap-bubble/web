@@ -27,10 +27,8 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import {
-  selectors as inputSelectors,
-} from 'morpheus/input';
-import {
   special as inputHandlerFactory,
+  eventInterface,
 } from 'morpheus/hotspot';
 import {
   getAssetUrl,
@@ -439,7 +437,7 @@ export const delegate = memoize((scene) => {
     return specialSelectors.data(state);
   }
 
-  function doLoad(setState) {
+  function doLoad({ setState }) {
     return (dispatch, getState) => {
       const state = getState();
       const isLoaded = specialSelectors.isLoaded(state);
@@ -620,7 +618,7 @@ export const delegate = memoize((scene) => {
           }),
           canvas,
         }).then(() => {
-          const specialHandler = inputSelectors.inputHandler(inputHandlerFactory({
+          const specialHandler = eventInterface.touchDisablesMouse(inputHandlerFactory({
             dispatch,
             scene,
           }));
@@ -666,6 +664,25 @@ export const delegate = memoize((scene) => {
           };
         });
       });
+    };
+  }
+
+  function onStage() {
+    return (dispatch, getState) => {
+      const images = specialSelectors.images(getState());
+      images.some(({ data: cast }) => {
+        if (cast.actionAtEnd) {
+          // FIXME this is a disconnected promise chain because trying to sychronize
+          // on the new action while within the scene pipeline did not work
+          Promise
+            .delay(1000)
+            .then(() => dispatch(
+              sceneActions.goToScene(cast.actionAtEnd, cast.dissolveToNextScene)),
+            );
+        }
+        return null;
+      });
+      return Promise.resolve();
     };
   }
 
@@ -725,7 +742,7 @@ export const delegate = memoize((scene) => {
       const sounds = specialSelectors.sounds(getState());
 
       Object.keys([...videos, ...sounds]).forEach(({ el, listeners }) => {
-        if (listeners.ended) {
+        if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
       });
@@ -744,6 +761,7 @@ export const delegate = memoize((scene) => {
     applies,
     doLoad,
     doEnter,
+    onStage,
     doExit,
     doUnload,
   };

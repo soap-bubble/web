@@ -36,13 +36,15 @@ import {
   selectors as gameSelectors,
 } from 'morpheus/game';
 import {
-  selectors as inputSelectors,
-} from 'morpheus/input';
+  composeMouseTouch,
+  touchDisablesMouse,
+} from 'morpheus/hotspot/eventInterface';
 import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
 import loader from 'morpheus/render/pano/loader';
+import loggerFactory from 'utils/logger';
 import {
   momentum as momentumFactory,
   pano as inputHandlerFactory,
@@ -57,6 +59,7 @@ const sliceHeight = 0.56;
 const sliceDepth = 1.0;
 const X_ROTATION_OFFSET = 0 * (Math.PI / 180);
 const uvSliceWidth = 0.0416666666666667;
+const logger = loggerFactory('casts:module:pano');
 
 function createGeometries() {
   const geometries = [];
@@ -182,13 +185,13 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'object3D'),
   );
-  const selectCanvas = createSelector(
-    selectPano,
-    pano => get(pano, 'canvas'),
-  );
   const selectRenderElements = createSelector(
     selectPano,
-    pano => pick(pano, ['camera', 'renderer']),
+    pano => get(pano, 'webgl'),
+  );
+  const selectCanvas = createSelector(
+    selectRenderElements,
+    re => get(re, 'canvas'),
   );
   const selectRotation = createSelector(
     selectPanoObject3D,
@@ -348,17 +351,24 @@ export const delegate = memoize((scene) => {
     return panoSelectors.panoCastData(state);
   }
 
-  function doLoad(setState) {
+  function doLoad({ setState }) {
     return (dispatch, getState) => {
       if (panoSelectors.isLoaded(getState())) {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'Already loaded so returning existing state',
+        });
         return Promise.resolve(panoSelectors.cache(getState()));
       }
       if (panoSelectors.isLoading(getState())) {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'Already loading so waiting for load finish and returning existing state',
+        });
         return panoSelectors.isLoading(getState());
       }
       const panoCastData = panoSelectors.panoCastData(getState());
       if (panoCastData) {
-        const { width, height } = gameSelectors.dimensions(getState());
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
 
         const renderedCanvas = createCanvas({
@@ -380,13 +390,18 @@ export const delegate = memoize((scene) => {
         });
         const scene3D = createScene(object3D);
         const promise = promiseMaterial
+          .then(() => {
+            logger.debug({
+              sceneId: scene.sceneId,
+              message: 'Finished loading material',
+            });
+          })
           .then(() => ({
             object3D,
             scene3D,
             assets,
             renderedCanvas,
             canvasTexture: map,
-            canvas: createCanvas({ width, height }),
             isLoaded: true,
           }));
         setState({
@@ -398,8 +413,10 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doEnter() {
-    return (dispatch) => {
+  function doEnter({
+    webGlPool,
+  }) {
+    return (dispatch, getState) => {
       const panoHandler = inputHandlerFactory({
         dispatch,
         scene,
@@ -409,39 +426,28 @@ export const delegate = memoize((scene) => {
         dispatch,
         scene,
       });
-
-      return Promise.resolve({
-        panoHandler,
-        inputHandler: inputSelectors.inputHandler({
-          onMouseUp(event) {
-            panoHandler.handlers.onMouseUp(event);
-            momentumHandler.onMouseUp(event);
-          },
-          onMouseMove(event) {
-            panoHandler.handlers.onMouseMove(event);
-            momentumHandler.onMouseMove(event);
-          },
-          onMouseDown(event) {
-            panoHandler.handlers.onMouseDown(event);
-            momentumHandler.onMouseDown(event);
-          },
-          onTouchStart(event) {
-            panoHandler.handlers.onTouchStart(event);
-            momentumHandler.onTouchStart(event);
-          },
-          onTouchMove(event) {
-            panoHandler.handlers.onTouchMove(event);
-            momentumHandler.onTouchMove(event);
-          },
-          onTouchEnd(event) {
-            panoHandler.handlers.onTouchEnd(event);
-            momentumHandler.onTouchEnd(event);
-          },
-          onTouchCancel(event) {
-            panoHandler.handlers.onTouchCancel(event);
-            momentumHandler.onTouchCancel(event);
-          },
-        }),
+      logger.debug({
+        sceneId: scene.sceneId,
+        message: 'acquire webgl from pool',
+        spareResourceCapacity: webGlPool.spareResourceCapacity,
+        size: webGlPool.size,
+      });
+      return webGlPool.acquire().then((webgl) => {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'doEnter finished',
+        });
+        return {
+          webgl,
+            // Hold on to panohandler separately because it needs to be turned off
+          panoHandler,
+          inputHandler: touchDisablesMouse(
+              composeMouseTouch(
+                panoHandler.handlers,
+                momentumHandler,
+              ),
+            ),
+        };
       });
     };
   }
@@ -449,11 +455,9 @@ export const delegate = memoize((scene) => {
   function onStage() {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
-      const canvas = panoSelectors.canvas(getState());
-      const { width, height } = gameSelectors.dimensions(getState());
-      const camera = createCamera({ width, height });
-      const renderer = createRenderer({ canvas, width, height });
+      const { camera, renderer, setSize } = panoSelectors.renderElements(getState());
       const assets = panoSelectors.assets(getState());
+      const { width, height } = gameSelectors.dimensions(getState());
       const renderedCanvas = panoSelectors.renderedCanvas(getState());
       const canvasTexture = panoSelectors.canvasTexture(getState());
 
@@ -462,6 +466,8 @@ export const delegate = memoize((scene) => {
       if (panoObject3D) {
         panoObject3D.rotation.y = nextStartAngle;
       }
+
+      setSize({ width, height });
 
       positionCamera({
         camera,
@@ -503,10 +509,12 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doUnload() {
+  function doUnload({
+    webGlPool,
+  }) {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
-      const { renderer } = panoSelectors.renderElements(getState());
+      const webgl = panoSelectors.renderElements(getState());
 
       scene3D.children.forEach((child) => {
         scene3D.remove(child);
@@ -517,18 +525,24 @@ export const delegate = memoize((scene) => {
           child.material.dispose();
         }
       });
-      renderer.dispose();
-      renderer.forceContextLoss();
-      renderer.context = null;
-      renderer.domElement = null;
+      logger.debug({
+        sceneId: scene.sceneId,
+        message: 'Release webgl resources',
+      });
 
-      return Promise.resolve({
-        scene3D: null,
-        object3D: null,
-        renderer: null,
-        camera: null,
-        canvas: null,
-        isLoaded: false,
+      return webGlPool.release(webgl).then(() => {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'doUnload finished',
+          spareResourceCapacity: webGlPool.spareResourceCapacity,
+          size: webGlPool.size,
+        });
+        return {
+          scene3D: null,
+          object3D: null,
+          webgl: null,
+          isLoaded: false,
+        };
       });
     };
   }

@@ -93,12 +93,17 @@ module.exports = (env) => {
       app: './client/js/app.jsx',
       vendor: [
         'babel-polyfill',
+        '@soapbubble/components',
+        '@soapbubble/style',
         'axios',
-        'classnames',
-        'lodash',
         'bluebird',
+        'browser-bunyan',
+        'classnames',
         'immutable',
+        'keycode',
+        'generic-pool',
         'local-storage',
+        'lodash',
         'promise-queue',
         'query-string',
         'raf',
@@ -127,6 +132,12 @@ module.exports = (env) => {
     },
     module: {
       rules: styleLoaders.concat([
+        {
+          test: /\.js$/,
+          include: /generic-pool/,
+          exclude: [/generic-pool\/node_modules/],
+          use: ['babel-loader'],
+        },
         {
           test: /\.jsx?$/,
           include: dirSharedComponents.concat([

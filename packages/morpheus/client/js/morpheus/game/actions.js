@@ -329,6 +329,8 @@ export const browserSaveEpic = createEpic((action$, store) => action$
     currentSceneId: sceneSelectors.currentSceneId(store.getState()),
     previousSceneId: sceneSelectors.previousSceneId(store.getState()),
     saveId: gameSelectors.saveId(store.getState()),
+    rotation: castSelectors.forScene(sceneSelectors.currentSceneData(store.getState()))
+      .pano.rotation(store.getState()),
   }))
   .catch(err => ({
     type: SAVE_ERROR,
@@ -347,7 +349,7 @@ export function browserLoad() {
   };
 }
 
-export const browserLoadEpic = createEpic(action$ => action$
+export const browserLoadEpic = createEpic((action$, store) => action$
   .ofType(BROWSER_LOAD)
   .filter(({ payload: data }) => !!data)
   .mergeMap(({
@@ -355,10 +357,11 @@ export const browserLoadEpic = createEpic(action$ => action$
       gamestates,
       currentSceneId,
       previousSceneId,
+      rotation,
     },
   }) => Observable.from([
     gamestateActions.inject(gamestates),
-    sceneActions.goToScene(currentSceneId, true, previousSceneId),
+    sceneActions.goToScene(currentSceneId, true, previousSceneId, rotation),
   ])),
 );
 

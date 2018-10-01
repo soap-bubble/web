@@ -181,7 +181,7 @@ export const delegate = memoize((scene) => {
       && (selfSelectors.controlledCastsData(state).length !== 0));
   }
 
-  function doLoad(setState) {
+  function doLoad({ setState }) {
     return (dispatch, getState) => {
       const controlledCastsData = selfSelectors.controlledCastsData(getState());
       if (selfSelectors.isLoaded(getState())) {

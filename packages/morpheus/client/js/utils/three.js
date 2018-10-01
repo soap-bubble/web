@@ -3,7 +3,7 @@ import {
   WebGLRenderer,
 } from 'three';
 
-export function createCamera({ position }) {
+export function createCamera({ position } = {}) {
   const camera = new PerspectiveCamera(51.75, 640 / 420, 0.01, 1000);
   if (position) {
     ['x', 'y', 'z'].forEach((axis) => {
@@ -39,7 +39,22 @@ export function positionCameraForType({ camera, type, vector3 }) {
 }
 
 export function createRenderer({ canvas, width, height, alpha = true, preserveDrawingBuffer }) {
-  const renderer = new WebGLRenderer({ canvas, alpha, preserveDrawingBuffer });
+  let renderer;
+  try {
+    renderer = new WebGLRenderer({
+      canvas,
+      alpha,
+      preserveDrawingBuffer,
+    });
+  } catch (error) {
+    console.error('Error creating WebGLRenderer', error);
+    renderer = new WebGLRenderer({
+      canvas,
+      alpha,
+      preserveDrawingBuffer,
+      precision: 'mediump',
+    });
+  }
   renderer.setSize(width, height);
   renderer.setClearColor(0x000000, 0);
   return renderer;

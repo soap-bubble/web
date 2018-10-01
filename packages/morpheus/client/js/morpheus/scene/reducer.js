@@ -14,7 +14,6 @@ import {
   SCENE_LOAD_ERROR,
 } from './actionTypes';
 
-const CURRENT_SCENE_STACK_SIZE = 5;
 const defaultState = Immutable.fromJS({
   cache: {},
   backgroundScene: null,
@@ -60,22 +59,15 @@ const reducer = createReducer('scene', defaultState, {
   [SCENE_SET_BACKGROUND_SCENE](state, { payload: scene }) {
     return state.set('backgroundScene', scene);
   },
-  [SCENE_DO_ENTERING](state, { payload: scene }) {
-    let currentScenes = state.get('currentScenes');
-    // Check if scene is already in scene stack
-    const existingScene = currentScenes.find(s => s.sceneId === scene.sceneId);
-    if (existingScene) {
-      // Promote existing scene to top...
-      currentScenes = currentScenes.remove(currentScenes.indexOf(existingScene));
-    } else if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE
-      || (currentScenes.count() === 1 && currentScenes.first().sceneId === 100000)) {
-      currentScenes = currentScenes.pop();
-    }
-    currentScenes = currentScenes.unshift(scene);
+  [SCENE_DO_ENTERING](state, { payload: {
+    currentScene,
+    currentScenes,
+    previousScene,
+  } }) {
     return state.withMutations(s =>
       s.set('status', 'entering')
-        .set('previousScene', state.get('currentScene'))
-        .set('currentScene', scene)
+        .set('previousScene', previousScene)
+        .set('currentScene', currentScene)
         .set('currentScenes', currentScenes),
     );
   },

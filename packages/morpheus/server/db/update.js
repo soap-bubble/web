@@ -212,4 +212,30 @@ export default function update() {
       }
       return Promise.resolve();
     }));
+    // .then(() => getModel('Scene').find({
+    //   sceneId: 873008,
+    // }).exec()
+    // .map((scene) => {
+    //   if (scene) {
+    //     logger.info('Adding a clickthrough hotspot to pub dart close');
+    //     scene.casts = scene.casts.concat([{
+    //       castId: 0,
+    //       comparators: [],
+    //       cursorShapeWhenActive: 10005,
+    //       defaultPass: false,
+    //       gesture: 2,
+    //       initiallyEnabled: true,
+    //       param1: 873009,
+    //       param2: 0,
+    //       param3: 0,
+    //       rectBottom: 400,
+    //       rectLeft: 0,
+    //       rectRight: 640,
+    //       rectTop: 0,
+    //       type: 0,
+    //     }]);
+    //     return scene.save();
+    //   }
+    //   return Promise.resolve();
+    // }));
 }

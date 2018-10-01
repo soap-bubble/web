@@ -44,6 +44,7 @@ import {
 } from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
 import loader from 'morpheus/render/pano/loader';
+import loggerFactory from 'utils/logger';
 import {
   momentum as momentumFactory,
   pano as inputHandlerFactory,
@@ -58,6 +59,7 @@ const sliceHeight = 0.56;
 const sliceDepth = 1.0;
 const X_ROTATION_OFFSET = 0 * (Math.PI / 180);
 const uvSliceWidth = 0.0416666666666667;
+const logger = loggerFactory('casts:module:pano');
 
 function createGeometries() {
   const geometries = [];
@@ -352,9 +354,17 @@ export const delegate = memoize((scene) => {
   function doLoad({ setState }) {
     return (dispatch, getState) => {
       if (panoSelectors.isLoaded(getState())) {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'Already loaded so returning existing state',
+        });
         return Promise.resolve(panoSelectors.cache(getState()));
       }
       if (panoSelectors.isLoading(getState())) {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'Already loading so waiting for load finish and returning existing state',
+        });
         return panoSelectors.isLoading(getState());
       }
       const panoCastData = panoSelectors.panoCastData(getState());
@@ -380,6 +390,12 @@ export const delegate = memoize((scene) => {
         });
         const scene3D = createScene(object3D);
         const promise = promiseMaterial
+          .then(() => {
+            logger.debug({
+              sceneId: scene.sceneId,
+              message: 'Finished loading material',
+            });
+          })
           .then(() => ({
             object3D,
             scene3D,
@@ -410,17 +426,29 @@ export const delegate = memoize((scene) => {
         dispatch,
         scene,
       });
-      return webGlPool.acquire().then(webgl => ({
-        webgl,
-          // Hold on to panohandler separately because it needs to be turned off
-        panoHandler,
-        inputHandler: touchDisablesMouse(
-            composeMouseTouch(
-              panoHandler.handlers,
-              momentumHandler,
+      logger.debug({
+        sceneId: scene.sceneId,
+        message: 'acquire webgl from pool',
+        spareResourceCapacity: webGlPool.spareResourceCapacity,
+        size: webGlPool.size,
+      });
+      return webGlPool.acquire().then((webgl) => {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'doEnter finished',
+        });
+        return {
+          webgl,
+            // Hold on to panohandler separately because it needs to be turned off
+          panoHandler,
+          inputHandler: touchDisablesMouse(
+              composeMouseTouch(
+                panoHandler.handlers,
+                momentumHandler,
+              ),
             ),
-          ),
-      }));
+        };
+      });
     };
   }
 
@@ -497,12 +525,25 @@ export const delegate = memoize((scene) => {
           child.material.dispose();
         }
       });
-      return webGlPool.release(webgl).then(() => ({
-        scene3D: null,
-        object3D: null,
-        webgl: null,
-        isLoaded: false,
-      }));
+      logger.debug({
+        sceneId: scene.sceneId,
+        message: 'Release webgl resources',
+      });
+
+      return webGlPool.release(webgl).then(() => {
+        logger.debug({
+          sceneId: scene.sceneId,
+          message: 'doUnload finished',
+          spareResourceCapacity: webGlPool.spareResourceCapacity,
+          size: webGlPool.size,
+        });
+        return {
+          scene3D: null,
+          object3D: null,
+          webgl: null,
+          isLoaded: false,
+        };
+      });
     };
   }
 

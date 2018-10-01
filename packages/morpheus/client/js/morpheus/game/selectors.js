@@ -209,6 +209,10 @@ const menuDefinition = createSelector(
       key: 'settings',
       title: 'Settings',
     });
+    menuData.push({
+      key: 'reload',
+      title: 'Reload',
+    });
     return menuData;
   },
 );

@@ -1,6 +1,7 @@
 import {
   memoize,
 } from 'lodash';
+import loggerFactory from 'utils/logger';
 import createWebGLRendererPool from './webglPool';
 import {
   forScene as selectorsForScene,
@@ -15,6 +16,8 @@ import {
 } from './actionTypes';
 import * as modules from './modules';
 
+const logger = loggerFactory('cast:actions');
+
 const webGlPool = createWebGLRendererPool({
   width: window.innerWidth,
   height: window.innerHeight,
@@ -28,8 +31,20 @@ export function dispatchCastState({ event, castState, castType, scene }) {
   };
 }
 
-function doActionForCast({ event, scene, castType, action }) {
+function doActionForCast({
+  event,
+  scene,
+  castType,
+  action,
+  actionName,
+}) {
   return (dispatch) => {
+    logger.info({
+      message: 'doActionForCast',
+      sceneId: scene.sceneId,
+      actionName,
+      castType,
+    });
     function setState(state) {
       return dispatch(dispatchCastState({
         event,
@@ -76,6 +91,7 @@ export const lifecycle = [{
             scene,
             castType: cast,
             action: delegate[action],
+            actionName: action,
           }));
         }
         return Promise.resolve();

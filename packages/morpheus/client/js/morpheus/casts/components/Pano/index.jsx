@@ -37,28 +37,10 @@ function mapDispatchToProps(dispatch, { scene }) {
     onKeyDown(event) {
       dispatch(inputActions.keyPress(event.which));
     },
-    onMount({
-      canvas,
-    }) {
-      dispatch(castActions.lifecycle.onMount({
-        scene,
-        castType: 'pano',
-        canvas,
-      }));
-    },
-    onUnmount() {
-      dispatch(castActions.lifecycle.doUnload(scene));
-    },
   };
 }
 
 class Pano extends PureComponent {
-
-  componentWillUnmount() {
-    const { onUnmount } = this.props;
-    onUnmount();
-  }
-
   render() {
     const {
       style,

@@ -55,6 +55,8 @@ function mapDispatchToPros(dispatch) {
       } else if (key === 'settings') {
         dispatch(openSettings());
         dispatch(closeMenu());
+      } else if (key === 'reload') {
+        location.reload();
       } else {
         dispatch(closeMenu());
       }

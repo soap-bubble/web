@@ -742,7 +742,7 @@ export const delegate = memoize((scene) => {
       const sounds = specialSelectors.sounds(getState());
 
       Object.keys([...videos, ...sounds]).forEach(({ el, listeners }) => {
-        if (listeners.ended) {
+        if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
       });

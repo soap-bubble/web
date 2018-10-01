@@ -48,7 +48,7 @@ export default function createWebGLRendererPool({
   };
   const opts = {
     min: 2,
-    max: 8,
+    max: 32,
   };
   return genericPool.createPool(factory, opts);
 }

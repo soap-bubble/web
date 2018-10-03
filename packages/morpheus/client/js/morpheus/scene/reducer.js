@@ -7,7 +7,7 @@ import {
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_DO_ENTERING,
   SCENE_DO_EXITING,
-  SCENE_DO_ENTER,
+  SCENE_ENTER_DONE,
   SET_NEXT_START_ANGLE,
   SCENE_LOAD_START,
   SCENE_LOAD_COMPLETE,
@@ -76,7 +76,7 @@ const reducer = createReducer('scene', defaultState, {
       .set('status', 'exiting')
       .set('dissolve', isUndefined(dissolve) || !!dissolve);
   },
-  [SCENE_DO_ENTER](state) {
+  [SCENE_ENTER_DONE](state) {
     return state
       .set('status', 'live');
   },

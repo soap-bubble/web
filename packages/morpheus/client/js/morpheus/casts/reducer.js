@@ -9,7 +9,29 @@ import {
   EXITING,
   ON_STAGE,
   ON_MOUNT,
+  UNLOADING,
 } from './actionTypes';
+
+function withStatus(status) {
+  return (state, { payload: castData = {}, meta: { type: castType, scene } }) => {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
+    return {
+      ...state,
+      cache: {
+        ...state.cache,
+        [scene.sceneId]: {
+          ...oldSceneCache,
+          status,
+          [castType]: {
+            ...oldSceneCache[castType],
+            ...castData,
+          },
+        },
+      },
+    };
+  };
+}
+
 
 const reducer = createReducer('casts', {
   cache: {},
@@ -26,74 +48,11 @@ const reducer = createReducer('casts', {
       },
     };
   },
-  [ENTERING](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...state.cache[scene.sceneId],
-          status: 'entering',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
-  [ON_MOUNT](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...oldSceneCache,
-          status: 'onMount',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
-  [ON_STAGE](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...oldSceneCache,
-          status: 'onStage',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
-  [EXITING](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...oldSceneCache,
-          status: 'exiting',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
+  [ENTERING]: withStatus(ENTERING),
+  [ON_MOUNT]: withStatus(ON_MOUNT),
+  [EXITING]: withStatus(EXITING),
+  [UNLOADING]: withStatus(UNLOADING),
+  [EXITING]: withStatus(EXITING),
 });
 
 export default reducer;

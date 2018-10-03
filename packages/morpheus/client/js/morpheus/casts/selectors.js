@@ -3,20 +3,14 @@ import {
 } from 'lodash';
 import { createSelector } from 'reselect';
 import * as modules from './modules';
-
-// const selectCastsFromScene = scene => get(scene, 'casts', []);
-// const selectCastsCurrent = createSelector(
-//   sceneSelectors.currentSceneData,
-//   selectCastsFromScene,
-// );
-// const selectCastsBackground = createSelector(
-//   sceneSelectors.backgroundSceneData,
-//   selectCastsFromScene,
-// );
-// const selectCastsPrevious = createSelector(
-//   sceneSelectors.previousSceneData,
-//   selectCastsFromScene,
-// );
+import {
+  LOADING,
+  ENTERING,
+  EXITING,
+  ON_STAGE,
+  ON_MOUNT,
+  UNLOADING,
+} from './actionTypes';
 
 const forSceneSelectorExtensions = {};
 export function extendForScene(name, selectorFactory) {
@@ -27,15 +21,15 @@ export function forScene(scene) {
   const selectCastCacheForThisScene = state => get(state, `casts.cache[${scene.sceneId}]`);
   const selectCastIsEntering = createSelector(
     selectCastCacheForThisScene,
-    cast => cast.status === 'entering',
+    cast => cast.status === ENTERING,
   );
   const selectCastIsOnStage = createSelector(
     selectCastCacheForThisScene,
-    cast => cast.status === 'onStage',
+    cast => cast.status === ON_STAGE,
   );
   const selectCastIsExiting = createSelector(
     selectCastCacheForThisScene,
-    cast => cast.status === 'exiting',
+    cast => cast.status === EXITING,
   );
 
   const castSelectors = {
@@ -62,56 +56,3 @@ export function forScene(scene) {
 
   return castSelectors;
 }
-
-
-const selectCastIsInitiallyEnabled = cast => cast.initiallyEnabled;
-
-//
-// export const backgroundEnabled = createSelector(
-//   sceneSelectors.backgroundSceneData
-//   backgroundSceneData => selectCastsFromScene(selectForScene(backgroundSceneData)),
-//   _currentCasts => _currentCasts.filter(
-//     cast => (selectCastIsEntering(cast) || selectCastIsOnStage(cast)) && isCastEnabled(cast)
-//   ),
-// );
-//
-// export const previousEnabled = createSelector(
-//   state => state.casts.previous,
-//   _currentCasts => _currentCasts.filter(
-//     cast => (isCastExiting(cast) || isCastOnStage(cast)) && isCastEnabled(cast)
-//   ),
-// );
-//
-// export const currentEnabled = createSelector(
-//   state => state.casts
-// )
-//
-// export const isCastEnabled = createSelector(
-//   [ selectCastIsInitiallyEnabled, selectCastIsEntering, gamestates ],
-//   (_isCastInitiallyEnabled, _isCastEntering, _gamestates) => {
-//     let result = comparators.every(({
-//       gameStateId,
-//       testType,
-//       value,
-//     }) => {
-//       const gs = _gamestates[gameStateId];
-//
-//       switch(TEST_TYPES[testType]) {
-//         case 'EqualTo':
-//           return value === gs.value;
-//         case 'NotEqualTo':
-//           return value !== gs.value;
-//         case 'GreaterThan':
-//           return value > gs.value;
-//         case 'LessThan':
-//           return value < gs.value
-//         default:
-//           return false;
-//       }
-//     });
-//     if (!_isCastInitiallyEnabled) {
-//       result = !result;
-//     }
-//     return result;
-//   }
-// );

@@ -77,11 +77,6 @@ export const selectors = memoize((scene) => {
     hotspot => get(hotspot, 'webgl'),
   );
 
-  const selectRenderElements = createSelector(
-    selectWebgl,
-    ({ camera, renderer }) => ({ camera, renderer }),
-  );
-
   const selectCanvas = createSelector(
     selectWebgl,
     ({ canvas }) => canvas,
@@ -111,7 +106,7 @@ export const selectors = memoize((scene) => {
     visibleObject3D: selectHotspotVisibleObject3D,
     hitObject3D: selectHotspotHitObject3D,
     hitColorList: selectHitColorList,
-    renderElements: selectRenderElements,
+    renderElements: selectWebgl,
     webgl: selectWebgl,
     hotspotsData: selectHotspotsData,
     canvas: selectCanvas,
@@ -343,7 +338,8 @@ export const delegate = memoize((scene) => {
   const hotspotSelectors = selectors(scene);
 
   function applies(state) {
-    return hotspotSelectors.hotspotsData(state).length;
+    const isPano = hotspotSelectors.isPano(state);
+    return hotspotSelectors.hotspotsData(state).length && isPano;
   }
 
   function doEnter({
@@ -411,7 +407,7 @@ export const delegate = memoize((scene) => {
           hitColorList,
         }));
       }
-      return Promise.resolve();
+      return Promise.resolve({});
     };
   }
 

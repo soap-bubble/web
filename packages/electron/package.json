@@ -3,7 +3,7 @@
   "version": "1.7.0",
   "description": "A minimal Electron application",
   "private": true,
-  "main": "src/main.js",
+  "main": "dist/main.js",
   "scripts": {
     "start": "electron-forge start",
     "start:watch": "cross-env NODE_ENV=development electromon .",

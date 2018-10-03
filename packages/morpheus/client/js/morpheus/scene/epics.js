@@ -12,12 +12,12 @@ import {
 
 import {
 // CAST_ON_STAGE,
-  SCENE_DO_ENTER,
+  SCENE_ENTER_DONE,
   SCENE_DO_ENTERING,
 } from './actionTypes';
 
 createEpic(action$ => action$
-  .ofType(SCENE_DO_ENTER)
+  .ofType(SCENE_ENTER_DONE)
   .forEach((action) => {
     socketPromise().then((socket) => {
       if (socket.channel) {

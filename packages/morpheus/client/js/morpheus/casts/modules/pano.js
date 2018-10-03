@@ -509,12 +509,9 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doUnload({
-    webGlPool,
-  }) {
+  function doPreunload() {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
-      const webgl = panoSelectors.renderElements(getState());
 
       scene3D.children.forEach((child) => {
         scene3D.remove(child);
@@ -529,6 +526,19 @@ export const delegate = memoize((scene) => {
         sceneId: scene.sceneId,
         message: 'Release webgl resources',
       });
+      return Promise.resolve();
+    };
+  }
+
+  function doUnload({
+    webGlPool,
+  }) {
+    return (dispatch, getState) => {
+      const webgl = panoSelectors.renderElements(getState());
+      logger.debug({
+        sceneId: scene.sceneId,
+        message: 'Release webgl resources',
+      });
 
       return webGlPool.release(webgl).then(() => {
         logger.debug({
@@ -537,12 +547,13 @@ export const delegate = memoize((scene) => {
           spareResourceCapacity: webGlPool.spareResourceCapacity,
           size: webGlPool.size,
         });
-        return {
-          scene3D: null,
-          object3D: null,
-          webgl: null,
-          isLoaded: false,
-        };
+        return dispatch(doPreunload())
+          .then(() => ({
+            scene3D: null,
+            object3D: null,
+            webgl: null,
+            isLoaded: false,
+          }));
       });
     };
   }
@@ -550,9 +561,11 @@ export const delegate = memoize((scene) => {
   return {
     applies,
     doLoad,
+    doPreload: doLoad,
     doEnter,
     onStage,
     doExit,
     doUnload,
+    doPreunload,
   };
 });

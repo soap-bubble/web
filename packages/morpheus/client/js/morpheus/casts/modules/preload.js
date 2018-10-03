@@ -75,7 +75,7 @@ export const delegate = memoize((scene) => {
           filter: ({ toLoad }) => preloadSelectors.newScenesToLoad(toLoad),
           loader: async ({ id }) => {
             const sceneToLoad = await dispatch(sceneActions.fetch(id));
-            await dispatch(lifecycle.doLoad(sceneToLoad));
+            await dispatch(lifecycle.doPreload(sceneToLoad));
             console.log(`Preloaded ${id}`);
           },
         });

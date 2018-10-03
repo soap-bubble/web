@@ -264,6 +264,8 @@ export const delegate = memoize((scene) => {
   return {
     applies,
     doLoad,
+    doPreload: doLoad,
+    doPreunload: doUnload,
     doEnter,
     doUnload,
     update,

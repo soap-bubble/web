@@ -8,7 +8,7 @@ import {
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_DO_ENTERING,
   SCENE_DO_EXITING,
-  SCENE_DO_ENTER,
+  SCENE_ENTER_DONE,
 } from './actionTypes';
 
 describe('morpheus/scene/reducer', () => {
@@ -201,10 +201,10 @@ describe('morpheus/scene/reducer', () => {
     expect(scene).toHaveDissolve(false);
   });
 
-  describe(SCENE_DO_ENTER, () => {
+  describe(SCENE_ENTER_DONE, () => {
     it('isLive', () => {
       const scene = reducer(undefined, {
-        type: SCENE_DO_ENTER,
+        type: SCENE_ENTER_DONE,
       });
       expect(scene).toBeLive();
     });

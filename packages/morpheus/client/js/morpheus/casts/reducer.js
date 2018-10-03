@@ -1,99 +1,66 @@
 import {
-  merge,
+  omit,
 } from 'lodash';
 import createReducer from 'utils/createReducer';
 
 import {
+  PRELOAD,
   LOADING,
   ENTERING,
   EXITING,
   ON_STAGE,
-  ON_MOUNT,
+  UNLOADING,
+  UNPRELOAD,
 } from './actionTypes';
+
+function withStatus(status) {
+  return (state, { payload: castData = {}, meta: { type: castType, scene } }) => {
+    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
+    return {
+      ...state,
+      cache: {
+        ...state.cache,
+        [scene.sceneId]: {
+          ...oldSceneCache,
+          status,
+          [castType]: {
+            ...oldSceneCache[castType],
+            ...castData,
+          },
+        },
+      },
+      status: {
+        ...state.status,
+        [scene.sceneId]: status,
+      },
+    };
+  };
+}
+
 
 const reducer = createReducer('casts', {
   cache: {},
 }, {
-  [LOADING](state, { payload: castData, meta: { type: castType, scene } }) {
+  [LOADING]: withStatus(ENTERING),
+  [PRELOAD]: withStatus(PRELOAD),
+  [ENTERING]: withStatus(ENTERING),
+  [EXITING]: withStatus(EXITING),
+  [ON_STAGE]: withStatus(ON_STAGE),
+  [UNPRELOAD](state, { meta: { scene } }) {
     return {
       ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          status: 'loading',
-          [castType]: castData,
-        },
-      },
+      cache: omit(state.cache, scene.sceneId),
+      status: omit(state.status, scene.sceneId),
     };
   },
-  [ENTERING](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
+  [UNLOADING](state, { meta: { scene } }) {
     return {
       ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...state.cache[scene.sceneId],
-          status: 'entering',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
+      cache: omit(state.cache, scene.sceneId),
+      status: omit(state.status, scene.sceneId),
     };
   },
-  [ON_MOUNT](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...oldSceneCache,
-          status: 'onMount',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
-  [ON_STAGE](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...oldSceneCache,
-          status: 'onStage',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
-  [EXITING](state, { payload: castData = {}, meta: { type: castType, scene } }) {
-    const oldSceneCache = state.cache[scene.sceneId] ? state.cache[scene.sceneId] : {};
-    return {
-      ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          ...oldSceneCache,
-          status: 'exiting',
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
-        },
-      },
-    };
-  },
+  [EXITING]: withStatus(EXITING),
 });
 
 export default reducer;

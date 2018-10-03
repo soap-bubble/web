@@ -1,3 +1,6 @@
+import {
+  flow,
+} from 'lodash';
 import { reset } from 'utils/render';
 import Events from 'events';
 import { bySceneId } from 'service/scene';
@@ -6,19 +9,24 @@ import {
 } from 'morpheus/input';
 import {
   actions as castActions,
+  selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
+import {
+  forEachSeries,
+} from 'utils/asyncIteration';
 import loggerFactory from 'utils/logger';
 import SceneQueue from './queue';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,
+  SCENE_LOAD_COMPLETE,
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
-  SCENE_DO_ENTER,
+  SCENE_ENTER_DONE,
   SCENE_DO_EXITING,
   SET_NEXT_START_ANGLE,
 } from './actionTypes';
@@ -55,7 +63,14 @@ export function fetch(id) {
       return Promise.resolve(cachedScene);
     }
     const fetchPromise = bySceneId(id)
-      .then(response => response.data);
+      .then(response => response.data)
+      .then((scene) => {
+        dispatch({
+          type: SCENE_LOAD_COMPLETE,
+          payload: scene,
+        });
+        return scene;
+      });
     dispatch(sceneLoadStarted(id, fetchPromise));
     return fetchPromise;
   };
@@ -88,6 +103,7 @@ const CURRENT_SCENE_STACK_SIZE = 5;
 
 function doSceneEntering(scene) {
   return (dispatch, getState) => {
+    let oldScene;
     let currentScenes = sceneSelectors.currentScenesData(getState());
     const previousScene = sceneSelectors.currentSceneData(getState());
     const currentScene = scene;
@@ -99,7 +115,7 @@ function doSceneEntering(scene) {
       currentScenes = currentScenes.remove(currentScenes.indexOf(existingScene));
     } else if (currentScenes.count() === CURRENT_SCENE_STACK_SIZE
       || (currentScenes.count() === 1 && currentScenes.first().sceneId === 100000)) {
-      dispatch(castActions.lifecycle.doUnload(currentScenes.last()));
+      oldScene = currentScenes.last();
       currentScenes = currentScenes.pop();
     }
     currentScenes = currentScenes.unshift(scene);
@@ -113,26 +129,42 @@ function doSceneEntering(scene) {
         sceneId: scene.sceneId,
       },
     });
+    return oldScene;
   };
 }
 
 export function runScene(scene) {
-  return (dispatch) => {
+  return async (dispatch, getState) => {
     logger.info('runScene', scene.sceneId);
-    return dispatch(castActions.lifecycle.doLoad(scene))
-      .then(() => dispatch(castActions.lifecycle.doEnter(scene)))
-      .then(() => dispatch(doSceneEntering(scene)))
-      .then(() => dispatch(castActions.lifecycle.onStage(scene)))
-      .then(() => {
-        dispatch({
-          type: SCENE_DO_ENTER,
-          payload: scene.sceneId,
-        });
+    let userIncontrol = false;
+    try {
+      await dispatch(castActions.lifecycle.doLoad(scene));
+      await dispatch(castActions.lifecycle.doEnter(scene));
+      const sceneToUnload = dispatch(doSceneEntering(scene));
+      await dispatch(castActions.lifecycle.onStage(scene));
+      if (sceneToUnload) {
+        await dispatch(castActions.lifecycle.doUnload(sceneToUnload));
+      }
+      await dispatch(castActions.unpreloadAll());
 
-        dispatch(inputActions.enableControl());
-        events.emit(`sceneEnter:${scene.sceneId}`);
-        return scene;
+      dispatch({
+        type: SCENE_ENTER_DONE,
+        payload: scene.sceneId,
       });
+
+      dispatch(inputActions.enableControl());
+      userIncontrol = true;
+      events.emit(`sceneEnter:${scene.sceneId}`);
+    } catch (error) {
+      logger.error({
+        message: 'runScene error',
+        error,
+      });
+      // Make sure user has control anyways
+      if (!userIncontrol) {
+        dispatch(inputActions.enableControl());
+      }
+    }
   };
 }
 

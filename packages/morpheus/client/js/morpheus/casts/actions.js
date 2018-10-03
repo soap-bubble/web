@@ -2,17 +2,21 @@ import {
   memoize,
 } from 'lodash';
 import loggerFactory from 'utils/logger';
+import {
+  selectors as sceneSelectors,
+} from 'morpheus/scene';
 import createWebGLRendererPool from './webglPool';
 import {
-  forScene as selectorsForScene,
+  preloadedSceneIds,
 } from './selectors';
 import {
+  PRELOAD,
   LOADING,
   ENTERING,
   EXITING,
   ON_STAGE,
-  ON_MOUNT,
   UNLOADING,
+  UNPRELOAD,
 } from './actionTypes';
 import * as modules from './modules';
 
@@ -65,6 +69,9 @@ function doActionForCast({
 }
 
 export const lifecycle = [{
+  action: 'doPreload',
+  event: PRELOAD,
+}, {
   action: 'doLoad',
   event: LOADING,
 }, {
@@ -79,6 +86,9 @@ export const lifecycle = [{
 }, {
   action: 'doUnload',
   event: UNLOADING,
+}, {
+  action: 'doPreunload',
+  event: UNPRELOAD,
 }]
   .reduce((memo, { action, event }) => {
     memo[action] = function moduleAction(scene) {
@@ -99,20 +109,7 @@ export const lifecycle = [{
           .then(() => scene);
     };
     return memo;
-  }, {
-    onMount({
-      scene,
-      castType,
-      ...castState
-    }) {
-      return dispatchCastState({
-        event: ON_MOUNT,
-        scene,
-        castType,
-        castState,
-      });
-    },
-  });
+  }, {});
 
 export const forScene = memoize((scene) => {
   const moduleActions = Object.keys(modules.default).reduce((memo, name) => {
@@ -150,3 +147,14 @@ export const forScene = memoize((scene) => {
       },
     }), {}));
 });
+
+export function unpreloadScenes(...sceneIds) {
+  return (dispatch, getState) => Promise.all(sceneIds
+    .map(sceneId => sceneSelectors.sceneFromCache(sceneId)(getState()))
+    .map(scene => dispatch(lifecycle.doPreunload(scene))),
+  );
+}
+
+export function unpreloadAll() {
+  return (dispatch, getState) => dispatch(unpreloadScenes(...preloadedSceneIds(getState())));
+}

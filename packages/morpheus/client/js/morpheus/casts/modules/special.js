@@ -760,10 +760,12 @@ export const delegate = memoize((scene) => {
   return {
     applies,
     doLoad,
+    doPreload: doLoad,
     doEnter,
     onStage,
     doExit,
     doUnload,
+    doPreunload: doUnload,
   };
 });
 

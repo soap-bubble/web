@@ -1,5 +1,10 @@
 import {
   get,
+  flow,
+  partialRight,
+  filter,
+  entries,
+  map,
 } from 'lodash';
 import { createSelector } from 'reselect';
 import * as modules from './modules';
@@ -8,7 +13,7 @@ import {
   ENTERING,
   EXITING,
   ON_STAGE,
-  ON_MOUNT,
+  PRELOAD,
   UNLOADING,
 } from './actionTypes';
 
@@ -17,26 +22,38 @@ export function extendForScene(name, selectorFactory) {
   forSceneSelectorExtensions[name] = selectorFactory;
 }
 
+const root = state => state.casts;
+
+function allSceneIdsForStatus(status) {
+  return createSelector(
+    root,
+    flow(
+      ({ cache }) => cache || {},
+      entries,
+      partialRight(filter, ([sceneId, cacheEntry]) => sceneId && cacheEntry.status === status),
+      partialRight(map, ([sceneId]) => sceneId),
+    ),
+  );
+}
+
+export const preloadedSceneIds = allSceneIdsForStatus(PRELOAD);
+
 export function forScene(scene) {
   const selectCastCacheForThisScene = state => get(state, `casts.cache[${scene.sceneId}]`);
-  const selectCastIsEntering = createSelector(
-    selectCastCacheForThisScene,
-    cast => cast.status === ENTERING,
-  );
-  const selectCastIsOnStage = createSelector(
-    selectCastCacheForThisScene,
-    cast => cast.status === ON_STAGE,
-  );
-  const selectCastIsExiting = createSelector(
-    selectCastCacheForThisScene,
-    cast => cast.status === EXITING,
-  );
+
+  const forStatus = status => createSelector(
+      selectCastCacheForThisScene,
+      cast => cast.status === status,
+    );
 
   const castSelectors = {
     cache: selectCastCacheForThisScene,
-    isEntering: selectCastIsEntering,
-    isOnStage: selectCastIsOnStage,
-    isExiting: selectCastIsExiting,
+    isLoading: forStatus(LOADING),
+    isEntering: forStatus(ENTERING),
+    isOnStage: forStatus(ON_STAGE),
+    isExiting: forStatus(EXITING),
+    isUnloading: forStatus(UNLOADING),
+    isPreloading: forStatus(PRELOAD),
   };
   const moduleSelectors = Object.keys(modules).reduce((memo, name) => {
     if (modules[name].selectors) {

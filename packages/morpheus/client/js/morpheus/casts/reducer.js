@@ -1,15 +1,16 @@
 import {
-  merge,
+  omit,
 } from 'lodash';
 import createReducer from 'utils/createReducer';
 
 import {
+  PRELOAD,
   LOADING,
   ENTERING,
   EXITING,
   ON_STAGE,
-  ON_MOUNT,
   UNLOADING,
+  UNPRELOAD,
 } from './actionTypes';
 
 function withStatus(status) {
@@ -28,6 +29,10 @@ function withStatus(status) {
           },
         },
       },
+      status: {
+        ...state.status,
+        [scene.sceneId]: status,
+      },
     };
   };
 }
@@ -36,22 +41,25 @@ function withStatus(status) {
 const reducer = createReducer('casts', {
   cache: {},
 }, {
-  [LOADING](state, { payload: castData, meta: { type: castType, scene } }) {
+  [LOADING]: withStatus(ENTERING),
+  [PRELOAD]: withStatus(PRELOAD),
+  [ENTERING]: withStatus(ENTERING),
+  [EXITING]: withStatus(EXITING),
+  [ON_STAGE]: withStatus(ON_STAGE),
+  [UNPRELOAD](state, { meta: { scene } }) {
     return {
       ...state,
-      cache: {
-        ...state.cache,
-        [scene.sceneId]: {
-          status: 'loading',
-          [castType]: castData,
-        },
-      },
+      cache: omit(state.cache, scene.sceneId),
+      status: omit(state.status, scene.sceneId),
     };
   },
-  [ENTERING]: withStatus(ENTERING),
-  [ON_MOUNT]: withStatus(ON_MOUNT),
-  [EXITING]: withStatus(EXITING),
-  [UNLOADING]: withStatus(UNLOADING),
+  [UNLOADING](state, { meta: { scene } }) {
+    return {
+      ...state,
+      cache: omit(state.cache, scene.sceneId),
+      status: omit(state.status, scene.sceneId),
+    };
+  },
   [EXITING]: withStatus(EXITING),
 });
 

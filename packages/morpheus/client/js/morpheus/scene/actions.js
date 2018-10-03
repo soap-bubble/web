@@ -9,15 +9,20 @@ import {
 } from 'morpheus/input';
 import {
   actions as castActions,
+  selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
+import {
+  forEachSeries,
+} from 'utils/asyncIteration';
 import loggerFactory from 'utils/logger';
 import SceneQueue from './queue';
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,
+  SCENE_LOAD_COMPLETE,
   SCENE_SET_BACKGROUND_SCENE,
   SCENE_SET_CURRENT_SCENE,
   SCENE_DO_ENTERING,
@@ -58,7 +63,14 @@ export function fetch(id) {
       return Promise.resolve(cachedScene);
     }
     const fetchPromise = bySceneId(id)
-      .then(response => response.data);
+      .then(response => response.data)
+      .then((scene) => {
+        dispatch({
+          type: SCENE_LOAD_COMPLETE,
+          payload: scene,
+        });
+        return scene;
+      });
     dispatch(sceneLoadStarted(id, fetchPromise));
     return fetchPromise;
   };
@@ -122,7 +134,7 @@ function doSceneEntering(scene) {
 }
 
 export function runScene(scene) {
-  return async (dispatch) => {
+  return async (dispatch, getState) => {
     logger.info('runScene', scene.sceneId);
     let userIncontrol = false;
     try {
@@ -130,7 +142,11 @@ export function runScene(scene) {
       await dispatch(castActions.lifecycle.doEnter(scene));
       const sceneToUnload = dispatch(doSceneEntering(scene));
       await dispatch(castActions.lifecycle.onStage(scene));
-      if (sceneToUnload) await dispatch(castActions.lifecycle.doUnload(sceneToUnload));
+      if (sceneToUnload) {
+        await dispatch(castActions.lifecycle.doUnload(sceneToUnload));
+      }
+      await dispatch(castActions.unpreloadAll());
+
       dispatch({
         type: SCENE_ENTER_DONE,
         payload: scene.sceneId,

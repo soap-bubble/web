@@ -1,3 +1,5 @@
+export const PRELOAD = 'CAST_PRELOAD';
+export const UNPRELOAD = 'CAST_UNPRELOAD';
 export const LOADING = 'CAST_LOADING';
 export const ENTERING = 'CAST_ENTERING';
 export const EXITING = 'CAST_EXITING';

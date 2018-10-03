@@ -31,7 +31,7 @@ function allSceneIdsForStatus(status) {
       ({ cache }) => cache || {},
       entries,
       partialRight(filter, ([sceneId, cacheEntry]) => sceneId && cacheEntry.status === status),
-      partialRight(map, ([sceneId]) => sceneId),
+      partialRight(map, ([sceneId]) => Number(sceneId)),
     ),
   );
 }

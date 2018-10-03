@@ -29,10 +29,6 @@ function withStatus(status) {
           },
         },
       },
-      status: {
-        ...state.status,
-        [scene.sceneId]: status,
-      },
     };
   };
 }
@@ -50,14 +46,12 @@ const reducer = createReducer('casts', {
     return {
       ...state,
       cache: omit(state.cache, scene.sceneId),
-      status: omit(state.status, scene.sceneId),
     };
   },
   [UNLOADING](state, { meta: { scene } }) {
     return {
       ...state,
       cache: omit(state.cache, scene.sceneId),
-      status: omit(state.status, scene.sceneId),
     };
   },
   [EXITING]: withStatus(EXITING),

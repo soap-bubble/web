@@ -110,7 +110,7 @@ window.onload = () => {
     window.getGameState = function getgameState(gamestateId) {
       const state = gamestateSelectors.forState(store.getState()).byId(gamestateId);
       return {
-        vale: state.value,
+        value: state.value,
         maxValue: state.maxValue,
         minValue: state.minValue,
         stateId: state.stateId,

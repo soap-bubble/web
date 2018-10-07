@@ -86,8 +86,11 @@ module.exports = (env) => {
     devtool = 'inline-source-map';
   }
 
+  const mode = env.development ? 'development' : 'production';
+
   let webpackConfig = {
     target,
+    mode,
     devtool,
     entry: {
       app: './client/js/app.jsx',

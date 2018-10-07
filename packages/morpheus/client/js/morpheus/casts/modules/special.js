@@ -768,27 +768,3 @@ export const delegate = memoize((scene) => {
     doPreunload: doUnload,
   };
 });
-
-export const actions = memoize(() => {
-  function handleMouseEvent({ type, hotspot, top, left }) {
-    return (dispatch) => {
-      const {
-        gesture,
-      } = hotspot;
-      const gestureType = GESTURES[gesture];
-      let done = false;
-      if (type === 'MouseStillDown') {
-        done = dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
-      } else if (type === 'MouseUp' || type === 'MouseLeave') {
-        done = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
-      } else if (type === gestureType) {
-        done = dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
-      }
-      return done;
-    };
-  }
-
-  return {
-    handleMouseEvent,
-  };
-});

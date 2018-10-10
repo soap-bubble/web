@@ -14,18 +14,14 @@ import {
   Tween,
   Easing,
 } from 'tween';
-import { get, memoize, pick } from 'lodash';
+import { get, memoize } from 'lodash';
 import { createSelector } from 'reselect';
 import {
-  getAssetUrl,
-} from 'service/gamedb';
-import {
-  createCamera,
   positionCamera,
-  createRenderer,
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
+  actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import {
@@ -58,7 +54,6 @@ const sliceWidth = 0.1325;
 const sliceHeight = 0.56;
 const sliceDepth = 1.0;
 const X_ROTATION_OFFSET = 0 * (Math.PI / 180);
-const uvSliceWidth = 0.0416666666666667;
 const logger = loggerFactory('casts:module:pano');
 
 function createGeometries() {
@@ -173,6 +168,10 @@ export const selectors = memoize((scene) => {
     () => scene,
     s => get(s, 'casts', []).find(c => c.__t === 'PanoCast'),
   );
+  const selectPanoCastAnimData = createSelector(
+    () => scene,
+    s => get(s, 'casts', []).filter(c => c.__t === 'PanoAnim'),
+  );
   const selectPano = createSelector(
     selectSceneCache,
     castCache => get(castCache, 'pano'),
@@ -227,6 +226,7 @@ export const selectors = memoize((scene) => {
   );
   return {
     panoCastData: selectPanoCastData,
+    panoAnimData: selectPanoCastAnimData,
     panoScene3D: selectPanoScene3D,
     panoObject3D: selectPanoObject3D,
     cache: selectPano,
@@ -379,6 +379,27 @@ export const delegate = memoize((scene) => {
           scene,
           gamestates: gamestateSelectors.forState(getState()),
         });
+
+        const hasNextSceneAssets = panoSelectors
+          .panoAnimData(getState())
+          .filter((cast) => {
+            const { nextSceneId } = cast;
+            const hasNextScene = nextSceneId && nextSceneId !== 0x3FFFFFFF;
+            return hasNextScene;
+          });
+
+
+        hasNextSceneAssets
+          .forEach(({ data, promise }) => {
+            promise.forEach(p => p.then((videoEl) => {
+              function onEnded() {
+                videoEl.removeEventListener('ended', onEnded);
+                const { nextSceneId } = data;
+                dispatch(sceneActions.goToScene(nextSceneId, false));
+              }
+              videoEl.addEventListener('ended', onEnded);
+            }));
+          });
 
         const geometries = createGeometries();
         const map = new CanvasTexture(renderedCanvas);

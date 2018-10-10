@@ -19,6 +19,9 @@ const app = express();
 //   app.use(require('connect-browser-sync')(bs));
 // }
 
+app.set('view engine', 'ejs');
+app.set('views', path.resolve(__dirname, '../client/html'));
+
 const server = socket(app);
 
 const gameDbPath = path.resolve(config.gameDbPath);

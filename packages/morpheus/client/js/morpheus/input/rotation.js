@@ -30,20 +30,28 @@ function supportsMotion() {
 
 function createGyro() {
   if (!gyroscopeInstance) {
-    gyroscopeInstance = new global.Gyroscope({
-      frequency: 60,
-    });
-    gyroscopeInstance.start();
+    try {
+      gyroscopeInstance = new global.Gyroscope({
+        frequency: 60,
+      });
+      gyroscopeInstance.start();
+    } catch (e) {
+      console.error('Gyroscope not supported', e);
+    }
   }
   return gyroscopeInstance;
 }
 
 function createAccel() {
   if (!accelerometerInstance) {
-    accelerometerInstance = new global.Accelerometer({
-      frequency: 60,
-    });
-    accelerometerInstance.start();
+    try {
+      accelerometerInstance = new global.Accelerometer({
+        frequency: 60,
+      });
+      accelerometerInstance.start();
+    } catch (e) {
+      console.error('Accelerometer not supported', e);
+    }
   }
   return accelerometerInstance;
 }
@@ -88,7 +96,9 @@ export default function factory() {
 
   if (supportsMotion()) {
     const accl = createAccel();
+    if (!accl) return events;
     const gyroscope = createGyro();
+    if (!gyroscope) return events;
 
     let timestamp = null;
     const bias = 0.98;
@@ -131,19 +141,21 @@ export default function factory() {
     };
     gyroscope.addEventListener('reading', onGyro);
   } else if ('DeviceMotionEvent' in window) {
-    deviceMotion(e => events.emit(
-      'reading',
-      createCallbackContext({
-        x: e.acceleration.x,
-        y: e.acceleration.y,
-        z: e.acceleration.z,
-        alpha: e.rotationRate.alpha,
-        beta: e.rotationRate.beta,
-        gamma: e.rotationRate.gamma,
-      }),
-    ));
-  } else {
-    // No web motion controls supported
+    try {
+      deviceMotion(e => events.emit(
+        'reading',
+        createCallbackContext({
+          x: e.acceleration.x,
+          y: e.acceleration.y,
+          z: e.acceleration.z,
+          alpha: e.rotationRate.alpha,
+          beta: e.rotationRate.beta,
+          gamma: e.rotationRate.gamma,
+        }),
+      ));
+    } catch (e) {
+      console.error('DeviceMotionEvent not supported', e);
+    }
   }
 
   return events;

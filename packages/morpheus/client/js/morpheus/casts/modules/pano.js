@@ -36,6 +36,7 @@ import {
   touchDisablesMouse,
 } from 'morpheus/hotspot/eventInterface';
 import {
+  isActive,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
@@ -224,6 +225,14 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'inputHandler'),
   );
+  const selectOnVideoEndAssets = createSelector(
+    selectPano,
+    pano => get(pano, 'onVideoEndAssets'),
+  );
+  const selectNextSceneAssets = createSelector(
+    selectPano,
+    pano => get(pano, 'nextSceneAssets'),
+  );
   return {
     panoCastData: selectPanoCastData,
     panoAnimData: selectPanoCastAnimData,
@@ -240,6 +249,8 @@ export const selectors = memoize((scene) => {
     isLoading: selectIsLoading,
     panoHandler: selectPanoHandler,
     inputHandler: selectInputHandler,
+    onVideoEndAssets: selectOnVideoEndAssets,
+    nextSceneAssets: selectNextSceneAssets,
   };
 });
 
@@ -380,25 +391,25 @@ export const delegate = memoize((scene) => {
           gamestates: gamestateSelectors.forState(getState()),
         });
 
-        const hasNextSceneAssets = panoSelectors
-          .panoAnimData(getState())
-          .filter((cast) => {
+        const castsInAssets = assets.map(a => a.data);
+        const onVideoEndAssets = assets
+          .filter(({
+            data: cast,
+          }) => {
             const { nextSceneId } = cast;
             const hasNextScene = nextSceneId && nextSceneId !== 0x3FFFFFFF;
             return hasNextScene;
           });
 
-
-        hasNextSceneAssets
-          .forEach(({ data, promise }) => {
-            promise.forEach(p => p.then((videoEl) => {
-              function onEnded() {
-                videoEl.removeEventListener('ended', onEnded);
-                const { nextSceneId } = data;
-                dispatch(sceneActions.goToScene(nextSceneId, false));
-              }
-              videoEl.addEventListener('ended', onEnded);
-            }));
+        const nextSceneAssets = panoSelectors
+          .panoAnimData(getState())
+          .filter((cast) => {
+            if (castsInAssets.indexOf(cast) !== -1) {
+              return false;
+            }
+            const { nextSceneId } = cast;
+            const hasNextScene = nextSceneId && nextSceneId !== 0x3FFFFFFF;
+            return hasNextScene;
           });
 
         const geometries = createGeometries();
@@ -422,6 +433,8 @@ export const delegate = memoize((scene) => {
             scene3D,
             assets,
             renderedCanvas,
+            onVideoEndAssets,
+            nextSceneAssets,
             canvasTexture: map,
             isLoaded: true,
           }));
@@ -494,6 +507,31 @@ export const delegate = memoize((scene) => {
         camera,
         vector3: { z: -0.09 },
       });
+
+      panoSelectors.onVideoEndAssets(getState())
+        .forEach(({ data, promise }) => {
+          promise.forEach(p => p.then((videoEl) => {
+            function onEnded() {
+              videoEl.removeEventListener('ended', onEnded);
+              const { nextSceneId } = data;
+              dispatch(sceneActions.goToScene(nextSceneId, false));
+            }
+            videoEl.addEventListener('ended', onEnded);
+          }));
+        });
+
+      panoSelectors.nextSceneAssets(getState())
+        .forEach((cast) => {
+          if (isActive({
+            cast,
+            gamestates: gamestateSelectors.forState(getState()),
+          })) {
+            Promise.delay(500).then(() => {
+              const { nextSceneId } = cast;
+              dispatch(sceneActions.goToScene(nextSceneId, false));
+            });
+          }
+        });
 
       startRenderLoop({
         scene3D,

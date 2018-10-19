@@ -9,8 +9,8 @@ import {
 } from 'three';
 import {
   get,
-  memoize,
 } from 'lodash';
+import memoize from 'utils/memoize';
 import {
   createSelector,
 } from 'reselect';

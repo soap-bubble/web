@@ -123,10 +123,18 @@ export default function ({
       }
       const isMouseDown = mouseDown;
 
-      const interactionDistance = wasMouseUpped && Math.sqrt(
-        ((currentSreenPosition.left - startingScreenPosition.left) ** 2)
-        + ((currentSreenPosition.top - startingScreenPosition.top) ** 2),
-      );
+      let interactionDistance;
+
+      if (wasMouseUpped && startingScreenPosition) {
+        interactionDistance = Math.sqrt(
+          ((currentSreenPosition.left - startingScreenPosition.left) ** 2)
+          + ((currentSreenPosition.top - startingScreenPosition.top) ** 2),
+        );
+      } else if (wasMouseUpped) { // if no previous mouse down
+        startingScreenPosition = currentSreenPosition;
+        interactionDistance = 0;
+      }
+
       const debounceDistance = isTouch ? 80 : 20;
       const isClick = wasMouseUpped
         && (Date.now() - lastMouseDown < 500) && interactionDistance < debounceDistance;

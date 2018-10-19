@@ -14,7 +14,8 @@ import {
   Tween,
   Easing,
 } from 'tween';
-import { get, memoize } from 'lodash';
+import { get } from 'lodash';
+import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import {
   positionCamera,

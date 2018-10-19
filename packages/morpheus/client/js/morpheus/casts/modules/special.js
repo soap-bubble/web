@@ -1,9 +1,9 @@
 import {
   get,
-  memoize,
   isUndefined,
 } from 'lodash';
 import Promise from 'bluebird';
+import memoize from 'utils/memoize';
 import {
   Tween,
 } from 'tween';
@@ -315,7 +315,7 @@ function startRenderLoop({ update }) {
   renderEvents.onRender(update);
 }
 
-export function selectors(scene) {
+export const selectors = memoize((scene) => {
   const selectSpecialCastData = createSelector(
     () => scene,
     () => get(scene, 'sceneType'),
@@ -428,7 +428,7 @@ export function selectors(scene) {
     isLoading: selectIsLoading,
     inputHandler: selectInputHandler,
   };
-}
+});
 
 export const delegate = memoize((scene) => {
   const specialSelectors = selectors(scene);

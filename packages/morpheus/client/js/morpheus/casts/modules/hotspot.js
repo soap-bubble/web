@@ -13,8 +13,8 @@ import {
 } from 'three';
 import {
   get,
-  memoize,
 } from 'lodash';
+import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import createCanvas from 'utils/canvas';
 import {

@@ -359,7 +359,8 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }
       }
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
-        return await dispatch(sceneActions.goToScene(hotspot.param1, false));
+        await dispatch(sceneActions.goToScene(hotspot.param1, false));
+        return !hotspot.defaultPass;
       }
     }
     return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition }));

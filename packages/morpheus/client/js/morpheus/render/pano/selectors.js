@@ -1,4 +1,5 @@
-import { get, memoize, uniq } from 'lodash';
+import { get, uniq } from 'lodash';
+import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import {
   getPanoAnimUrl,

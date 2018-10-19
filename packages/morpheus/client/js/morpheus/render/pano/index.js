@@ -1,6 +1,4 @@
-import {
-  memoize,
-} from 'lodash';
+import memoize from 'utils/memoize';
 import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';

@@ -1,6 +1,4 @@
-import {
-  memoize,
-} from 'lodash';
+import memoize from 'utils/memoize';
 import loggerFactory from 'utils/logger';
 import {
   selectors as sceneSelectors,
@@ -94,15 +92,32 @@ export const lifecycle = [{
     memo[action] = function moduleAction(scene) {
       return (dispatch, getState) => Promise.all(Object.keys(modules.default).map((cast) => {
         const module = modules.default[cast];
-        const delegate = module.delegate && module.delegate(scene);
-        if (delegate && delegate && delegate[action] && delegate.applies(getState())) {
-          return dispatch(doActionForCast({
-            event,
-            scene,
-            castType: cast,
-            action: delegate[action],
-            actionName: action,
-          }));
+        if (scene) {
+          const delegate = module.delegate && module.delegate(scene);
+          if (delegate && delegate && delegate[action] && delegate.applies(getState())) {
+            let promise = dispatch(doActionForCast({
+              event,
+              scene,
+              castType: cast,
+              action: delegate[action],
+              actionName: action,
+            }));
+            if (action === 'doUnload') {
+              promise = promise.then((result) => {
+                if (module.selectors) {
+                  module.selectors.cache.delete(scene._id);
+                }
+                if (module.delegate) {
+                  module.delegate.cache.delete(scene._id);
+                }
+                if (module.actions) {
+                  module.actions.cache.delete(scene._id);
+                }
+                return result;
+              });
+            }
+            return promise;
+          }
         }
         return Promise.resolve();
       }))

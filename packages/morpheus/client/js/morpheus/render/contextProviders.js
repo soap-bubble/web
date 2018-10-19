@@ -56,6 +56,7 @@ export function loadAsVideo({
         });
         video = vid;
         videoHasLoaded = true;
+        return vid;
       }),
     ...rest,
   };
@@ -97,10 +98,13 @@ export function loadAsImage({
       });
     },
     promise: promiseImage
-      .then(img => canvasInit({
-        canvas: provideCanvas(),
-        image: img,
-      })),
+      .then((img) => {
+        canvasInit({
+          canvas: provideCanvas(),
+          image: img,
+        });
+        return img;
+      }),
     ...rest,
   };
   return selfie;

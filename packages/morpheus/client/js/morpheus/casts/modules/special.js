@@ -1,9 +1,9 @@
 import {
   get,
-  memoize,
   isUndefined,
 } from 'lodash';
 import Promise from 'bluebird';
+import memoize from 'utils/memoize';
 import {
   Tween,
 } from 'tween';
@@ -315,7 +315,7 @@ function startRenderLoop({ update }) {
   renderEvents.onRender(update);
 }
 
-export function selectors(scene) {
+export const selectors = memoize((scene) => {
   const selectSpecialCastData = createSelector(
     () => scene,
     () => get(scene, 'sceneType'),
@@ -428,7 +428,7 @@ export function selectors(scene) {
     isLoading: selectIsLoading,
     inputHandler: selectInputHandler,
   };
-}
+});
 
 export const delegate = memoize((scene) => {
   const specialSelectors = selectors(scene);
@@ -766,29 +766,5 @@ export const delegate = memoize((scene) => {
     doExit,
     doUnload,
     doPreunload: doUnload,
-  };
-});
-
-export const actions = memoize(() => {
-  function handleMouseEvent({ type, hotspot, top, left }) {
-    return (dispatch) => {
-      const {
-        gesture,
-      } = hotspot;
-      const gestureType = GESTURES[gesture];
-      let done = false;
-      if (type === 'MouseStillDown') {
-        done = dispatch(gamestateActions.handleMouseStillDown({ hotspot, top, left }));
-      } else if (type === 'MouseUp' || type === 'MouseLeave') {
-        done = dispatch(gamestateActions.handleMouseUp({ hotspot, top, left }));
-      } else if (type === gestureType) {
-        done = dispatch(gamestateActions.handleHotspot({ hotspot, top, left }));
-      }
-      return done;
-    };
-  }
-
-  return {
-    handleMouseEvent,
   };
 });

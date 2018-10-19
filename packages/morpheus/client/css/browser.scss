@@ -1,0 +1,11 @@
+.subcontainer {
+  position: absolute;
+  height: 300px;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+.subcontainer:nth-child(1),
+.subcontainer:nth-child(2),
+.subcontainer:nth-child(3) {
+  border-top: 1px solid black;
+}

@@ -219,7 +219,7 @@ export function handleEventFactory() {
           || self.lastWasMouseMoved !== wasMouseMoved
         )
       ) {
-        logger.info({
+        logger.debug({
           currentPosition,
           startingPosition,
           nowInHotspots,
@@ -251,118 +251,39 @@ export function handleEventFactory() {
       self.lastWasMouseMoved = wasMouseMoved;
       self.lastWasMouseDowned = wasMouseDowned;
 
-      await someSeries(alwaysExecuteHotspots, async (hotspot) => {
+      const handleIfActive = inform => async (hotspot) => {
+        let allDone = false;
+        const handlerContext = {};
         if (isHotspotActive({
           hotspot,
           gamestates: gamestateSelectors.forState(getState()),
         })) {
-          const allDone = await dispatch(handleHotspot({
+          allDone = await dispatch(handleHotspot({
             hotspot,
             currentPosition,
             startingPosition,
+            context: handlerContext,
           }));
-          return allDone;
+          if (inform) {
+            inform({
+              allDone,
+              hotspot,
+              handlerContext,
+            });
+          }
         }
-      });
+        return allDone;
+      };
 
-      await forEachSeries(mouseLeavingHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-        }
-      });
-
-      await forEachSeries(mouseEnteringHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-        }
-      });
-
-      await someSeries(mouseUpHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          const allDone = await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-          return allDone;
-        }
-        return null;
-      });
-
-      await someSeries(clickableHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          const allDone = await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-          return allDone;
-        }
-        return null;
-      });
-
-      await someSeries(mouseDragHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          const allDone = await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-          return allDone;
-        }
-        return null;
-      });
-
-      await someSeries(mouseDownHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          const allDone = await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-          return allDone;
-        }
-        return null;
-      });
-
-      await forEachSeries(mouseNoneHotspots, async (hotspot) => {
-        if (isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })) {
-          await dispatch(handleHotspot({
-            hotspot,
-            currentPosition,
-            startingPosition,
-          }));
-        }
-      });
+      let debugLogger; // = logger.debug.bind(logger);
+      await someSeries(alwaysExecuteHotspots, handleIfActive(debugLogger));
+      await forEachSeries(mouseLeavingHotspots, handleIfActive(debugLogger));
+      await forEachSeries(mouseEnteringHotspots, handleIfActive(debugLogger));
+      await someSeries(mouseUpHotspots, handleIfActive(debugLogger));
+      await someSeries(clickableHotspots, handleIfActive(debugLogger));
+      await someSeries(mouseDragHotspots, handleIfActive(debugLogger));
+      await someSeries(mouseDownHotspots, handleIfActive(debugLogger));
+      await forEachSeries(mouseNoneHotspots, handleIfActive(debugLogger));
 
       const cursor = dispatch(resolveCursor({
         hotspots,

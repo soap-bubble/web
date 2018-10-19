@@ -76,8 +76,8 @@ module.exports = (env) => {
   }
 
   const webpackDefineConfig = {
-    'process.env.NODE_ENV': `"${nodeEnv}"`,
-    'process.env.AUTOSTART': `${env.electron || env.cordova}`,
+    'process.env.NODE_ENV': JSON.stringify(nodeEnv),
+    'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
     config: JSON.stringify(appConfig),
   };
 
@@ -91,6 +91,7 @@ module.exports = (env) => {
     devtool,
     entry: {
       app: './client/js/app.jsx',
+      browser: './client/js/browser.js',
       vendor: [
         'babel-polyfill',
         '@soapbubble/components',
@@ -176,6 +177,14 @@ module.exports = (env) => {
         filename: 'index.html',
         template: `client/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
+        chunks: ['vendor', 'app'],
+      }),
+      new HtmlWebpackPlugin({
+        title: 'Morpheus Browser',
+        filename: 'browser.html',
+        template: 'client/html/index.ejs',
+        googleAnalyticsClientId: config.googleAnalyticsClientId,
+        chunks: ['vendor', 'browser'],
       }),
       new webpack.DefinePlugin(webpackDefineConfig),
     ],

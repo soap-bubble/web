@@ -18,6 +18,7 @@ import {
   actions as castActions,
   selectors as castSelectors,
 } from 'morpheus/casts';
+import loggerFactory from 'utils/logger';
 import {
   API_ERROR,
   LOAD_COMPLETE,
@@ -28,6 +29,8 @@ import {
   ACTION_TYPES,
   GESTURES,
 } from '../constants';
+
+const logger = loggerFactory('gamestate:actions');
 
 export function inject(gamestates) {
   return {
@@ -72,7 +75,7 @@ function nextSceneAngle(hotspot) {
   return startAngle;
 }
 
-export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
+export function handleHotspot({ hotspot, currentPosition, startingPosition, context = {} }) {
   return async (dispatch, getState) => {
     const gamestates = gamestateSelectors.forState(getState());
     const {
@@ -83,11 +86,11 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
 
     let allDone = !defaultPass;
 
-    const actionType = ACTION_TYPES[type];
+    const actionType = context.actionType = ACTION_TYPES[type];
     switch (actionType) {
       case 'GoBack': {
-        const prevSceneId = sceneSelectors.previousSceneId(getState());
-        const nAngle = nextSceneAngle(hotspot);
+        const prevSceneId = context.prevSceneId = sceneSelectors.previousSceneId(getState());
+        const nAngle = context.nAngle = nextSceneAngle(hotspot);
         if (nAngle) {
           dispatch(sceneActions.setNextStartAngle(nAngle));
         }
@@ -96,7 +99,8 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
       }
       case 'DissolveTo': {
         const { param1: nextSceneId } = hotspot;
-        const nAngle = nextSceneAngle(hotspot);
+        context.nextSceneId = nextSceneId;
+        const nAngle = context.nAngle = nextSceneAngle(hotspot);
         if (nAngle) {
           dispatch(sceneActions.setNextStartAngle(nAngle));
         }
@@ -105,8 +109,9 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
       }
       case 'ChangeScene': {
         const { param1: nextSceneId } = hotspot;
+        context.nextSceneId = nextSceneId;
         if (nextSceneId) {
-          const nAngle = nextSceneAngle(hotspot);
+          const nAngle = context.nAngle = nextSceneAngle(hotspot);
           if (nAngle) {
             dispatch(sceneActions.setNextStartAngle(nAngle));
           }
@@ -149,10 +154,11 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition }) {
 
         const currAngle = (param3 - param2) * ((value - minValue) /
                   (maxValue - minValue));
-
+        context.currAngle = currAngle;
         if (angle - currAngle < 90 && angle - currAngle > -90) {
-          const ratio = angle / (param3 - param2);
-          value = minValue + ((maxValue - minValue) * ratio) + 0.5;
+          const ratio = context.ratio = angle / (param3 - param2);
+          value = context.value = minValue + ((maxValue - minValue) * ratio) + 0.5;
+          context.param1 = param1;
           dispatch(updateGameState(param1, Math.floor(value)));
         }
         break;
@@ -353,7 +359,8 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }
       }
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
-        return await dispatch(sceneActions.goToScene(hotspot.param1, false));
+        await dispatch(sceneActions.goToScene(hotspot.param1, false));
+        return !hotspot.defaultPass;
       }
     }
     return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition }));

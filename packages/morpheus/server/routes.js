@@ -26,8 +26,8 @@ if (process.env.NODE_ENV !== 'production') {
             return c;
           });
         });
+        res.json(scenes);
       });
-      res.json(scenes);
     }, (err) => {
       res.status(500).send(err);
     });

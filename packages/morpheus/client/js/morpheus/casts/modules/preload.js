@@ -1,6 +1,4 @@
-import {
-  memoize,
-} from 'lodash';
+import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import {
   selectors as panoSelectors,

@@ -93,6 +93,9 @@ export class PanoAnim extends MovieCast {
       },
       frame: Number,
       looping: Boolean,
+      actionAtEnd: Number,
+      dissolveToNextScene: Boolean,
+      nextSceneId: Number,
     });
   }
 }

@@ -8,14 +8,33 @@ import { getModel } from './db';
 const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
 const router = express.Router();
 
-router
-  .get('/scenes', (req, res) => {
+if (process.env.NODE_ENV !== 'production') {
+  router.get('/scenes', (req, res) => {
     getModel('Scene').find().exec().then((scenes) => {
+      const castsToLoad = scenes.reduce(
+        (memo, scene) => memo.concat(
+          scene.casts.filter(c => c.ref).map(c => c.ref.castId),
+        ),
+        [],
+      );
+      getModel('Cast').find({ castId: { $in: castsToLoad } }).exec().then((casts) => {
+        scenes.forEach((scene) => {
+          scene.casts = scene.casts.map((c) => {
+            if (c.ref) {
+              return casts.find(c1 => c1.castId === c.ref.castId);
+            }
+            return c;
+          });
+        });
+      });
       res.json(scenes);
     }, (err) => {
       res.status(500).send(err);
     });
-  })
+  });
+}
+
+router
   .get('/gamestate', (req, res) => {
     getModel('GameState').find().exec().then((gamestates) => {
       res.json(gamestates);

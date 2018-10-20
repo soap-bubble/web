@@ -104,13 +104,13 @@ export const lifecycle = [{
             }));
             if (action === 'doUnload') {
               promise = promise.then((result) => {
-                if (module.selectors) {
+                if (module.selectors && module.selectors.cache) {
                   module.selectors.cache.delete(scene._id);
                 }
-                if (module.delegate) {
+                if (module.delegate && module.delegate.cache) {
                   module.delegate.cache.delete(scene._id);
                 }
-                if (module.actions) {
+                if (module.actions && module.actions.cache) {
                   module.actions.cache.delete(scene._id);
                 }
                 return result;

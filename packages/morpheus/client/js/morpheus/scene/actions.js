@@ -99,7 +99,7 @@ export function setNextStartAngle(angle) {
   };
 }
 
-const CURRENT_SCENE_STACK_SIZE = 5;
+const CURRENT_SCENE_STACK_SIZE = 6;
 
 function doSceneEntering(scene) {
   return (dispatch, getState) => {

@@ -1,3 +1,8 @@
+import uasParser from 'ua-parser-js';
+
+const userAgentString = (global.navigator && global.navigator.userAgent) || '';
+const uas = uasParser(userAgentString);
+
 export function addSourceToVideo(element, src, type) {
   const source = document.createElement('source');
 
@@ -12,8 +17,11 @@ export function createVideo(url, options) {
   video.crossOrigin = 'anonymous';
   video.setAttribute('webkit-playsinline', 'webkit-playsinline');
   Object.assign(video, options);
-  addSourceToVideo(video, `${url}.webm`, 'video/webm');
-  // addSourceToVideo(video, `${url}.mp4`, 'video/mp4');
+  if (uas.browser.name.indexOf('Safari') !== -1) {
+    addSourceToVideo(video, `${url}.mp4`, 'video/mp4');
+  } else {
+    addSourceToVideo(video, `${url}.webm`, 'video/webm');
+  }
   return video;
 }
 

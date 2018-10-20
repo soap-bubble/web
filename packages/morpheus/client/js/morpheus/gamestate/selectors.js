@@ -35,9 +35,10 @@ export function castEnabled({ comparators }) {
 }
 
 export function forState(state) {
+  const gs = state.gamestate.get('idMap');
   return {
     byId(id) {
-      const gamestate = gamestates(state).get(id);
+      const gamestate = gs.get(id);
 
       if (!gamestate) {
         throw new Error(`VariableNotFound ${id}`);

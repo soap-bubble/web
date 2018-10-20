@@ -157,7 +157,7 @@ export default function update() {
           && rectBottom === 400
           && rectLeft === 0
           && rectRight === 640
-          && (param1 === 1401 || param1 === 1448),
+          && (param1 === 1448),
         );
         if (removeHotspots.length) {
           logger.info('Removing unessecary state changes');
@@ -288,6 +288,18 @@ export default function update() {
         cast.image = true;
         cast.fileName = 'GameDB/Deck4/engSTL';
         logger.info('Turning engine background into an image');
+        return cast.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('Cast').find({
+      castId: 411050,
+    }).exec()
+    .map((cast) => {
+      if (cast && !cast.width) {
+        cast.width = 640;
+        cast.height = 400;
+        logger.info('Patching width/height on engine background');
         return cast.save();
       }
       return Promise.resolve();

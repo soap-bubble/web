@@ -4,7 +4,7 @@ export default function linkPreload(url) {
     res.rel = 'preload';
     res.as = 'video';
     res.href = url;
-    res.onload = resolve;
+    res.onload = () => resolve(res);
     res.onerror = reject;
     document.head.appendChild(res);
   });

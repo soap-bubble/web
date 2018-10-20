@@ -4,6 +4,7 @@ import {
 } from 'lodash';
 import Promise from 'bluebird';
 import memoize from 'utils/memoize';
+import uasParser from 'ua-parser-js';
 import {
   Tween,
 } from 'tween';
@@ -59,6 +60,9 @@ const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
 const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
 const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT;
+const userAgentString = (global.navigator && global.navigator.userAgent) || '';
+const uas = uasParser(userAgentString);
+const movExt = uas.browser.name.indexOf('Safari') !== -1 ? 'mp4' : 'webm';
 
 function resizeToScreen({ width, height, top, left, right, bottom, clip = false }) {
   if (width / height > ORIGINAL_ASPECT_RATIO) {
@@ -408,6 +412,10 @@ export const selectors = memoize((scene) => {
     selectSpecial,
     special => get(special, 'specialHandler'),
   );
+  const selectVideoPreloads = createSelector(
+    selectSpecial,
+    special => get(special, 'videoPreloads'),
+  );
 
   return {
     data: selectSpecialCastData,
@@ -427,6 +435,7 @@ export const selectors = memoize((scene) => {
     isLoaded: selectIsLoaded,
     isLoading: selectIsLoading,
     inputHandler: selectInputHandler,
+    videoPreloads: selectVideoPreloads,
   };
 });
 
@@ -499,7 +508,7 @@ export const delegate = memoize((scene) => {
         }));
 
       const loadMovies = Promise.all(movieCasts
-        .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, 'mp4'))));
+        .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, movExt))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
         .filter(cast => !cast.audioOnly)
@@ -515,9 +524,10 @@ export const delegate = memoize((scene) => {
         loadSounds,
         loadMovies,
         loadControlledMovies,
-      ]).then(([images, sounds, videos, controlledCasts]) => ({
+      ]).then(([images, sounds, videoPreloads, controlledCasts]) => ({
         images,
         sounds,
+        videoPreloads,
         controlledCasts,
         isLoaded: true,
       }));
@@ -764,17 +774,24 @@ export const delegate = memoize((scene) => {
     return (dispatch, getState) => {
       const videos = specialSelectors.videos(getState());
       const sounds = specialSelectors.sounds(getState());
+      const videoPreloads = specialSelectors.videoPreloads(getState());
 
       Object.keys([...videos, ...sounds]).forEach(({ el, listeners }) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
+        if (listeners && listeners.canplaythrough) {
+          el.removeEventListener('canplaythrough', listeners.canplaythrough);
+        }
       });
+
+      videoPreloads.forEach(el => el.parentNode.removeChild(el));
 
       return Promise.resolve({
         videos: [],
         sounds: [],
         images: [],
+        videoPreloads: [],
         canvas: null,
         isLoaded: false,
       });

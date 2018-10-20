@@ -499,10 +499,6 @@ export const delegate = memoize((scene) => {
         }));
 
       const loadMovies = Promise.all(movieCasts
-        .filter(cast => isActive({
-          cast,
-          gamestates,
-        }))
         .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, 'mp4'))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
@@ -532,144 +528,171 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doEnter() {
+  function doEnter({
+    setState,
+  }) {
     return (dispatch, getState) => {
       const state = getState();
-      const gamestates = gamestateSelectors.forState(state);
       const dimensions = gameSelectors.dimensions(state);
       const movieCasts = specialSelectors.movieCasts(state);
       const images = specialSelectors.images(state);
-      const sounds = specialSelectors.sounds(state);
       const controlledCasts = specialSelectors.controlledCasts(state);
-
+      const canvas = createCanvas(dimensions);
       dispatch(gameActions.setCursor(null));
 
-      return Promise.all(movieCasts
-        .filter(cast => isActive({
-          cast,
-          gamestates,
-        }))
-        .map(movieCast => new Promise((resolve, reject) => {
-          const video = createVideo(getAssetUrl(movieCast.fileName), {
-            loop: movieCast.looping,
-            autoplay: 'true',
-            onerror: reject,
-          });
-          video.classList.add('MovieSpecialCast');
-          function onSoundEnded() {
-            let startAngle;
-            const {
-              nextSceneId,
-              angleAtEnd,
-              dissolveToNextScene,
-            } = movieCast;
-            video.removeEventListener('ended', onSoundEnded);
-            if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-              if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
-                startAngle = (angleAtEnd * Math.PI) / 1800;
-                startAngle -= Math.PI - (Math.PI / 6);
-              }
-              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
-                .catch(() => console.error('Failed to load scene', nextSceneId));
-              dispatch(sceneActions.setNextStartAngle(startAngle));
-            }
-          }
-          function onCanPlayThrough() {
-            video.removeEventListener('canplaythrough', onCanPlayThrough);
-            resolve({
-              el: video,
-              listeners: {
-                ended: onSoundEnded,
-                canplaythrough: onCanPlayThrough,
-              },
+      const assets = [];
+
+      function existsInAssets(cast) {
+        return assets.find(a => a.data === cast);
+      }
+
+      function updateAssets() {
+        return Promise.all(movieCasts
+          .filter(cast => !existsInAssets(cast) && isActive({
+            cast,
+            gamestates: gamestateSelectors.forState(getState()),
+          }))
+          .map(movieCast => new Promise((resolve, reject) => {
+            const video = createVideo(getAssetUrl(movieCast.fileName), {
+              loop: movieCast.looping,
+              autoplay: 'true',
+              onerror: reject,
             });
-          }
-          video.addEventListener('ended', onSoundEnded);
-          video.addEventListener('canplaythrough', onCanPlayThrough);
-        })
-          .then(({ el, listeners }) => ({
-            el,
-            data: movieCast,
-            listeners,
-          }))))
-      .then((videos) => {
-        const canvas = createCanvas(dimensions);
-        sounds.forEach(({ el: sound }) => sound.play());
-        videos.forEach(({ el: video, data }) => {
-          applyTransformToVideo({
-            transform: generateMovieTransform({
-              dimensions,
-              cast: data,
-            }),
-            video,
+            video.classList.add('MovieSpecialCast');
+            function onSoundEnded() {
+              let startAngle;
+              const {
+                nextSceneId,
+                angleAtEnd,
+                dissolveToNextScene,
+              } = movieCast;
+              video.removeEventListener('ended', onSoundEnded);
+              if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+                if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
+                  startAngle = (angleAtEnd * Math.PI) / 1800;
+                  startAngle -= Math.PI - (Math.PI / 6);
+                }
+                dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
+                  .catch(() => console.error('Failed to load scene', nextSceneId));
+                dispatch(sceneActions.setNextStartAngle(startAngle));
+              }
+            }
+            function onCanPlayThrough() {
+              video.removeEventListener('canplaythrough', onCanPlayThrough);
+              resolve({
+                el: video,
+                listeners: {
+                  ended: onSoundEnded,
+                  canplaythrough: onCanPlayThrough,
+                },
+              });
+            }
+            video.addEventListener('ended', onSoundEnded);
+            video.addEventListener('canplaythrough', onCanPlayThrough);
+          })
+            .then(({ el, listeners }) => ({
+              el,
+              data: movieCast,
+              listeners,
+            }))))
+        .then((videos) => {
+          videos.forEach(({ el: video, data }) => {
+            applyTransformToVideo({
+              transform: generateMovieTransform({
+                dimensions,
+                cast: data,
+              }),
+              video,
+            });
+            assets.push({
+              el: video,
+              data,
+            });
+            setState({
+              videos,
+            });
           });
         });
+      }
 
-        return generateSpecialImages({
-          images: generateImages({
-            gamestates,
-            images,
-            dimensions,
-          }),
-          controlledFrames: generateControlledFrames({
-            gamestates,
-            controlledCasts,
-            dimensions,
-          }),
-          canvas,
-        }).then(() => {
-          const specialHandler = eventInterface.touchDisablesMouse(inputHandlerFactory({
-            dispatch,
-            scene,
-          }));
+      return updateAssets().then(() => generateSpecialImages({
+        images: generateImages({
+          gamestates: gamestateSelectors.forState(getState()),
+          images,
+          dimensions: gameSelectors.dimensions(getState()),
+        }),
+        controlledFrames: generateControlledFrames({
+          gamestates: gamestateSelectors.forState(getState()),
+          controlledCasts,
+          dimensions: gameSelectors.dimensions(getState()),
+        }),
+        canvas,
+      }).then(() => {
+        const specialHandler = eventInterface.touchDisablesMouse(inputHandlerFactory({
+          dispatch,
+          scene,
+        }));
 
-          startRenderLoop({
-            update() {
+        startRenderLoop({
+          update() {
               // Need updated versions of these vars
               // eslint-disable-next-line no-shadow
-              const dimensions = gameSelectors.dimensions(getState());
+            const dimensions = gameSelectors.dimensions(getState());
               // eslint-disable-next-line no-shadow
-              const gamestates = gamestateSelectors.forState(getState());
-              videos.forEach(({ el: video, data }) => {
-                applyTransformToVideo({
-                  transform: generateMovieTransform({
-                    dimensions,
-                    cast: data,
-                  }),
-                  video,
-                });
-              });
-
-              dispatch(gameActions.drawCursor());
-
-              return generateSpecialImages({
-                images: generateImages({
-                  gamestates,
-                  images,
+            const gamestates = gamestateSelectors.forState(getState());
+            updateAssets().then(() => assets.forEach(({ el: video, data }) => {
+              applyTransformToVideo({
+                transform: generateMovieTransform({
                   dimensions,
+                  cast: data,
                 }),
-                controlledFrames: generateControlledFrames({
-                  gamestates,
-                  controlledCasts,
-                  dimensions,
-                }),
-                canvas,
+                video,
               });
-            },
-          });
-          return {
-            canvas,
-            videos,
-            specialHandler,
-          };
+            }));
+
+            dispatch(gameActions.drawCursor());
+
+            return generateSpecialImages({
+              images: generateImages({
+                gamestates,
+                images,
+                dimensions,
+              }),
+              controlledFrames: generateControlledFrames({
+                gamestates,
+                controlledCasts,
+                dimensions,
+              }),
+              canvas,
+            });
+          },
         });
-      });
+        return {
+          canvas,
+          specialHandler,
+        };
+      }));
     };
   }
 
   function onStage() {
     return (dispatch, getState) => {
+      const sounds = specialSelectors.sounds(getState());
       const images = specialSelectors.images(getState());
+      const hotspotData = specialSelectors.hotspotData(getState());
+      const gamestates = gamestateSelectors.forState(getState());
+      hotspotData
+        .filter(cast => isActive({ cast, gamestates }))
+        .forEach((hotspot) => {
+          const { gesture } = hotspot;
+          if (
+            GESTURES[gesture] === 'Always'
+            || GESTURES[gesture] === 'SceneEnter'
+          ) {
+            dispatch(gamestateActions.handleHotspot({ hotspot }));
+          }
+        });
+      sounds.forEach(({ el: sound }) => sound.play());
       images.some(({ data: cast }) => {
         if (cast.actionAtEnd) {
           // FIXME this is a disconnected promise chain because trying to sychronize
@@ -688,9 +711,10 @@ export const delegate = memoize((scene) => {
 
   function doExit() {
     return (dispatch, getState) => {
-      const videos = specialSelectors.videos(getState());
+      // FIXME: Clean this up!!
+      // const videos = specialSelectors.videos(getState());
       const sounds = specialSelectors.sounds(getState());
-      const everything = [...videos, ...sounds];
+      const everything = sounds;
       const v = {
         volume: 1,
       };

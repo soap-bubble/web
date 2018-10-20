@@ -1,5 +1,4 @@
 import { get, uniq } from 'lodash';
-import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import {
   getPanoAnimUrl,
@@ -9,7 +8,7 @@ import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 
-export default memoize((scene) => {
+export default (scene) => {
   const selectPanoCastData = createSelector(
     () => scene,
     s => get(s, 'casts', []).find(c => c.__t === 'PanoCast'),
@@ -61,4 +60,4 @@ export default memoize((scene) => {
     enabledFilenames: selectEnabledFilenames,
     isPanoAnim: selectIsPanoAnim,
   };
-});
+};

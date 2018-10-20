@@ -102,9 +102,6 @@ window.onload = () => {
   if (process.env.NODE_ENV !== 'production') {
     window.updateGameState = function updateGameState(gamestateId, value) {
       store.dispatch(gamestateActions.updateGameState(gamestateId, value));
-      const scene = sceneSelectors.currentSceneData(store.getState());
-      store.dispatch(castActions.forScene(scene).special.update(scene));
-      store.dispatch(castActions.forScene(scene).controlledMovie.update(scene));
     };
 
     window.getGameState = function getgameState(gamestateId) {

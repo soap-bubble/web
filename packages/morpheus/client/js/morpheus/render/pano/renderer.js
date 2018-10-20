@@ -1,10 +1,3 @@
-// export default function ({
-//   assets,
-//   canvas,
-// }) {
-//   const { width, height } = canvas;
-// }
-
 export default function pano({
   contextProvider,
   canvas,

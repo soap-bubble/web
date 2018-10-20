@@ -41,7 +41,7 @@ import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import createCanvas from 'utils/canvas';
-import loader from 'morpheus/render/pano/loader';
+import assetLoader from 'morpheus/render/pano/loader';
 import loggerFactory from 'utils/logger';
 import {
   momentum as momentumFactory,
@@ -226,13 +226,9 @@ export const selectors = memoize((scene) => {
     selectPano,
     pano => get(pano, 'inputHandler'),
   );
-  const selectOnVideoEndAssets = createSelector(
+  const selectLoader = createSelector(
     selectPano,
-    pano => get(pano, 'onVideoEndAssets'),
-  );
-  const selectNextSceneAssets = createSelector(
-    selectPano,
-    pano => get(pano, 'nextSceneAssets'),
+    pano => get(pano, 'loader'),
   );
   return {
     panoCastData: selectPanoCastData,
@@ -250,8 +246,7 @@ export const selectors = memoize((scene) => {
     isLoading: selectIsLoading,
     panoHandler: selectPanoHandler,
     inputHandler: selectInputHandler,
-    onVideoEndAssets: selectOnVideoEndAssets,
-    nextSceneAssets: selectNextSceneAssets,
+    loader: selectLoader,
   };
 });
 
@@ -387,31 +382,21 @@ export const delegate = memoize((scene) => {
           width: 2048,
           height: 1024,
         });
-        const assets = loader({
+        const loader = assetLoader({
           scene,
-          gamestates: gamestateSelectors.forState(getState()),
+          onVideoEndFactory(data) {
+            return function onVideoEnded() {
+              const el = this;
+              el.onended = null;
+              const { nextSceneId } = data;
+              const hasNextScene = nextSceneId && nextSceneId !== 0x3FFFFFFF;
+              if (hasNextScene) {
+                dispatch(sceneActions.goToScene(nextSceneId, false));
+              }
+            };
+          },
         });
-
-        const castsInAssets = assets.map(a => a.data);
-        const onVideoEndAssets = assets
-          .filter(({
-            data: cast,
-          }) => {
-            const { nextSceneId } = cast;
-            const hasNextScene = nextSceneId && nextSceneId !== 0x3FFFFFFF;
-            return hasNextScene;
-          });
-
-        const nextSceneAssets = panoSelectors
-          .panoAnimData(getState())
-          .filter((cast) => {
-            if (castsInAssets.indexOf(cast) !== -1) {
-              return false;
-            }
-            const { nextSceneId } = cast;
-            const hasNextScene = nextSceneId && nextSceneId !== 0x3FFFFFFF;
-            return hasNextScene;
-          });
+        const assets = loader.load(gamestateSelectors.forState(getState()));
 
         const geometries = createGeometries();
         const map = new CanvasTexture(renderedCanvas);
@@ -434,8 +419,7 @@ export const delegate = memoize((scene) => {
             scene3D,
             assets,
             renderedCanvas,
-            onVideoEndAssets,
-            nextSceneAssets,
+            loader,
             canvasTexture: map,
             isLoaded: true,
           }));
@@ -491,11 +475,10 @@ export const delegate = memoize((scene) => {
     return (dispatch, getState) => {
       const scene3D = panoSelectors.panoScene3D(getState());
       const { camera, renderer, setSize } = panoSelectors.renderElements(getState());
-      const assets = panoSelectors.assets(getState());
       const { width, height } = gameSelectors.dimensions(getState());
       const renderedCanvas = panoSelectors.renderedCanvas(getState());
       const canvasTexture = panoSelectors.canvasTexture(getState());
-
+      const loader = panoSelectors.loader(getState());
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
       const panoObject3D = panoSelectors.panoObject3D(getState());
       if (panoObject3D) {
@@ -509,30 +492,7 @@ export const delegate = memoize((scene) => {
         vector3: { z: -0.09 },
       });
 
-      panoSelectors.onVideoEndAssets(getState())
-        .forEach(({ data, promise }) => {
-          promise.forEach(p => p.then((videoEl) => {
-            function onEnded() {
-              videoEl.removeEventListener('ended', onEnded);
-              const { nextSceneId } = data;
-              dispatch(sceneActions.goToScene(nextSceneId, false));
-            }
-            videoEl.addEventListener('ended', onEnded);
-          }));
-        });
-
-      panoSelectors.nextSceneAssets(getState())
-        .forEach((cast) => {
-          if (isActive({
-            cast,
-            gamestates: gamestateSelectors.forState(getState()),
-          })) {
-            Promise.delay(500).then(() => {
-              const { nextSceneId } = cast;
-              dispatch(sceneActions.goToScene(nextSceneId, false));
-            });
-          }
-        });
+      loader.play();
 
       startRenderLoop({
         scene3D,
@@ -540,13 +500,14 @@ export const delegate = memoize((scene) => {
         renderer,
         update: () => {
           canvasTexture.needsUpdate = true;
-          assets.forEach((contextProvider) => {
-            const ctx = renderedCanvas.getContext('2d');
-            const {
-              render,
-            } = contextProvider;
-            render(ctx);
-          });
+          loader.load(gamestateSelectors.forState(getState()))
+            .forEach((contextProvider) => {
+              const ctx = renderedCanvas.getContext('2d');
+              const {
+                render,
+              } = contextProvider;
+              render(ctx);
+            });
           dispatch(gameActions.drawCursor());
         },
       });

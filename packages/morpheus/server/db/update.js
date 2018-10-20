@@ -42,6 +42,23 @@ export default function update() {
         cast.fileName = cast.fileName.replace('cargoH', 'CargoH');
         return cast.save();
       }))
+      .then(() => getModel('MovieSpecialCast').find({
+        actionAtEnd: { $lt: -1 },
+      }).exec()
+        .map((cast) => {
+          if (
+            cast.looping === true
+            && cast.nextSceneId === 0
+            && cast.startFrame === -cast.actionAtEnd
+          ) {
+            return Promise.resolve();
+          }
+          logger.info(`Patching negative actionAtEnd cast ${cast.castId}`);
+          cast.looping = true;
+          cast.nextSceneId = 0;
+          cast.startFrame = -cast.actionAtEnd;
+          return cast.save();
+        }))
     .then(() => getModel('Cast').find({
       castId: 421057,
     }).exec()
@@ -51,23 +68,6 @@ export default function update() {
         }
         logger.info('Patching buttom push in engine room 1');
         cast.nextSceneId = 421065;
-        return cast.save();
-      }))
-    .then(() => getModel('MovieSpecialCast').find({
-      actionAtEnd: { $lt: -1 },
-    }).exec()
-      .map((cast) => {
-        if (
-          cast.looping === true
-          && cast.nextSceneId === 0
-          && cast.startFrame === -cast.actionAtEnd
-        ) {
-          return Promise.resolve();
-        }
-        logger.info(`Patching negative actionAtEnd cast ${cast.castId}`);
-        cast.looping = true;
-        cast.nextSceneId = 0;
-        cast.startFrame = -cast.actionAtEnd;
         return cast.save();
       }))
     .then(() => getModel('Cast').find({
@@ -211,31 +211,85 @@ export default function update() {
         return scene.save();
       }
       return Promise.resolve();
+    }))
+    .then(() => getModel('Scene').find({
+      sceneId: 415050,
+    }).exec()
+    .map((scene) => {
+      const hotspot = scene.casts.find(c => c.param1 === 421005);
+      if (scene.casts.length === 16) {
+        const hotspotIndex = scene.casts.indexOf(hotspot);
+        scene.casts = scene.casts.slice(0, hotspotIndex).concat([{
+          ...hotspot,
+          type: 9, // SetStateTo
+          param1: 1401,
+          param2: 0,
+          param3: 0,
+          defaultPass: true,
+        }]).concat(scene.casts.slice(hotspotIndex));
+        logger.info('Reset AIV maintenace cart when leaving');
+        return scene.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('Cast').find({
+      castId: 414050,
+    }).exec()
+    .map((cast) => {
+      if (cast && cast.fileName === 'GameDB/Deck4/atriumSPC') {
+        cast.image = true;
+        cast.fileName = 'GameDB/Deck4/atriumSTL';
+        logger.info('Turning atrium background into an image');
+        return cast.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('Cast').find({
+      castId: 413050,
+    }).exec()
+    .map((cast) => {
+      if (cast && cast.fileName === 'GameDB/Deck4/inject1SPC') {
+        cast.image = true;
+        cast.fileName = 'GameDB/Deck4/inject1STL';
+        logger.info('Turning inject1 background into an image');
+        return cast.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('Cast').find({
+      castId: 413080,
+    }).exec()
+    .map((cast) => {
+      if (cast && cast.fileName === 'GameDB/Deck4/inject2SPC') {
+        cast.image = true;
+        cast.fileName = 'GameDB/Deck4/inject2STL';
+        logger.info('Turning inject2 background into an image');
+        return cast.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('Cast').find({
+      castId: 412050,
+    }).exec()
+    .map((cast) => {
+      if (cast && cast.fileName === 'GameDB/Deck4/ventSPC') {
+        cast.image = true;
+        cast.fileName = 'GameDB/Deck4/ventSTL';
+        logger.info('Turning ventrium background into an image');
+        return cast.save();
+      }
+      return Promise.resolve();
+    }))
+    .then(() => getModel('Cast').find({
+      castId: 411050,
+    }).exec()
+    .map((cast) => {
+      if (cast && cast.fileName === 'GameDB/Deck4/engSPC') {
+        cast.image = true;
+        cast.fileName = 'GameDB/Deck4/engSTL';
+        logger.info('Turning engine background into an image');
+        return cast.save();
+      }
+      return Promise.resolve();
     }));
-    // .then(() => getModel('Scene').find({
-    //   sceneId: 873008,
-    // }).exec()
-    // .map((scene) => {
-    //   if (scene) {
-    //     logger.info('Adding a clickthrough hotspot to pub dart close');
-    //     scene.casts = scene.casts.concat([{
-    //       castId: 0,
-    //       comparators: [],
-    //       cursorShapeWhenActive: 10005,
-    //       defaultPass: false,
-    //       gesture: 2,
-    //       initiallyEnabled: true,
-    //       param1: 873009,
-    //       param2: 0,
-    //       param3: 0,
-    //       rectBottom: 400,
-    //       rectLeft: 0,
-    //       rectRight: 640,
-    //       rectTop: 0,
-    //       type: 0,
-    //     }]);
-    //     return scene.save();
-    //   }
-    //   return Promise.resolve();
-    // }));
 }

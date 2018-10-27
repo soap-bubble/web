@@ -18,7 +18,7 @@ import {
   ACTION_TYPES,
 } from 'morpheus/constants';
 
-export const selectors = memoize((scene) => {
+const selectors = memoize((scene) => {
   const sceneToLoad = (cast) => {
     const {
       type,
@@ -65,7 +65,7 @@ export const delegate = memoize((scene) => {
       return true;
     },
     update(position) {
-      return (dispatch, getState) => {
+      return (dispatch) => {
         // const angle = panoSelectors(scene).rotation(getState());
         // console.log(angle.y, position);
         loader.load({

@@ -12,8 +12,9 @@ import {
 } from 'morpheus/casts';
 
 function mapStateToProps(state, { scene }) {
+  const sound = castSelectors.forScene(scene).cache().sound;
   return {
-    assetsUrl: castSelectors.forScene(scene).sound.assetsUrl(state),
+    assetsUrl: (sound && sound.assetsUrl) || [],
     volume: gameSelectors.htmlVolume(state),
   };
 }

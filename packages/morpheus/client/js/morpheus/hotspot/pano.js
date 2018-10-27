@@ -27,6 +27,9 @@ import {
   actions as gamestateActions,
 } from 'morpheus/gamestate';
 import storeFactory from 'store';
+import {
+  isHotspot,
+} from 'morpheus/casts/matchers';
 
 const actionQueue = new Queue(1, 128);
 
@@ -37,7 +40,7 @@ export default function ({
   const store = storeFactory();
   const handleEvent = handleEventFactory();
   const raycaster = new Raycaster();
-  const hotspots = castSelectors.forScene(scene).hotspot.hotspotsData(store.getState());
+  const hotspots = scene.casts.filter(isHotspot);
   const castActionsForScene = castActions.forScene(scene);
 
   let startingPanoPosition;
@@ -61,10 +64,10 @@ export default function ({
     const state = store.getState();
     const currentScene = sceneSelectors.currentSceneData(state);
     if (currentScene === scene && !document.hidden) {
-      const canvas = castSelectors.forScene(scene).hotspot.canvas(state);
-      const hotspotScene3D = castSelectors.forScene(scene).hotspot.scene3D(state);
-      const panoScene3D = castSelectors.forScene(scene).pano.panoScene3D(state);
-      const camera = castSelectors.forScene(scene).hotspot.camera(state);
+      const cache = castSelectors.forScene(scene).cache();
+      const { camera, canvas } = cache.hotspot.webgl;
+      const hotspotScene3D = cache.hotspot.scene3D;
+      const panoScene3D = cache.pano.scene3D;
 
       // Convert mouse coordinates to x, y clamped between -1 and 1.  Also invert y
       const y = (((canvas.height - currentSreenPosition.top) / canvas.height) * 2) - 1;

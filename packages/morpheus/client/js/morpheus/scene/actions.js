@@ -9,14 +9,10 @@ import {
 } from 'morpheus/input';
 import {
   actions as castActions,
-  selectors as castSelectors,
 } from 'morpheus/casts';
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
-import {
-  forEachSeries,
-} from 'utils/asyncIteration';
 import loggerFactory from 'utils/logger';
 import SceneQueue from './queue';
 import {

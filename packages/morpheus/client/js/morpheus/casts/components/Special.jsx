@@ -10,12 +10,12 @@ import {
 } from 'morpheus/game';
 
 function mapStateToProps(state, { scene }) {
-  const selector = castSelectors.forScene(scene);
+  const special = castSelectors.forScene(scene).cache().special;
   return {
-    canvas: selector.special.canvas(state),
-    videos: selector.special.videos(state),
+    canvas: (special && special.canvas) || null,
+    videos: (special && special.videos) || null,
     style: gameSelectors.style(state),
-    ...selector.special.inputHandler(state),
+    ...(special && special.specialHandler) || null,
   };
 }
 
@@ -71,6 +71,7 @@ class Special extends Component {
           } else {
             this.el.removeEventListener('touchstart', onTouchStart);
             this.el.removeEventListener('touchmove', onTouchMove);
+            this.el = null;
           }
         }}
         onMouseDown={onMouseDown}

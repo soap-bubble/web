@@ -353,7 +353,7 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }
       || ACTION_TYPES[hotspot.type] === 'DissolveTo')
     ) {
       const currentScene = sceneSelectors.currentSceneData(getState());
-      const scene3D = castSelectors.forScene(currentScene).hotspot.scene3D(getState());
+      const scene3D = castSelectors.forScene(currentScene).cache().hotspot.scene3D;
       if (scene3D) {
         dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
       }

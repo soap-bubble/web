@@ -48,6 +48,17 @@ import renderEvents from 'utils/render';
 import {
   GESTURES,
 } from 'morpheus/constants';
+import {
+  and,
+  or,
+  not,
+} from 'utils/matchers';
+import {
+  forMorpheusType,
+  isMovie,
+  isAudio,
+  isHotspot,
+} from '../matchers';
 
 const logger = loggerFactory('cast:special');
 const selectSpecialCastDataFromSceneAndType = (scene, sceneType) => {
@@ -169,28 +180,6 @@ function calculateImageOperation({ cast, img, rect }) {
     rect.sizeX * scale,
     rect.sizeY * scale,
   ];
-}
-
-function sdfdfs({
-  cast,
-  gamestates,
-}) {
-  const { controlledMovieCallbacks } = cast;
-  const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null);
-  const gs = gamestates.byId(gameStateId);
-  const value = Math.round(gs.value, 0);
-  const frames = get(controlledMovieCallbacks, '[0].frames', 1);
-  const currentOffset = value * frames;
-
-  if (typeof controlledMovieCallbacks.currentValue === 'undefined' || frames <= 1) {
-    controlledMovieCallbacks.currentValue = currentOffset;
-  } else if (controlledMovieCallbacks.currentValue < currentOffset) {
-    controlledMovieCallbacks.currentValue++;
-  } else if (controlledMovieCallbacks.currentValue > currentOffset) {
-    controlledMovieCallbacks.currentValue--;
-  }
-
-  return Math.abs(currentOffset - controlledMovieCallbacks.currentValue);
 }
 
 function calculateControlledFrameOperation({ cast, img, gamestates, rect }) {
@@ -319,7 +308,7 @@ function startRenderLoop({ update }) {
   renderEvents.onRender(update);
 }
 
-export const selectors = memoize((scene) => {
+const selectors = memoize((scene) => {
   const selectSpecialCastData = createSelector(
     () => scene,
     () => get(scene, 'sceneType'),
@@ -440,28 +429,36 @@ export const selectors = memoize((scene) => {
 });
 
 export const delegate = memoize((scene) => {
-  const specialSelectors = selectors(scene);
-
-  function applies(state) {
-    return specialSelectors.data(state);
+  function applies() {
+    return selectSpecialCastDataFromSceneAndType(scene, get(scene, 'sceneType'));
   }
 
-  function doLoad({ setState }) {
+  function doLoad({
+    setState,
+    isLoaded,
+    isLoading,
+  }) {
     return (dispatch, getState) => {
-      const state = getState();
-      const isLoaded = specialSelectors.isLoaded(state);
-      const isLoading = specialSelectors.isLoading(state);
       if (isLoaded) {
-        return Promise.resolve(specialSelectors.cache(state));
+        return Promise.resolve({});
       }
       if (isLoading) {
         return isLoading;
       }
-      const controlledCastsData = specialSelectors.controlledCastsData(state);
-      const movieCasts = specialSelectors.movieCasts(state);
-      const imageCasts = specialSelectors.imageCasts(state);
-      const soundCasts = specialSelectors.soundCasts(state);
-      const gamestates = gamestateSelectors.forState(state);
+      const controlledCastsData = scene.casts.filter(and(
+        forMorpheusType('ControlledMovieCast'),
+        not(isAudio),
+      ));
+      const movieCasts = scene.casts.filter(isMovie);
+      const imageCasts = scene.casts.filter(c => c.image);
+      const soundCasts = scene.casts.filter(and(
+        or(
+          forMorpheusType('MovieSpecialCast'),
+          forMorpheusType('ControlledMovieCast'),
+        ),
+        isAudio,
+      ));
+      const gamestates = gamestateSelectors.forState(getState());
 
       const loadImages = Promise.all(imageCasts.map((imageCast) => {
         const {
@@ -540,13 +537,13 @@ export const delegate = memoize((scene) => {
 
   function doEnter({
     setState,
+    images,
+    controlledCasts,
   }) {
     return (dispatch, getState) => {
       const state = getState();
       const dimensions = gameSelectors.dimensions(state);
-      const movieCasts = specialSelectors.movieCasts(state);
-      const images = specialSelectors.images(state);
-      const controlledCasts = specialSelectors.controlledCasts(state);
+      const movieCasts = scene.casts.filter(isMovie);
       const canvas = createCanvas(dimensions);
       dispatch(gameActions.setCursor(null));
 
@@ -685,11 +682,12 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function onStage() {
+  function onStage({
+    sounds,
+    images,
+  }) {
     return (dispatch, getState) => {
-      const sounds = specialSelectors.sounds(getState());
-      const images = specialSelectors.images(getState());
-      const hotspotData = specialSelectors.hotspotData(getState());
+      const hotspotData = scene.casts.filter(isHotspot);
       const gamestates = gamestateSelectors.forState(getState());
       hotspotData
         .filter(cast => isActive({ cast, gamestates }))
@@ -719,11 +717,14 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doExit() {
+  function doExit({
+    controlledCasts,
+    sounds,
+  }) {
     return (dispatch, getState) => {
       // FIXME: Clean this up!!
       // const videos = specialSelectors.videos(getState());
-      const sounds = specialSelectors.sounds(getState());
+
       const everything = sounds;
       const v = {
         volume: 1,
@@ -755,7 +756,6 @@ export const delegate = memoize((scene) => {
         });
       });
       // Reset animated controlledMovieCallbacks
-      const controlledCasts = specialSelectors.controlledCasts(getState());
       controlledCasts
         .map(ref => ref.data)
         .filter(cast => cast.controlledMovieCallbacks && cast.controlledMovieCallbacks.length)
@@ -770,12 +770,12 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doUnload() {
-    return (dispatch, getState) => {
-      const videos = specialSelectors.videos(getState());
-      const sounds = specialSelectors.sounds(getState());
-      const videoPreloads = specialSelectors.videoPreloads(getState());
-
+  function doUnload({
+    videos = [],
+    sounds,
+    videoPreloads,
+  }) {
+    return () => {
       Object.keys([...videos, ...sounds]).forEach(({ el, listeners }) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);

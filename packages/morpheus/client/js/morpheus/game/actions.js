@@ -229,15 +229,15 @@ export function resize({
       sceneSelectors.currentScenesData(getState()).forEach((scene) => {
         const canvas = gameSelectors.canvas(getState());
         setSize({
-          ...castSelectors.forScene(scene).pano.renderElements(getState()),
+          ...castSelectors.forScene(scene).pano.webgl,
           canvas,
         });
         setSize({
-          ...castSelectors.forScene(scene).hotspot.renderElements(getState()),
+          ...castSelectors.forScene(scene).hotspot.webgl,
           canvas,
         });
         setSize({
-          canvas: castSelectors.forScene(scene).special.canvas(getState()),
+          canvas: castSelectors.forScene(scene).special.canvas,
         });
       });
     } else {
@@ -324,14 +324,17 @@ export const newSaveGameEpic = createEpic((action$, store) => action$
 
 export const browserSaveEpic = createEpic((action$, store) => action$
   .ofType(BROWSER_SAVE)
-  .forEach(() => storage.set('save', {
-    gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
-    currentSceneId: sceneSelectors.currentSceneId(store.getState()),
-    previousSceneId: sceneSelectors.previousSceneId(store.getState()),
-    saveId: gameSelectors.saveId(store.getState()),
-    rotation: castSelectors.forScene(sceneSelectors.currentSceneData(store.getState()))
-      .pano.rotation(store.getState()),
-  }))
+  .forEach(() => {
+    const pano = castSelectors.forScene(sceneSelectors.currentSceneData(store.getState()))
+      .pano;
+    storage.set('save', {
+      gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
+      currentSceneId: sceneSelectors.currentSceneId(store.getState()),
+      previousSceneId: sceneSelectors.previousSceneId(store.getState()),
+      saveId: gameSelectors.saveId(store.getState()),
+      rotation: (pano && pano.object3D.rotation) || null,
+    });
+  })
   .catch(err => ({
     type: SAVE_ERROR,
     payload: err,

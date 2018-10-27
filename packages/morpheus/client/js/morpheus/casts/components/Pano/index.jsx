@@ -20,10 +20,10 @@ import qs from 'query-string';
 const transparentPano = qs.parse(location.search).transparentPano;
 
 function mapStateToProps(state, { scene }) {
-  const selector = castSelectors.forScene(scene);
-  const canvas = selector.pano.canvas(state);
+  const selector = castSelectors.forScene(scene).cache();
+  const canvas = selector.pano.webgl.canvas;
   const style = gameSelectors.style(state);
-  const inputHandler = selector.pano.inputHandler(state);
+  const inputHandler = selector.pano.inputHandler;
 
   return {
     style,
@@ -66,6 +66,7 @@ class Pano extends PureComponent {
           } else {
             this.el.removeEventListener('touchstart', onTouchStart);
             this.el.removeEventListener('touchmove', onTouchMove);
+            this.el = null;
           }
         }}
 

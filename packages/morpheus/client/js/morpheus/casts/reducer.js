@@ -23,10 +23,10 @@ function withStatus(status) {
         [scene.sceneId]: {
           ...oldSceneCache,
           status,
-          [castType]: {
-            ...oldSceneCache[castType],
-            ...castData,
-          },
+          // [castType]: {
+          //   ...oldSceneCache[castType],
+          //   ...castData,
+          // },
         },
       },
     };

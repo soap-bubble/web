@@ -1,12 +1,11 @@
 import {
-  get,
   flow,
   partialRight,
   filter,
   entries,
   map,
 } from 'lodash';
-import { createSelector } from 'reselect';
+import cache from './cache';
 import * as modules from './modules';
 import {
   LOADING,
@@ -22,29 +21,21 @@ export function extendForScene(name, selectorFactory) {
   forSceneSelectorExtensions[name] = selectorFactory;
 }
 
-const root = state => state.casts;
-
 function allSceneIdsForStatus(status) {
-  return createSelector(
-    root,
-    flow(
-      ({ cache }) => cache || {},
-      entries,
-      partialRight(filter, ([sceneId, cacheEntry]) => sceneId && cacheEntry.status === status),
-      partialRight(map, ([sceneId]) => Number(sceneId)),
-    ),
+  return flow(
+    () => cache,
+    entries,
+    partialRight(filter, ([sceneId, cacheEntry]) => sceneId && cacheEntry.status === status),
+    partialRight(map, ([sceneId]) => Number(sceneId)),
   );
 }
 
 export const preloadedSceneIds = allSceneIdsForStatus(PRELOAD);
 
 export function forScene(scene) {
-  const selectCastCacheForThisScene = state => get(state, `casts.cache[${scene.sceneId}]`);
+  const selectCastCacheForThisScene = () => (scene && cache[scene.sceneId]) || {};
 
-  const forStatus = status => createSelector(
-      selectCastCacheForThisScene,
-      cast => cast.status === status,
-    );
+  const forStatus = status => selectCastCacheForThisScene().status === status;
 
   const castSelectors = {
     cache: selectCastCacheForThisScene,

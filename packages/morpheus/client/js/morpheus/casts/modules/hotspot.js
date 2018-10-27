@@ -44,75 +44,10 @@ import {
   ACTION_TYPES,
   GESTURES,
 } from 'morpheus/constants';
-
-export const selectors = memoize((scene) => {
-  const selectSceneCache = castSelectors.forScene(scene).cache;
-  const selectHotspot = createSelector(
-    selectSceneCache,
-    cache => get(cache, 'hotspot'),
-  );
-
-  const selectHotspotsData = createSelector(
-    () => scene,
-    s => get(s, 'casts', [])
-      .filter(c => c.castId === 0),
-  );
-  const selectHitColorList = createSelector(
-    selectHotspot,
-    hotspot => hotspot.hitColorList,
-  );
-
-  const selectHotspotHitObject3D = createSelector(
-    selectHotspot,
-    hotspot => hotspot.hitObject3D,
-  );
-
-  const selectHotspotVisibleObject3D = createSelector(
-    selectHotspot,
-    hotspot => hotspot.visibleObject3D,
-  );
-
-  const selectWebgl = createSelector(
-    selectHotspot,
-    hotspot => get(hotspot, 'webgl'),
-  );
-
-  const selectCanvas = createSelector(
-    selectWebgl,
-    ({ canvas }) => canvas,
-  );
-
-  const selectIsPano = createSelector(
-    () => scene,
-    (sceneData) => {
-      const { casts } = sceneData;
-      return !!(casts.find(c => c.__t === 'PanoCast'));
-    },
-  );
-
-  const selectScene3D = createSelector(
-    selectHotspot,
-    hotspot => get(hotspot, 'scene3D'),
-  );
-
-  const selectCamera = createSelector(
-    selectWebgl,
-    ({ camera }) => camera,
-  );
-
-  return {
-    isPano: selectIsPano,
-    scene3D: selectScene3D,
-    visibleObject3D: selectHotspotVisibleObject3D,
-    hitObject3D: selectHotspotHitObject3D,
-    hitColorList: selectHitColorList,
-    renderElements: selectWebgl,
-    webgl: selectWebgl,
-    hotspotsData: selectHotspotsData,
-    canvas: selectCanvas,
-    camera: selectCamera,
-  };
-});
+import {
+  isPano,
+  isHotspot,
+} from '../matchers';
 
 const X_ROTATION_OFFSET = -0.038;
 const SCALE_FACTOR = 1.0;
@@ -334,21 +269,86 @@ function startRenderLoop({ scene3D, camera, renderer }) {
   renderEvents.onDestroy(() => renderer.dispose());
 }
 
-export const delegate = memoize((scene) => {
-  const hotspotSelectors = selectors(scene);
+const selectors = memoize((scene) => {
+  const selectSceneCache = castSelectors.forScene(scene).cache;
+  const selectHotspot = createSelector(
+    selectSceneCache,
+    cache => get(cache, 'hotspot'),
+  );
 
-  function applies(state) {
-    const isPano = hotspotSelectors.isPano(state);
-    return hotspotSelectors.hotspotsData(state).length && isPano;
+  const selectHotspotsData = createSelector(
+    () => scene,
+    s => get(s, 'casts', [])
+      .filter(c => c.castId === 0),
+  );
+  const selectHitColorList = createSelector(
+    selectHotspot,
+    hotspot => hotspot.hitColorList,
+  );
+
+  const selectHotspotHitObject3D = createSelector(
+    selectHotspot,
+    hotspot => hotspot.hitObject3D,
+  );
+
+  const selectHotspotVisibleObject3D = createSelector(
+    selectHotspot,
+    hotspot => hotspot.visibleObject3D,
+  );
+
+  const selectWebgl = createSelector(
+    selectHotspot,
+    hotspot => get(hotspot, 'webgl'),
+  );
+
+  const selectCanvas = createSelector(
+    selectWebgl,
+    ({ canvas }) => canvas,
+  );
+
+  const selectIsPano = createSelector(
+    () => scene,
+    (sceneData) => {
+      const { casts } = sceneData;
+      return !!(casts.find(c => c.__t === 'PanoCast'));
+    },
+  );
+
+  const selectScene3D = createSelector(
+    selectHotspot,
+    hotspot => get(hotspot, 'scene3D'),
+  );
+
+  const selectCamera = createSelector(
+    selectWebgl,
+    ({ camera }) => camera,
+  );
+
+  return {
+    isPano: selectIsPano,
+    scene3D: selectScene3D,
+    visibleObject3D: selectHotspotVisibleObject3D,
+    hitObject3D: selectHotspotHitObject3D,
+    hitColorList: selectHitColorList,
+    renderElements: selectWebgl,
+    webgl: selectWebgl,
+    hotspotsData: selectHotspotsData,
+    canvas: selectCanvas,
+    camera: selectCamera,
+  };
+});
+
+export const delegate = memoize((scene) => {
+  function applies() {
+    return scene.casts.find(isHotspot) && isPano(scene);
   }
 
   function doEnter({
     webGlPool,
   }) {
     return (dispatch, getState) => {
-      const hotspotsData = hotspotSelectors.hotspotsData(getState());
-      const isPano = hotspotSelectors.isPano(getState());
-      if (hotspotsData.length && isPano) {
+      const hotspotsData = scene.casts.filter(isHotspot);
+      if (hotspotsData.length && isPano(scene)) {
         // Handle "Always" hotspots now
         const gamestates = gamestateSelectors.forState(getState());
         hotspotsData
@@ -405,25 +405,26 @@ export const delegate = memoize((scene) => {
           hitObject3D,
           visibleObject3D,
           hitColorList,
+          hotspotsData,
         }));
       }
       return Promise.resolve({});
     };
   }
 
-  function onStage() {
+  function onStage({
+    hotspotsData,
+    scene3D,
+    webgl,
+  }) {
     return (dispatch, getState) => {
       const { width, height } = gameSelectors.dimensions(getState());
-      const hotspotsData = hotspotSelectors.hotspotsData(getState());
-      const isPano = hotspotSelectors.isPano(getState());
-      if (isPano) {
-        const scene3D = hotspotSelectors.scene3D(getState());
-
+      if (isPano(scene)) {
         const {
           camera,
           renderer,
           setSize,
-        } = hotspotSelectors.webgl(getState());
+        } = webgl;
         setSize({ width, height });
 
         positionCamera({
@@ -457,9 +458,10 @@ export const delegate = memoize((scene) => {
 
   function doUnload({
     webGlPool,
+    scene3D,
+    webgl,
   }) {
-    return (dispatch, getState) => {
-      const scene3D = hotspotSelectors.scene3D(getState());
+    return () => {
       if (scene3D) {
         scene3D.children.forEach((child) => {
           scene3D.remove(child);
@@ -471,7 +473,6 @@ export const delegate = memoize((scene) => {
           }
         });
 
-        const webgl = hotspotSelectors.webgl(getState());
         return webGlPool.release(webgl).then(() => ({
           scene3D: null,
           visibleObject3D: null,

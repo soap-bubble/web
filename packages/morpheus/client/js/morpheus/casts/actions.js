@@ -1,10 +1,15 @@
+import {
+  get,
+} from 'lodash';
 import memoize from 'utils/memoize';
 import loggerFactory from 'utils/logger';
+import cache from './cache';
 import {
   selectors as sceneSelectors,
 } from 'morpheus/scene';
 import createWebGLRendererPool from './webglPool';
 import {
+  forScene as cacheForScene,
   preloadedSceneIds,
 } from './selectors';
 import {
@@ -25,6 +30,26 @@ const webGlPool = createWebGLRendererPool({
   height: window.innerHeight,
 });
 
+function updateCache({
+  actionName,
+  sceneId,
+  castData,
+  castType,
+}) {
+  if (['UNLOADING', 'UNPRELOAD'].indexOf(actionName) !== -1) {
+    delete cache[sceneId];
+  } else {
+    const oldSceneCache = cache[sceneId] ? cache[sceneId] : {};
+    cache[sceneId] = {
+      ...cache[sceneId],
+      [castType]: {
+        ...oldSceneCache[castType],
+        ...castData,
+      },
+    };
+  }
+}
+
 export function dispatchCastState({ event, castState, castType, scene }) {
   return {
     type: event,
@@ -41,6 +66,7 @@ function doActionForCast({
   actionName,
 }) {
   return (dispatch) => {
+    const myCache = get(cache, `${scene.sceneId}.${castType}`, {});
     logger.info({
       message: 'doActionForCast',
       sceneId: scene.sceneId,
@@ -48,16 +74,24 @@ function doActionForCast({
       castType,
     });
     function setState(state) {
-      return dispatch(dispatchCastState({
+      dispatch(dispatchCastState({
         event,
         castState: state,
         castType,
         scene,
       }));
+      updateCache({
+        actionName,
+        castData: state,
+        castType,
+        sceneId: scene.sceneId,
+      });
     }
     return dispatch(action({
       setState,
       webGlPool,
+      modules: cache[scene.sceneId],
+      ...myCache,
     }))
       .then(setState)
       .catch((err) => {
@@ -134,7 +168,7 @@ export const forScene = memoize((scene) => {
     return memo;
   }, {});
   return Object.defineProperties({
-    update(payload) {
+    update(updateEvent) {
       return (dispatch) => {
         Object.keys(modules.default).forEach((name) => {
           const module = modules.default[name];
@@ -144,7 +178,10 @@ export const forScene = memoize((scene) => {
             const delegate = module.delegate(scene);
             if (delegate.update && delegate.applies(scene)) {
               try {
-                dispatch(delegate.update(payload));
+                dispatch(delegate.update({
+                  ...cacheForScene(scene).cache()[name],
+                  updateEvent,
+                }));
               } catch (err) {
                 console.error(err);
               }

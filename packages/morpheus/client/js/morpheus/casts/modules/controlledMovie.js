@@ -136,7 +136,7 @@ function createObject3D({ geometry, material }) {
   return mesh;
 }
 
-export const selectors = memoize((scene) => {
+const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
   const allCasts = () => get(scene, 'casts', []);
   const selectSelfInStore = createSelector(
@@ -174,21 +174,23 @@ export const selectors = memoize((scene) => {
 });
 
 export const delegate = memoize((scene) => {
-  const selfSelectors = selectors(scene);
-
-  function applies(state) {
-    return (selfSelectors.isPano(state)
-      && (selfSelectors.controlledCastsData(state).length !== 0));
+  function applies() {
+    return (isPano(scene)
+      && scene.casts.find(forMorpheusType('ControlledMovieCast')));
   }
 
-  function doLoad({ setState }) {
-    return (dispatch, getState) => {
-      const controlledCastsData = selfSelectors.controlledCastsData(getState());
-      if (selfSelectors.isLoaded(getState())) {
-        return Promise.resolve(selfSelectors.self(getState()));
+  function doLoad({
+    setState,
+    isLoaded,
+    isLoading,
+  }) {
+    return () => {
+      const controlledCastsData = scene.casts.filter(forMorpheusType('ControlledMovieCast'));
+      if (isLoaded) {
+        return Promise.resolve({});
       }
-      if (selfSelectors.isLoading(getState())) {
-        return selfSelectors.isLoading(getState());
+      if (isLoading) {
+        return isLoading;
       }
       const promise = Promise.all(
         controlledCastsData.map(
@@ -214,12 +216,12 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doEnter() {
-    return (dispatch, getState) => {
-      const panoObject3D = panoSelectors(scene).panoObject3D(getState());
-      const controlledCasts = selfSelectors.controlledCasts(getState());
-
-      return Promise.all(controlledCasts.map(({ data, material, positions }) => {
+  function doEnter({
+    controlledCasts,
+    modules: { pano: { object3D: panoObject3D } },
+  }) {
+    return (dispatch, getState) => Promise.all(
+      controlledCasts.map(({ data, material, positions }) => {
         const uvs = createUvs({
           cast: data,
           gamestates: gamestateSelectors.forState(getState()),
@@ -236,12 +238,12 @@ export const delegate = memoize((scene) => {
         .then(c => ({
           controlledCasts: c,
         }));
-    };
   }
 
-  function doUnload() {
-    return (dispatch, getState) => {
-      const controlledCasts = selfSelectors.controlledCasts(getState());
+  function doUnload({
+    controlledCasts,
+  }) {
+    return () => {
       controlledCasts.forEach(({ object3D }) => object3D.dispose());
       return Promise.resolve({
         isLoaded: false,
@@ -249,10 +251,11 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function update() {
+  function update({
+    controlledCasts,
+  }) {
     return (dispatch, getState) => {
       const gamestates = gamestateSelectors.forState(getState());
-      const controlledCasts = selfSelectors.controlledCasts(getState());
       controlledCasts.forEach(({ object3D, data: cast }) => {
         const uv = createUvs({ cast, gamestates });
         object3D.geometry.attributes.uv = uv;

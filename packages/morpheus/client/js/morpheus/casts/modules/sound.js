@@ -14,8 +14,11 @@ import {
   handleEventFactory,
 } from 'morpheus/input';
 import Promise from 'bluebird';
+import {
+  forMorpheusType,
+} from '../matchers';
 
-export const selectors = memoize((scene) => {
+const selectors = memoize((scene) => {
   const selectCasts = createSelector(
     () => scene,
     s => get(s, 'casts', []),
@@ -61,16 +64,60 @@ export const selectors = memoize((scene) => {
   };
 });
 
+const isSoundCast = forMorpheusType('SoundCast');
+
+function isActiveSound({
+  casts,
+  gamestates,
+}) {
+  return casts.filter((cast) => {
+    if (isSoundCast(cast)) {
+      if (cast.comparators.length) {
+        return isActive({ cast, gamestates });
+      }
+    }
+    return false;
+  });
+}
+
+
+function isEmptySoundCast({
+  casts,
+  gamestates,
+}) {
+  const soundCastData = isActiveSound({
+    casts,
+    gamestates,
+  });
+  return soundCastData.length && !casts.some(cast =>
+    ['PanoCast', 'ControlledMovieCast', 'MovieSpecialCast'].indexOf(cast.__t) !== -1);
+}
+
 export const delegate = memoize((scene) => {
   const soundSelectors = selectors(scene);
   const inputHandler = handleEventFactory();
   function applies(state) {
-    return soundSelectors.soundCastsData(state).length;
+    return isActiveSound({
+      casts: scene.casts,
+      gamestates: gamestateSelectors.forState(state),
+    });
+  }
+
+  function doEnter() {
+    return (dispatch, getState) => Promise.resolve({
+      assetsUrl: isActiveSound({
+        casts: scene.casts,
+        gamestates: gamestateSelectors.forState(getState()),
+      }).map(cast => get(cast, 'fileName')),
+    });
   }
 
   function onStage() {
     return (dispatch, getState) => {
-      if (soundSelectors.isEmpty(getState())) {
+      if (isEmptySoundCast({
+        casts: scene.casts,
+        gamestates: gamestateSelectors.forState(getState()),
+      })) {
         Promise.delay(500).then(() => {
           const eventOptions = {
             currentPosition: { top: 1, left: 1 },
@@ -96,6 +143,7 @@ export const delegate = memoize((scene) => {
 
   return {
     applies,
+    doEnter,
     onStage,
   };
 });

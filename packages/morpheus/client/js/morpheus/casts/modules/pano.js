@@ -48,8 +48,11 @@ import {
   pano as inputHandlerFactory,
 } from 'morpheus/hotspot';
 import {
-  selectors as hotspotSelectors,
-} from './hotspot';
+  forScene,
+} from '../selectors';
+import {
+  forMorpheusType,
+} from '../matchers';
 
 const twentyFourthRad = Math.PI / 12;
 const sliceWidth = 0.1325;
@@ -163,7 +166,7 @@ function startRenderLoop({ scene3D, camera, renderer, update }) {
   });
 }
 
-export const selectors = memoize((scene) => {
+const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache;
 
   const selectPanoCastData = createSelector(
@@ -196,7 +199,7 @@ export const selectors = memoize((scene) => {
   );
   const selectRotation = createSelector(
     selectPanoObject3D,
-    panoObject3D => get(panoObject3D, 'rotation'),
+    object3D => get(object3D, 'rotation'),
   );
   const selectAssets = createSelector(
     selectPano,
@@ -251,30 +254,33 @@ export const selectors = memoize((scene) => {
 });
 
 export const actions = memoize((scene) => {
-  const panoSelectors = selectors(scene);
   let isSweeping = false;
 
   function rotate({ x, y }) {
-    return (dispatch, getState) => {
-      const scene3D = hotspotSelectors(scene).scene3D(getState());
-      const panoObject3D = panoSelectors.panoObject3D(getState());
+    return () => {
+      const {
+        hotspot,
+        pano,
+      } = forScene(scene).cache();
+      const scene3D = hotspot.scene3D;
+      const object3D = pano.object3D;
       const rot = clamp({
         x,
         y,
       });
       Object.assign(scene3D.rotation, rot);
-      Object.assign(panoObject3D.rotation, rot);
+      Object.assign(object3D.rotation, rot);
     };
   }
 
   function rotateBy({ x: deltaX, y: deltaY }) {
-    return (dispatch, getState) => {
+    return (dispatch) => {
       if (!isSweeping) {
-        const panoObject3D = panoSelectors.panoObject3D(getState());
+        const object3D = forScene(scene).cache().pano.object3D;
         let {
           x,
           y,
-        } = panoObject3D.rotation;
+        } = object3D.rotation;
 
         x += deltaX;
         y += deltaY;
@@ -288,7 +294,7 @@ export const actions = memoize((scene) => {
     rectLeft,
     rectRight,
   }) {
-    return (dispatch, getState) => {
+    return (dispatch) => {
       const left = rectLeft;
       const right = rectRight > rectLeft
         ? rectRight : rectRight + 3600;
@@ -297,24 +303,24 @@ export const actions = memoize((scene) => {
       const startAngle = ((angleAtEnd * Math.PI) / 1800) - (Math.PI - (Math.PI / 6));
       const y = startAngle;
       const x = 0;
-      const panoObject3D = panoSelectors.panoObject3D(getState());
-      if (panoObject3D) {
+      const object3D = forScene(scene).cache().pano.object3D;
+      if (object3D) {
         const v = {
-          x: panoObject3D.rotation.x,
-          y: panoObject3D.rotation.y,
+          x: object3D.rotation.x,
+          y: object3D.rotation.y,
         };
         if (Math.abs(v.y - y) > Math.PI) {
           // Travelling more than half way around the axis, so instead let's go the other way
           if (v.y > y) {
             v.y -= 2 * Math.PI;
-            panoObject3D.rotation.y -= 2 * Math.PI;
+            object3D.rotation.y -= 2 * Math.PI;
           } else {
             v.y += 2 * Math.PI;
-            panoObject3D.rotation.y += 2 * Math.PI;
+            object3D.rotation.y += 2 * Math.PI;
           }
         }
         const distance = Math.sqrt(
-          ((x - panoObject3D.rotation.x) ** 2) + ((y - panoObject3D.rotation.y) ** 2),
+          ((x - object3D.rotation.x) ** 2) + ((y - object3D.rotation.y) ** 2),
         );
         return new Promise((resolve) => {
           if (distance === 0) {
@@ -339,7 +345,7 @@ export const actions = memoize((scene) => {
           }
         });
       }
-      console.error('panoObject3D not defined');
+      console.error('object3D not defined');
       return Promise.resolve();
     };
   }
@@ -352,29 +358,31 @@ export const actions = memoize((scene) => {
 });
 
 export const delegate = memoize((scene) => {
-  const panoSelectors = selectors(scene);
-
-  function applies(state) {
-    return panoSelectors.panoCastData(state);
+  function applies() {
+    return scene.casts.find(forMorpheusType('PanoCast'));
   }
 
-  function doLoad({ setState }) {
+  function doLoad({
+    setState,
+    isLoaded,
+    isLoading,
+  }) {
     return (dispatch, getState) => {
-      if (panoSelectors.isLoaded(getState())) {
+      if (isLoaded) {
         logger.debug({
           sceneId: scene.sceneId,
           message: 'Already loaded so returning existing state',
         });
-        return Promise.resolve(panoSelectors.cache(getState()));
+        return Promise.resolve({});
       }
-      if (panoSelectors.isLoading(getState())) {
+      if (isLoading) {
         logger.debug({
           sceneId: scene.sceneId,
           message: 'Already loading so waiting for load finish and returning existing state',
         });
-        return panoSelectors.isLoading(getState());
+        return isLoading;
       }
-      const panoCastData = panoSelectors.panoCastData(getState());
+      const panoCastData = scene.casts.filter(forMorpheusType('PanoCast'));
       if (panoCastData) {
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
 
@@ -435,7 +443,7 @@ export const delegate = memoize((scene) => {
   function doEnter({
     webGlPool,
   }) {
-    return (dispatch, getState) => {
+    return (dispatch) => {
       const panoHandler = inputHandlerFactory({
         dispatch,
         scene,
@@ -471,18 +479,20 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function onStage() {
+  function onStage({
+    scene3D,
+    webgl,
+    renderedCanvas,
+    canvasTexture,
+    loader,
+    object3D,
+  }) {
     return (dispatch, getState) => {
-      const scene3D = panoSelectors.panoScene3D(getState());
-      const { camera, renderer, setSize } = panoSelectors.renderElements(getState());
+      const { camera, renderer, setSize } = webgl;
       const { width, height } = gameSelectors.dimensions(getState());
-      const renderedCanvas = panoSelectors.renderedCanvas(getState());
-      const canvasTexture = panoSelectors.canvasTexture(getState());
-      const loader = panoSelectors.loader(getState());
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-      const panoObject3D = panoSelectors.panoObject3D(getState());
-      if (panoObject3D) {
-        panoObject3D.rotation.y = nextStartAngle;
+      if (object3D) {
+        object3D.rotation.y = nextStartAngle;
       }
 
       setSize({ width, height });
@@ -519,9 +529,10 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doExit() {
-    return (dispatch, getState) => {
-      const panoHandler = panoSelectors.panoHandler(getState());
+  function doExit({
+    panoHandler,
+  }) {
+    return () => {
       panoHandler.off();
       return Promise.resolve({
         panoHandler: null,
@@ -530,10 +541,10 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doPreunload() {
-    return (dispatch, getState) => {
-      const scene3D = panoSelectors.panoScene3D(getState());
-
+  function doPreunload({
+    scene3D,
+  }) {
+    return () => {
       scene3D.children.forEach((child) => {
         scene3D.remove(child);
         if (child.geometry) {
@@ -551,11 +562,12 @@ export const delegate = memoize((scene) => {
     };
   }
 
-  function doUnload({
-    webGlPool,
-  }) {
-    return (dispatch, getState) => {
-      const webgl = panoSelectors.renderElements(getState());
+  function doUnload(state) {
+    const {
+      webGlPool,
+      webgl,
+    } = state;
+    return (dispatch) => {
       logger.debug({
         sceneId: scene.sceneId,
         message: 'Release webgl resources',
@@ -568,7 +580,7 @@ export const delegate = memoize((scene) => {
           spareResourceCapacity: webGlPool.spareResourceCapacity,
           size: webGlPool.size,
         });
-        return dispatch(doPreunload())
+        return dispatch(doPreunload(state))
           .then(() => ({
             scene3D: null,
             object3D: null,

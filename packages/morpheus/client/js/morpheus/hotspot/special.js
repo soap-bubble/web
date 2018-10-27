@@ -26,6 +26,9 @@ import loggerFactory from 'utils/logger';
 import {
   screenToGame,
 } from 'utils/coordinates';
+import {
+  isHotspot,
+} from 'morpheus/casts/matchers';
 
 const logger = loggerFactory('flatspot');
 const mouseQueue = new Queue(1, 128);
@@ -56,9 +59,9 @@ export default function ({ dispatch, scene }) {
           return null;
         }
         const location = gameSelectors.location(state);
-        const hotspots = castSelectorForScene.special.hotspotData(state);
+        const hotspots = scene.casts.filter(isHotspot);
         const isCurrent = sceneSelectors.currentSceneData(state) === scene;
-        const isExiting = castSelectorForScene.isExiting(state);
+        const isExiting = castSelectorForScene.isExiting;
         const acceptsMouseEvents = isCurrent && !isExiting;
         if (!acceptsMouseEvents) {
           return null;

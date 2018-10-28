@@ -2,6 +2,8 @@ import { createSelector } from 'reselect';
 import { get } from 'lodash';
 
 export default function (root) {
+  'ngInject';
+
   const isLoggedIn = createSelector(
     root,
     login => login.loggedIn,

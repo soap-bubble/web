@@ -13,9 +13,7 @@ module.exports = (env) => {
   ];
 
   if (!env.development) {
-    plugins.push(new webpack.optimize.UglifyJsPlugin({
-      mangle: false,
-    }));
+    plugins.push(new webpack.optimize.UglifyJsPlugin());
   }
 
   const webpackConfig = {

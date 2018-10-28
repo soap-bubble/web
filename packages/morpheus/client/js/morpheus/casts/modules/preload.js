@@ -17,6 +17,9 @@ import createLoader from 'utils/loader';
 import {
   ACTION_TYPES,
 } from 'morpheus/constants';
+import createLogger from 'utils/logger';
+
+const logger = createLogger('cast:modules:preload');
 
 const selectors = memoize((scene) => {
   const sceneToLoad = (cast) => {
@@ -74,7 +77,7 @@ export const delegate = memoize((scene) => {
           loader: async ({ id }) => {
             const sceneToLoad = await dispatch(sceneActions.fetch(id));
             await dispatch(lifecycle.doPreload(sceneToLoad));
-            console.log(`Preloaded ${id}`);
+            logger.info(`preload ${id}`);
           },
         });
       };

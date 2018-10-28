@@ -1,6 +1,7 @@
 {
   "presets": ["env", "react"],
   "plugins": [
+    ["angularjs-annotate", { "explicitOnly" : true}],
     ["transform-object-rest-spread", { "useBuiltIns": true }]
   ]
 }

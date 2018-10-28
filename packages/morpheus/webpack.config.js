@@ -192,10 +192,7 @@ module.exports = (env) => {
 
   if (env.production) {
     webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-      },
-      mangle: false,
+      parallel: true,
     }));
   }
 

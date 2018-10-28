@@ -603,7 +603,7 @@ export const delegate = memoize((scene) => {
               listeners,
             }))))
         .then((videos) => {
-          videos.forEach(({ el: video, data }) => {
+          videos.forEach(({ el: video, data, listeners }) => {
             applyTransformToVideo({
               transform: generateMovieTransform({
                 dimensions,
@@ -614,6 +614,7 @@ export const delegate = memoize((scene) => {
             assets.push({
               el: video,
               data,
+              listeners,
             });
             setState({
               videos,
@@ -785,7 +786,7 @@ export const delegate = memoize((scene) => {
         }
       });
 
-      videoPreloads.forEach(el => el.parentNode.removeChild(el));
+      videoPreloads.forEach(el => el.parentNode && el.parentNode.removeChild(el));
 
       return Promise.resolve({
         videos: [],

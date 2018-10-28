@@ -48,6 +48,9 @@ import {
   pano as inputHandlerFactory,
 } from 'morpheus/hotspot';
 import {
+  disposeScene,
+} from 'utils/three';
+import {
   forScene,
 } from '../selectors';
 import {
@@ -253,7 +256,7 @@ const selectors = memoize((scene) => {
   };
 });
 
-export const actions = memoize((scene) => {
+export const actions = (scene) => {
   let isSweeping = false;
 
   function rotate({ x, y }) {
@@ -355,7 +358,7 @@ export const actions = memoize((scene) => {
     rotateBy,
     sweepTo,
   };
-});
+};
 
 export const delegate = memoize((scene) => {
   function applies() {
@@ -543,22 +546,23 @@ export const delegate = memoize((scene) => {
 
   function doPreunload({
     scene3D,
+    canvasTexture,
+    loader,
   }) {
     return () => {
-      scene3D.children.forEach((child) => {
-        scene3D.remove(child);
-        if (child.geometry) {
-          child.geometry.dispose();
-        }
-        if (child.material) {
-          child.material.dispose();
-        }
-      });
+      disposeScene(scene3D);
+      canvasTexture.dispose();
+      loader.dispose();
       logger.debug({
         sceneId: scene.sceneId,
         message: 'Release webgl resources',
       });
-      return Promise.resolve();
+      return Promise.resolve({
+        canvasTexture: null,
+        isLoaded: false,
+        isLoading: null,
+        loader: null,
+      });
     };
   }
 
@@ -581,11 +585,11 @@ export const delegate = memoize((scene) => {
           size: webGlPool.size,
         });
         return dispatch(doPreunload(state))
-          .then(() => ({
+          .then(clear => ({
             scene3D: null,
             object3D: null,
             webgl: null,
-            isLoaded: false,
+            ...clear,
           }));
       });
     };

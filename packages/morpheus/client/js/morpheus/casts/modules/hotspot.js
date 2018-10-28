@@ -18,9 +18,8 @@ import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import createCanvas from 'utils/canvas';
 import {
-  createCamera,
+  disposeScene,
   positionCamera,
-  createRenderer,
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
@@ -463,15 +462,7 @@ export const delegate = memoize((scene) => {
   }) {
     return () => {
       if (scene3D) {
-        scene3D.children.forEach((child) => {
-          scene3D.remove(child);
-          if (child.geometry) {
-            child.geometry.dispose();
-          }
-          if (child.material) {
-            child.material.dispose();
-          }
-        });
+        disposeScene(scene3D);
 
         return webGlPool.release(webgl).then(() => ({
           scene3D: null,
@@ -479,6 +470,7 @@ export const delegate = memoize((scene) => {
           hitObject3D: null,
           webgl: null,
           isLoaded: false,
+          isLoading: null,
         }));
       }
       return Promise.resolve();

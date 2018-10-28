@@ -65,7 +65,7 @@ export const delegate = memoize((scene) => {
   const preloadSelectors = selectors(scene);
   return {
     applies() {
-      return true;
+      return false;
     },
     update(position) {
       return (dispatch) => {

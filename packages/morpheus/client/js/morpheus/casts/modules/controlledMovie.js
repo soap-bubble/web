@@ -21,11 +21,11 @@ import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
 import {
-  selectors as panoSelectors,
-} from 'morpheus/casts/modules/pano';
-import {
   selectors as castSelectors,
 } from 'morpheus/casts';
+import {
+  disposeObject,
+} from 'utils/three';
 import {
   isPano,
   forMorpheusType,
@@ -244,9 +244,13 @@ export const delegate = memoize((scene) => {
     controlledCasts,
   }) {
     return () => {
-      controlledCasts.forEach(({ object3D }) => object3D.dispose());
+      controlledCasts.forEach(({ object3D }) => {
+        disposeObject(object3D);
+      });
       return Promise.resolve({
         isLoaded: false,
+        isLoading: null,
+        controlledCasts: [],
       });
     };
   }

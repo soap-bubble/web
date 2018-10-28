@@ -73,14 +73,14 @@ export default ({
             },
             frame,
           } = videoCastData;
+          const onended = onVideoEndFactory(videoCastData);
           assets.push(loadAsVideo({
             url: getPanoAnimUrl(fileName),
             data: videoCastData,
             video: true,
             videoOptions: {
               loop: looping,
-              autoPlay: false,
-              onended: onVideoEndFactory(videoCastData),
+              onended,
             },
             renderer({
               srcContext,
@@ -96,6 +96,11 @@ export default ({
         });
       }
       return assets;
+    },
+    dispose() {
+      assets.filter(a => a.video).forEach(({ context: video }) => {
+        video.onended = null;
+      });
     },
   };
 };

@@ -1,6 +1,7 @@
 {
   "name": "helloworld",
   "displayName": "HelloCordova",
+  "private": true,
   "version": "1.8.0",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",

@@ -5,6 +5,8 @@ import { connect } from 'react-redux';
 const window = global;
 
 export default function (actions) {
+  'ngInject';
+
   const loginActions = actions;
 
   class GoogleLogin extends React.Component {

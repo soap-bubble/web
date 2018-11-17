@@ -6,5 +6,7 @@ WORKDIR /opt/app
 RUN npm install --quiet
 COPY . /opt/app
 ENV NODE_ENV=production
+RUN npm run build
+RUN npm install --quiet --production
 CMD npm run start
 EXPOSE 8050

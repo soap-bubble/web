@@ -3,6 +3,7 @@ export default function linkPreload(url) {
     const res = document.createElement('link');
     res.rel = 'preload';
     res.as = 'video';
+    res.crossOrigin = 'anonymous';
     res.href = url;
     res.onload = () => resolve(res);
     res.onerror = reject;

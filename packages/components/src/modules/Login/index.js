@@ -7,13 +7,13 @@ import PopOver from './containers/PopOver';
 import Google from './containers/Google';
 
 const blueprint = builder({
-  selectors: rootSelector => selectorFactory(rootSelector),
-  epics: $ => $(epics),
-  actions: $ => $(actions),
+  selectors: /* @ngInject */ rootSelector => selectorFactory(rootSelector),
+  epics: /* @ngInject */ $ => $(epics),
+  actions: /* @ngInject */ $ => $(actions),
   reducer: () => reducer,
-  PopOver: $ => $(PopOver),
-  Google: $ => $(Google),
-  promiseLoggedIn: loggedInDefer => loggedInDefer.promise,
+  PopOver: /* @ngInject */ $ => $(PopOver),
+  Google: /* @ngInject */ $ => $(Google),
+  promiseLoggedIn: /* @ngInject */ loggedInDefer => loggedInDefer.promise,
   loggedInDefer: () => {
     let resolve;
     let reject;

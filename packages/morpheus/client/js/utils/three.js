@@ -3,6 +3,31 @@ import {
   WebGLRenderer,
 } from 'three';
 
+export function disposeObject(object) {
+  if (object.geometry) {
+    object.geometry.dispose();
+  }
+  if (object.material) {
+    if (object.material.map) {
+      object.material.map.dispose();
+    }
+    object.material.dispose();
+  }
+  if (object.dispose) {
+    object.dispose();
+  }
+  if (object.children) {
+    object.children.forEach(disposeObject);
+  }
+}
+
+export function disposeScene(scene) {
+  scene.children.forEach((child) => {
+    scene.remove(child);
+    disposeObject(child);
+  });
+}
+
 export function createCamera({ position } = {}) {
   const camera = new PerspectiveCamera(51.75, 640 / 420, 0.01, 1000);
   if (position) {

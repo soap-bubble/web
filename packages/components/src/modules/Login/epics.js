@@ -10,7 +10,9 @@ import {
 
 const window = global;
 
-export default function (selectors, googleConfigProvider, loggedInDefer) {
+function epics(selectors, googleConfigProvider, loggedInDefer) {
+  'ngInject';
+
   const windowGapi$ = Observable
     .interval(99)
     .takeUntil(() => !window.gapi)
@@ -83,3 +85,5 @@ export default function (selectors, googleConfigProvider, loggedInDefer) {
 
   return [initEpic, loggedInEpic, logoutEpic];
 }
+
+export default epics;

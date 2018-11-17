@@ -38,12 +38,17 @@ export default function createWebGLRendererPool({
     create() {
       return createThreeWebGLResources({ width, height });
     },
-    destroy({
-      renderer,
-      camera,
-    }) {
+    destroy(webgl) {
+      const {
+        renderer,
+        camera,
+      } = webgl;
       renderer.dispose();
+      renderer.forceContextLoss();
+      renderer.context = null;
+      renderer.domElement = null;
       camera.dispose();
+      webgl.canvas = null;
     },
   };
   const opts = {

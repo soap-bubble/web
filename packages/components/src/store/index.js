@@ -9,6 +9,8 @@ const middlewares = [
 
 
 export default function (reducers) {
+  'ngInject';
+
   const store = createStore(
     combineReducers(reducers),
     applyMiddleware(...middlewares),

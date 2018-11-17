@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/morpheus",
-  "version": "1.5.3",
+  "version": "1.8.0",
   "description": "",
   "main": "lib/index.js",
   "private": true,
@@ -24,7 +24,7 @@
     "db:update": "gulp db:update | bunyan",
     "webpack": "webpack",
     "db:prime": "gulp db:prime | bunyan",
-    "start": "npm run build:client:production & npm run build:server && node lib/index",
+    "start": "node lib/index",
     "start:staging": "npm run build:client:staging & npm run build:server && node lib/index",
     "start:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
@@ -56,6 +56,7 @@
     "babel-core": "https://registry.npmjs.org/babel-core/-/babel-core-6.22.1.tgz",
     "babel-jest": "https://registry.npmjs.org/babel-jest/-/babel-jest-20.0.3.tgz",
     "babel-loader": "^7.1.2",
+    "babel-plugin-angularjs-annotate": "^0.9.0",
     "babel-plugin-module-resolver": "https://registry.npmjs.org/babel-plugin-module-resolver/-/babel-plugin-module-resolver-2.7.1.tgz",
     "babel-plugin-transform-export-extensions": "^6.22.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
@@ -107,8 +108,8 @@
     "whatwg-fetch": "^2.0.2"
   },
   "dependencies": {
-    "@soapbubble/components": "^1.5.3",
-    "@soapbubble/style": "^1.5.3",
+    "@soapbubble/components": "^1.8.0",
+    "@soapbubble/style": "^1.8.0",
     "axios": "^0.12.0",
     "babel-polyfill": "^6.26.0",
     "bluebird": "^3.4.7",

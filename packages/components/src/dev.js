@@ -18,6 +18,8 @@ const blueprint = builder({
 });
 
 blueprint.construct().$((store) => {
+  'ngInject';
+
   render(
     <Provider store={store}>
       <loginFactory.Google onLogin={user => console.log(user)} />

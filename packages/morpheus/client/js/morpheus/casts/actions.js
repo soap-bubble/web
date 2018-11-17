@@ -36,7 +36,7 @@ function updateCache({
   castData,
   castType,
 }) {
-  if (['UNLOADING', 'UNPRELOAD'].indexOf(actionName) !== -1) {
+  if (['doUnload', 'doPreunload'].indexOf(actionName) !== -1) {
     delete cache[sceneId];
   } else {
     const oldSceneCache = cache[sceneId] ? cache[sceneId] : {};

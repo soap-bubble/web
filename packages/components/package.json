@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/components",
-  "version": "1.5.3",
+  "version": "1.8.0",
   "description": "Web Components for Soap Bubble Productions",
   "main": "dist/index.js",
   "esnext": "src/index.js",
@@ -21,6 +21,7 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.0",
     "babel-loader": "^7.1.2",
+    "babel-plugin-angularjs-annotate": "^0.9.0",
     "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-env": "^1.6.0",
     "babel-preset-react": "^6.24.1",
@@ -38,7 +39,7 @@
     "webpack-node-externals": "^1.6.0"
   },
   "dependencies": {
-    "@soapbubble/style": "^1.5.3",
+    "@soapbubble/style": "^1.8.0",
     "axios": "^0.16.2",
     "create-react-class": "^15.6.2",
     "lodash": "^4.17.4",
@@ -53,7 +54,7 @@
     "redux-thunk": "^2.2.0",
     "reselect": "^3.0.1",
     "rxjs": "^5.4.3",
-    "service-builder": "^1.0.1",
+    "service-builder": "^1.1.1",
     "uuid": "^3.1.0"
   }
 }

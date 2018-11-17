@@ -4,6 +4,7 @@ import { createStore, applyMiddleware } from 'redux';
 import qs from 'query-string';
 import { reducer } from 'utils/createReducer';
 import { middleware as epicMiddleware } from 'utils/createEpic';
+import isDebug from 'utils/isDebug';
 
 import loggingMiddleware from './logger';
 
@@ -13,13 +14,7 @@ let store;
 export default function () {
   if (!store) {
     let middleware;
-    if (process.env.NODE_ENV === 'production') {
-      middleware = applyMiddleware(
-        epicMiddleware(),
-        thunkMiddleware,
-        promiseMiddleware,
-      );
-    } else {
+    if (isDebug) {
       // eslint-disable-next-line
       const compose = qp.reduxDev ? require('redux-devtools-extension').composeWithDevTools({})
       // eslint-disable-next-line
@@ -32,6 +27,12 @@ export default function () {
           promiseMiddleware,
           loggingMiddleware,
         ),
+      );
+    } else {
+      middleware = applyMiddleware(
+        epicMiddleware(),
+        thunkMiddleware,
+        promiseMiddleware,
       );
     }
 

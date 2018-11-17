@@ -1,6 +1,7 @@
 import {
   get,
   isUndefined,
+  once,
 } from 'lodash';
 import Promise from 'bluebird';
 import memoize from 'utils/memoize';
@@ -53,6 +54,7 @@ import {
   or,
   not,
 } from 'utils/matchers';
+import isSafari from 'utils/isSafari';
 import {
   forMorpheusType,
   isMovie,
@@ -433,6 +435,90 @@ export const delegate = memoize((scene) => {
     return selectSpecialCastDataFromSceneAndType(scene, get(scene, 'sceneType'));
   }
 
+  function updateAssets({
+    getState,
+    autoplay,
+    assets,
+    movieCasts,
+    dispatch,
+  }) {
+    function existsInAssets(cast) {
+      return assets.find(a => a.data === cast);
+    }
+    return Promise.all(movieCasts
+      .filter(cast => !existsInAssets(cast) && isActive({
+        cast,
+        gamestates: gamestateSelectors.forState(getState()),
+      }))
+      .map(movieCast => new Promise((resolve, reject) => {
+        const video = createVideo(getAssetUrl(movieCast.fileName), {
+          loop: movieCast.looping,
+          autoplay,
+          onerror: reject,
+        });
+        video.classList.add('MovieSpecialCast');
+        function onSoundEnded() {
+          let startAngle;
+          const {
+            nextSceneId,
+            angleAtEnd,
+            dissolveToNextScene,
+          } = movieCast;
+          video.removeEventListener('ended', onSoundEnded);
+          if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
+              startAngle = (angleAtEnd * Math.PI) / 1800;
+              startAngle -= Math.PI - (Math.PI / 6);
+            }
+            dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
+              .catch(() => console.error('Failed to load scene', nextSceneId));
+            dispatch(sceneActions.setNextStartAngle(startAngle));
+          }
+        }
+        function onCanPlayThrough() {
+          video.removeEventListener('canplaythrough', onCanPlayThrough);
+          resolve({
+            el: video,
+            listeners: {
+              ended: onSoundEnded,
+              canplaythrough: onCanPlayThrough,
+            },
+          });
+        }
+        video.addEventListener('ended', onSoundEnded);
+        video.addEventListener('canplaythrough', onCanPlayThrough);
+      })
+        .then(({ el, listeners }) => ({
+          el,
+          data: movieCast,
+          listeners,
+        }))))
+    .then((videos) => {
+      // Check is there is already a parent... we will immediately add there.
+      const findParent = once(() => videos.find(v => v.parentElement));
+      videos.forEach((video) => {
+        const { el, data, listeners } = video;
+        applyTransformToVideo({
+          transform: generateMovieTransform({
+            dimensions: gameSelectors.dimensions(getState()),
+            cast: data,
+          }),
+          video: el,
+        });
+        assets.push({
+          el,
+          data,
+          listeners,
+        });
+        const parent = findParent();
+        if (parent) {
+          parent.appendChild(el);
+        }
+      });
+      return videos;
+    });
+  }
+
   function doLoad({
     setState,
     isLoaded,
@@ -445,6 +531,7 @@ export const delegate = memoize((scene) => {
       if (isLoading) {
         return isLoading;
       }
+      const assets = [];
       const controlledCastsData = scene.casts.filter(and(
         forMorpheusType('ControlledMovieCast'),
         not(isAudio),
@@ -504,8 +591,17 @@ export const delegate = memoize((scene) => {
           };
         }));
 
-      const loadMovies = Promise.all(movieCasts
-        .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, movExt))));
+      let loadMovies = isSafari
+        ? updateAssets({
+            dispatch,
+            setState,
+            getState,
+            movieCasts,
+            assets,
+            autoplay: false,
+          })
+        : Promise.all(movieCasts
+            .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, movExt))));
 
       const loadControlledMovies = Promise.all(controlledCastsData
         .filter(cast => !cast.audioOnly)
@@ -521,12 +617,14 @@ export const delegate = memoize((scene) => {
         loadSounds,
         loadMovies,
         loadControlledMovies,
-      ]).then(([images, sounds, videoPreloads, controlledCasts]) => ({
+      ]).then(([images, sounds, movies, controlledCasts]) => ({
         images,
         sounds,
-        videoPreloads,
         controlledCasts,
         isLoaded: true,
+        assets,
+        movies: isSafari ? movies : [],
+        videoPreloads: isSafari ? [] : movies,
       }));
       setState({
         isLoading: promise,
@@ -539,6 +637,8 @@ export const delegate = memoize((scene) => {
     setState,
     images,
     controlledCasts,
+    assets,
+    movies,
   }) {
     return (dispatch, getState) => {
       const state = getState();
@@ -547,82 +647,14 @@ export const delegate = memoize((scene) => {
       const canvas = createCanvas(dimensions);
       dispatch(gameActions.setCursor(null));
 
-      const assets = [];
-
-      function existsInAssets(cast) {
-        return assets.find(a => a.data === cast);
-      }
-
-      function updateAssets() {
-        return Promise.all(movieCasts
-          .filter(cast => !existsInAssets(cast) && isActive({
-            cast,
-            gamestates: gamestateSelectors.forState(getState()),
-          }))
-          .map(movieCast => new Promise((resolve, reject) => {
-            const video = createVideo(getAssetUrl(movieCast.fileName), {
-              loop: movieCast.looping,
-              autoplay: 'true',
-              onerror: reject,
-            });
-            video.classList.add('MovieSpecialCast');
-            function onSoundEnded() {
-              let startAngle;
-              const {
-                nextSceneId,
-                angleAtEnd,
-                dissolveToNextScene,
-              } = movieCast;
-              video.removeEventListener('ended', onSoundEnded);
-              if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-                if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
-                  startAngle = (angleAtEnd * Math.PI) / 1800;
-                  startAngle -= Math.PI - (Math.PI / 6);
-                }
-                dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
-                  .catch(() => console.error('Failed to load scene', nextSceneId));
-                dispatch(sceneActions.setNextStartAngle(startAngle));
-              }
-            }
-            function onCanPlayThrough() {
-              video.removeEventListener('canplaythrough', onCanPlayThrough);
-              resolve({
-                el: video,
-                listeners: {
-                  ended: onSoundEnded,
-                  canplaythrough: onCanPlayThrough,
-                },
-              });
-            }
-            video.addEventListener('ended', onSoundEnded);
-            video.addEventListener('canplaythrough', onCanPlayThrough);
-          })
-            .then(({ el, listeners }) => ({
-              el,
-              data: movieCast,
-              listeners,
-            }))))
-        .then((videos) => {
-          videos.forEach(({ el: video, data }) => {
-            applyTransformToVideo({
-              transform: generateMovieTransform({
-                dimensions,
-                cast: data,
-              }),
-              video,
-            });
-            assets.push({
-              el: video,
-              data,
-            });
-            setState({
-              videos,
-            });
-          });
-        });
-      }
-
-      return updateAssets().then(() => generateSpecialImages({
+      return updateAssets({
+        dispatch,
+        setState,
+        getState,
+        assets,
+        autoplay: true,
+        movieCasts,
+      }).then(() => generateSpecialImages({
         images: generateImages({
           gamestates: gamestateSelectors.forState(getState()),
           images,
@@ -640,6 +672,8 @@ export const delegate = memoize((scene) => {
           scene,
         }));
 
+        movies.forEach(({ el }) => el.play());
+
         startRenderLoop({
           update() {
               // Need updated versions of these vars
@@ -647,7 +681,14 @@ export const delegate = memoize((scene) => {
             const dimensions = gameSelectors.dimensions(getState());
               // eslint-disable-next-line no-shadow
             const gamestates = gamestateSelectors.forState(getState());
-            updateAssets().then(() => assets.forEach(({ el: video, data }) => {
+            updateAssets({
+              dispatch,
+              setState,
+              getState,
+              assets,
+              autoplay: true,
+              movieCasts,
+            }).then(() => assets.forEach(({ el: video, data }) => {
               applyTransformToVideo({
                 transform: generateMovieTransform({
                   dimensions,
@@ -746,10 +787,7 @@ export const delegate = memoize((scene) => {
       everything.forEach(({ el, listeners }) => {
         Object.keys(listeners).forEach((eventName) => {
           const handler = listeners[eventName];
-          if (eventName !== 'ended') {
-            // Ended events will clean themselves up
-            el.removeEventListener(eventName, handler);
-          } else {
+          if (eventName === 'ended') {
             // Used to keep handler from doing things it shouldn't
             handler.__aborted = true;
           }
@@ -771,12 +809,12 @@ export const delegate = memoize((scene) => {
   }
 
   function doUnload({
-    videos = [],
+    assets,
     sounds,
     videoPreloads,
   }) {
     return () => {
-      Object.keys([...videos, ...sounds]).forEach(({ el, listeners }) => {
+      Object.keys([...assets, ...sounds]).forEach(({ el, listeners }) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
@@ -785,12 +823,12 @@ export const delegate = memoize((scene) => {
         }
       });
 
-      videoPreloads.forEach(el => el.parentNode.removeChild(el));
+      videoPreloads.forEach(el => el.parentElement && el.parentElement.removeChild(el));
 
       return Promise.resolve({
-        videos: [],
         sounds: [],
         images: [],
+        assets: [],
         videoPreloads: [],
         canvas: null,
         isLoaded: false,

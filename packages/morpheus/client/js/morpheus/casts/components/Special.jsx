@@ -13,7 +13,7 @@ function mapStateToProps(state, { scene }) {
   const special = castSelectors.forScene(scene).cache().special;
   return {
     canvas: (special && special.canvas) || null,
-    videos: (special && special.videos) || null,
+    assets: (special && special.assets) || null,
     style: gameSelectors.style(state),
     ...(special && special.specialHandler) || null,
   };
@@ -23,28 +23,28 @@ class Special extends Component {
   componentDidMount() {
     const {
       canvas,
-      videos,
+      assets,
     } = this.props;
 
     if (canvas) {
       this.el.appendChild(canvas);
     }
-    if (videos) {
-      videos.forEach(video => this.el.appendChild(video.el));
+    if (assets) {
+      assets.forEach(video => this.el.appendChild(video.el));
     }
   }
 
   componentWillUnmount() {
     const {
       canvas,
-      videos,
+      assets,
     } = this.props;
 
     if (canvas) {
       canvas.remove();
     }
-    if (videos) {
-      videos.forEach(video => video.el.remove());
+    if (assets) {
+      assets.forEach(video => video.el.remove());
     }
   }
 

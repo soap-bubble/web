@@ -34,6 +34,7 @@ if (process.env.NODE_ENV !== 'production') {
   });
 }
 
+
 router
   .get('/gamestate', (req, res) => {
     getModel('GameState').find().exec().then((gamestates) => {

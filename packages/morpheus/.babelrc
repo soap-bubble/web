@@ -6,6 +6,7 @@
     }]],
   "plugins": [
     "transform-export-extensions",
+    ["angularjs-annotate", { "explicitOnly" : true}],
     ["transform-object-rest-spread", { "useBuiltIns": true }],
     ["module-resolver", {
       "root": ["./client/js"]

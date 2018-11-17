@@ -228,16 +228,20 @@ export function resize({
     ) {
       sceneSelectors.currentScenesData(getState()).forEach((scene) => {
         const canvas = gameSelectors.canvas(getState());
+        const sceneSelectors = castSelectors.forScene(scene);
+        const panoWebgl = sceneSelectors && sceneSelectors.pano && sceneSelectors.pano.webgl;
+        const hotspotWebgl = sceneSelectors && sceneSelectors.hotspot && sceneSelectors.hotspot.webgl;
+        const specialCanvas = sceneSelectors && sceneSelectors.special && sceneSelectors.special.canvas;
         setSize({
-          ...castSelectors.forScene(scene).pano.webgl,
+          ...panoWebgl,
           canvas,
         });
         setSize({
-          ...castSelectors.forScene(scene).hotspot.webgl,
+          ...hotspotWebgl,
           canvas,
         });
         setSize({
-          canvas: castSelectors.forScene(scene).special.canvas,
+          canvas: specialCanvas,
         });
       });
     } else {

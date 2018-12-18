@@ -75,7 +75,7 @@ function nextSceneAngle(hotspot) {
   return startAngle;
 }
 
-export function handleHotspot({ hotspot, currentPosition, startingPosition, context = {} }) {
+export function handleHotspot({ hotspot, currentPosition, startingPosition, isMouseDown, context = {} }) {
   return async (dispatch, getState) => {
     const gamestates = gamestateSelectors.forState(getState());
     const {
@@ -336,7 +336,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, cont
       default: {
         const script = scripts(type);
         if (script) {
-          dispatch(script.execute(hotspot, gamestates));
+          dispatch(script.execute(hotspot, gamestates, isMouseDown));
           break;
         }
         allDone = false;
@@ -346,7 +346,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, cont
   };
 }
 
-export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }) {
+export function handlePanoHotspot({ hotspot, currentPosition, startingPosition, isMouseDown }) {
   return async (dispatch, getState) => {
     if (hotspot.param1 !== 0
       && (ACTION_TYPES[hotspot.type] === 'ChangeScene'
@@ -363,6 +363,6 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }
         return !hotspot.defaultPass;
       }
     }
-    return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition }));
+    return await dispatch(handleHotspot({ hotspot, currentPosition, startingPosition, isMouseDown }));
   };
 }

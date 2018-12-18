@@ -18,13 +18,15 @@ const scripts = [
   mapPins,
 ];
 
+function enabled(cast, gamestates) {
+  return isCastActive({ cast, gamestates });
+}
+
 export default function (type) {
   const script = scripts.find(({ id }) => id === type);
   if (script) {
     return Object.assign({
-      enabled(cast, gamestates) {
-        return isCastActive({ cast, gamestates });
-      },
+      enabled,
     }, script);
   }
   return null;

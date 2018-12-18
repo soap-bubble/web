@@ -6,6 +6,10 @@ const bot = new Schema({
   letsPlayEnabled: Boolean,
   letsPlayChannel: String,
   letsPlayUserId: String,
+  twitchTokenAccess: String,
+  twitchTokenRefresh: String,
+  twitchTokenExpiresIn: Number,
+  twitchBotName: String,
 });
 
 export default bot;

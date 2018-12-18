@@ -7,6 +7,7 @@ const Bot = ({
   letsPlayChannel,
   onSettingsChange,
   onSubmit,
+  onTwitchAuth,
 }) => {
   function onInput(key, event) {
     onSettingsChange({
@@ -65,6 +66,13 @@ const Bot = ({
           value={letsPlayUserId}
         />
       </div>
+      <button
+        type="button"
+        className="btn btn-default"
+        onClick={onTwitchAuth}
+      >
+        Authorize Twitch
+      </button>
       <button
         type="submit"
         className="btn btn-default"

@@ -1,5 +1,6 @@
 import login from './login';
 import google from './google';
+import twitch from './twitch';
 import user from './user';
 import oauth from './oauth';
 import saves from './saves';
@@ -15,6 +16,7 @@ export default function (app, createLogger) {
 
   $(login);
   $(google);
+  $(twitch);
   $(user);
   $(oauth);
   $(saves);

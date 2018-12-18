@@ -145,6 +145,7 @@ export const pingPong = {
 
 export default function (socket) {
   return (message, cb) => {
+    console.log(message);
     [
       hotspotLook,
       hotspotGo,

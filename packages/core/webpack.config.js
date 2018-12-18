@@ -28,7 +28,11 @@ module.exports = (env) => {
   const cssName = env.production ? 'main.[contenthash].css' : 'main.css';
   const jsName = env.production ? '[name].[hash].js' : '[name].js';
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
-  const appConfig = {};
+  const appConfig = {
+    twitch: config.twitch,
+  };
+
+  console.log(appConfig)
 
   if (env.production) {
     Object.assign(appConfig, {

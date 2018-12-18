@@ -24,8 +24,15 @@ function mapDisptachToProps(dispatch) {
       e.preventDefault();
       dispatch(botSettingConfirm());
     },
+    onTwitchAuth(e) {
+      e.preventDefault();
+      document.location = `https://id.twitch.tv/oauth2/authorize?client_id=${config.twitch.clientID}&redirect_uri=${config.twitch.callbackURL}&response_type=code&scope=${encodeURIComponent(config.twitch.scope)}`;
+    }
   };
 }
 const Page = connect(mapStateToProps, mapDisptachToProps)(Bot);
 
 export default Page;
+
+
+console.log(config)

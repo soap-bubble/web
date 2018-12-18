@@ -51,11 +51,10 @@ export default function userRoute(app, db, createLogger) {
     res.status(200).send(res.bot);
   });
 
-  app.post('/SaveBotSettings', passport.authenticate('google-login-token'), (req, res) => {
+  app.post('/SaveBotSettings', botAuthMiddleware, (req, res) => {
     logger.info({
       route: 'SaveBotSettings',
       method: 'POST',
-      body: req.body,
     });
 
     botSettings().then(bot => Object.assign(bot, req.body).save()

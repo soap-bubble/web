@@ -9,7 +9,8 @@
     "build:android": "cordova build android",
     "android": "cordova run adroid",
     "start:android": "npm run build:android && npm run android",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start:dev": "echo true"
   },
   "author": "Apache Cordova Team",
   "license": "Apache-2.0",

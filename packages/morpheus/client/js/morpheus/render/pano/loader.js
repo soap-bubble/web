@@ -25,7 +25,9 @@ export default ({
     play() {
       assets.filter(a => a.video).forEach(({
         promise,
-      }) => promise.then(el => el.play()));
+      }) => promise.then(el => {
+         el.play()
+      }));
     },
     load(gamestates) {
       const panoCastData = sceneMatchers.panoCastData(scene);

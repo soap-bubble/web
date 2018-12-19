@@ -319,5 +319,27 @@ export default function update() {
         logger.info('Patch cargo elevator control reset from MouseEnter to MouseUp');
         return scene.save();
       }
+    })
+    .then(() => getModel('Cast').find({
+      fileName: 'GameDB/Deck3Aft/scrbLGSPC',
+    }))
+    .map((cast) => {
+      logger.info('Patch movie for rooms to be images');
+      cast.fileName = 'GameDB/Deck3Aft/scrbLGSTL';
+      cast.image = true;
+      cast.width = 640;
+      cast.height = 400;
+      return cast.save();
+    })
+    .then(() => getModel('Cast').find({
+      fileName: 'GameDB/Deck3Aft/scrbclseSPC',
+    }))
+    .map((cast) => {
+      logger.info('Patch movie for rooms to be images');
+      cast.fileName = 'GameDB/Deck3Aft/scrbclseSTL';
+      cast.image = true;
+      cast.width = 640;
+      cast.height = 400;
+      return cast.save();
     });
 }

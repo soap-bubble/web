@@ -271,6 +271,7 @@ export function handleEventFactory() {
             hotspot,
             currentPosition,
             startingPosition,
+            isMouseDown,
             context: handlerContext,
           }));
           if (inform) {

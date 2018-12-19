@@ -303,5 +303,21 @@ export default function update() {
         return cast.save();
       }
       return Promise.resolve();
-    }));
+    }))
+    .then(() => getModel('Scene').find({
+      'casts.type': 7,
+      'casts.gesture': 3
+    }))
+    .map((scene) => {
+      const hotspot = scene.casts.find(c => c.type === 7 && c.gesture === 3);
+      if (hotspot) {
+        const hotspotIndex = scene.casts.indexOf(hotspot);
+        scene.casts = scene.casts.slice(0, hotspotIndex).concat([{
+          ...hotspot,
+          gesture: 1, // MouseUp
+        }]).concat(scene.casts.slice(hotspotIndex + 1));
+        logger.info('Patch cargo elevator control reset from MouseEnter to MouseUp');
+        return scene.save();
+      }
+    });
 }

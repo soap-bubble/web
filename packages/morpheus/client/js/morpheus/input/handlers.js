@@ -6,6 +6,9 @@ import {
   actions as gameActions,
 } from 'morpheus/game';
 import {
+  actions as sceneActions,
+} from 'morpheus/scene';
+import {
   isActive,
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate';
@@ -251,9 +254,15 @@ export function handleEventFactory() {
       self.lastWasMouseMoved = wasMouseMoved;
       self.lastWasMouseDowned = wasMouseDowned;
 
+      let nextSceneSpread;
+
       const handleIfActive = inform => async (hotspot) => {
         let allDone = false;
-        const handlerContext = {};
+        const handlerContext = {
+          set nextSceneSpread(spread) {
+            nextSceneSpread = spread;
+          },
+        };
         if (isHotspotActive({
           hotspot,
           gamestates: gamestateSelectors.forState(getState()),
@@ -276,12 +285,13 @@ export function handleEventFactory() {
       };
 
       let debugLogger; // = logger.debug.bind(logger);
-      await someSeries(alwaysExecuteHotspots, handleIfActive(debugLogger));
+
       await forEachSeries(mouseLeavingHotspots, handleIfActive(debugLogger));
       await forEachSeries(mouseEnteringHotspots, handleIfActive(debugLogger));
       await someSeries(mouseUpHotspots, handleIfActive(debugLogger));
       await someSeries(clickableHotspots, handleIfActive(debugLogger));
       await someSeries(mouseDragHotspots, handleIfActive(debugLogger));
+      await someSeries(alwaysExecuteHotspots, handleIfActive(debugLogger));
       await someSeries(mouseDownHotspots, handleIfActive(debugLogger));
       await forEachSeries(mouseNoneHotspots, handleIfActive(debugLogger));
 
@@ -292,6 +302,9 @@ export function handleEventFactory() {
         isMouseDown,
       }));
       await dispatch(gameActions.setCursor(cursor));
+      if (nextSceneSpread) {
+        await dispatch(sceneActions.goToScene(...nextSceneSpread));
+      }
     };
   };
 

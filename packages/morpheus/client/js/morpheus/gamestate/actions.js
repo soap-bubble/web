@@ -89,12 +89,13 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, cont
     const actionType = context.actionType = ACTION_TYPES[type];
     switch (actionType) {
       case 'GoBack': {
-        const prevSceneId = context.prevSceneId = sceneSelectors.previousSceneId(getState());
+        const prevSceneId = sceneSelectors.previousSceneId(getState());
         const nAngle = context.nAngle = nextSceneAngle(hotspot);
         if (nAngle) {
           dispatch(sceneActions.setNextStartAngle(nAngle));
         }
-        await dispatch(sceneActions.goToScene(prevSceneId));
+        context.nextSceneSpread = [prevSceneId];
+        // await dispatch(sceneActions.goToScene(prevSceneId));
         break;
       }
       case 'DissolveTo': {
@@ -104,7 +105,11 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, cont
         if (nAngle) {
           dispatch(sceneActions.setNextStartAngle(nAngle));
         }
-        if (nextSceneId) await dispatch(sceneActions.goToScene(nextSceneId), true);
+        if (nextSceneId) {
+          context.nextSceneSpread = [nextSceneId];
+        }
+
+        //await dispatch(sceneActions.goToScene(nextSceneId), true);
         break;
       }
       case 'ChangeScene': {
@@ -115,7 +120,8 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, cont
           if (nAngle) {
             dispatch(sceneActions.setNextStartAngle(nAngle));
           }
-          await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
+          context.nextSceneSpread = [nextSceneId, dissolveToNextScene];
+          // await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
         }
         break;
       }
@@ -346,7 +352,7 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, cont
   };
 }
 
-export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }) {
+export function handlePanoHotspot({ hotspot, currentPosition, startingPosition, context }) {
   return async (dispatch, getState) => {
     if (hotspot.param1 !== 0
       && (ACTION_TYPES[hotspot.type] === 'ChangeScene'
@@ -359,7 +365,8 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition }
       }
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
-        await dispatch(sceneActions.goToScene(hotspot.param1, false));
+        context.nextSceneSpread = [hotspot.param1, false];
+        // await dispatch(sceneActions.goToScene(hotspot.param1, false));
         return !hotspot.defaultPass;
       }
     }

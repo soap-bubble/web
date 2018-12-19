@@ -85,13 +85,7 @@ class Special extends Component {
           ...style,
           cursor: 'none',
         }}
-      >
-        <MenuButton
-          el={(el) => {
-            this.menu = el;
-          }}
-        />
-      </div>
+      />
     );
   }
 }

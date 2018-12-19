@@ -203,7 +203,6 @@ export function goToScene(id, dissolve) {
                 reset();
                 return dispatch(startAtScene(id))
                   .then((scene) => {
-                    logger.info('goToScene:isTransitioning', isTransitioning, id);
                     isTransitioning = false;
                     return scene;
                   });

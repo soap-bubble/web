@@ -54,7 +54,6 @@ import {
   or,
   not,
 } from 'utils/matchers';
-import isSafari from 'utils/isSafari';
 import {
   forMorpheusType,
   isMovie,
@@ -457,16 +456,15 @@ export const delegate = memoize((scene) => {
           onerror: reject,
         });
         video.classList.add('MovieSpecialCast');
-        function onSoundEnded() {
+        function onVideoEnded() {
           let startAngle;
           const {
             nextSceneId,
             angleAtEnd,
             dissolveToNextScene,
           } = movieCast;
-          video.removeEventListener('ended', onSoundEnded);
           if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
-            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onSoundEnded.__aboted) {
+            if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onVideoEnded.__aborted) {
               startAngle = (angleAtEnd * Math.PI) / 1800;
               startAngle -= Math.PI - (Math.PI / 6);
             }
@@ -480,12 +478,12 @@ export const delegate = memoize((scene) => {
           resolve({
             el: video,
             listeners: {
-              ended: onSoundEnded,
+              ended: onVideoEnded,
               canplaythrough: onCanPlayThrough,
             },
           });
         }
-        video.addEventListener('ended', onSoundEnded);
+        video.addEventListener('ended', onVideoEnded);
         video.addEventListener('canplaythrough', onCanPlayThrough);
       })
         .then(({ el, listeners }) => ({
@@ -512,7 +510,7 @@ export const delegate = memoize((scene) => {
         });
         const parent = findParent();
         if (parent) {
-          parent.appendChild(el);
+          parent.parentElement.appendChild(el);
         }
       });
       return videos;
@@ -571,7 +569,6 @@ export const delegate = memoize((scene) => {
           const sound = createSound(getAssetUrl(fileName));
           function onSoundEnded() {
             let startAngle;
-            sound.removeEventListener('ended', onSoundEnded);
             if (nextSceneId && nextSceneId !== 0x3FFFFFFF && !onSoundEnded.__aborted) {
               if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
                 startAngle = (angleAtEnd * Math.PI) / 1800;
@@ -591,17 +588,14 @@ export const delegate = memoize((scene) => {
           };
         }));
 
-      let loadMovies = isSafari
-        ? updateAssets({
-            dispatch,
-            setState,
-            getState,
-            movieCasts,
-            assets,
-            autoplay: false,
-          })
-        : Promise.all(movieCasts
-            .map(movieCast => linkPreload(getAssetUrl(movieCast.fileName, movExt))));
+      let loadMovies = updateAssets({
+          dispatch,
+          setState,
+          getState,
+          movieCasts,
+          assets,
+          autoplay: false,
+        });
 
       const loadControlledMovies = Promise.all(controlledCastsData
         .filter(cast => !cast.audioOnly)
@@ -623,8 +617,8 @@ export const delegate = memoize((scene) => {
         controlledCasts,
         isLoaded: true,
         assets,
-        movies: isSafari ? movies : [],
-        videoPreloads: isSafari ? [] : movies,
+        movies: movies,
+        videoPreloads: [],
       }));
       setState({
         isLoading: promise,
@@ -672,7 +666,14 @@ export const delegate = memoize((scene) => {
           scene,
         }));
 
-        movies.forEach(({ el }) => el.play());
+        movies.forEach(({ el }) => {
+          try {
+            el.play();
+          } catch (e) {
+            el.muted = true;
+            el.play();
+          }
+        });
 
         startRenderLoop({
           update() {

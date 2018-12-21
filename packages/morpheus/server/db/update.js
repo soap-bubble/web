@@ -136,6 +136,74 @@ export default function update() {
         cast.nextSceneId = 6002;
         return cast.save();
       }))
+    .then(() => getModel('Cast').find({
+      castId: 710010,
+    }).exec()
+      .map(async (fullDrumCast) => {
+        logger.info('START - drum scene update');
+        /* Update process for drum script
+         *  1) Create separate SoundCast for each drum audio file
+         *  2) Add all new SoundCasts to scene
+         */
+
+       const drumScene = await getModel('Scene').findOne({
+         sceneId: 7100,
+       });
+       drumScene.casts = drumScene.casts
+          .filter(cast => !(cast.ref && cast.ref.castId === 710010))
+          .map(cast => {
+            if (cast.type === 1007) {
+              cast.param1 = 7100;
+              cast.param3 += 1;
+            }
+            return cast;
+          });
+
+       for (let i = 1; i <= 8; i++) {
+         const castId = 710010 + i;
+         const newDrumCast = new getModel('SoundCast')({
+           actionAtEnd: 0,
+           angleAtEnd: -1,
+           castId,
+           comparators: [{
+              gameStateId: 7100,
+              testType: 0,
+              value: i,
+           }],
+           dissolveToNextScene: false,
+           endFrame: -1,
+           fileName:`GameDB/OAsounds/drumsTOM${i - 1}`,
+           initiallyEnabled: true,
+           location: {
+             x: 0,
+             y: 0,
+           },
+           looping: false,
+           nextSceneId: 0,
+           scale: 1,
+           startFrame: 0,
+           audioOnly: true,
+         });
+         drumScene.casts.push({
+           ref: {
+             castId,
+           }
+         });
+         await newDrumCast.save();
+       }
+       await drumScene.save();
+       const newGameState = getModel('GameState')({
+         stateId: 7100,
+         initialValue: 0,
+         minValue: 0,
+         maxValue: 8,
+         stateWraps: 0,
+         value: 0,
+       });
+       await newGameState.save();
+       await fullDrumCast.remove();
+       logger.info('END - drum scene update');
+    }))
     .then(() => getModel('Scene').find({
       sceneId: 415050,
     }).exec()

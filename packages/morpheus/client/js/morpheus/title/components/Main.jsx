@@ -3,10 +3,12 @@ import cx from 'classnames';
 import { Tween, Easing } from 'tween';
 import { getAssetUrl } from 'service/gamedb';
 import Title from '../containers/Title';
+import qs from 'query-string';
 import PlayOverlay from './PlayOverlay';
 import WhyAmISeeingThis from './WhyAmISeeingThis';
 
 const WHY_DO_I_NEED_TO_CLICK_PLAY = 'Recent changes to Chrome require user interaction before WebAudio can be played.';
+const qp = qs.parse(location.search);
 
 class Main extends React.Component {
   constructor() {
@@ -14,7 +16,7 @@ class Main extends React.Component {
     this.state = {
       isLeaving: false,
       target: 1,
-      started: process.env.AUTOSTART,
+      started: process.env.AUTOSTART || qp.quickstart,
     };
     this.onPlayClicked = this.onPlayClicked.bind(this);
   }

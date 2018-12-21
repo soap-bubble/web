@@ -15,6 +15,7 @@ export const GESTURES = [
   'Always',     // 6
   'SceneEnter', // 7
   'SceneExit',  // 8
+  'Rotation',   // 9
 ];
 
 export const ACTION_TYPES = {

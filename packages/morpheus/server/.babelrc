@@ -1,7 +1,7 @@
 {
   "presets": ["react", ["env", {
     "targets": {
-        "chrome": 71
+        "node": "current"
       }
     }]],
   "plugins": [

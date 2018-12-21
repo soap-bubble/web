@@ -113,6 +113,7 @@ export default function ({
       const enteringHotspots = difference(nowInHotspots, wasInHotspots);
       const noInteractionHotspots = difference(hotspots, nowInHotspots);
 
+
       // Update our state
       if (wasMouseUpped) {
         mouseDown = false;

@@ -41,9 +41,6 @@ import {
 import {
   createVideo,
 } from 'utils/video';
-import {
-  createSound,
-} from 'utils/sound';
 import linkPreload from 'utils/linkPreload';
 import renderEvents from 'utils/render';
 import {
@@ -378,10 +375,6 @@ const selectors = memoize((scene) => {
     selectSpecial,
     special => get(special, 'videos', []),
   );
-  const selectSounds = createSelector(
-    selectSpecial,
-    special => get(special, 'sounds', []),
-  );
   const selectImages = createSelector(
     selectSpecial,
     special => get(special, 'images', []),
@@ -420,7 +413,6 @@ const selectors = memoize((scene) => {
     nextSceneId: selectNextSceneId,
     canvas: selectCanvas,
     videos: selectVideos,
-    sounds: selectSounds,
     images: selectImages,
     isLoaded: selectIsLoaded,
     isLoading: selectIsLoading,
@@ -536,13 +528,6 @@ export const delegate = memoize((scene) => {
       ));
       const movieCasts = scene.casts.filter(isMovie);
       const imageCasts = scene.casts.filter(c => c.image);
-      const soundCasts = scene.casts.filter(and(
-        or(
-          forMorpheusType('MovieSpecialCast'),
-          forMorpheusType('ControlledMovieCast'),
-        ),
-        isAudio,
-      ));
       const gamestates = gamestateSelectors.forState(getState());
 
       const loadImages = Promise.all(imageCasts.map((imageCast) => {
@@ -556,37 +541,6 @@ export const delegate = memoize((scene) => {
             data: imageCast,
           }));
       }));
-
-      const loadSounds = Promise.all(soundCasts
-        .filter(soundCast => isActive({ cast: soundCast, gamestates }))
-        .map((soundCast) => {
-          const {
-            fileName,
-            nextSceneId,
-            angleAtEnd,
-            dissolveToNextScene,
-          } = soundCast;
-          const sound = createSound(getAssetUrl(fileName));
-          function onSoundEnded() {
-            let startAngle;
-            if (nextSceneId && nextSceneId !== 0x3FFFFFFF && !onSoundEnded.__aborted) {
-              if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
-                startAngle = (angleAtEnd * Math.PI) / 1800;
-                startAngle -= Math.PI - (Math.PI / 6);
-              }
-              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene));
-              dispatch(sceneActions.setNextStartAngle(startAngle));
-            }
-          }
-          sound.addEventListener('ended', onSoundEnded);
-          return {
-            el: sound,
-            listeners: {
-              ended: onSoundEnded,
-            },
-            data: soundCast,
-          };
-        }));
 
       let loadMovies = updateAssets({
           dispatch,
@@ -608,12 +562,10 @@ export const delegate = memoize((scene) => {
 
       const promise = Promise.all([
         loadImages,
-        loadSounds,
         loadMovies,
         loadControlledMovies,
-      ]).then(([images, sounds, movies, controlledCasts]) => ({
+      ]).then(([images, movies, controlledCasts]) => ({
         images,
-        sounds,
         controlledCasts,
         isLoaded: true,
         assets,
@@ -725,7 +677,6 @@ export const delegate = memoize((scene) => {
   }
 
   function onStage({
-    sounds,
     images,
   }) {
     return (dispatch, getState) => {
@@ -742,7 +693,6 @@ export const delegate = memoize((scene) => {
             dispatch(gamestateActions.handleHotspot({ hotspot }));
           }
         });
-      sounds.forEach(({ el: sound }) => sound.play());
       images.some(({ data: cast }) => {
         if (cast.actionAtEnd) {
           // FIXME this is a disconnected promise chain because trying to sychronize
@@ -761,39 +711,38 @@ export const delegate = memoize((scene) => {
 
   function doExit({
     controlledCasts,
-    sounds,
   }) {
     return (dispatch, getState) => {
-      // FIXME: Clean this up!!
-      // const videos = specialSelectors.videos(getState());
-
-      const everything = sounds;
-      const v = {
-        volume: 1,
-      };
-      const tween = new Tween(v)
-        .to({
-          volume: 0,
-        }, 1000);
-      tween.onUpdate(() => {
-        everything.forEach(({ el, listeners }) => {
-          if (!listeners.ended) {
-            // Only fade out sounds that do not need to finish
-            el.volume = v.volume;
-          }
-        });
-      });
-      tween.start();
-
-      everything.forEach(({ el, listeners }) => {
-        Object.keys(listeners).forEach((eventName) => {
-          const handler = listeners[eventName];
-          if (eventName === 'ended') {
-            // Used to keep handler from doing things it shouldn't
-            handler.__aborted = true;
-          }
-        });
-      });
+      // // FIXME: Clean this up!!
+      // // const videos = specialSelectors.videos(getState());
+      //
+      // const everything = sounds;
+      // const v = {
+      //   volume: 1,
+      // };
+      // const tween = new Tween(v)
+      //   .to({
+      //     volume: 0,
+      //   }, 1000);
+      // tween.onUpdate(() => {
+      //   everything.forEach(({ el, listeners }) => {
+      //     if (!listeners.ended) {
+      //       // Only fade out sounds that do not need to finish
+      //       el.volume = v.volume;
+      //     }
+      //   });
+      // });
+      // tween.start();
+      //
+      // everything.forEach(({ el, listeners }) => {
+      //   Object.keys(listeners).forEach((eventName) => {
+      //     const handler = listeners[eventName];
+      //     if (eventName === 'ended') {
+      //       // Used to keep handler from doing things it shouldn't
+      //       handler.__aborted = true;
+      //     }
+      //   });
+      // });
       // Reset animated controlledMovieCallbacks
       controlledCasts
         .map(ref => ref.data)
@@ -811,11 +760,10 @@ export const delegate = memoize((scene) => {
 
   function doUnload({
     assets,
-    sounds,
     videoPreloads,
   }) {
     return () => {
-      Object.keys([...assets, ...sounds]).forEach(({ el, listeners }) => {
+      assets.forEach(({ el, listeners }) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
@@ -827,7 +775,6 @@ export const delegate = memoize((scene) => {
       videoPreloads.forEach(el => el.parentElement && el.parentElement.removeChild(el));
 
       return Promise.resolve({
-        sounds: [],
         images: [],
         assets: [],
         videoPreloads: [],

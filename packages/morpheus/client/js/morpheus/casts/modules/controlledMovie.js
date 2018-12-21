@@ -29,6 +29,9 @@ import {
 import {
   isPano,
   forMorpheusType,
+  and,
+  or,
+  not,
 } from '../matchers';
 
 const SCALE_FACTOR = 1.0;

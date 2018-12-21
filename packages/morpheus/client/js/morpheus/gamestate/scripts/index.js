@@ -8,6 +8,7 @@ import * as instruments from './instruments';
 import * as musicbox from './musicbox';
 import * as pins from './pins';
 import * as mapPins from './mapPins';
+import * as drums from './drums';
 
 const scripts = [
   tapestry,
@@ -16,6 +17,7 @@ const scripts = [
   musicbox,
   pins,
   mapPins,
+  drums,
 ];
 
 function enabled(cast, gamestates) {

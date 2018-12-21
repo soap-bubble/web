@@ -25,7 +25,7 @@ export default function () {
           epicMiddleware(),
           thunkMiddleware,
           promiseMiddleware,
-          //loggingMiddleware,
+          loggingMiddleware,
         ),
       );
     } else {

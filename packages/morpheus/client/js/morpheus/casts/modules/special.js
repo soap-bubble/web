@@ -460,9 +460,14 @@ export const delegate = memoize((scene) => {
               startAngle = (angleAtEnd * Math.PI) / 1800;
               startAngle -= Math.PI - (Math.PI / 6);
             }
-            dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
-              .catch(() => console.error('Failed to load scene', nextSceneId));
-            dispatch(sceneActions.setNextStartAngle(startAngle));
+            if (scene.sceneId !== nextSceneId && !sceneActions.sceneLoadQueue.isPending()) {
+              logger.info(`End of movie transition from ${scene.sceneId} to ${nextSceneId}`);
+              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
+                .catch(() => console.error('Failed to load scene', nextSceneId));
+              dispatch(sceneActions.setNextStartAngle(startAngle));
+            } else {
+              logger.info(`Rejected end of movie transition ${scene.sceneId} to ${nextSceneId} with pending scenes: ${sceneActions.sceneLoadQueue.isPending()}`);
+            }
           }
         }
         function onCanPlayThrough() {
@@ -699,9 +704,16 @@ export const delegate = memoize((scene) => {
           // on the new action while within the scene pipeline did not work
           Promise
             .delay(1000)
-            .then(() => dispatch(
-              sceneActions.goToScene(cast.actionAtEnd, cast.dissolveToNextScene)),
-            );
+            .then(() => {
+              if (!sceneActions.sceneLoadQueue.isPending()) {
+                logger.info(`Image transition from ${scene.sceneId} to ${cast.actionAtEnd}`);
+                dispatch(
+                  sceneActions.goToScene(cast.actionAtEnd, cast.dissolveToNextScene)
+                );
+              } else {
+                logger.info(`Rejected end of image transition ${scene.sceneId} to ${cast.actionAtEnd} with pending scenes: ${sceneActions.sceneLoadQueue.isPending()}`);
+              }
+            });
         }
         return null;
       });

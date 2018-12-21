@@ -29,7 +29,7 @@ import {
 
 const logger = loggerFactory('scene:actions');
 export const events = new Events();
-const sceneLoadQueue = new SceneQueue();
+export const sceneLoadQueue = new SceneQueue();
 
 export function sceneLoadComplete(responseData) {
   return (dispatch) => {
@@ -210,7 +210,7 @@ export function goToScene(id, dissolve) {
         }
 
         if (isTransitioning || (currentSceneData && currentSceneData.sceneId === id)) {
-          logger.warn(`goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData}`);
+          logger.warn(`goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`);
           return Promise.resolve(currentSceneData);
         }
         return doSceneTransition();

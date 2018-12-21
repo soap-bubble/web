@@ -128,6 +128,7 @@ export default function ({ dispatch, scene }) {
           wasMouseMoved,
           wasMouseUpped,
           wasMouseDowned,
+          currentScene: currentScene.sceneId,
           handleHotspot: gamestateActions.handleHotspot,
         };
 

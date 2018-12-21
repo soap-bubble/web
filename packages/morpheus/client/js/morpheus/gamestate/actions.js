@@ -94,6 +94,8 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, isMo
         if (nAngle) {
           dispatch(sceneActions.setNextStartAngle(nAngle));
         }
+        const currentSceneId = sceneSelectors.currentSceneId(getState());
+        logger.info(`From GoBack at ${currentSceneId} requesting next scene ${prevSceneId}`);
         context.nextSceneSpread = [prevSceneId];
         // await dispatch(sceneActions.goToScene(prevSceneId));
         break;
@@ -106,6 +108,8 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, isMo
           dispatch(sceneActions.setNextStartAngle(nAngle));
         }
         if (nextSceneId) {
+          const currentSceneId = sceneSelectors.currentSceneId(getState());
+          logger.info(`From DissolveTo at ${currentSceneId} requesting next scene ${nextSceneId}`);
           context.nextSceneSpread = [nextSceneId];
         }
 
@@ -120,6 +124,8 @@ export function handleHotspot({ hotspot, currentPosition, startingPosition, isMo
           if (nAngle) {
             dispatch(sceneActions.setNextStartAngle(nAngle));
           }
+          const currentSceneId = sceneSelectors.currentSceneId(getState());
+          logger.info(`From ChangeScene at ${currentSceneId} requesting next scene ${nextSceneId}`);
           context.nextSceneSpread = [nextSceneId, dissolveToNextScene];
           // await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
         }
@@ -365,6 +371,7 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition, 
       }
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
+        logger.info(`From GoBack at ${currentScene.sceneId} requesting next scene ${hotspot.param1}`);
         context.nextSceneSpread = [hotspot.param1, false];
         // await dispatch(sceneActions.goToScene(hotspot.param1, false));
         return !hotspot.defaultPass;

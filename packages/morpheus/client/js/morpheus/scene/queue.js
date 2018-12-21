@@ -66,7 +66,10 @@ export default function init() {
         });
     },
     isPending(id) {
-      return id in Object.keys(taskMap);
+      if (id) {
+        return id in Object.keys(taskMap);
+      }
+      return Object.keys(taskMap).length;
     },
     cancel(id) {
       if (typeof id !== 'undefined') {

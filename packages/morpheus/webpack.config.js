@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const styleLoaders = require('@soapbubble/style').loaders;
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const config = require('config');
 
 const dirJs = path.resolve(__dirname, 'client/js');
@@ -76,7 +76,6 @@ module.exports = (env) => {
   }
 
   const webpackDefineConfig = {
-    'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
     config: JSON.stringify(appConfig),
   };
@@ -87,6 +86,7 @@ module.exports = (env) => {
   }
 
   let webpackConfig = {
+    mode: nodeEnv,
     target,
     devtool,
     entry: {
@@ -95,7 +95,7 @@ module.exports = (env) => {
       vendor: [
         'babel-polyfill',
         '@soapbubble/components',
-        '@soapbubble/style',
+        '@soapbubble/style/dist',
         'axios',
         'bluebird',
         'browser-bunyan',
@@ -132,7 +132,7 @@ module.exports = (env) => {
       mainFields,
     },
     module: {
-      rules: styleLoaders.concat([
+      rules: styleLoaders(env).concat([
         {
           test: /\.js$/,
           include: /generic-pool/,
@@ -148,13 +148,6 @@ module.exports = (env) => {
           use: ['babel-loader'],
         },
         {
-          test: /\.(scss|sass)$/,
-          use: ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: ['css-loader', 'postcss-loader', 'sass-loader'],
-          }),
-        },
-        {
           test: /\.png/,
           use: {
             loader: 'url-loader',
@@ -164,12 +157,22 @@ module.exports = (env) => {
             },
           },
         },
+        {
+          test: /\.svg/,
+          use: {
+            loader: 'url-loader',
+            options: {
+              limit: 10000,
+              mimetype: 'image/svg',
+            },
+          },
+        },
       ]),
     },
     plugins: [
-      new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: vendorName }),
-      new ExtractTextPlugin({
+      new MiniCssExtractPlugin({
         filename: cssName,
+        chunkFilename: "[id].css",
         disable: !env.production,
       }),
       new HtmlWebpackPlugin({
@@ -189,13 +192,6 @@ module.exports = (env) => {
       new webpack.DefinePlugin(webpackDefineConfig),
     ],
   };
-
-  if (env.production) {
-    webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
-      parallel: true,
-    }));
-  }
-
   if (env.electron) {
     const {
       output,

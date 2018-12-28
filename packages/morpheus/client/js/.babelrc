@@ -1,0 +1,15 @@
+{
+  "presets": ["react", ["env", {
+    "targets": {
+        "chrome": 72,
+      }
+    }]],
+  "plugins": [
+    "transform-export-extensions",
+    ["angularjs-annotate", { "explicitOnly" : true}],
+    ["transform-object-rest-spread", { "useBuiltIns": true }],
+    ["module-resolver", {
+      "root": ["./client/js"]
+    }]
+  ]
+}

@@ -7,19 +7,14 @@ import packageJson from './package.json';
 
 module.exports = (env) => {
   const plugins = [
-    new webpack.DefinePlugin({
-      'process.env.NODE_ENV': JSON.stringify(env.development ? 'development' : 'production'),
-    }),
   ];
-
-  if (!env.development) {
-    plugins.push(new webpack.optimize.UglifyJsPlugin());
-  }
-
+  const styles = styleLoaders(env);
+  
   const webpackConfig = {
     entry: {
       index: './src/index',
     },
+    mode: env.production ? 'production': 'development',
     devtool: env.development ? 'inline-source-map' : '',
     output: {
       path: path.resolve('dist'),
@@ -30,7 +25,7 @@ module.exports = (env) => {
     module: {
       rules: [
         { test: /\.js$/, exclude: /node_modules/, loader: 'babel-loader' },
-      ].concat(styleLoaders),
+      ].concat(styles),
     },
     externals: env.development ? [] : [nodeExternals({
       // Only externalize JS files

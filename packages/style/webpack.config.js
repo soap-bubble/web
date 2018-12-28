@@ -1,29 +1,21 @@
 const path = require('path');
-const ExtractTextPlugin = require("extract-text-webpack-plugin");
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const loaders = require('./index').loaders;
 module.exports = env => {
   const sassLoaders = ["css-loader", "postcss-loader", "sass-loader"];
   const cssLoaders = ["css-loader", "postcss-loader"];
   return {
+    mode: env.production ? 'production': 'development',
     entry: './build.js',
     output: {
-      filename: 'dist.js',
+      filename: 'index.js',
       path: path.resolve(__dirname, 'dist'),
     },
     module: {
-      rules: loaders.concat([
-        {
-          test: /\.(scss|sass)$/,
-          use: env.development ? ["style-loader"].concat(sassLoaders) : ExtractTextPlugin.extract({ use: sassLoaders }),
-        },
-        {
-          test: /\.css$/,
-          use:  env.development ? ["style-loader"].concat(cssLoaders) : ExtractTextPlugin.extract({ use: cssLoaders }),
-        },
-      ]),
+      rules: loaders(env),
     },
     plugins: [
-      new ExtractTextPlugin({
+      new MiniCssExtractPlugin({
         filename: 'soapbubble.css',
       }),
     ],

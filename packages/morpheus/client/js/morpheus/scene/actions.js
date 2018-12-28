@@ -178,43 +178,53 @@ export function startAtScene(id) {
 
 let isTransitioning = false;
 export function goToScene(id, dissolve) {
-  logger.info('goToScene:queue', id);
-  sceneLoadQueue.cancel();
-  return (dispatch, getState) => sceneLoadQueue.add({
-    id,
-    tasks: [
-      () => {
-        logger.info('goToScene:start', id);
-        const currentSceneData = sceneSelectors.currentSceneData(getState());
+  return (dispatch, getState) => {
+    logger.info('goToScene:queue', id);
+    let currentSceneData = sceneSelectors.currentSceneData(getState());
+    if (
+      sceneLoadQueue.isPending(id)
+      || (currentSceneData && currentSceneData.sceneId === id)
+    ) {
+      logger.warn(`goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`);
+      return Promise.resolve(currentSceneData);
+    }
+    sceneLoadQueue.cancel();
+    return sceneLoadQueue.add({
+      id,
+      tasks: [
+        () => {
+          logger.info('goToScene:start', id);
+          currentSceneData = sceneSelectors.currentSceneData(getState());
 
-        function doSceneTransition() {
-          isTransitioning = true;
-          return dispatch(castActions.lifecycle.doExit(currentSceneData))
-              .then(() => {
-                logger.info('goToScene:exiting', id);
-                dispatch({
-                  type: SCENE_DO_EXITING,
-                  payload: {
-                    sceneId: currentSceneData && currentSceneData.sceneId,
-                    dissolve,
-                  },
-                });
-                dispatch(inputActions.disableControl());
-                reset();
-                return dispatch(startAtScene(id))
-                  .then((scene) => {
-                    isTransitioning = false;
-                    return scene;
+          function doSceneTransition() {
+            isTransitioning = true;
+            return dispatch(castActions.lifecycle.doExit(currentSceneData))
+                .then(() => {
+                  logger.info('goToScene:exiting', id);
+                  dispatch({
+                    type: SCENE_DO_EXITING,
+                    payload: {
+                      sceneId: currentSceneData && currentSceneData.sceneId,
+                      dissolve,
+                    },
                   });
-              });
-        }
+                  dispatch(inputActions.disableControl());
+                  reset();
+                  return dispatch(startAtScene(id))
+                    .then((scene) => {
+                      isTransitioning = false;
+                      return scene;
+                    });
+                });
+          }
 
-        if (isTransitioning || (currentSceneData && currentSceneData.sceneId === id)) {
-          logger.warn(`goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`);
-          return Promise.resolve(currentSceneData);
-        }
-        return doSceneTransition();
-      },
-    ],
-  });
+          if (isTransitioning || (currentSceneData && currentSceneData.sceneId === id)) {
+            logger.warn(`goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`);
+            return Promise.resolve(currentSceneData);
+          }
+          return doSceneTransition();
+        },
+      ],
+    });
+  };
 }

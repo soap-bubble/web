@@ -460,14 +460,10 @@ export const delegate = memoize((scene) => {
               startAngle = (angleAtEnd * Math.PI) / 1800;
               startAngle -= Math.PI - (Math.PI / 6);
             }
-            if (scene.sceneId !== nextSceneId && !sceneActions.sceneLoadQueue.isPending()) {
-              logger.info(`End of movie transition from ${scene.sceneId} to ${nextSceneId}`);
-              dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
-                .catch(() => console.error('Failed to load scene', nextSceneId));
-              dispatch(sceneActions.setNextStartAngle(startAngle));
-            } else {
-              logger.info(`Rejected end of movie transition ${scene.sceneId} to ${nextSceneId} with pending scenes: ${sceneActions.sceneLoadQueue.isPending()}`);
-            }
+            logger.info(`End of movie transition from ${scene.sceneId} to ${nextSceneId}`);
+            dispatch(sceneActions.goToScene(nextSceneId, dissolveToNextScene))
+              .catch(() => console.error('Failed to load scene', nextSceneId));
+            dispatch(sceneActions.setNextStartAngle(startAngle));
           }
         }
         function onCanPlayThrough() {
@@ -705,14 +701,10 @@ export const delegate = memoize((scene) => {
           Promise
             .delay(1000)
             .then(() => {
-              if (!sceneActions.sceneLoadQueue.isPending()) {
-                logger.info(`Image transition from ${scene.sceneId} to ${cast.actionAtEnd}`);
-                dispatch(
-                  sceneActions.goToScene(cast.actionAtEnd, cast.dissolveToNextScene)
-                );
-              } else {
-                logger.info(`Rejected end of image transition ${scene.sceneId} to ${cast.actionAtEnd} with pending scenes: ${sceneActions.sceneLoadQueue.isPending()}`);
-              }
+              logger.info(`Image transition from ${scene.sceneId} to ${cast.actionAtEnd}`);
+              dispatch(
+                sceneActions.goToScene(cast.actionAtEnd, cast.dissolveToNextScene)
+              );
             });
         }
         return null;

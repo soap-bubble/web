@@ -86,14 +86,14 @@ const selectors = memoize((scene) => {
   };
 });
 
-const isSoundCast = forMorpheusType('SoundCast');
+
 
 function isActiveSound({
   casts,
   gamestates,
 }) {
   return casts.filter((cast) => {
-    if (isSoundCast(cast)) {
+    if (forMorpheusType('SoundCast')(cast)) {
       if (cast.comparators.length) {
         return isActive({ cast, gamestates });
       }
@@ -124,7 +124,7 @@ export const delegate = memoize((scene) => {
   const soundSelectors = selectors(scene);
   const inputHandler = handleEventFactory();
   function applies(state) {
-    return scene.casts.filter(isSoundCast).length > 0;
+    return scene.casts.filter(forMorpheusType('SoundCast')).length > 0;
   }
 
   function updateAssets({
@@ -280,7 +280,7 @@ export const delegate = memoize((scene) => {
           }
         });
         const assetsUrl = scene.casts.filter(and(
-          isSoundCast,
+          forMorpheusType('SoundCast'),
           noComparators,
         )).map(cast => get(cast, 'fileName'));
 

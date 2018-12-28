@@ -48,7 +48,8 @@ class Sound extends Component {
     } = this.props;
 
     return (
-      <div id={`sounds${scene && scene.sceneId || ''}`}>
+      <React.Fragment>
+        <div id={`sounds${scene && scene.sceneId || ''}`} />
         {assetsUrl.map((asset) => {
           const assetKey = `${asset}El`;
           if (this[assetKey]) {
@@ -66,7 +67,7 @@ class Sound extends Component {
             <source src={getAssetUrl(asset, 'ogg')} type="audio/ogg" />
           </audio>);
         })}
-      </div>
+      </React.Fragment>
     );
   }
 }

@@ -90,7 +90,7 @@ module.exports = (env) => {
       mainFields,
     },
     module: {
-      rules: styleLoaders.concat([
+      rules: styleLoaders(env).concat([
         {
           test: /\.jsx?$/,
           exclude: [/node_modules/],

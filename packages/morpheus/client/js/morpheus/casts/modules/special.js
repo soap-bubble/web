@@ -774,9 +774,10 @@ export const delegate = memoize((scene) => {
         if (listeners && listeners.canplaythrough) {
           el.removeEventListener('canplaythrough', listeners.canplaythrough);
         }
+        el.remove();
       });
 
-      videoPreloads.forEach(el => el.parentElement && el.parentElement.removeChild(el));
+      videoPreloads.forEach(el => el.remove());
 
       return Promise.resolve({
         images: [],

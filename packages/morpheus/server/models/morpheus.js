@@ -124,7 +124,14 @@ export class MovieSpecialCast extends MovieCast {
 
 export class PanoCast extends MovieCast {}
 export class PreloadCast extends MovieCast {}
-export class SoundCast extends MovieCast {}
+export class SoundCast extends MovieCast {
+  constructor(opts) {
+    super(opts);
+    this.add({
+      looping: Boolean,
+    });
+  }
+}
 
 export class Scene extends Morpheus {
   constructor(opts) {

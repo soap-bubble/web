@@ -262,7 +262,7 @@ export const delegate = memoize((scene) => {
     controlledCasts,
   }) {
     return (dispatch, getState) => {
-      const gamestates = gamestateSelectors.forState(getState());
+      const gamestates = gamestateSectors.forState(getState());
       controlledCasts.forEach(({ object3D, data: cast }) => {
         const uv = createUvs({ cast, gamestates });
         object3D.geometry.attributes.uv = uv;

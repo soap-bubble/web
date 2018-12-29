@@ -16,6 +16,9 @@ import {
   isActive,
 } from 'morpheus/gamestate';
 import {
+  actions as sceneActions,
+} from 'morpheus/scene';
+import {
   handleEventFactory,
 } from 'morpheus/input';
 import Promise from 'bluebird';
@@ -204,7 +207,7 @@ export const delegate = memoize((scene) => {
         ),
         and(
           forMorpheusType('SoundCast'),
-          not(noComparators),
+          cast => !cast.looping,
         )
       ));
 
@@ -240,7 +243,7 @@ export const delegate = memoize((scene) => {
         ),
         and(
           forMorpheusType('SoundCast'),
-          not(noComparators),
+          cast => !cast.looping,
         )
       ));
       return updateAssets({
@@ -279,10 +282,14 @@ export const delegate = memoize((scene) => {
             lastPlayed = nextPlay;
           }
         });
-        const assetsUrl = scene.casts.filter(and(
-          forMorpheusType('SoundCast'),
-          noComparators,
-        )).map(cast => get(cast, 'fileName'));
+        const assetsUrl = isActiveSound({
+          casts: scene.casts.filter(and(
+            forMorpheusType('SoundCast'),
+            cast => cast.looping,
+          )),
+          gamestates:  gamestateSelectors.forState(getState()),
+        })
+          .map(cast => get(cast, 'fileName'));
 
         return Promise.resolve({
           assetsUrl,
@@ -364,6 +371,7 @@ export const delegate = memoize((scene) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
+        el.remove();
       });
       return Promise.resolve({
         assets: [],

@@ -8,6 +8,15 @@ import {
 function mapStateToProps(state) {
   const style = gameSelectors.style(state);
   const canvas = gameSelectors.canvas(state);
+  const dimensions = gameSelectors.dimensions(state);
+  if (dimensions && dimensions.width && dimensions.height) {
+    if (dimensions.width !== canvas.width) {
+      canvas.width = dimensions.width;
+    }
+    if (dimensions.height !== canvas.height) {
+      canvas.height = dimensions.height;
+    }
+  }
 
   return {
     style,

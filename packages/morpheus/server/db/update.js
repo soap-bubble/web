@@ -137,6 +137,16 @@ export default function update() {
         return cast.save();
       }))
     .then(() => getModel('Cast').find({
+      __t: 'SoundCast',
+    }).exec()
+      .map(async (soundCast) => {
+        if (typeof soundCast.looping === 'undefined') {
+          soundCast.looping = true;
+          logger.info(`Making background music loop for cast: ${soundCast.castId}`);
+          await soundCast.save();
+        }
+      }))
+    .then(() => getModel('Cast').find({
       castId: 710010,
     }).exec()
       .map(async (fullDrumCast) => {
@@ -162,27 +172,15 @@ export default function update() {
        for (let i = 1; i <= 8; i++) {
          const castId = 710010 + i;
          const newDrumCast = new getModel('SoundCast')({
-           actionAtEnd: 0,
-           angleAtEnd: -1,
            castId,
            comparators: [{
               gameStateId: 7100,
               testType: 0,
               value: i,
            }],
-           dissolveToNextScene: false,
-           endFrame: -1,
            fileName:`GameDB/OAsounds/drumsTOM${i - 1}`,
            initiallyEnabled: true,
-           location: {
-             x: 0,
-             y: 0,
-           },
            looping: false,
-           nextSceneId: 0,
-           scale: 1,
-           startFrame: 0,
-           audioOnly: true,
          });
          drumScene.casts.push({
            ref: {

@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/components",
-  "version": "1.9.2",
+  "version": "1.10.0",
   "description": "Web Components for Soap Bubble Productions",
   "main": "dist/index.js",
   "esnext": "src/index.js",
@@ -46,7 +46,7 @@
     "lodash": "^4.17.4",
     "prop-types": "^15.6.2",
     "react": "^16.7.0",
-    "react-bootstrap": "^0.31.3",
+    "react-bootstrap": "^0.32.4",
     "react-dom": "^16.7.0",
     "react-redux": "^5.0.6",
     "redux": "^3.7.2",

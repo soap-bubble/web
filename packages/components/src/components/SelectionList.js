@@ -12,7 +12,7 @@ const SelectionList = ({
   onSelect,
 }) => (
   <Nav
-    bsStyle="pills"
+    bsStyle="pills flex-column"
     stacked
     activeKey={startKey}
     onSelect={onSelect}

@@ -29,6 +29,9 @@ import {
   actions as sceneActions,
 } from 'morpheus/scene';
 import {
+  sceneLoadQueue,
+} from 'morpheus/scene/actions';
+import {
   special as inputHandlerFactory,
   eventInterface,
 } from 'morpheus/hotspot';
@@ -455,7 +458,7 @@ export const delegate = memoize((scene) => {
             angleAtEnd,
             dissolveToNextScene,
           } = movieCast;
-          if (nextSceneId && nextSceneId !== 0x3FFFFFFF) {
+          if (nextSceneId && nextSceneId !== 0x3FFFFFFF && nextSceneId !== scene.sceneId) {
             if (!isUndefined(angleAtEnd) && angleAtEnd !== -1 && !onVideoEnded.__aborted) {
               startAngle = (angleAtEnd * Math.PI) / 1800;
               startAngle -= Math.PI - (Math.PI / 6);
@@ -694,18 +697,22 @@ export const delegate = memoize((scene) => {
             dispatch(gamestateActions.handleHotspot({ hotspot }));
           }
         });
+
       images.some(({ data: cast }) => {
-        if (cast.actionAtEnd) {
+        if (cast.actionAtEnd > 0) {
           // FIXME this is a disconnected promise chain because trying to sychronize
           // on the new action while within the scene pipeline did not work
-          Promise
-            .delay(1000)
-            .then(() => {
+          function tryToTransition() {
+            if (!sceneLoadQueue.isPending(scene.sceneId)) {
               logger.info(`Image transition from ${scene.sceneId} to ${cast.actionAtEnd}`);
               dispatch(
                 sceneActions.goToScene(cast.actionAtEnd, cast.dissolveToNextScene)
               );
-            });
+            } else {
+              setTimeout(tryToTransition, 500);
+            }
+          }
+          setTimeout(tryToTransition, 500);
         }
         return null;
       });

@@ -259,6 +259,21 @@ export default function update() {
       return Promise.resolve();
     }))
     .then(() => getModel('Scene').find({
+      sceneId: 2510,
+    }).exec()
+    .map(async (scene) => {
+      const hotspot = scene.casts.find(c => c.param1 === 496);
+      if (!hotspot.comparators.length) {
+        const hotspotIndex = scene.casts.indexOf(hotspot);
+        scene.casts = scene.casts.slice(0, hotspotIndex).concat([{
+          ...hotspot,
+          gesture: 6,
+        }]).concat(scene.casts.slice(hotspotIndex + 1));
+        logger.info('End gym narration');
+        await scene.save();
+      }
+    }))
+    .then(() => getModel('Scene').find({
       sceneId: 415050,
     }).exec()
     .map((scene) => {

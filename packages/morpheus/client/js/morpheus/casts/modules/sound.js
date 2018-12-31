@@ -124,6 +124,7 @@ function noComparators(cast) {
 }
 
 export const delegate = memoize((scene) => {
+  const pendingEvents = [];
   const soundSelectors = selectors(scene);
   const inputHandler = handleEventFactory();
   function applies(state) {
@@ -156,7 +157,6 @@ export const delegate = memoize((scene) => {
         gamestates: gamestateSelectors.forState(getState()),
       }))
       .map(soundCast => new Promise((resolve, reject) => {
-        const findParent = once(() => document.querySelector(`div#sounds${scene.sceneId}`));
         const {
           fileName,
           nextSceneId,
@@ -182,9 +182,11 @@ export const delegate = memoize((scene) => {
             data: soundCast,
           };
           assets.push(descriptor);
-          const parent = findParent();
+          const parent = document.querySelector(`div#sounds${scene.sceneId}`);
           if (parent) {
             parent.appendChild(sound);
+          } else {
+            pendingEvents.push(() => document.querySelector(`div#sounds${scene.sceneId}`).append(sound));
           }
           resolve(descriptor);
         }
@@ -225,7 +227,7 @@ export const delegate = memoize((scene) => {
         setState,
         getState,
         assets,
-        autoplay: true,
+        autoplay: false,
         soundCasts,
       }).then(() => ({
         assets,
@@ -260,7 +262,7 @@ export const delegate = memoize((scene) => {
         setState,
         getState,
         assets,
-        autoplay: true,
+        autoplay: false,
         soundCasts,
       }).then(() => {
         let lastPlayed = assets.filter(({ data: cast }) => isActive({
@@ -309,11 +311,14 @@ export const delegate = memoize((scene) => {
 
   function onStage() {
     return (dispatch, getState) => {
+      if (pendingEvents.length) {
+        pendingEvents.forEach(p => p() && pendingEvents.pop());
+      }
       if (isEmptySoundCast({
         casts: scene.casts,
         gamestates: gamestateSelectors.forState(getState()),
       })) {
-        Promise.delay(500).then(() => {
+        Promise.delay(1000).then(() => {
           const eventOptions = {
             currentPosition: { top: 1, left: 1 },
             startingPosition: { top: 1, left: 1 },
@@ -380,6 +385,8 @@ export const delegate = memoize((scene) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
         }
+        el.pause();
+        el.src = null;
         el.remove();
       });
       return Promise.resolve({

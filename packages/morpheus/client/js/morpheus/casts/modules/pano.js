@@ -19,6 +19,7 @@ import memoize from 'utils/memoize';
 import { createSelector } from 'reselect';
 import {
   positionCamera,
+  disposeScene,
 } from 'utils/three';
 import renderEvents from 'utils/render';
 import {
@@ -47,9 +48,6 @@ import {
   momentum as momentumFactory,
   pano as inputHandlerFactory,
 } from 'morpheus/hotspot';
-import {
-  disposeScene,
-} from 'utils/three';
 import {
   forScene,
 } from '../selectors';
@@ -570,6 +568,7 @@ export const delegate = memoize((scene) => {
     const {
       webGlPool,
       webgl,
+      scene3D,
     } = state;
     return (dispatch) => {
       logger.debug({
@@ -584,6 +583,7 @@ export const delegate = memoize((scene) => {
           spareResourceCapacity: webGlPool.spareResourceCapacity,
           size: webGlPool.size,
         });
+        disposeScene(scene3D);
         return dispatch(doPreunload(state))
           .then(clear => ({
             scene3D: null,

@@ -25,6 +25,7 @@ import {
 } from 'morpheus/casts';
 import {
   disposeObject,
+  disposeScene,
 } from 'utils/three';
 import {
   isPano,
@@ -247,9 +248,6 @@ export const delegate = memoize((scene) => {
     controlledCasts,
   }) {
     return () => {
-      controlledCasts.forEach(({ object3D }) => {
-        disposeObject(object3D);
-      });
       return Promise.resolve({
         isLoaded: false,
         isLoading: null,

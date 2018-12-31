@@ -127,7 +127,16 @@ export const delegate = memoize((scene) => {
   const soundSelectors = selectors(scene);
   const inputHandler = handleEventFactory();
   function applies(state) {
-    return scene.casts.filter(forMorpheusType('SoundCast')).length > 0;
+    return scene.casts.filter(or(
+      and(
+        or(
+          forMorpheusType('MovieSpecialCast'),
+          forMorpheusType('ControlledMovieCast'),
+        ),
+        isAudio,
+      ),
+      forMorpheusType('SoundCast'),
+    )).length > 0;
   }
 
   function updateAssets({

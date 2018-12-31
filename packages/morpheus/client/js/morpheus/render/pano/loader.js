@@ -101,6 +101,7 @@ export default ({
     },
     dispose() {
       assets.filter(a => a.video).forEach(({ context: video }) => {
+        video.src = null;
         video.onended = null;
       });
     },

@@ -25,10 +25,7 @@ import * as modules from './modules';
 
 const logger = loggerFactory('cast:actions');
 
-const webGlPool = createWebGLRendererPool({
-  width: window.innerWidth,
-  height: window.innerHeight,
-});
+const webGlPool = createWebGLRendererPool();
 
 function updateCache({
   actionName,

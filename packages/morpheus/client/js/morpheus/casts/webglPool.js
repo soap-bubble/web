@@ -5,38 +5,55 @@ import {
 } from 'utils/three';
 import createCanvas from 'utils/canvas';
 
-function createThreeWebGLResources({
-  width,
-  height,
-}) {
-  const canvas = createCanvas({ width, height });
+function createThreeWebGLResources() {
   const camera = createCamera();
-  const renderer = createRenderer({
-    canvas,
-    width,
-    height,
-  });
-  return {
-    renderer,
+  let width;
+  let height;
+  let canvas;
+  let renderer
+  const selfie = {
+    get renderer() {
+      if (!renderer) {
+        if (!width || !height) {
+          throw new Error('setSize frist');
+        }
+        renderer = createRenderer({
+          canvas,
+          width,
+          height,
+        });
+      }
+      return renderer;
+    },
     camera,
-    canvas,
+    get canvas() {
+      if (!canvas) {
+        if (!width || !height) {
+          throw new Error('setSize frist');
+        }
+        canvas = createCanvas({ width, height });
+      }
+      return canvas;
+    },
     setSize({ width: w, height: h }) {
-      renderer.setSize(w, h);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
-      canvas.width = w;
-      canvas.height = h;
+      width = w;
+      height = h;
+      if (renderer && canvas) {
+        renderer.setSize(w, h);
+        camera.aspect = w / h;
+        camera.updateProjectionMatrix();
+        canvas.width = w;
+        canvas.height = h;
+      }
     },
   };
+  return selfie;
 }
 
-export default function createWebGLRendererPool({
-  width,
-  height,
-}) {
+export default function createWebGLRendererPool() {
   const factory = {
     create() {
-      return createThreeWebGLResources({ width, height });
+      return createThreeWebGLResources();
     },
     destroy(webgl) {
       const {
@@ -52,8 +69,8 @@ export default function createWebGLRendererPool({
     },
   };
   const opts = {
-    min: 2,
-    max: 32,
+    min: 6,
+    max: 18,
   };
   return genericPool.createPool(factory, opts);
 }

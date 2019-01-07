@@ -398,14 +398,18 @@ export const delegate = memoize((scene) => {
         const scene3D = createScene(hitObject);
         scene3D.rotation.y = nextStartAngle;
 
-        return webGlPool.acquire().then(webgl => ({
-          webgl,
-          scene3D,
-          hitObject3D,
-          visibleObject3D,
-          hitColorList,
-          hotspotsData,
-        }));
+        return webGlPool.acquire().then(webgl => {
+          const { width, height } = gameSelectors.dimensions(getState());
+          webgl.setSize({ width, height });
+          return {
+            webgl,
+            scene3D,
+            hitObject3D,
+            visibleObject3D,
+            hitColorList,
+            hotspotsData,
+          }
+        });
       }
       return Promise.resolve({});
     };
@@ -417,14 +421,12 @@ export const delegate = memoize((scene) => {
     webgl,
   }) {
     return (dispatch, getState) => {
-      const { width, height } = gameSelectors.dimensions(getState());
       if (isPano(scene)) {
         const {
           camera,
           renderer,
           setSize,
         } = webgl;
-        setSize({ width, height });
 
         positionCamera({
           camera,

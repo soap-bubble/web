@@ -39,7 +39,7 @@ module.exports = (env) => {
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
   const appConfig = {};
 
-  if (env.production || env.cordova || env.electron) {
+  if ((env.production || env.cordova || env.electron) && !env.debug) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://morpheus.soapbubble.online',
@@ -76,6 +76,7 @@ module.exports = (env) => {
   }
 
   const webpackDefineConfig = {
+    'process.env.NODE_ENV': JSON.stringify('production'),
     'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
     config: JSON.stringify(appConfig),
   };

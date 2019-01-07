@@ -444,7 +444,7 @@ export const delegate = memoize((scene) => {
   function doEnter({
     webGlPool,
   }) {
-    return (dispatch) => {
+    return (dispatch, getState) => {
       const panoHandler = inputHandlerFactory({
         dispatch,
         scene,
@@ -465,6 +465,8 @@ export const delegate = memoize((scene) => {
           sceneId: scene.sceneId,
           message: 'doEnter finished',
         });
+        const { width, height } = gameSelectors.dimensions(getState());
+        webgl.setSize({ width, height });
         return {
           webgl,
             // Hold on to panohandler separately because it needs to be turned off
@@ -490,13 +492,10 @@ export const delegate = memoize((scene) => {
   }) {
     return (dispatch, getState) => {
       const { camera, renderer, setSize } = webgl;
-      const { width, height } = gameSelectors.dimensions(getState());
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
       if (object3D) {
         object3D.rotation.y = nextStartAngle;
       }
-
-      setSize({ width, height });
 
       positionCamera({
         camera,

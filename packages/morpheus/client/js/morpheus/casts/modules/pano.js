@@ -1,6 +1,8 @@
 import {
   PerspectiveCamera,
+  FrontSide,
   BackSide,
+  DoubleSide,
   BufferGeometry,
   Object3D,
   BufferAttribute,
@@ -9,6 +11,9 @@ import {
   Mesh,
   Scene,
   CanvasTexture,
+  CylinderGeometry,
+  CylinderBufferGeometry,
+  RepeatWrapping,
 } from 'three';
 import {
   Tween,
@@ -49,68 +54,84 @@ import {
   pano as inputHandlerFactory,
 } from 'morpheus/hotspot';
 import {
+  DST_WIDTH,
+  DST_HEIGHT,
+  PANO_DRAW_NUDGE,
+} from 'morpheus/constants';
+import {
   forScene,
 } from '../selectors';
 import {
   forMorpheusType,
 } from '../matchers';
-
+// 0.00592592592
+const sliceOffset = ((600 / 3072) * Math.PI * 2);
 const twentyFourthRad = Math.PI / 12;
-const sliceWidth = 0.1325;
+const sliceWidth = sliceOffset;
 const sliceHeight = 0.56;
 const sliceDepth = 1.0;
 const X_ROTATION_OFFSET = 0 * (Math.PI / 180);
 const logger = loggerFactory('casts:module:pano');
 
-function createGeometries() {
-  const geometries = [];
-  for (let i = 0; i < 24; i++) {
-    const geometry = new BufferGeometry();
-
-    const positions = new BufferAttribute(new Float32Array([
-      -sliceWidth, -sliceHeight, sliceDepth,
-      sliceWidth, -sliceHeight, sliceDepth,
-      sliceWidth, sliceHeight, sliceDepth,
-      -sliceWidth, sliceHeight, sliceDepth,
-    ]), 3);
-
-    const left = (i % 16) / 16;
-    const right = left + 0.0625;
-    const top = Math.floor(i / 16) === 0 ? 0.5 : 0.0;
-    const bottom = top + 0.5;
-
-    const uvs = new BufferAttribute(new Float32Array([
-      right, top,
-      left, top,
-      left, bottom,
-      right, bottom,
-    ]), 2);
-
-    const indices = new Uint16BufferAttribute([
-      0, 1, 2,
-      0, 2, 3,
-    ], 1);
-
-    // itemSize = 3 because there are 3 values (components) per vertex
-    geometry.setIndex(indices);
-    geometry.addAttribute('uv', uvs);
-    geometry.addAttribute('position', positions);
-    geometries.push(geometry);
-  }
-  return geometries;
+function cylindrical(theta) {
+  return {
+    x: Math.cos(theta),
+    y: Math.sin(theta),
+  };
 }
 
-function createObject3D({ theta = 0, geometries, material, startAngle = 0 }) {
-  const meshes = geometries.map((g, i) => {
-    const mesh = new Mesh(g, material);
-    mesh.rotation.y = -(i * twentyFourthRad) + theta;
-    mesh.name = 'pano';
-    return mesh;
-  });
+function createGeometry() {
+  const geometry = new CylinderBufferGeometry(1, 1, sliceHeight * 2, 24, 1, true, -sliceOffset / 2, sliceOffset);
+  geometry.addAttribute('uv', new BufferAttribute(new Float32Array(
+    geometry.attributes.uv.array.map((u, i) => {
+      return 1 - u;
+    }),
+  ), 2));
+  return geometry;
+}
+
+function createGeometryOld() {
+  const positionsArray = [];
+  const uvsArray = [];
+  const indicesArray = [];
+  for (let i = -12; i < 12; i++) {
+    const index = (i + 12) * 4;
+    const xleft = Math.sin(i * sliceOffset);
+    const xright = Math.sin((i + 1) * sliceOffset);
+    const yleft = Math.cos(i * sliceOffset);
+    const yright = Math.cos((i + 1) * sliceOffset);
+    positionsArray.push(
+      xleft, -sliceDepth, yleft,
+      xright, -sliceDepth, yleft,
+      xright, sliceDepth, yright,
+      xleft, sliceDepth, yright,
+    );
+    indicesArray.push(
+      0 + index, 1 + index, 2 + index,
+      0 + index, 2 + index, 3 + index,
+    )
+  }
+  const geometry = new BufferGeometry();
+  geometry.setIndex(new Uint16BufferAttribute(uvsArray, 1));
+  geometry.addAttribute('uv', new BufferAttribute(new Float32Array([
+    1, 0,
+    0, 0,
+    0, 1,
+    1, 1,
+  ]), 2));
+  geometry.addAttribute('position', new BufferAttribute(new Float32Array(positionsArray), 3));
+  return geometry;
+}
+
+function createObject3D({ theta = Math.PI, geometry, material, startAngle = 0 }) {
+  const mesh = new Mesh(geometry, material);
+  mesh.rotation.y = theta;
+  mesh.name = 'pano';
+  return mesh;
 
   const object3D = new Object3D();
-  meshes.forEach(m => object3D.add(m));
-  object3D.rotation.y += startAngle;
+  object3D.add(mesh);
+  // object3D.rotation.y += startAngle;
   return object3D;
 }
 
@@ -199,8 +220,8 @@ const selectors = memoize((scene) => {
     re => get(re, 'canvas'),
   );
   const selectRotation = createSelector(
-    selectPanoObject3D,
-    object3D => get(object3D, 'rotation'),
+    selectPano,
+    pano => get(pano, 'rotation'),
   );
   const selectAssets = createSelector(
     selectPano,
@@ -254,34 +275,54 @@ const selectors = memoize((scene) => {
   };
 });
 
+const radToMorpheus = 3600 / (Math.PI * 2);
+const radToMorpheusTexture = 3072 / (Math.PI * 2);
+
+function morpheusRotationTransform(rot3, mRot) {
+  mRot.y = rot3.y;
+  mRot.x = rot3.x;
+}
+
 export const actions = (scene) => {
   let isSweeping = false;
-
+  global.rotate = function (y) {
+    forScene(scene).cache().pano.object3D.rotation.y = y;
+  }
   function rotate({ x, y }) {
     return () => {
       const {
-        hotspot,
-        pano,
+        hotspot: {
+          scene3D,
+        },
+        pano: {
+          object3D,
+          rotation,
+          canvasTexture,
+        },
       } = forScene(scene).cache();
-      const scene3D = hotspot.scene3D;
-      const object3D = pano.object3D;
       const rot = clamp({
         x,
         y,
       });
       Object.assign(scene3D.rotation, rot);
-      Object.assign(object3D.rotation, rot);
+      object3D.rotation.x = rot.x;
+      // Object.assign(object3D.rotation, rot);
+      morpheusRotationTransform(rot, rotation);
+      canvasTexture.needsUpdate = true;
     };
   }
 
   function rotateBy({ x: deltaX, y: deltaY }) {
     return (dispatch) => {
       if (!isSweeping) {
-        const object3D = forScene(scene).cache().pano.object3D;
-        let {
-          x,
-          y,
-        } = object3D.rotation;
+        const cache = forScene(scene).cache();
+        const object3D = cache.pano.object3D;
+        const {
+          x: rotX,
+          y: rotY,
+        } = cache.pano.rotation;
+        let x = rotX;
+        let y = rotY;
 
         x += deltaX;
         y += deltaY;
@@ -299,29 +340,24 @@ export const actions = (scene) => {
       const left = rectLeft;
       const right = rectRight > rectLeft
         ? rectRight : rectRight + 3600;
-
-      const angleAtEnd = left + ((right - left) / 2);
-      const startAngle = ((angleAtEnd * Math.PI) / 1800) - (Math.PI - (Math.PI / 6));
+      const cache = forScene(scene).cache();
+      const angleAtEnd = left + ((right - left) / 2) - 1500;
+      const startAngle = angleAtEnd / radToMorpheus;
       const y = startAngle;
       const x = 0;
-      const object3D = forScene(scene).cache().pano.object3D;
+      const object3D = cache.pano.object3D;
       if (object3D) {
-        const v = {
-          x: object3D.rotation.x,
-          y: object3D.rotation.y,
-        };
+        const v = cache.pano.rotation;
         if (Math.abs(v.y - y) > Math.PI) {
           // Travelling more than half way around the axis, so instead let's go the other way
           if (v.y > y) {
             v.y -= 2 * Math.PI;
-            object3D.rotation.y -= 2 * Math.PI;
           } else {
             v.y += 2 * Math.PI;
-            object3D.rotation.y += 2 * Math.PI;
           }
         }
         const distance = Math.sqrt(
-          ((x - object3D.rotation.x) ** 2) + ((y - object3D.rotation.y) ** 2),
+          ((x - v.x) ** 2) + ((y - v.y) ** 2),
         );
         return new Promise((resolve) => {
           if (distance === 0) {
@@ -386,13 +422,14 @@ export const delegate = memoize((scene) => {
       const panoCastData = scene.casts.filter(forMorpheusType('PanoCast'));
       if (panoCastData) {
         const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-
         const renderedCanvas = createCanvas({
-          width: 2048,
-          height: 1024,
+          width: DST_WIDTH,
+          height: DST_HEIGHT,
         });
+        const map = new CanvasTexture(renderedCanvas);
         const loader = assetLoader({
           scene,
+          canvasTexture: map,
           onVideoEndFactory(data) {
             return function onVideoEnded() {
               const el = this;
@@ -407,12 +444,12 @@ export const delegate = memoize((scene) => {
         });
         const assets = loader.load(gamestateSelectors.forState(getState()));
 
-        const geometries = createGeometries();
-        const map = new CanvasTexture(renderedCanvas);
+        const geometry = createGeometry();
+        map.flipY = false;
         const { material, promise: promiseMaterial } = createMaterial(map);
         const object3D = createObject3D({
           material,
-          geometries,
+          geometry,
           startAngle: nextStartAngle,
         });
         const scene3D = createScene(object3D);
@@ -431,6 +468,40 @@ export const delegate = memoize((scene) => {
             loader,
             canvasTexture: map,
             isLoaded: true,
+            rotation: {
+              x: 0,
+              y: 0,
+              get morpheusOffsetLeft() {
+                // the left most of canvasTexture in Morpheus coordinates
+                let morpheusOffsetLeft = (this.y * radToMorpheus) + 1800;
+                if (morpheusOffsetLeft < 0) {
+                  morpheusOffsetLeft += 3600;
+                } else if (morpheusOffsetLeft > 3600) {
+                  morpheusOffsetLeft -= 3600;
+                }
+                return morpheusOffsetLeft;
+              },
+              get morpheusOffsetX() {
+                // rotation should be the middle of the texture
+                let morpheusOffsetX = (this.y * radToMorpheusTexture) + 1536;
+                if (morpheusOffsetX < 0) {
+                  morpheusOffsetX += 3072;
+                } else if (morpheusOffsetX > 3072) {
+                  morpheusOffsetX -= 3072;
+                }
+                return morpheusOffsetX;
+              },
+              get morpheusX() {
+                // offset when drawing to canvas texture
+                let x = this.morpheusOffsetX - PANO_DRAW_NUDGE;
+                if (x < 0) {
+                  x += 3072;
+                } else if (x > 3072) {
+                  x -= 3072;
+                }
+                return x;
+              }
+            },
           }));
         setState({
           isLoading: promise,
@@ -483,6 +554,7 @@ export const delegate = memoize((scene) => {
   }
 
   function onStage({
+    rotation,
     scene3D,
     webgl,
     renderedCanvas,
@@ -493,34 +565,47 @@ export const delegate = memoize((scene) => {
     return (dispatch, getState) => {
       const { camera, renderer, setSize } = webgl;
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-      if (object3D) {
-        object3D.rotation.y = nextStartAngle;
-      }
+      //scene3D.rotation.y = nextStartAngle;
+      rotation.y = nextStartAngle;
 
-      positionCamera({
-        camera,
-        vector3: { z: -0.09 },
-      });
+      // positionCamera({
+      //   camera,
+      //   vector3: { z: -0.09 },
+      // });
+
+      global.camera = camera;
+      camera.position.z = -0.09;
+      // camera.lookAt(0, 0, 1);
+      // object3D.geometry.computeBoundingSphere();
+      // object3D.geometry.boundingSphere.radius = 1.5;
 
       loader.play();
-
+      let textureVersion = canvasTexture.version;
+      canvasTexture.needsUpdate = true;
       startRenderLoop({
         scene3D,
         camera,
         renderer,
         update: () => {
-          canvasTexture.needsUpdate = true;
           loader.load(gamestateSelectors.forState(getState()))
             .forEach((contextProvider) => {
-              const ctx = renderedCanvas.getContext('2d');
-              const {
-                render,
-              } = contextProvider;
-              render(ctx);
+              if (canvasTexture.version !== textureVersion) {
+                const ctx = renderedCanvas.getContext('2d');
+                const {
+                  render,
+                } = contextProvider;
+                render(ctx, rotation);
+              }
             });
           dispatch(gameActions.drawCursor());
+          textureVersion = canvasTexture.version;
         },
       });
+
+      morpheusRotationTransform({
+        x: 0,
+        y: rotation.y,
+      }, rotation);
 
       return Promise.resolve({
         camera,

@@ -362,17 +362,6 @@ export const delegate = memoize((scene) => {
         });
       });
       tween.start();
-
-      assets.forEach(({ el, listeners }) => {
-        Object.keys(listeners).forEach((eventName) => {
-          const handler = listeners[eventName];
-          if (eventName === 'ended') {
-            // Used to keep handler from doing things it shouldn't
-            handler.__aborted = true;
-          }
-        });
-      });
-
       return Promise.resolve();
     };
   }
@@ -384,6 +373,7 @@ export const delegate = memoize((scene) => {
       assets.forEach(({ el, listeners }) => {
         if (listeners && listeners.ended) {
           el.removeEventListener('ended', listeners.ended);
+          listeners.ended.__aborted = true;
         }
         el.pause();
         el.src = null;

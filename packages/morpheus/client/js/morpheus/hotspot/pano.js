@@ -22,6 +22,9 @@ import {
   actions as inputActions,
   handleEventFactory,
 } from 'morpheus/input';
+import {
+  hotspotRectMatchesPosition,
+} from 'morpheus/hotspot/matchers';
 import createOrientation from 'morpheus/input/orientation';
 import {
   actions as gamestateActions,
@@ -30,6 +33,12 @@ import storeFactory from 'store';
 import {
   isHotspot,
 } from 'morpheus/casts/matchers';
+import {
+  PANO_CANVAS_WIDTH,
+  PANO_CHUNK,
+  PANO_UV_NUDGE,
+  DST_RATIO,
+} from 'morpheus/constants';
 
 const actionQueue = new Queue(1, 128);
 
@@ -67,7 +76,8 @@ export default function ({
       const cache = castSelectors.forScene(scene).cache();
       const { camera, canvas } = cache.hotspot.webgl;
       const hotspotScene3D = cache.hotspot.scene3D;
-      const panoScene3D = cache.pano.scene3D;
+      const panoScene3D = cache.pano.object3D;
+      const rotation = cache.pano.rotation;
 
       // Convert mouse coordinates to x, y clamped between -1 and 1.  Also invert y
       const y = (((canvas.height - currentSreenPosition.top) / canvas.height) * 2) - 1;
@@ -75,16 +85,16 @@ export default function ({
       // Create a ray that travels from camera through screen at mouse location
       raycaster.setFromCamera({ x, y }, camera);
       // Got all faces that the ray intersects
-      const hotspotIntersects = raycaster.intersectObjects(hotspotScene3D.children, true);
-      // Map faces to hotspots...
-      const nowInHotspots = sortBy( // Sorted by cast index
-        uniq( // In the off chance that we hit both faces in a hotspot
-          hotspotIntersects.map(i => Math.floor(i.faceIndex / 2)),
-        ),
-      ) // Map back to hotspot index
-        .map(hotspotIndex => hotspots[hotspotIndex]);
-      const hotspotObject3Ds = get(panoScene3D, 'children[0].children', []);
-      const panoIntersects = raycaster.intersectObjects(hotspotObject3Ds.filter(c => c.name === 'pano'), true);
+      // const hotspotIntersects = raycaster.intersectObjects(hotspotScene3D.children, true);
+      // // Map faces to hotspots...
+      // const nowInHotspots = sortBy( // Sorted by cast index
+      //   uniq( // In the off chance that we hit both faces in a hotspot
+      //     hotspotIntersects.map(i => Math.floor(i.faceIndex / 2)),
+      //   ),
+      // ) // Map back to hotspot index
+      //   .map(hotspotIndex => hotspots[hotspotIndex]);
+      const hotspotObject3Ds = [panoScene3D];
+      const panoIntersects = raycaster.intersectObject(panoScene3D);
       const currentPanoPosition = {};
       const panoIntersect = panoIntersects.find((intersect) => {
         if (intersect && intersect.uv) {
@@ -94,21 +104,20 @@ export default function ({
       });
       if (panoIntersect) {
         const { uv, object: { material } } = panoIntersect;
+        const top = (uv.y * 512) - 256;
+
         material.map.transformUv(uv);
-        let left = uv.x * 2400;
-        let top = (uv.y * 1000) - 250;
-        if (uv.y > 0.5) {
-          left += 2400;
-          top = ((uv.y - 0.5) * 1000) - 250;
-        }
-        left -= 375;
+
+        let left = (uv.x * (PANO_CHUNK * DST_RATIO)) + rotation.morpheusOffsetLeft - ((PANO_CHUNK * DST_RATIO) / 2) - PANO_UV_NUDGE;
         if (left < 0) {
           left += 3600;
+        } else if (left > 3600) {
+          left -= 3600;
         }
         currentPanoPosition.left = left;
         currentPanoPosition.top = top;
       }
-
+      const nowInHotspots = hotspots.filter(hotspotRectMatchesPosition(currentPanoPosition));
       const leavingHotspots = difference(wasInHotspots, nowInHotspots);
       const enteringHotspots = difference(nowInHotspots, wasInHotspots);
       const noInteractionHotspots = difference(hotspots, nowInHotspots);

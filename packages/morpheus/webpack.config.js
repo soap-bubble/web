@@ -76,7 +76,7 @@ module.exports = (env) => {
   }
 
   const webpackDefineConfig = {
-    'process.env.NODE_ENV': JSON.stringify('production'),
+    'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
     config: JSON.stringify(appConfig),
   };

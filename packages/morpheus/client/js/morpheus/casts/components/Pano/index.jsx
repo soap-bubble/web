@@ -43,6 +43,7 @@ function mapDispatchToProps(dispatch, { scene }) {
 class Pano extends PureComponent {
   render() {
     const {
+      scene,
       style,
       canvas,
       onMouseUp,
@@ -57,6 +58,7 @@ class Pano extends PureComponent {
     return (
       <div
         className={cn('scene')}
+        id={scene.sceneId}
         ref={(el) => {
           if (el) {
             el.appendChild(canvas);

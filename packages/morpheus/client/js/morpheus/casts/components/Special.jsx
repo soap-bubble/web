@@ -50,6 +50,7 @@ class Special extends Component {
 
   render() {
     const {
+      scene,
       style,
       onMouseDown,
       onMouseMove,
@@ -63,6 +64,7 @@ class Special extends Component {
     return (
       <div
         className={cn('scene')}
+        id={scene.sceneId}
         ref={(el) => {
           if (el) {
             el.addEventListener('touchstart', onTouchStart, { passive: false });

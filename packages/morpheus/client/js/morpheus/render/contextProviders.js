@@ -27,7 +27,7 @@ export function loadAsVideo({
   let videoHasLoaded = false;
   let video;
   let canvas;
-  const promiseImage = promiseVideoElement(url, videoOptions);
+  const promiseVideo = promiseVideoElement(url, videoOptions);
 
   function provideCanvas() {
     if (!canvas) {
@@ -42,13 +42,14 @@ export function loadAsVideo({
       }
       return provideCanvas();
     },
-    render(dstContext) {
+    render(dstContext, rotation) {
       return renderer({
         srcContext: selfie.context,
         dstContext,
+        rotation,
       });
     },
-    promise: promiseImage
+    promise: promiseVideo
       .then((vid) => {
         canvasInit({
           canvas: provideCanvas(),
@@ -91,10 +92,11 @@ export function loadAsImage({
     get context() {
       return provideCanvas();
     },
-    render(dstContext) {
+    render(dstContext, rotation) {
       return renderer({
         srcContext: selfie.context,
         dstContext,
+        rotation,
       });
     },
     promise: promiseImage

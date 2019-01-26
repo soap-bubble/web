@@ -365,10 +365,6 @@ export function handlePanoHotspot({ hotspot, currentPosition, startingPosition, 
       || ACTION_TYPES[hotspot.type] === 'DissolveTo')
     ) {
       const currentScene = sceneSelectors.currentSceneData(getState());
-      const scene3D = castSelectors.forScene(currentScene).cache().hotspot.scene3D;
-      if (scene3D) {
-        dispatch(sceneActions.setNextStartAngle(scene3D.rotation.y));
-      }
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot));
         logger.info(`From GoBack at ${currentScene.sceneId} requesting next scene ${hotspot.param1}`);

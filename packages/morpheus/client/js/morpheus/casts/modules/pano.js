@@ -376,6 +376,7 @@ export const actions = (scene) => {
             });
             tween.onComplete(() => {
               isSweeping = false;
+              dispatch(sceneActions.setNextStartAngle(v.y));
               resolve();
             });
             tween.start();
@@ -565,19 +566,9 @@ export const delegate = memoize((scene) => {
     return (dispatch, getState) => {
       const { camera, renderer, setSize } = webgl;
       const nextStartAngle = sceneSelectors.nextSceneStartAngle(getState());
-      //scene3D.rotation.y = nextStartAngle;
       rotation.y = nextStartAngle;
 
-      // positionCamera({
-      //   camera,
-      //   vector3: { z: -0.09 },
-      // });
-
-      global.camera = camera;
       camera.position.z = -0.09;
-      // camera.lookAt(0, 0, 1);
-      // object3D.geometry.computeBoundingSphere();
-      // object3D.geometry.boundingSphere.radius = 1.5;
 
       loader.play();
       let textureVersion = canvasTexture.version;

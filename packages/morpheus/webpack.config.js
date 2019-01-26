@@ -214,7 +214,7 @@ module.exports = (env) => {
           mainFields,
         },
         module: {
-          rules: styleLoaders.concat([
+          rules: styleLoaders(env).concat([
             {
               test: /\.js?$/,
               include: dirSharedComponents.concat([

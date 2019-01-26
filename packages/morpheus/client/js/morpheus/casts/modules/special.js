@@ -796,6 +796,33 @@ export const delegate = memoize((scene) => {
     };
   }
 
+  function doPause({
+    assets,
+  }) {
+    return () => {
+      assets.forEach(({ el }) => {
+        if (el.paused) {
+          el.__mWasPaused = true;
+        } else {
+          el.pause();
+          el.__mWasPaused = false;
+        }
+      });
+    };
+  }
+
+  function doResume({
+    assets,
+  }) {
+    return () => {
+      assets.forEach(({ el }) => {
+        if (!el.__mWasPaused) {
+          el.play();  
+        }
+      });
+    };
+  }
+
   return {
     applies,
     doLoad,
@@ -805,5 +832,7 @@ export const delegate = memoize((scene) => {
     doExit,
     doUnload,
     doPreunload: doUnload,
+    doPause,
+    doResume,
   };
 });

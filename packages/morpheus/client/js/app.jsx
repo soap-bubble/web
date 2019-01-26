@@ -136,3 +136,20 @@ if (process.env.ELECTRON_ENV) {
     });
   }
 }
+
+if (window.hasOwnProperty('cordova')) {
+  document.addEventListener('pause', () => {
+    const scenes = sceneSelectors.loadedScenes(store.getState());
+
+    scenes.forEach((scene) => {
+      store.dispatch(castActions.lifecycle.doPause(scene));
+    });
+  });
+  document.addEventListener('resume', () => {
+    const scenes = sceneSelectors.loadedScenes(store.getState());
+
+    scenes.forEach((scene) => {
+      store.dispatch(castActions.lifecycle.doResume(scene));
+    });
+  });
+}

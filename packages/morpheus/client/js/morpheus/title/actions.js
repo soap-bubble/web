@@ -64,7 +64,7 @@ export function start() {
 }
 
 export function canvasCreated(canvas) {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     if (canvas) {
       const titleActions = dispatch(titleActionsFactory());
       const buttonsActions = dispatch(buttonActionsFactory());
@@ -91,6 +91,8 @@ export function canvasCreated(canvas) {
         vector3: { z: 2 },
       });
       const scene3D = createScene();
+
+      await buttonsActions.load();
 
       for (const object of backgroundActions.createObject3D()) {
         scene3D.add(object);

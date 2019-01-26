@@ -21,6 +21,28 @@ function mapStateToProps(state, { scene }) {
 }
 
 class Sound extends Component {
+  constructor() {
+    super();
+    this.onPause = this.onPause.bind(this);
+    this.onResume = this.onResume.bind(this);
+  }
+
+  onPause() {
+    const { assetsUrl } = this.props;
+
+    assetsUrl.map(asset => this[`${asset}El`]).forEach(el => {
+      el.pause();
+    });
+  }
+
+  onResume() {
+    const { assetsUrl } = this.props;
+    
+    assetsUrl.map(asset => this[`${asset}El`]).forEach(el => {
+      el.play();
+    });
+  }
+
   componentDidMount() {
     const {
       assets,
@@ -28,6 +50,12 @@ class Sound extends Component {
 
     if (assets) {
       assets.forEach(sound => this.el.appendChild(sound.el));
+    }
+    if (window.hasOwnProperty('cordova')) {
+      if (window.hasOwnProperty('cordova')) {
+        document.addEventListener('pause', this.onPause);
+        document.addEventListener('resume', this.onResume);
+      }
     }
   }
 
@@ -38,6 +66,10 @@ class Sound extends Component {
 
     if (assets) {
       assets.forEach(sound => sound.el.remove());
+    }
+    if (window.hasOwnProperty('cordova')) {
+      document.removeEventListener('pause', this.onPause);
+      document.removeEventListener('resume', this.onResume);
     }
   }
   render() {

@@ -18,6 +18,8 @@ import {
   ENTERING,
   EXITING,
   ON_STAGE,
+  PAUSE,
+  RESUME,
   UNLOADING,
   UNPRELOAD,
 } from './actionTypes';
@@ -84,12 +86,12 @@ function doActionForCast({
         sceneId: scene.sceneId,
       });
     }
-    return dispatch(action({
+    return Promise.resolve(dispatch(action({
       setState,
       webGlPool,
       modules: cache[scene.sceneId],
       ...myCache,
-    }))
+    })))
       .then(setState)
       .catch((err) => {
         console.error(err);
@@ -112,6 +114,12 @@ export const lifecycle = [{
 }, {
   action: 'doExit',
   event: EXITING,
+}, {
+  action: 'doPause',
+  event: PAUSE,
+}, {
+  action: 'doResume',
+  event: RESUME,
 }, {
   action: 'doUnload',
   event: UNLOADING,

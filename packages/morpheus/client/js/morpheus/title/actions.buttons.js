@@ -28,12 +28,19 @@ import {
 import newMap from '../../../image/texture/new.png';
 import newBumpMap from '../../../image/texture/new-bump.png';
 import settingsMap from '../../../image/texture/settings.png';
-import settingBumpMap from '../../../image/texture/settings-bump.png';
+import settingsBumpMap from '../../../image/texture/settings-bump.png';
 import exitMap from '../../../image/texture/exit.png';
 import exitBumpMap from '../../../image/texture/exit-bump.png';
 import contMap from '../../../image/texture/cont.png';
 import contBumpMap from '../../../image/texture/cont-bump.png';
 
+const textureLoader = new TextureLoader();
+
+function createTexture(map) {
+  return new Promise((resolve, reject) => {
+    textureLoader.load(map, resolve, null, reject);
+  });
+}
 
 function createButton({
   map,
@@ -46,29 +53,23 @@ function createButton({
     return geometry;
   }
 
-  const textureLoader = new TextureLoader();
-
-  function createTexture() {
-    const texture = textureLoader.load(map);
-    return texture;
-  }
-
   function createBumpMap() {
     return textureLoader.load(bumpMap);
   }
 
   function createMaterial() {
-    const material = new MeshPhongMaterial({
-      map: createTexture(),
+    const material = new MeshPhongMaterial(Object.assign({
+      map,
       specular: 0x222222,
       shininess: 5,
-      bumpMap: createBumpMap(),
-      bumpScale: 0.1,
       side: DoubleSide,
       transparent: true,
       vertexShader: singleRippleVertexShader,
       uniforms,
-    });
+    }, !window.hasOwnProperty('cordova') ? {
+      bumpMap,
+      bumpScale: 0.1,
+    } : {}));
     return material;
   }
 
@@ -98,6 +99,7 @@ export default function factory() {
       exitButton: null,
       contButton: null,
     };
+    const textures = {};
     const selfie = {
       start({ camera, buttonCallback }) {
         // const newButtonStopWatch = createStopWatch().start();
@@ -300,10 +302,22 @@ export default function factory() {
         };
         renderEvents.onDestroy(cleanUp);
       },
+      load() {
+        return Promise.all([
+          createTexture(newMap).then(map => textures.newMap = map),
+          createTexture(newBumpMap).then(map => textures.newBumpMap = map),
+          createTexture(settingsMap).then(map => textures.settingsMap = map),
+          createTexture(settingsBumpMap).then(map => textures.settingsBumpMap = map),
+          createTexture(exitMap).then(map => textures.exitMap = map),
+          createTexture(exitBumpMap).then(map => textures.exitBumpMap = map),
+          createTexture(contMap).then(map => textures.contMap = map),
+          createTexture(contBumpMap).then(map => textures.contBumpMap = map),
+        ]);
+      },
       * createObject3D() {
         objects.newButton = createButton({
-          map: newMap,
-          bumpMap: newBumpMap,
+          map: textures.newMap,
+          bumpMap: textures.newBumpMap,
           position: {
             x: -2.5,
             y: -0.3,
@@ -311,8 +325,8 @@ export default function factory() {
         });
         yield objects.newButton;
         objects.settingsButton = createButton({
-          map: settingsMap,
-          bumpMap: settingBumpMap,
+          map: textures.settingsMap,
+          bumpMap: textures.settingsBumpMap,
           position: {
             x: 2.5,
             y: -0.3,
@@ -320,8 +334,8 @@ export default function factory() {
         });
         yield objects.settingsButton;
         objects.exitButton = createButton({
-          map: exitMap,
-          bumpMap: exitBumpMap,
+          map: textures.exitMap,
+          bumpMap: textures.exitBumpMap,
           position: {
             x: 2.5,
             y: -0.7,
@@ -329,8 +343,8 @@ export default function factory() {
         });
         yield objects.exitButton;
         objects.contButton = createButton({
-          map: contMap,
-          bumpMap: contBumpMap,
+          map: textures.contMap,
+          bumpMap: textures.contBumpMap,
           position: {
             x: -2.5,
             y: -0.7,

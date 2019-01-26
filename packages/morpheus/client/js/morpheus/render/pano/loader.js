@@ -157,7 +157,7 @@ export default ({
         const { context: video } = asset;
         video.src = null;
         video.onended = null;
-        assset.disposed = true;
+        asset.disposed = true;
       });
     },
   };

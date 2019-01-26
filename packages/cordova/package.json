@@ -1,13 +1,13 @@
 {
-  "name": "helloworld",
-  "displayName": "HelloCordova",
+  "name": "MorpheusMobile",
+  "displayName": "Morpheus",
   "private": true,
   "version": "1.8.1",
   "description": "A sample Apache Cordova application that responds to the deviceready event.",
   "main": "index.js",
   "scripts": {
     "build:android": "cordova build android",
-    "android": "cordova run adroid",
+    "android": "cordova run android",
     "start:android": "npm run build:android && npm run android",
     "test": "echo \"Error: no test specified\" && exit 1",
     "start:dev": "echo true"

@@ -22,7 +22,7 @@ class Main extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (this.props.leaving === false && nextProps.leaving === true) {
+    if (this.props.leaving === false && (nextProps.leaving === true || nextProps.done === true)) {
       this.fadeOut();
     }
   }
@@ -44,7 +44,7 @@ class Main extends React.Component {
   fadeOut() {
     const { isLeaving } = this.state;
     if (!isLeaving) {
-      const v = { target: 1 };
+      const v = { target: this.audio.volume };
       const tween = new Tween(v)
         .to({
           target: 0,

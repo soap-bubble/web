@@ -1,25 +1,21 @@
 import { connect } from 'react-redux';
 import {
   isLeaving,
+  isDone,
   titleStyle,
 } from '../selectors';
-import {
-  done,
-} from '../actions';
 import Main from '../components/Main';
 
 function mapStateToProps(state) {
   return {
     leaving: isLeaving(state),
+    done: isDone(state),
     style: titleStyle(state),
   };
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    done() {
-      dispatch(done());
-    },
     onFullscreen() {
       if (root.requestFullscreen) {
         root.requestFullscreen();

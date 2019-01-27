@@ -18,8 +18,7 @@ import { getAssetUrl } from 'service/gamedb';
 import renderEvents from 'utils/render';
 import { createVideo } from 'utils/video';
 import {
-  leaving,
-  done,
+  titleDone,
 } from './actions';
 import {
   titleDimensions,
@@ -209,7 +208,7 @@ export default function factory({ canvas: sourceCanvas }) {
           window.document.removeEventListener('touchstart', handleTouchStart);
           window.document.removeEventListener('touchmove', handleTouchMove);
           window.document.removeEventListener('touchend', handleMouseUp);
-          dispatch(done());
+          dispatch(titleDone());
         };
 
         video.addEventListener('ended', function videoEnded() {

@@ -17,6 +17,7 @@ import {
 import {
   actions as gamestateActions,
 } from 'morpheus/gamestate';
+import Promise from 'bluebird';
 import {
   titleDimensions,
 } from './selectors';
@@ -63,6 +64,12 @@ export function start() {
   };
 }
 
+export function done() {
+  return {
+    type: DONE,
+  };
+}
+
 export function canvasCreated(canvas) {
   return async (dispatch, getState) => {
     if (canvas) {
@@ -73,6 +80,7 @@ export function canvasCreated(canvas) {
       const introActions = dispatch(introFactory({
         canvas,
       }));
+      await Promise.delay(1);
       dispatch(gameActions.resize({
         width: window.innerWidth,
         height: window.innerHeight,
@@ -123,10 +131,16 @@ export function canvasCreated(canvas) {
         screen,
       }) => {
         if (name === 'newButton') {
+          delete localStorage.save;
           introActions.activate(screen);
           dispatch(leaving());
           buttonsActions.stop();
-          // setNewScene(dissolveActions.scene3D);
+        } else if (name === 'contButton') {
+          const savedGame = dispatch(gameActions.browserLoad());
+          if (savedGame) {
+            dispatch(done());
+            buttonsActions.stop();
+          }
         }
       };
 
@@ -150,16 +164,12 @@ export function canvasCreated(canvas) {
   };
 }
 
-export function done() {
+export function titleDone() {
   return (dispatch) => {
-    dispatch({
-      type: DONE,
-    });
+    dispatch(done());
     dispatch(sceneActions.startAtScene(2000))
       .then(() => {
-        dispatch({
-          type: DONE,
-        });
+        dispatch(done());
       });
   };
 }

@@ -1,4 +1,5 @@
 import { connect } from 'react-redux';
+import qs from 'query-string';
 import { SelectionList } from '@soapbubble/components';
 import {
   menuDelegate,
@@ -56,7 +57,10 @@ function mapDispatchToPros(dispatch) {
         dispatch(openSettings());
         dispatch(closeMenu());
       } else if (key === 'reload') {
-        location.reload();
+        const qp = qs.parse(document.location.search);
+        qp.reload = true;
+        const newUrl = `${document.location.protocol}//${document.location.host}${document.location.pathname}?${qs.stringify(qp)}`;
+        document.location.assign(newUrl);
       } else {
         dispatch(closeMenu());
       }

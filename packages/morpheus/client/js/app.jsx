@@ -51,10 +51,14 @@ window.onload = () => {
   store.dispatch(gameActions.setCursor(10000));
   store.dispatch(gamestateActions.fetchInitial())
     .then(() => {
-      const savedGame = store.dispatch(gameActions.browserLoad());
-      if (qp.scene) {
+      let savedGame;
+      if (qp.reload && !qp.scene) {
+        savedGame = store.dispatch(gameActions.browserLoad());
+      }
+      if (!qp.reload && qp.scene) {
         store.dispatch(sceneActions.startAtScene(qp.scene));
-      } else if (!savedGame) {
+      }
+      if (!qp.scene && !savedGame) {
         store.dispatch(sceneActions.runScene(titleSceneData))
           .then(() => store.dispatch(titleActions.start()));
       }

@@ -20,9 +20,6 @@ import {
   singleRippleVertexShader,
 } from './shaders';
 import {
-  leaving,
-} from './actions';
-import {
   titleDimensions,
 } from './selectors';
 import newMap from '../../../image/texture/new.png';
@@ -110,6 +107,12 @@ export default function factory() {
           newButton(screen) {
             buttonCallback({
               name: 'newButton',
+              screen,
+            });
+          },
+          contButton(screen) {
+            buttonCallback({
+              name: 'contButton',
               screen,
             });
           },

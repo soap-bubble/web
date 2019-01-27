@@ -12,6 +12,7 @@
     "build": "npm run build:server && npm run build:client:production",
     "build:server": "babel server -d lib --copy-files",
     "build:client:dev": "webpack --env.development=true",
+    "build:client:safari:dev": "webpack --env.development=true --env.safari=true",
     "build:client:production": "webpack --env.production=true",
     "build:client:electron": "webpack --env.electron=true",
     "build:client:cordova:dev": "webpack --env.cordova=true --env.dev=true --watch",
@@ -26,7 +27,8 @@
     "db:prime": "gulp db:prime | bunyan",
     "start": "node lib/index",
     "start:staging": "npm run build:client:staging & npm run build:server && node lib/index",
-    "start:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
+    "start:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\"",
+    "start:safari:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:safari:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
   "author": "",
   "license": "ISC",

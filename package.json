@@ -12,6 +12,7 @@
     "build:production": "lerna exec npm run build:production",
     "build:electron": "lerna run --scope @soapbubble/morpheus build:client:electron:production && lerna run --scope Morpheus build && lerna run --scope Morpheus make && lerna run --scope Morpheus package",
     "build:android": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:android",
+    "build:ios": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:ios",
     "start:dev": "lerna exec npm run start:dev --parallel",
     "release": "node ./scripts/release",
     "docker": "node ./scripts/docker"

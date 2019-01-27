@@ -7,6 +7,7 @@
   "main": "index.js",
   "scripts": {
     "build:android": "cordova build android",
+    "build:ios": "cordova build ios",
     "android": "cordova run android",
     "start:android": "npm run build:android && npm run android",
     "test": "echo \"Error: no test specified\" && exit 1",

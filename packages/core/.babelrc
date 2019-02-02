@@ -1,7 +1,12 @@
 {
-  "presets": ["react", "env"],
+  "presets": ["react", ["env", {
+    "targets": {
+        "browsers": ["defaults"]
+      }
+    }]],
   "plugins": [
     "transform-export-extensions",
+    ["angularjs-annotate", { "explicitOnly" : true}],
     ["transform-object-rest-spread", { "useBuiltIns": true }],
     ["module-resolver", {
       "alias": {

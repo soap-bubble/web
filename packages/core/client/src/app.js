@@ -1,9 +1,10 @@
 // The polyfill will emulate a full ES6 environment (for old browsers)
 // (including generators, which means async/await)
 import 'babel-polyfill';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap/dist/css/bootstrap-theme.min.css';
-import 'bootstrap-social/bootstrap-social.css';
+// import 'bootstrap/dist/css/bootstrap.min.css';
+// import 'bootstrap/dist/css/bootstrap-theme.min.css';
+// import 'bootstrap-social/bootstrap-social.css';
+import '@soapbubble/style/dist';
 import 'react-responsive-ui/styles/react-responsive-ui.css';
 import React from 'react';
 import { render } from 'react-dom';

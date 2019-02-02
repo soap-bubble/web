@@ -1,6 +1,6 @@
 import React from 'react';
 import { LinkContainer } from 'react-router-bootstrap';
-import { NavItem } from 'react-bootstrap';
+import { Nav } from 'react-bootstrap';
 import LoggedIn from '../components/LoggedIn';
 
 const LoggedStatusNavItem = ({
@@ -9,16 +9,16 @@ const LoggedStatusNavItem = ({
   userName,
 }) => {
   if (isCheckingLogin) {
-    return <NavItem>Checking...</NavItem>;
+    return <Nav.Item>Checking...</Nav.Item>;
   } else if (isLoggedIn) {
     return (<LinkContainer to={'/settings'}>
-      <NavItem>
+      <Nav.Link>
         <LoggedIn name={userName} />
-      </NavItem>
+      </Nav.Link>
     </LinkContainer>);
   }
   return (<LinkContainer to={'/login'}>
-    <NavItem>Login</NavItem>
+    <Nav.Link>Login</Nav.Link>
   </LinkContainer>);
 };
 

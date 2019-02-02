@@ -18,14 +18,13 @@ const {
 let onInit;
 
 const mapStateToProps = (state) => {
-  const { page, product } = state;
+  const { page } = state;
   const isLoggedIn = loginSelectors.isLoggedIn(state);
   const isCheckingLogin = loginSelectors.isCheckingLogin(state);
   const userName = loginSelectors.userName(state);
 
   return {
     page,
-    product,
     rightToolbar:
       (<LoginStatusNavItem
         isCheckingLogin={isCheckingLogin}

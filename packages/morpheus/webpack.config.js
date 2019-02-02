@@ -142,10 +142,10 @@ module.exports = (env) => {
         },
         {
           test: /\.jsx?$/,
+          exclude: [/node_modules/],
           include: dirSharedComponents.concat([
             dirJs,
           ]),
-          exclude: [/node_modules/],
           use: ['babel-loader'],
         },
         {

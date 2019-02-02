@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const styleLoaders = require('@soapbubble/style').loaders;
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
+const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const config = require('config');
 
 const dirJs = path.resolve(__dirname, 'client/src');
@@ -14,6 +14,12 @@ const dirSharedComponents = [
 
 // cheap-module-eval-source-map
 module.exports = (env) => {
+
+  let nodeEnv = 'development';
+  if (env.production) {
+    nodeEnv = 'production';
+  }
+
   const outputPath = (() => {
     if (env.phonegap) {
       return path.resolve(__dirname, '../phonegap/www');
@@ -31,8 +37,6 @@ module.exports = (env) => {
   const appConfig = {
     twitch: config.twitch,
   };
-
-  console.log(appConfig)
 
   if (env.production) {
     Object.assign(appConfig, {
@@ -62,6 +66,7 @@ module.exports = (env) => {
 
   const webpackConfig = {
     target,
+    mode: nodeEnv,
     devtool: env.production ? false : 'source-map',
     entry: {
       app: './client/src/app.js',
@@ -77,7 +82,6 @@ module.exports = (env) => {
         'redux-thunk',
         'reselect',
         'classnames',
-        'babel-polyfill',
       ],
     },
     output: {
@@ -101,25 +105,48 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          use: ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: ['css-loader', 'postcss-loader'],
-          }),
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            'css-loader'
+          ]
         },
         {
-          test: /\.less$/,
-          use: ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: ['css-loader', 'postcss-loader', 'less-loader'],
-          }),
+          test: /\.less/,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            'css-loader', 'postcss-loader', 'less-loader',
+          ]
         },
-        {
-          test: /\.(scss|sass)$/,
-          use: ExtractTextPlugin.extract({
-            fallback: 'style-loader',
-            use: ['css-loader', 'postcss-loader', 'sass-loader'],
-          }),
-        },
+        { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,   loader: "url-loader?limit=10000&mimetype=application/font-woff" },
+        { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,  loader: "url-loader?limit=10000&mimetype=application/font-woff" },
+        { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,    loader: "url-loader?limit=10000&mimetype=application/octet-stream" },
+        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,    loader: "file-loader" },
+        { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,    loader: "url-loader?limit=10000&mimetype=image/svg+xml" },
+        // {
+        //   test: /\.css$/,
+        //   use: ExtractTextPlugin.extract({
+        //     fallback: 'style-loader',
+        //     use: ['css-loader', 'postcss-loader'],
+        //   }),
+        // },
+        // {
+        //   test: /\.less$/,
+        //   use: ExtractTextPlugin.extract({
+        //     fallback: 'style-loader',
+        //     use: ['css-loader', 'postcss-loader', 'less-loader'],
+        //   }),
+        // },
+        // {
+        //   test: /\.(scss|sass)$/,
+        //   use: ExtractTextPlugin.extract({
+        //     fallback: 'style-loader',
+        //     use: ['css-loader', 'postcss-loader', 'sass-loader'],
+        //   }),
+        // },
         {
           test: /\.png/,
           use: {
@@ -133,9 +160,10 @@ module.exports = (env) => {
       ]),
     },
     plugins: [
-      new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: vendorName }),
-      new ExtractTextPlugin({
+      // new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: vendorName }),
+      new MiniCssExtractPlugin({
         filename: cssName,
+        chunkFilename: "[id].css",
         disable: !env.production,
       }),
       new HtmlWebpackPlugin({
@@ -144,22 +172,14 @@ module.exports = (env) => {
         template: `client/assets/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
         fbAppId: config.fbAppId,
+        chunks: ['vendor', 'app'],
       }),
       new webpack.DefinePlugin({
-        'process.env.NODE_ENV': `"${process.env.NODE_ENV}"`,
+        'process.env.NODE_ENV': `"${nodeEnv}"`,
         config: JSON.stringify(appConfig),
       }),
     ],
   };
-
-  if (env.production) {
-    webpackConfig.plugins.push(new webpack.optimize.UglifyJsPlugin({
-      compress: {
-        warnings: false,
-      },
-      mangle: false,
-    }));
-  }
 
   return webpackConfig;
 };

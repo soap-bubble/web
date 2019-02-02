@@ -10,32 +10,31 @@ const NavBar = ({ onInit, page, onPageChange, rightToolbar }) => (
         onInit();
       }
     }}
-    inverse
     collapseOnSelect
+    bg="dark"
+    variant="dark"
+    sticky="top"
   >
-    <Navbar.Header>
-      <Navbar.Brand>
-        <a href="/about">Soapbubble</a>
-      </Navbar.Brand>
-      <Navbar.Toggle />
-    </Navbar.Header>
+    <Navbar.Brand>
+      Soap Bubble
+    </Navbar.Brand>
+    <Navbar.Toggle />
     <Navbar.Collapse>
-      <Nav pullRight>
-        {rightToolbar}
-      </Nav>
-      <Nav onSelect={onPageChange}>
+      <Nav className="mr-auto" onSelect={onPageChange} className="mr-auto">
         {page.available.map(({ label, route }) => (
           <LinkContainer key={`page:${route}`} to={`/${route}`}>
-            <NavItem active={page.current.route === route} eventKey={route}>{label}</NavItem>
+            <Nav.Link active={page.current.route === route ? true : undefined} eventKey={route}>{label}</Nav.Link>
           </LinkContainer>
         ))}
+      </Nav>
+      <Nav className="justify-content-end">
+        {rightToolbar}
       </Nav>
     </Navbar.Collapse>
   </Navbar>
 );
 
 NavBar.propTypes = {
-  page: PropTypes.string,
   onPageChange: PropTypes.func.isRequired,
   onInit: PropTypes.func,
   rightToolbar: PropTypes.oneOfType([
@@ -45,7 +44,6 @@ NavBar.propTypes = {
 };
 
 NavBar.defaultProps = {
-  page: '',
   rightToolbar: '',
   onInit: () => {},
 };

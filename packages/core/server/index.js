@@ -2,7 +2,7 @@ import express from 'express';
 import bunyan from 'bunyan';
 import path from 'path';
 
-const logger = bunyan.createLogger({ name: 'webgl-pano-server' });
+const logger = bunyan.createLogger({ name: 'core' });
 const app = express();
 
 if (app.get('env') !== 'production') {

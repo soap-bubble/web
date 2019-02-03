@@ -6,9 +6,15 @@ import {
 const available = [{
   route: 'about',
   label: 'About',
+  matches: /about/
 }, {
   route: 'examples',
   label: 'Gallery',
+  matches: /examples/
+}, {
+  route: 'blog',
+  label: 'Blog',
+  matches: /blog/
 }];
 
 const reducer = createReducer({

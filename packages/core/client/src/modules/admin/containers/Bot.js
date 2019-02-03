@@ -33,6 +33,3 @@ function mapDisptachToProps(dispatch) {
 const Page = connect(mapStateToProps, mapDisptachToProps)(Bot);
 
 export default Page;
-
-
-console.log(config)

@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { Link } from 'react-router';
 
 const Footer = () => (
-  <footer className="footer">
+  <footer className="footer position-sticky fixed-bottom">
     <div className="container">
       <Link to="/privacy">
         Privacy Policy

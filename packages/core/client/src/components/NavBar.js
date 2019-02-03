@@ -21,9 +21,9 @@ const NavBar = ({ onInit, page, onPageChange, rightToolbar }) => (
     <Navbar.Toggle />
     <Navbar.Collapse>
       <Nav className="mr-auto" onSelect={onPageChange} className="mr-auto">
-        {page.available.map(({ label, route }) => (
+        {page.available.map(({ label, route, matches }) => (
           <LinkContainer key={`page:${route}`} to={`/${route}`}>
-            <Nav.Link active={page.current.route === route ? true : undefined} eventKey={route}>{label}</Nav.Link>
+            <Nav.Link active={page.current.route.match(matches) ? true : undefined} eventKey={route}>{label}</Nav.Link>
           </LinkContainer>
         ))}
       </Nav>

@@ -36,6 +36,9 @@ module.exports = (env) => {
   const vendorName = env.production ? '[name].[hash].js' : '[name].js';
   const appConfig = {
     twitch: config.twitch,
+    contentfulSpace: config.contentfulSpace,
+    contentfulAccess: config.contentfulAccess,
+    contentfulEnv: 'development',
   };
 
   if (env.production) {
@@ -43,12 +46,14 @@ module.exports = (env) => {
       self: 'https://soapbubble.online',
       morpheusServer: 'https://morpheus.soapbubble.online',
       authHost: 'https://auth.soapbubble.online',
+      contentfulEnv: 'master',
     });
   } else if (env.staging) {
     Object.assign(appConfig, {
       self: 'https://staging.soapbubble.online',
       morpheusServer: 'https://morpheus.staging.soapbubble.online',
       authHost: 'https://auth.staging.soapbubble.online',
+      contentfulEnv: 'master',
     });
   }
   if (env.development) {
@@ -135,27 +140,6 @@ module.exports = (env) => {
         { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,    loader: "url-loader?limit=10000&mimetype=application/octet-stream" },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,    loader: "file-loader" },
         { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,    loader: "url-loader?limit=10000&mimetype=image/svg+xml" },
-        // {
-        //   test: /\.css$/,
-        //   use: ExtractTextPlugin.extract({
-        //     fallback: 'style-loader',
-        //     use: ['css-loader', 'postcss-loader'],
-        //   }),
-        // },
-        // {
-        //   test: /\.less$/,
-        //   use: ExtractTextPlugin.extract({
-        //     fallback: 'style-loader',
-        //     use: ['css-loader', 'postcss-loader', 'less-loader'],
-        //   }),
-        // },
-        // {
-        //   test: /\.(scss|sass)$/,
-        //   use: ExtractTextPlugin.extract({
-        //     fallback: 'style-loader',
-        //     use: ['css-loader', 'postcss-loader', 'sass-loader'],
-        //   }),
-        // },
         {
           test: /\.png/,
           use: {

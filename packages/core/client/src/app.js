@@ -26,6 +26,7 @@ import Examples from './containers/Examples';
 import Login from './containers/Login';
 import Settings from './containers/Settings';
 import { Page as User } from './modules/User';
+import { Page as BlogPage, Entries, Entry } from './modules/Blog';
 import Privacy from './containers/Privacy';
 
 syncHistoryWithStore(browserHistory, store).listen(({ pathname }) => {
@@ -46,6 +47,10 @@ window.onload = () => {
           <IndexRedirect to="/examples" />
           <Route path="about" component={About} />
           <Route path="examples" component={Examples} />
+          <Route component={BlogPage}>
+            <Route path="blog" component={Entries} />
+            <Route path="blog/:slug" component={Entry} />
+          </Route>
           <Route path="login" component={Login} />
           <Route path="settings" component={Settings} />
           <Route path="user/:category" component={User} />

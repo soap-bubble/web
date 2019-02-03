@@ -1,11 +1,10 @@
 // The polyfill will emulate a full ES6 environment (for old browsers)
 // (including generators, which means async/await)
-import 'babel-polyfill';
+// import 'babel-polyfill';
 // import 'bootstrap/dist/css/bootstrap.min.css';
 // import 'bootstrap/dist/css/bootstrap-theme.min.css';
 // import 'bootstrap-social/bootstrap-social.css';
 import '@soapbubble/style/dist';
-import 'react-responsive-ui/styles/react-responsive-ui.css';
 import React from 'react';
 import { render } from 'react-dom';
 import { Provider } from 'react-redux';
@@ -17,6 +16,7 @@ import {
   Bot as AdminBot,
 } from 'app/modules/admin';
 import store from './store';
+import { login } from './modules/soapbubble';
 import '../assets/styles/main.scss';
 import '../assets/styles/main.less';
 import history from './routes/history';
@@ -35,6 +35,8 @@ syncHistoryWithStore(browserHistory, store).listen(({ pathname }) => {
     ga('send', 'pageview');
   }
 });
+
+store.dispatch(login.actions.init());
 
 window.onload = () => {
   render(

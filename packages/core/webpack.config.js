@@ -50,7 +50,8 @@ module.exports = (env) => {
       morpheusServer: 'https://morpheus.staging.soapbubble.online',
       authHost: 'https://auth.staging.soapbubble.online',
     });
-  } else {
+  }
+  if (env.development) {
     Object.assign(appConfig, {
       self: 'http://localhost:8060',
       morpheusServer: 'http://localhost:8050',

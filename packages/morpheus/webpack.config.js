@@ -53,12 +53,12 @@ module.exports = (env) => {
       authHost: 'https://auth.soapbubble.online',
       botHost: 'https://bot.staging.soapbubble.online',
     });
-  } else {
+  }
+  if (env.development) {
     Object.assign(appConfig, {
-      assetHost: '',
-      apiHost: '',
+      self: 'http://localhost:8060',
+      morpheusServer: 'http://localhost:8050',
       authHost: 'http://localhost:4000',
-      botHost: 'http://localhost:8040',
     });
   }
 
@@ -66,9 +66,7 @@ module.exports = (env) => {
     appConfig.apiHost = 'morpheus://';
   }
   const target = env.electron ? 'electron-renderer' : 'web';
-  const mainFields = (env.production || env.staging)
-    ? ['browser', 'module', 'main']
-    : ['esnext', 'browser', 'module', 'main'];
+  const mainFields = ['esnext', 'browser', 'module', 'main'];
 
   let nodeEnv = 'development';
   if (env.production) {
@@ -81,8 +79,10 @@ module.exports = (env) => {
     config: JSON.stringify(appConfig),
   };
 
-  let devtool = (env.production) ? false : 'source-map';
-  if (env.cordova && !env.production) {
+
+
+  let devtool = env.development ? 'source-map' : false;
+  if (env.cordova && env.development) {
     devtool = 'inline-source-map';
   }
 
@@ -95,7 +95,6 @@ module.exports = (env) => {
       browser: './client/js/browser.js',
       vendor: [
         'babel-polyfill',
-        '@soapbubble/components',
         'axios',
         'bluebird',
         'browser-bunyan',
@@ -158,12 +157,12 @@ module.exports = (env) => {
           },
         },
         {
-          test: /\.svg$/,
+          test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
           use: {
             loader: 'url-loader',
             options: {
               limit: 10000,
-              mimetype: 'image/svg',
+              mimetype: 'image/svg+xml',
             },
           },
         },
@@ -189,7 +188,6 @@ module.exports = (env) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        filename: cssName,
         chunkFilename: "[id].css",
         disable: !env.production,
       }),

@@ -32,8 +32,8 @@ import {
 import {
   CURSOR_IDS,
 } from 'morpheus/game/cursors';
+import isDebug from 'utils/isDebug';
 
-const isDebug = process.env.NODE_ENV !== 'production';
 const logger = loggerFactory('input:handlers');
 
 const isHotspotActive = ({ hotspot, gamestates }) => isActive({

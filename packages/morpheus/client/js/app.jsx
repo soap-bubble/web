@@ -28,7 +28,6 @@ import {
   login,
 } from 'soapbubble';
 import storeFactory from 'store';
-
 import '@soapbubble/style/dist';
 import '../css/main.scss';
 

@@ -3,7 +3,7 @@ import {
   range,
 } from 'lodash';
 import PropTypes from 'prop-types';
-import { Nav, NavItem } from 'react-bootstrap';
+import { ListGroup } from 'react-bootstrap';
 
 const SelectionList = ({
   startKey,
@@ -11,9 +11,7 @@ const SelectionList = ({
   rows,
   onSelect,
 }) => (
-  <Nav
-    bsStyle="pills flex-column"
-    stacked
+  <ListGroup
     activeKey={startKey}
     onSelect={onSelect}
   >
@@ -23,10 +21,10 @@ const SelectionList = ({
         content,
       } = delegate(index);
       return (
-        <NavItem eventKey={key}>{content}</NavItem>
+        <ListGroup.Item eventKey={key}>{content}</ListGroup.Item>
       );
     })}
-  </Nav>
+  </ListGroup>
 );
 
 SelectionList.propTypes = {

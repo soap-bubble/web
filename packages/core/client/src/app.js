@@ -18,7 +18,7 @@ import {
 import store from './store';
 import { login } from './modules/soapbubble';
 import '../assets/styles/main.scss';
-import '../assets/styles/main.less';
+// import '../assets/styles/main.less';
 import history from './routes/history';
 import Page from './components/Page';
 import About from './components/About';

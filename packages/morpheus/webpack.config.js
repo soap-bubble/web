@@ -96,7 +96,6 @@ module.exports = (env) => {
       vendor: [
         'babel-polyfill',
         '@soapbubble/components',
-        '@soapbubble/style/dist',
         'axios',
         'bluebird',
         'browser-bunyan',
@@ -149,7 +148,7 @@ module.exports = (env) => {
           use: ['babel-loader'],
         },
         {
-          test: /\.png/,
+          test: /\.png$/,
           use: {
             loader: 'url-loader',
             options: {
@@ -159,7 +158,7 @@ module.exports = (env) => {
           },
         },
         {
-          test: /\.svg/,
+          test: /\.svg$/,
           use: {
             loader: 'url-loader',
             options: {
@@ -167,6 +166,24 @@ module.exports = (env) => {
               mimetype: 'image/svg',
             },
           },
+        },
+        {
+          test: /\.css$/,
+          include: dirSharedComponents,
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            {
+              loader: 'css-loader',
+              options: {
+                modules: true,
+                importLoaders: 1,
+                localIdentName: '[path]___[name]__[local]___[hash:base64:5]',
+              },
+            },
+            { loader: 'postcss-loader' },
+          ],
         },
       ]),
     },

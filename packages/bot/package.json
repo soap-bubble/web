@@ -43,5 +43,6 @@
     "@babel/preset-env": "^7.2.0",
     "concurrently": "^3.5.1",
     "nodemon": "^1.14.12"
-  }
+  },
+  "gitHead": "f02404d1d1f377c622374e9daf81629926678d40"
 }

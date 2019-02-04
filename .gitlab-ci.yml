@@ -3,21 +3,12 @@
 # Build - Build necessary JS files
 # Deploy - Deploy application to S3/ElasticBeanstalk
 stages:
-  - install
   - build
 # Configuration
 variables:
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
 # Job: Install
-install:
-  image: node:carbon
-  stage: install
-  script:
-    - npm install
-    - npm run bootstrap
-  artifacts:
-    untracked: true
 build-morpheus:
   image: docker:stable
   services:
@@ -60,8 +51,3 @@ build-auth:
     - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/auth:latest
     - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
-build-electron:
-  image: docker:stable
-  stage: build
-  script:
-    - npm build:electron

@@ -14,22 +14,12 @@ const dirSharedComponents = [
 
 // cheap-module-eval-source-map
 module.exports = (env) => {
-
   let nodeEnv = 'development';
   if (env.production) {
     nodeEnv = 'production';
   }
 
-  const outputPath = (() => {
-    if (env.phonegap) {
-      return path.resolve(__dirname, '../phonegap/www');
-    }
-    if (env.electron) {
-      return path.resolve(__dirname, '../electron/build');
-    }
-    return path.join(__dirname, 'public');
-  })();
-
+  const outputPath = path.join(__dirname, 'public');
   const htmlTemplate = 'index.ejs';
   const cssName = env.production ? 'main.[contenthash].css' : 'main.css';
   const jsName = env.production ? '[name].[hash].js' : '[name].js';
@@ -66,9 +56,7 @@ module.exports = (env) => {
 
   const publicPath = `${appConfig.self}/`;
   const target = 'web';
-  const mainFields = (env.production || env.staging)
-    ? ['browser', 'module', 'main']
-    : ['esnext', 'browser', 'module', 'main'];
+  const mainFields = ['esnext', 'browser', 'module', 'main'];
 
   const webpackConfig = {
     target,
@@ -100,7 +88,7 @@ module.exports = (env) => {
       mainFields,
     },
     module: {
-      rules: styleLoaders(env).concat([
+      rules: [
         {
           test: /\.jsx?$/,
           exclude: [/node_modules/],
@@ -128,12 +116,27 @@ module.exports = (env) => {
         },
         {
           test: /\.less/,
-          use: [
-            {
-              loader: MiniCssExtractPlugin.loader,
-            },
-            'css-loader', 'postcss-loader', 'less-loader',
-          ]
+          use: [{
+            loader: MiniCssExtractPlugin.loader,
+          }, {
+            loader: 'css-loader', // translates CSS into CommonJS modules
+          }, {
+            loader: 'postcss-loader', // Run post css actions
+          }, {
+            loader: 'sass-loader' // compiles Sass to CSS
+          }]
+        },
+        {
+          test: /\.(scss|sass)$/,
+          use: [{
+            loader: MiniCssExtractPlugin.loader,
+          }, {
+            loader: 'css-loader', // translates CSS into CommonJS modules
+          }, {
+            loader: 'postcss-loader', // Run post css actions
+          }, {
+            loader: 'sass-loader' // compiles Sass to CSS
+          }]
         },
         { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,   loader: "url-loader?limit=10000&mimetype=application/font-woff" },
         { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,  loader: "url-loader?limit=10000&mimetype=application/font-woff" },
@@ -150,12 +153,10 @@ module.exports = (env) => {
             },
           },
         },
-      ]),
+      ],
     },
     plugins: [
-      // new webpack.optimize.CommonsChunkPlugin({ name: 'vendor', filename: vendorName }),
       new MiniCssExtractPlugin({
-        filename: cssName,
         chunkFilename: "[id].css",
         disable: !env.production,
       }),
@@ -165,7 +166,7 @@ module.exports = (env) => {
         template: `client/assets/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
         fbAppId: config.fbAppId,
-        chunks: ['vendor', 'app'],
+        chunks: ['app', 'vendor'],
       }),
       new webpack.DefinePlugin({
         'process.env.NODE_ENV': `"${nodeEnv}"`,

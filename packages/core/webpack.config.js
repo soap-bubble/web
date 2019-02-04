@@ -65,6 +65,7 @@ module.exports = (env) => {
     entry: {
       app: './client/src/app.js',
       vendor: [
+        '@soapbubble/style/dist/soapbubble.css',
         'axios',
         'lodash',
         'react',
@@ -99,6 +100,22 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
+          include: [/@soapbubble\/style\/dist\/soapbubble.css/],
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            {
+              loader: 'css-loader',
+            },
+            {
+              loader: 'postcss-loader',
+            },
+          ]
+        },
+        {
+          test: /\.css$/,
+          exclude: [/@soapbubble\/style\/dist\/soapbubble.css/],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,

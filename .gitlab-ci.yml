@@ -37,7 +37,7 @@ build-core:
   stage: build
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
-    - docker build -t soapbubble/core packages/core
+    - docker build -t -e GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} -e SOAPBUBBLE_CONTENTFUL_ACCESS=${SOAPBUBBLE_CONTENTFUL_ACCESS} -e SOAPBUBBLE_CONTENTFUL_SPACE=${SOAPBUBBLE_CONTENTFUL_SPACE} -e SOAPBUBBLE_FB_APP_ID=${SOAPBUBBLE_FB_APP_ID} soapbubble/core packages/core
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/core:latest

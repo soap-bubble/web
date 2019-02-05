@@ -93,6 +93,7 @@ module.exports = (env) => {
         {
           test: /\.jsx?$/,
           include: [/@soapbubble/],
+          exclude: [/@soapbubble\/node_modules/],
           use: ['babel-loader'],
         },
         {

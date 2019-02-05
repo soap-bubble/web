@@ -94,6 +94,7 @@ module.exports = (env) => {
       app: './client/js/app.jsx',
       browser: './client/js/browser.js',
       vendor: [
+        '@soapbubble/style/dist/soapbubble.css',
         'babel-polyfill',
         'axios',
         'bluebird',
@@ -134,8 +135,8 @@ module.exports = (env) => {
       rules: styleLoaders(env).concat([
         {
           test: /\.js$/,
-          include: /generic-pool/,
-          exclude: [/generic-pool\/node_modules/],
+          include: [/generic-pool/, /@soapbubble/],
+          exclude: [/generic-pool\/node_modules/, /@soapbubble\/node_modules/],
           use: ['babel-loader'],
         },
         {
@@ -168,7 +169,23 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: dirSharedComponents,
+          include: [/@soapbubble\/style\/dist\/soapbubble.css/],
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            {
+              loader: 'css-loader',
+            },
+            {
+              loader: 'postcss-loader',
+            },
+          ]
+        },
+        {
+          test: /\.css$/,
+          include: [/@soapbubble/],
+          exclude: [/@soapbubble\/style\/dist\/soapbubble.css/],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,

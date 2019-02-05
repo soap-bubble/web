@@ -92,10 +92,12 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.jsx?$/,
+          include: [/@soapbubble/],
+          use: ['babel-loader'],
+        },
+        {
+          test: /\.jsx?$/,
           exclude: [/node_modules/],
-          include: dirSharedComponents.concat([
-            dirJs,
-          ]),
           use: ['babel-loader'],
         },
         {

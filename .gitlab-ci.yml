@@ -6,6 +6,11 @@ stages:
   - build
 # Configuration
 variables:
+  BUTLER_API_KEY: ""
+  GOOGLE_ANALYTICS_ID: ""
+  SOAPBUBBLE_CONTENTFUL_ACCESS: ""
+  SOAPBUBBLE_CONTENTFUL_SPACE: ""
+  SOAPBUBBLE_FB_APP_ID: ""
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
 # Job: Install

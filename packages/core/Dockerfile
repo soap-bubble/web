@@ -7,5 +7,5 @@ RUN npm install --quiet
 COPY . /opt/app
 RUN npm run build;\
  npm install --production --quiet
-CMD npm run start
+CMD node lib/index
 EXPOSE 8060

@@ -1,56 +1,52 @@
 const path = require('path');
+const config = require('config');
+const express = require('express');
+const builder = require('service-builder');
 
-var leChallenge = require('le-challenge-route53').create({
-  zone: 'soapbubble.online.', // required
-  delay: 20000, // ms to wait before allowing letsencrypt to check dns record (20000 ms is the default)
-  debug: true,
+const blueprint = builder({
+  app: express,
+  config,
+  domains(config) {
+    return Object.values(config.routes).map(r => r.host);
+  },
+  email(config) {
+    return config.get('email');
+  },
+  isDebug(config) {
+    return config.get('debug');
+  },
+  httpChallenge(isDebug) {
+    return require('le-challenge-standalone').create({
+      debug: isDebug,
+    });
+  },
+  greenlockOpts(app, isDebug, httpChallenge) {
+    return {
+      debug: isDebug,
+      app,
+      configDir: path.resolve(__dirname, '.acme'),
+      challenges: {
+        'http-01': httpChallenge,
+      },
+    };
+  },
+  greenlock(greenlockOpts) {
+    return require('greenlock-express').create(greenlockOpts);
+  },
+  registerOpts(domains, email, isDebug) {
+    return {
+      debug: isDebug,
+      domains,
+      email,
+      agreeTos: true,
+      communityMember: false,
+    };
+  },
 });
 
-/////////////////////
-// SET USER PARAMS //
-/////////////////////
 
-var opts = {
-  debug: true,
-  domains: [ '*.soapbubble.online', 'soapbubble.online' ],
-  email: 'morpheus.dev@soapbubble.online',
-  challenge: leChallenge,
-  agreeTos: true,                 // Accept Let's Encrypt v2 Agreement
-  communityMember: false,         // Help make Greenlock better by submitting
-                                  // stats and getting updates
-};
+const factory = blueprint.construct();
 
-////////////////////
-// INIT GREENLOCK //
-////////////////////
-
-var greenlock = require('greenlock').create({
-  // version: 'draft-12',
-  // server: 'https://acme-v02.api.letsencrypt.org/directory',
-  server: 'https://acme-staging-v02.api.letsencrypt.org/directory',
-  // configDir: path.resolve(__dirname, 'acme'),
-  debug: true,
+factory.$((greenlock, domains, registerOpts) => {
+  greenlock.listen(80, 443);
 });
-
-
-///////////////////
-// GET TLS CERTS //
-///////////////////
-
-greenlock.check({ domains: [ '*.soapbubble.online' ] }).then(function (results) {
-  if (results) {
-    console.log(results);
-    process.exit();
-  }
-  console.log('> register');
-  greenlock.register(opts).then(function (certs) {
-    console.log(certs);
-    // privkey, cert, chain, expiresAt, issuedAt, subject, altnames
-  }, function (err) {
-    console.error(err);
-  });
-}, err => console.error(err));
-
-
-
-console.log('start')

@@ -42,6 +42,20 @@ build-core:
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/core:latest
     - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
+build-ssl:
+  image: docker:stable
+  services:
+    - docker:dind
+  tags:
+    - docker
+  stage: build
+  script:
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
+    - docker build --build-arg LE_SSL_EMAIL=${LE_SSL_EMAIL} --build-arg LE_SSL_DEBUG=true -t soapbubble/ssl packages/ssl
+    - docker tag soapbubble/ssl docker.soapbubble.online:5000/soapbubble/ssl:latest
+    - docker tag soapbubble/ssl docker.soapbubble.online:5000/soapbubble/ssl:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online:5000/soapbubble/ssl:latest
+    - docker push docker.soapbubble.online:5000/soapbubble/ssl:${CI_COMMIT_SHA:0:7}
 build-auth:
   image: docker:stable
   services:

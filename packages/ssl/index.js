@@ -13,40 +13,59 @@ const blueprint = builder({
     return config.get('email');
   },
   isDebug(config) {
-    return config.get('debug');
+    const val = config.get('debug');
+    if (val && val === 'false') {
+      return false;
+    }
+    return !!val;
+  },
+  server(isDebug) {
+    return isDebug ? 'https://acme-staging-v02.api.letsencrypt.org/directory' : 'https://acme-v02.api.letsencrypt.org/directory';
+  },
+  httpPort(config) {
+    return Number(config.get('httpPort'));
+  },
+  httpsPort(config) {
+    return Number(config.get('httpsPort'));
+  },
+  mongoUri(config) {
+    return config.get('mongoUri');
   },
   httpChallenge(isDebug) {
     return require('le-challenge-standalone').create({
       debug: isDebug,
     });
   },
-  greenlockOpts(app, isDebug, httpChallenge) {
+  greenlockOpts(app, store, email, httpChallenge, isDebug, server, domains) {
     return {
-      debug: isDebug,
       app,
-      configDir: path.resolve(__dirname, '.acme'),
+      email,
+      server,
+      store,
+      debug: isDebug,
       challenges: {
         'http-01': httpChallenge,
       },
+      configDir: path.resolve(__dirname, '.acme'),
+      agreeTos: true,
+      approvedDomains: domains,
+      communityMember: false,
     };
   },
   greenlock(greenlockOpts) {
     return require('greenlock-express').create(greenlockOpts);
   },
-  registerOpts(domains, email, isDebug) {
-    return {
-      debug: isDebug,
-      domains,
-      email,
-      agreeTos: true,
-      communityMember: false,
-    };
+  store(mongoUri) {
+    return require('le-store-mongodb').create({
+      // url: mongoUri,
+    });
   },
 });
 
 
 const factory = blueprint.construct();
 
-factory.$((greenlock, domains, registerOpts) => {
-  greenlock.listen(80, 443);
+factory.$((greenlock, httpPort, httpsPort) => {
+  console.log(`Listening on ${httpPort} and ${httpsPort}`);
+  greenlock.listen(httpPort, httpsPort);
 });

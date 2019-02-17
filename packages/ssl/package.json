@@ -4,6 +4,7 @@
   "description": "Letsencrypt SSL",
   "main": "index.js",
   "scripts": {
+    "start": "node index",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -15,6 +16,9 @@
     "greenlock-express": "^2.6.7",
     "le-acme-core": "^2.1.4",
     "le-challenge-standalone": "^2.1.0",
+    "le-store-mongo": "^1.0.0",
+    "le-store-mongodb": "0.0.1",
+    "lodash": "^4.17.11",
     "service-builder": "^1.1.1"
   }
 }

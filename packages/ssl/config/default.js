@@ -1,7 +1,7 @@
 module.exports = {
   httpPort: 80,
   httpsPort: 443,
-  mongoUri: 'localhost/node-letsencrypt',
+  mongoUri: 'mongodb://localhost/greenlock',
   routes: [
     {
       host: 'soapbubble.online',

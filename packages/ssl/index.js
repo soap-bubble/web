@@ -55,9 +55,10 @@ const blueprint = builder({
   greenlock(greenlockOpts) {
     return require('greenlock-express').create(greenlockOpts);
   },
-  store(mongoUri) {
+  store(mongoUri, isDebug) {
     return require('le-store-mongodb').create({
-      // url: mongoUri,
+      url: mongoUri,
+      debug: isDebug,
     });
   },
 });

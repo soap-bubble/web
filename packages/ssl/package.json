@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
+    "start:dev": "nodemon index --watch src",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -12,13 +13,16 @@
   "dependencies": {
     "config": "^3.0.1",
     "express": "^4.16.4",
+    "express-http-proxy": "^1.5.1",
     "greenlock": "^2.6.7",
     "greenlock-express": "^2.6.7",
     "le-acme-core": "^2.1.4",
     "le-challenge-standalone": "^2.1.0",
-    "le-store-mongo": "^1.0.0",
     "le-store-mongodb": "0.0.1",
     "lodash": "^4.17.11",
     "service-builder": "^1.1.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }

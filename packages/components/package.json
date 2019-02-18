@@ -4,9 +4,7 @@
   "description": "Web Components for Soap Bubble Productions",
   "main": "dist/index.js",
   "esnext": "src/index.js",
-  "publishConfig": {
-    "access": "public"
-  },
+  "private": true,
   "scripts": {
     "test": "exit 0",
     "lint": "eslint",

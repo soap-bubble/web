@@ -4,9 +4,6 @@
   "description": "Authorization server for soapbubble.online",
   "main": "dist/index.js",
   "private": true,
-  "publishConfig": {
-    "access": "private"
-  },
   "scripts": {
     "build": "babel server -d dist",
     "build:production": "npm run build",

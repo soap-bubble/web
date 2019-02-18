@@ -5,7 +5,7 @@ const updated = JSON.parse(run('lerna updated --json'));
 const bump = argv.bump ? argv.bump : 'patch';
 
 // increment version numbers accross all package.json's
-run(`lerna publish --exact ${bump}`);
+run(`lerna publish -y --exact ${bump}`);
 const { version, packages } = require('../lerna.json')
 const versionStr = `v${version}`
 

@@ -3,8 +3,9 @@
   "version": "1.11.2",
   "description": "Morpheus bot",
   "main": "dist/index.js",
+  "private": true,
   "publishConfig": {
-    "access": "public"
+    "access": "private"
   },
   "scripts": {
     "test": "exit 0",

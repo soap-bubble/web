@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const styleLoaders = require('@soapbubble/style').loaders;
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const config = require('config');
 
 const dirJs = path.resolve(__dirname, 'client/js');
@@ -49,15 +49,20 @@ module.exports = (env) => {
   } else if (env.staging) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
-      apiHost: 'https://morpheus.soapbubble.online',
-      authHost: 'https://auth.soapbubble.online',
-      botHost: 'https://bot.staging.soapbubble.online',
+      apiHost: 'https://staging.soapbubble.online/morpheus',
+      authHost: 'https://staging.soapbubble.online/auth',
     });
   }
-  if (env.development) {
+  if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
     Object.assign(appConfig, {
-      self: 'http://localhost:8060',
-      morpheusServer: 'http://localhost:8050',
+      assetHost: 'https://dev.soapbubble.online/morpheus',
+      apiHost: 'https://dev.soapbubble.online/morpheus',
+      authHost: 'https://dev.soapbubble.online/auth',
+    });
+  } else if (env.development) {
+    Object.assign(appConfig, {
+      assetHost: 'http://localhost:8050',
+      apiHost: 'http://localhost:8050',
       authHost: 'http://localhost:4000',
     });
   }
@@ -78,7 +83,6 @@ module.exports = (env) => {
     'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
     config: JSON.stringify(appConfig),
   };
-
 
 
   let devtool = env.development ? 'source-map' : false;
@@ -130,13 +134,14 @@ module.exports = (env) => {
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
       mainFields,
+      symlinks: false,
     },
     module: {
       rules: styleLoaders(env).concat([
         {
           test: /\.js$/,
           include: [/generic-pool/, /@soapbubble/],
-          exclude: [/generic-pool\/node_modules/, /@soapbubble\/node_modules/],
+          exclude: [/generic-pool\/node_modules/, /@soapbubble\/.*\/node_modules/],
           use: ['babel-loader'],
         },
         {
@@ -180,7 +185,7 @@ module.exports = (env) => {
             {
               loader: 'postcss-loader',
             },
-          ]
+          ],
         },
         {
           test: /\.css$/,
@@ -205,7 +210,7 @@ module.exports = (env) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        chunkFilename: "[id].css",
+        chunkFilename: '[id].css',
         disable: !env.production,
       }),
       new HtmlWebpackPlugin({
@@ -228,7 +233,6 @@ module.exports = (env) => {
   if (env.electron) {
     const {
       output,
-      devtool,
     } = webpackConfig;
 
     // convert to an array to also build service worker
@@ -244,6 +248,7 @@ module.exports = (env) => {
         resolve: {
           extensions: ['.js', '.json'],
           mainFields,
+          symlinks: false,
         },
         module: {
           rules: styleLoaders(env).concat([

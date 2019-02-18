@@ -24,7 +24,6 @@ module.exports = function init(routes) {
       middlewares.push(vhostDomainsRouter(host));
     }
     middlewares.push(proxy(target));
-
     router.use(hostRoute, ...middlewares);
   }
   return router;

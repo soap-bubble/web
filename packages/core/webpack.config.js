@@ -2,7 +2,7 @@ const webpack = require('webpack');
 const styleLoaders = require('@soapbubble/style').loaders;
 const path = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const config = require('config');
 
 const dirJs = path.resolve(__dirname, 'client/src');
@@ -46,7 +46,13 @@ module.exports = (env) => {
       contentfulEnv: 'master',
     });
   }
-  if (env.development) {
+  if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
+    Object.assign(appConfig, {
+      self: 'https://dev.soapbubble.online',
+      morpheusServer: 'https://dev.soapbubble.online/morpheus',
+      authHost: 'https://dev.soapbubble.online/auth',
+    });
+  } else if (env.development) {
     Object.assign(appConfig, {
       self: 'http://localhost:8060',
       morpheusServer: 'http://localhost:8050',
@@ -114,7 +120,7 @@ module.exports = (env) => {
             {
               loader: 'postcss-loader',
             },
-          ]
+          ],
         },
         {
           test: /\.css$/,
@@ -132,7 +138,7 @@ module.exports = (env) => {
               },
             },
             { loader: 'postcss-loader' },
-          ]
+          ],
         },
         {
           test: /\.less/,
@@ -143,8 +149,8 @@ module.exports = (env) => {
           }, {
             loader: 'postcss-loader', // Run post css actions
           }, {
-            loader: 'sass-loader' // compiles Sass to CSS
-          }]
+            loader: 'sass-loader', // compiles Sass to CSS
+          }],
         },
         {
           test: /\.(scss|sass)$/,
@@ -155,14 +161,14 @@ module.exports = (env) => {
           }, {
             loader: 'postcss-loader', // Run post css actions
           }, {
-            loader: 'sass-loader' // compiles Sass to CSS
-          }]
+            loader: 'sass-loader', // compiles Sass to CSS
+          }],
         },
-        { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,   loader: "url-loader?limit=10000&mimetype=application/font-woff" },
-        { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,  loader: "url-loader?limit=10000&mimetype=application/font-woff" },
-        { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,    loader: "url-loader?limit=10000&mimetype=application/octet-stream" },
-        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/,    loader: "file-loader" },
-        { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,    loader: "url-loader?limit=10000&mimetype=image/svg+xml" },
+        { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+        { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
+        { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+        { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
+        { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' },
         {
           test: /\.png/,
           use: {
@@ -177,7 +183,7 @@ module.exports = (env) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        chunkFilename: "[id].css",
+        chunkFilename: '[id].css',
         disable: !env.production,
       }),
       new HtmlWebpackPlugin({

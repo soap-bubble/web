@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index",
-    "start:dev": "nodemon index --watch src",
+    "start:dev": "nodemon index --watch src --watch config",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",

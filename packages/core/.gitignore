@@ -44,3 +44,6 @@ client/build
 
 # secrets
 secrets.yml
+
+# local config
+config/local.*

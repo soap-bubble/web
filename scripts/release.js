@@ -8,15 +8,15 @@ const bump = argv.bump ? argv.bump : 'patch';
 run(`lerna publish -y --exact ${bump}`);
 const { version, packages } = require('../lerna.json')
 const versionStr = `v${version}`
-
-// push packages to npm & github (but only non-private repos)
-updated
-  .filter(update => !update.private)
-  .forEach(update => run(`lerna exec --scope ${update.name} -- npm publish --access=public`));
-
-// commit & push version bump at monorepo level
-run(`git add ${packages.join(' ')} lerna.json`)
-run(`git commit -am ${versionStr}`)
-run(`git tag ${versionStr} -m ${versionStr}`)
-run(`git push`)
-run(`git push --tags`)
+// 
+// // push packages to npm & github (but only non-private repos)
+// updated
+//   .filter(update => !update.private)
+//   .forEach(update => run(`lerna exec --scope ${update.name} -- npm publish --access=public`));
+//
+// // commit & push version bump at monorepo level
+// run(`git add ${packages.join(' ')} lerna.json`)
+// run(`git commit -am ${versionStr}`)
+// run(`git tag ${versionStr} -m ${versionStr}`)
+// run(`git push`)
+// run(`git push --tags`)

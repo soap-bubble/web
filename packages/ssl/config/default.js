@@ -1,4 +1,5 @@
 module.exports = {
+  debug: false,
   httpPort: 80,
   httpsPort: 443,
   mongoUri: 'mongodb://localhost/greenlock',

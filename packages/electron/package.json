@@ -9,7 +9,7 @@
     "start:watch": "cross-env NODE_ENV=development electromon .",
     "build": "babel src -d dist",
     "build:watch": "npm run build -- --watch",
-    "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"npm run start:watch\"",
+    "start:local:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"npm run start:watch\"",
     "package": "electron-forge package",
     "make": "electron-forge make"
   },

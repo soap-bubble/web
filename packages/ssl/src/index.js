@@ -67,12 +67,11 @@ const blueprint = builder({
   },
   store(mongoUri, isDebug) {
     return require('le-store-mongodb').create({
-      url: mongoUri,
+      mongoUri,
       debug: isDebug,
     });
   },
 });
-
 
 const factory = blueprint.construct();
 

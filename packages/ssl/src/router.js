@@ -11,6 +11,11 @@ function vhostDomainsRouter(configHost) {
   };
 }
 
+function logRequest(req, res, next) {
+  console.log(`${req.method} REQ ${req.path}`);
+  next();
+}
+
 module.exports = function init(routes) {
   const router = new Router();
   for (let route of routes) {
@@ -20,7 +25,7 @@ module.exports = function init(routes) {
       ssl,
       target,
     } = route;
-    const middlewares = [];
+    const middlewares = [logRequest];
     if (host || host.length) {
       middlewares.push(vhostDomainsRouter(host));
     }

@@ -2,6 +2,7 @@ const path = require('path');
 const config = require('config');
 const express = require('express');
 const builder = require('service-builder');
+const { uniq } = require('lodash');
 
 const router = require('./router');
 
@@ -17,7 +18,7 @@ const blueprint = builder({
     return config.get('routes');
   },
   domains(config) {
-    return Object.values(config.routes).map(r => r.host);
+    return uniq(Object.values(config.routes).map(r => r.host));
   },
   email(config) {
     return config.get('email');

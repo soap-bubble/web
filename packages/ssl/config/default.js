@@ -2,28 +2,20 @@ module.exports = {
   debug: false,
   httpPort: 80,
   httpsPort: 443,
-  mongoUri: 'mongodb://localhost/greenlock',
+  mongoUri: 'mongodb://mongo-cluster/greenlock?replicaSet=rs0',
   routes: [
     {
       host: 'soapbubble.online',
-      route: 'core',
-      ssl: true,
+      route: '/auth',
+      target: 'http://auth:4000',
     }, {
-      host: 'docker.soapbubble.online',
-      route: 'docker',
-      ssl: true,
+      host: 'soapbubble.online',
+      route: '/morpheus',
+      target: 'http://morpheus:8050',
     }, {
-      host: 'rancher.soapbubble.online',
-      route: 'rancher',
-      ssl: true,
-    }, {
-      host: 'rancher2.soapbubble.online',
-      route: 'rancher',
-      ssl: true,
-    }, {
-      host: 'morpheus.soapbubble.online',
-      route: 'morpheus',
-      ssl: true,
-    },
+      host: 'soapbubble.online',
+      route: '/',
+      target: 'http://core:8060',
+    }
   ],
 };

@@ -17,13 +17,21 @@ module.exports = function init(routes) {
     const {
       host,
       route: hostRoute,
+      ssl,
       target,
     } = route;
     const middlewares = [];
     if (host || host.length) {
       middlewares.push(vhostDomainsRouter(host));
     }
-    middlewares.push(proxy(target));
+    const proxyOpts = {};
+    if (ssl === 'self') {
+      proxyOpts.proxyReqOptDecorator = (proxyReqOpts, originalReq) => {
+        proxyReqOpts.rejectUnauthorized = false
+        return proxyReqOpts;
+      };
+    }
+    middlewares.push(proxy(target, proxyOpts));
     router.use(hostRoute, ...middlewares);
   }
   return router;

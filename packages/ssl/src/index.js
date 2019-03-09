@@ -38,8 +38,8 @@ const blueprint = builder({
   httpsPort(config) {
     return Number(config.get('httpsPort'));
   },
-  mongoUri(config) {
-    return config.get('mongoUri');
+  mongoUri(config, isDebug) {
+    return `${config.get('mongoUri')}${isDebug ? '-staging' : ''}`;
   },
   httpChallenge(isDebug) {
     return require('le-challenge-standalone').create({

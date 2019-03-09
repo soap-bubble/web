@@ -42,9 +42,9 @@ module.exports = (env) => {
   if ((env.production || env.cordova || env.electron) && !env.debug) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
-      apiHost: 'https://morpheus.soapbubble.online',
-      authHost: 'https://auth.soapbubble.online',
-      botHost: 'https://bot.soapbubble.online',
+      apiHost: 'https://soapbubble.online/morpheus',
+      authHost: 'https://soapbubble.online/auth',
+      botHost: 'https://soapbubble.online/bot',
     });
   } else if (env.staging) {
     Object.assign(appConfig, {

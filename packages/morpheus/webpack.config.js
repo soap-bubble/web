@@ -56,10 +56,11 @@ module.exports = (env) => {
   }
   if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
     Object.assign(appConfig, {
-      assetHost: 'https://dev.soapbubble.online/morpheus',
+      assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://dev.soapbubble.online/morpheus',
       authHost: 'https://dev.soapbubble.online/auth',
     });
+    publicPath = '/morpheus/';
   } else if (env.development) {
     Object.assign(appConfig, {
       assetHost: 'http://localhost:8050',

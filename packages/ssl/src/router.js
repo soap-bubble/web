@@ -6,7 +6,7 @@ function vhostDomainsRouter(configHost, cb) {
   const domains = Array.isArray(configHost) ? configHost : [configHost];
   return (req, res, next) => {
     if (domains.includes(req.headers.host)) {
-      cb();
+      cb(req, res, next);
     } else {
       next();
     }
@@ -41,8 +41,14 @@ module.exports = function init(routes, isDebug) {
     if (isDebug) {
       middlewares.push(logRequest);
     }
+    let handler;
     if (host || host.length) {
-      middlewares.push(vhostDomainsRouter(host));
+      middlewares.push(
+        vhostDomainsRouter(
+          host,
+          (req, res, next) => handler && handler(req, res, next) || next(),
+        )
+      );
     }
     if (target) {
       const proxyOpts = {};
@@ -52,9 +58,9 @@ module.exports = function init(routes, isDebug) {
           return proxyReqOpts;
         };
       }
-      middlewares.push(proxy(target, proxyOpts));
+      handler = proxy(target, proxyOpts);
     } else if (redirect) {
-      middlewares.push(redirectMiddleware(redirect));
+      handler = redirectMiddleware(redirect);
     }
 
     router.use(hostRoute, ...middlewares);

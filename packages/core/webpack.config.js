@@ -34,8 +34,8 @@ module.exports = (env) => {
   if (env.production) {
     Object.assign(appConfig, {
       self: 'https://soapbubble.online',
-      morpheusServer: 'https://morpheus.soapbubble.online',
-      authHost: 'https://auth.soapbubble.online',
+      morpheusServer: 'https://soapbubble.online/morpheus',
+      authHost: 'https://soapbubble.online/auth',
       contentfulEnv: 'master',
     });
   } else if (env.staging) {

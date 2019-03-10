@@ -5,7 +5,7 @@ const { Router } = require('express');
 function vhostDomainsRouter(configHost, cb) {
   const domains = Array.isArray(configHost) ? configHost : [configHost];
   return (req, res, next) => {
-    if (domains.includes(req.hostname)) {
+    if (domains.includes(req.headers.host)) {
       cb(req, res, next);
     } else {
       next();
@@ -29,6 +29,8 @@ function redirectMiddleware(target) {
 
 module.exports = function init(routes) {
   const router = new Router();
+  router.use(logRequest);
+  const middlewarePerRoute = {};
   for (let route of routes) {
     const {
       host,
@@ -37,17 +39,9 @@ module.exports = function init(routes) {
       ssl,
       target,
     } = route;
-    const middlewares = [];
-    middlewares.push(logRequest);
-    let handler;
-    if (host || host.length) {
-      middlewares.push(
-        vhostDomainsRouter(
-          host,
-          (req, res, next) => handler && handler(req, res, next) || next(),
-        )
-      );
-    }
+    middlewarePerRoute[hostRoute] = middlewarePerRoute[hostRoute] || [];
+    const middlewares = middlewarePerRoute[hostRoute];
+
     if (target) {
       const proxyOpts = {};
       if (ssl === 'self') {
@@ -56,12 +50,34 @@ module.exports = function init(routes) {
           return proxyReqOpts;
         };
       }
-      handler = proxy(target, proxyOpts);
+      middlewares.push({
+        host,
+        type: 'proxy',
+        middleware: vhostDomainsRouter(
+          host,
+          proxy(target, proxyOpts),
+        ),
+      });
     } else if (redirect) {
-      handler = redirectMiddleware(redirect);
+      middlewares.push({
+        host,
+        type: 'redirect',
+        middleware: vhostDomainsRouter(
+          host,
+          redirectMiddleware(redirect),
+        ),
+      });
     }
-
-    router.use(hostRoute, ...middlewares);
+  }
+  for (let [path, middlewares] of Object.entries(middlewarePerRoute)) {
+    for (let { middleware, type, host } of middlewares.filter(({ type }) => type === 'redirect')) {
+      console.log(type, host, path);
+      router.use(path, middleware);
+    }
+    for (let { middleware, type, host } of middlewares.filter(({ type }) => type === 'proxy')) {
+      console.log(type, host, path);
+      router.use(path, middleware);
+    }
   }
   return router;
 }

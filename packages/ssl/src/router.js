@@ -16,12 +16,17 @@ function logRequest(req, res, next) {
   next();
 }
 
+function redirectMiddleware(target) {
+  return (req, res) => res.redirect(target);
+}
+
 module.exports = function init(routes, isDebug) {
   const router = new Router();
   for (let route of routes) {
     const {
       host,
       route: hostRoute,
+      redirect,
       ssl,
       target,
     } = route;
@@ -32,14 +37,19 @@ module.exports = function init(routes, isDebug) {
     if (host || host.length) {
       middlewares.push(vhostDomainsRouter(host));
     }
-    const proxyOpts = {};
-    if (ssl === 'self') {
-      proxyOpts.proxyReqOptDecorator = (proxyReqOpts, originalReq) => {
-        proxyReqOpts.rejectUnauthorized = false
-        return proxyReqOpts;
-      };
+    if (target) {
+      const proxyOpts = {};
+      if (ssl === 'self') {
+        proxyOpts.proxyReqOptDecorator = (proxyReqOpts, originalReq) => {
+          proxyReqOpts.rejectUnauthorized = false
+          return proxyReqOpts;
+        };
+      }
+      middlewares.push(proxy(target, proxyOpts));
+    } else if (hostRedirect) {
+      middlewares.push(redirectMiddleware(redirect));
     }
-    middlewares.push(proxy(target, proxyOpts));
+
     router.use(hostRoute, ...middlewares);
   }
   return router;

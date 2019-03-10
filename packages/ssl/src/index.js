@@ -50,6 +50,7 @@ const blueprint = builder({
   greenlockOpts(app, store, email, httpChallenge, isDebug, server, domains) {
     return {
       app,
+      approvedDomains: domains,
       email,
       server,
       store,
@@ -59,7 +60,6 @@ const blueprint = builder({
       },
       configDir: path.resolve(__dirname, '.acme'),
       agreeTos: true,
-      approvedDomains: domains,
       communityMember: false,
     };
   },

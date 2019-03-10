@@ -46,7 +46,7 @@ module.exports = (env) => {
       authHost: 'https://soapbubble.online/auth',
       botHost: 'https://soapbubble.online/bot',
     });
-    publicPath = '/morpheus';
+    publicPath = '/morpheus/';
   } else if (env.staging) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',

@@ -2,22 +2,29 @@ const proxy = require('express-http-proxy');
 const { Router } = require('express');
 
 // Only accepts connections whose `Host` header matches the provided domains.
-function vhostDomainsRouter(configHost) {
+function vhostDomainsRouter(configHost, cb) {
   const domains = Array.isArray(configHost) ? configHost : [configHost];
   return (req, res, next) => {
     if (domains.includes(req.headers.host)) {
+      cb();
+    } else {
       next();
     }
   };
 }
 
 function logRequest(req, res, next) {
-  console.log(`${req.method} ${req.protocol}://${req.hostname}${req.url}`);
+  console.log(`${req.method} ${req.protocol}://${req.hostname}${req.path}`);
   next();
 }
 
 function redirectMiddleware(target) {
-  return (req, res) => res.redirect(target);
+  return (req, res, next) => {
+    if (['GET', 'POST'].includes(req.method)) {
+      return res.redirect(`${target}${req.path}`);
+    }
+    next();
+  }
 }
 
 module.exports = function init(routes, isDebug) {
@@ -46,7 +53,7 @@ module.exports = function init(routes, isDebug) {
         };
       }
       middlewares.push(proxy(target, proxyOpts));
-    } else if (hostRedirect) {
+    } else if (redirect) {
       middlewares.push(redirectMiddleware(redirect));
     }
 

@@ -5,7 +5,7 @@ const { Router } = require('express');
 function vhostDomainsRouter(configHost, cb) {
   const domains = Array.isArray(configHost) ? configHost : [configHost];
   return (req, res, next) => {
-    if (domains.includes(req.headers.host)) {
+    if (domains.includes(req.hostname)) {
       cb(req, res, next);
     } else {
       next();
@@ -27,7 +27,7 @@ function redirectMiddleware(target) {
   }
 }
 
-module.exports = function init(routes, isDebug) {
+module.exports = function init(routes) {
   const router = new Router();
   for (let route of routes) {
     const {
@@ -38,9 +38,7 @@ module.exports = function init(routes, isDebug) {
       target,
     } = route;
     const middlewares = [];
-    if (isDebug) {
-      middlewares.push(logRequest);
-    }
+    middlewares.push(logRequest);
     let handler;
     if (host || host.length) {
       middlewares.push(

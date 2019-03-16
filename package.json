@@ -14,6 +14,7 @@
     "build:android": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:android",
     "build:ios": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:ios",
     "start:dev": "lerna exec npm run start:dev --parallel --no-bail",
+    "start:dev:ssl": "SOAPBUBBLE_LOCAL_SSL=true npm run start:dev",
     "release": "node ./scripts/release",
     "docker": "node ./scripts/docker"
   },

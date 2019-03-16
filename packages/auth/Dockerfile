@@ -1,4 +1,4 @@
-FROM node:boron
+FROM node:dubnium
 RUN mkdir -p /opt/app
 COPY package.json /opt/app/
 WORKDIR /opt/app

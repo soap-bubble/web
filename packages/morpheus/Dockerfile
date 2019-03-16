@@ -1,4 +1,4 @@
-FROM node:boron
+FROM node:dubnium
 # Doing this first because we don't want to change this layer often
 RUN mkdir -p /opt/app
 COPY package.json /opt/app/

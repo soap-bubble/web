@@ -18,7 +18,7 @@ const blueprint = builder({
     return config.get('routes');
   },
   domains(config) {
-    return uniq(Object.values(config.routes).map(r => r.host));
+    return uniq(config.routes.map(r => r.host));
   },
   email(config) {
     return config.get('email');
@@ -58,7 +58,6 @@ const blueprint = builder({
       challenges: {
         'http-01': httpChallenge,
       },
-      configDir: path.resolve(__dirname, '.acme'),
       agreeTos: true,
       communityMember: false,
     };
@@ -76,7 +75,7 @@ const blueprint = builder({
 
 const factory = blueprint.construct();
 
-factory.$((greenlock, httpPort, httpsPort) => {
-  console.log(`Listening on ${httpPort} and ${httpsPort}`);
+factory.$((greenlock, httpPort, httpsPort, domains) => {
+  console.log(`Listening on ${httpPort} and ${httpsPort} for ${domains.join(', ')}`);
   greenlock.listen(httpPort, httpsPort);
 });

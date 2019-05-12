@@ -30,6 +30,7 @@ app.use('/GameDB', express.static(gameDbPath));
 app.use(express.static('public'));
 app.use('/api', routes);
 
+
 app.db = db()
   .then(() => {
     getModel('Scene').find().exec().then((scenes) => {

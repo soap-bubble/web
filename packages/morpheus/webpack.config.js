@@ -8,7 +8,7 @@ const config = require('config');
 const dirJs = path.resolve(__dirname, 'client/js');
 const dirParent = path.resolve(__dirname, '../');
 const dirSharedComponents = [
-  path.join(dirParent, 'components'),
+  path.join(dirParent, 'components', 'src'),
   path.join(dirParent, 'style'),
 ];
 
@@ -94,6 +94,8 @@ module.exports = (env) => {
     devtool = 'inline-source-map';
   }
 
+  console.log(dirSharedComponents)
+
   let webpackConfig = {
     mode: nodeEnv,
     target,
@@ -138,19 +140,17 @@ module.exports = (env) => {
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
       mainFields,
-      symlinks: false,
     },
     module: {
       rules: styleLoaders(env).concat([
         {
           test: /\.js$/,
-          include: [/generic-pool/, /@soapbubble/],
-          exclude: [/generic-pool\/node_modules/, /@soapbubble\/.*\/node_modules/],
+          include: [/generic-pool/],
+          exclude: [/generic-pool\/node_modules/],
           use: ['babel-loader'],
         },
         {
           test: /\.jsx?$/,
-          exclude: [/node_modules/],
           include: dirSharedComponents.concat([
             dirJs,
           ]),
@@ -193,7 +193,7 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: [/@soapbubble/],
+          include: dirSharedComponents,
           exclude: [/@soapbubble\/style\/dist\/soapbubble.css/],
           use: [
             {

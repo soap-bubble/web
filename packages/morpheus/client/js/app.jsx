@@ -63,13 +63,13 @@ window.onload = () => {
     });
 
   const root = document.getElementById('root');
+  window.addEventListener('resize', resizeToWindow);
   render(
     <Provider store={store}>
       <Game className="game" />
     </Provider>,
     root,
   );
-  window.addEventListener('resize', resizeToWindow);
 
   if (qp.channel) {
     socketPromise().then((socket) => {

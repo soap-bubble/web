@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/ssl",
-  "version": "0.0.1",
+  "version": "1.12.0-alpha.0",
   "description": "Letsencrypt SSL using greenlock and router",
   "private": true,
   "main": "index.js",

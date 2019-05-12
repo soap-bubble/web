@@ -1,5 +1,5 @@
 import React from 'react';
-import { redirect } from 'react-isomorphic-render'
+import { redirect } from 'react-router';
 import { connect } from 'react-redux';
 import { Button } from 'react-bootstrap';
 import config from '../config';
@@ -14,9 +14,9 @@ const {
 
 class Settings extends React.Component {
   render() {
-    const { isLoggedIn, onSignOut } = this.props
+    const { isLoggedIn, onSignOut } = this.props;
     if (isLoggedIn) {
-      return <div
+      return (<div
         className="container"
       >
         <div className="centered">
@@ -24,7 +24,7 @@ class Settings extends React.Component {
             Sign out
           </Button>
         </div>
-      </div>;
+      </div>);
     }
     return null;
   }
@@ -42,7 +42,7 @@ function mapDispatchToProps(dispatch) {
     onSignOut() {
       dispatch(loginActions.logout())
         .then(dispatch(redirect('/')));
-    }
+    },
   };
 }
 

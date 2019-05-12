@@ -1,5 +1,5 @@
 import React from 'react';
-import { redirect } from 'react-isomorphic-render';
+import { redirect } from 'react-router';
 import { connect } from 'react-redux';
 import {
   login,

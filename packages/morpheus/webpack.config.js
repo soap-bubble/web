@@ -94,7 +94,7 @@ module.exports = (env) => {
     devtool = 'inline-source-map';
   }
 
-  console.log(dirSharedComponents)
+  console.log(dirSharedComponents);
 
   let webpackConfig = {
     mode: nodeEnv,
@@ -145,8 +145,8 @@ module.exports = (env) => {
       rules: styleLoaders(env).concat([
         {
           test: /\.js$/,
-          include: [/generic-pool/],
-          exclude: [/generic-pool\/node_modules/],
+          include: [/generic-pool/, /@soapbubble/],
+          exclude: [/generic-pool\/node_modules/, /@soapbubble\/.*\/node_modules/],
           use: ['babel-loader'],
         },
         {
@@ -193,7 +193,7 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: dirSharedComponents,
+          include: [/@soapbubble/],
           exclude: [/@soapbubble\/style\/dist\/soapbubble.css/],
           use: [
             {

@@ -209,17 +209,13 @@ export function resize({
         },
       },
     });
-    function setSize({ canvas, camera, renderer, dimensionSelector }) {
+    function setSize({ camera, renderer, dimensionSelector }) {
       if (camera && renderer) {
         const { width: w, height: h }
           = dimensionSelector ? dimensionSelector(getState()) : { width, height };
         renderer.setSize(w, h);
         camera.aspect = w / h;
         camera.updateProjectionMatrix();
-      }
-      if (canvas) {
-        canvas.width = width;
-        canvas.height = height;
       }
     }
 

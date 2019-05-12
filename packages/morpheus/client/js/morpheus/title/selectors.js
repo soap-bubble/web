@@ -15,12 +15,12 @@ export const titleDimensions = createSelector(
 
 export const titleStyle = createSelector(
   state => gameSelectors.location(state),
-  titleDimensions,
+  state => gameSelectors.dimensions(state),
   ({ x, y }, { width, height }) => ({
-    width: `${width}px`,
-    height: `${height}px`,
-    left: `${x}px`,
-    top: `${y}px`,
+    width,
+    height,
+    left: x,
+    top: y,
   }),
 );
 

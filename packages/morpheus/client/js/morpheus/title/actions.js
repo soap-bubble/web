@@ -17,7 +17,6 @@ import {
 import {
   actions as gamestateActions,
 } from 'morpheus/gamestate';
-import Promise from 'bluebird';
 import {
   titleDimensions,
 } from './selectors';
@@ -79,11 +78,6 @@ export function canvasCreated(canvas) {
       const backgroundActions = dispatch(backgroundFactory());
       const introActions = dispatch(introFactory({
         canvas,
-      }));
-      await Promise.delay(1);
-      dispatch(gameActions.resize({
-        width: window.innerWidth,
-        height: window.innerHeight,
       }));
       const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
@@ -151,6 +145,11 @@ export function canvasCreated(canvas) {
       });
       lightsActions.start();
       backgroundActions.start();
+
+      dispatch(gameActions.resize({
+        width,
+        height,
+      }));
 
       dispatch({
         type: SET_RENDER_ELEMENTS,

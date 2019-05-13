@@ -34,9 +34,7 @@ module.exports = (env) => {
     }
     return 'index.ejs';
   })();
-  const cssName = env.production ? 'morpheus.[contenthash].css' : 'morpheus.css';
   const jsName = env.production ? '[name].[hash].js' : '[name].js';
-  const vendorName = env.production ? '[name].[hash].js' : '[name].js';
   const appConfig = {};
 
   if ((env.production || env.cordova || env.electron) && !env.debug) {
@@ -88,18 +86,19 @@ module.exports = (env) => {
     config: JSON.stringify(appConfig),
   };
 
+  const devToolOptions = {};
 
-  let devtool = env.development ? 'source-map' : false;
-  if (env.cordova && env.development) {
-    devtool = 'inline-source-map';
+  if (env.development && !env.cordova) {
+    devToolOptions.filename = '[file].map';
+    if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
+      // devToolOptions.publicPath = 'https://dev.soapbubble.online/morpheus/';
+    }
   }
-
-  console.log(dirSharedComponents);
 
   let webpackConfig = {
     mode: nodeEnv,
     target,
-    devtool,
+    devtool: false,
     entry: {
       app: './client/js/app.jsx',
       browser: './client/js/browser.js',
@@ -144,7 +143,7 @@ module.exports = (env) => {
     module: {
       rules: styleLoaders(env).concat([
         {
-          test: /\.js$/,
+          test: /\.jsx?$/,
           include: [/generic-pool/, /@soapbubble/],
           exclude: [/generic-pool\/node_modules/, /@soapbubble\/.*\/node_modules/],
           use: ['babel-loader'],
@@ -193,7 +192,7 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: [/@soapbubble/],
+          include: [/@soapbubble/].concat(dirSharedComponents),
           exclude: [/@soapbubble\/style\/dist\/soapbubble.css/],
           use: [
             {
@@ -232,7 +231,7 @@ module.exports = (env) => {
         chunks: ['vendor', 'browser'],
       }),
       new webpack.DefinePlugin(webpackDefineConfig),
-    ],
+    ].concat(env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : []),
   };
   if (env.electron) {
     const {
@@ -244,7 +243,7 @@ module.exports = (env) => {
       webpackConfig,
       {
         target,
-        devtool,
+        devtool: false,
         output,
         entry: {
           sw: './client/js/sw.js',

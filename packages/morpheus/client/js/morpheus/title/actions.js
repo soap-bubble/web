@@ -79,6 +79,10 @@ export function canvasCreated(canvas) {
       const introActions = dispatch(introFactory({
         canvas,
       }));
+      dispatch(gameActions.resize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }));
       const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
       const renderer = createRenderer({
@@ -146,10 +150,10 @@ export function canvasCreated(canvas) {
       lightsActions.start();
       backgroundActions.start();
 
-      dispatch(gameActions.resize({
-        width,
-        height,
-      }));
+      const dimensions = titleDimensions(getState());
+      renderer.setSize(dimensions.width, dimensions.height);
+      camera.aspect = dimensions.width / dimensions.height;
+      camera.updateProjectionMatrix();
 
       dispatch({
         type: SET_RENDER_ELEMENTS,

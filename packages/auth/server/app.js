@@ -11,10 +11,17 @@ import permissions from './permissions';
 
 const logger = createLogger('app');
 
+function app(config) {
+  const router = new express.Router();
+  const app = express();
+  app.use(config.get('rootPath'), router);
+  return router;
+}
+
 define({
   db,
   permissions,
-  app: () => express(),
+  app,
   models: () => models,
   config: () => config,
   createLogger: () => createLogger,

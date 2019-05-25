@@ -15,6 +15,7 @@ module.exports = {
       __format: 'json',
     },
   },
+  rootPath: 'ROOT_PATH',
   passport: {
     strategies: {
       google: {

@@ -1,6 +1,4 @@
-import React from 'react';
-import { redirect } from 'react-isomorphic-render';
-import { createSelector } from 'redux';
+import { redirect } from 'react-router';
 import { connect } from 'react-redux';
 import * as User from '../../User';
 import SelectionList from '../../../components/SelectionList';

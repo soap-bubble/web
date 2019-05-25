@@ -1,6 +1,6 @@
 {
   "name": "@soapbubble/ssl",
-  "version": "0.0.1",
+  "version": "1.12.0-alpha.1",
   "description": "Letsencrypt SSL using greenlock and router",
   "private": true,
   "main": "index.js",
@@ -19,7 +19,7 @@
     "greenlock-express": "^2.6.7",
     "le-acme-core": "^2.1.4",
     "le-challenge-standalone": "^2.1.0",
-    "le-store-mongodb": "^2.0.0",
+    "le-store-mongodb": "^2.1.0",
     "lodash": "^4.17.11",
     "service-builder": "^1.1.1"
   },

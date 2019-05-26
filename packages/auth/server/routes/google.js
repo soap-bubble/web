@@ -1,14 +1,14 @@
 import passport from 'passport';
 import GoogleAuth from 'google-auth-library';
 
-export default function (app, db, config, createLogger) {
+export default function (baseRoute, db, config, createLogger) {
   const CLIENT_ID = config.passport.strategies.google.clientID;
   const auth = new GoogleAuth();
   const googleClient = new auth.OAuth2(CLIENT_ID, '', '');
 
   const logger = createLogger('routes:google');
 
-  app.post('/google/token', (req, res) => {
+  baseRoute.post('/google/token', (req, res) => {
     const { idtoken: token } = req.body;
     logger.info('Requesting login token for google');
     googleClient.verifyIdToken(
@@ -45,19 +45,19 @@ export default function (app, db, config, createLogger) {
     );
   });
 
-  app.get('/auth/me', passport.authenticate(), (req, res) => {
+  baseRoute.get('/auth/me', passport.authenticate(), (req, res) => {
     res.status(200).send(req.user);
   });
 
-  app.get('/google/oauth', (req, res) => {
+  baseRoute.get('/google/oauth', (req, res) => {
     res.status(200).send({
       client_id: config.passport.strategies.google.clientID,
       redirect_uri: config.passport.strategies.google.callbackURL,
     });
   });
 
-  app.get('/login/google', passport.authenticate('google', { scope: ['email'] }));
-  app.get(
+  baseRoute.get('/login/google', passport.authenticate('google', { scope: ['email'] }));
+  baseRoute.get(
     '/google/callback',
     passport.authenticate('google', { failureRedirect: '/login/google' }),
     (req, res) => {
@@ -66,7 +66,7 @@ export default function (app, db, config, createLogger) {
     },
   );
 
-  app.get(
+  baseRoute.get(
     '/google/login/token',
     passport.authenticate('google-login-token'),
     (req, res) => {

@@ -1,12 +1,12 @@
 import axios from 'axios';
 import qs from 'qs';
 
-export default function (app, db, config, createLogger) {
+export default function (baseRoute, db, config, createLogger) {
   const logger = createLogger('routes:twitch');
   const { scope, state, clientID, clientSecret, callbackURL } = config.passport.strategies.twitch;
 
   const Bot = db.model('Bot');
-  app.get(
+  baseRoute.get(
     '/twitch/callback',
     (req, res) => {
       const { code } = req.query;
@@ -41,7 +41,7 @@ export default function (app, db, config, createLogger) {
           });
 
           await bot.save();
-          res.redirect('http://localhost:8060/admin/bot');
+          res.redirect('/admin/bot');
         }
       }, e => {
         res.status(e.response.status).send(e.response.data)

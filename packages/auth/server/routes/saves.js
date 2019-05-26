@@ -1,9 +1,9 @@
 import uuid from 'uuid';
 import passport from 'passport';
 
-export default function userRoute(app, db, createLogger) {
+export default function userRoute(baseRoute, db, createLogger) {
   const logger = createLogger('routes:saves');
-  app.post('/NewSaveGame', passport.authenticate('google-login-token'), (req, res) => {
+  baseRoute.post('/NewSaveGame', passport.authenticate('google-login-token'), (req, res) => {
     logger.info({
       route: 'SaveGame',
       method: 'POST',
@@ -36,7 +36,7 @@ export default function userRoute(app, db, createLogger) {
       });
   });
 
-  app.post('/SaveGame', passport.authenticate('google-login-token'), (req, res) => {
+  baseRoute.post('/SaveGame', passport.authenticate('google-login-token'), (req, res) => {
     const {
       saveId,
       gamestates,
@@ -77,7 +77,7 @@ export default function userRoute(app, db, createLogger) {
       });
   });
 
-  app.get('/GetAllSaveMeta', passport.authenticate('google-login-token'), (req, res) => {
+  baseRoute.get('/GetAllSaveMeta', passport.authenticate('google-login-token'), (req, res) => {
     const Save = db.model('Save');
     Save.findAllForPlayer(req.user.id)
       .then((saves) => {
@@ -108,7 +108,7 @@ export default function userRoute(app, db, createLogger) {
       });
   });
 
-  app.post('/GetSaveGame', passport.authenticate('google-login-token'), (req, res) => {
+  baseRoute.post('/GetSaveGame', passport.authenticate('google-login-token'), (req, res) => {
     const Save = db.model('Save');
     const {
       saveId,

@@ -11,19 +11,25 @@ import permissions from './permissions';
 
 const logger = createLogger('app');
 
-function app(config) {
-  const router = new express.Router();
-  const app = express();
-  app.use(config.get('rootPath'), router);
-  return router;
-}
-
 define({
   db,
   permissions,
-  app,
+  app: () => express(),
+  baseRoute(app) {
+    const router = new express.Router();
+    app.use(config.rootPath, router);
+    return router;
+  },
   models: () => models,
-  config: () => config,
+  config: () => {
+    if (process.env.SOAPBUBBLE_LOCAL_SSL) {
+      return {
+        ...config,
+        rootPath: '/auth',
+      };
+    }
+    return config;
+  },
   createLogger: () => createLogger,
 });
 init();

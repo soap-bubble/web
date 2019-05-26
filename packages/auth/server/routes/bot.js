@@ -2,7 +2,7 @@ import uuid from 'uuid';
 import passport from 'passport';
 
 
-export default function userRoute(app, db, createLogger) {
+export default function userRoute(baseRoute, db, createLogger) {
   const logger = createLogger('routes:bot');
 
   function initBot() {
@@ -42,7 +42,7 @@ export default function userRoute(app, db, createLogger) {
     });
   }
 
-  app.get('/GetBotSettings', botAuthMiddleware, (req, res) => {
+  baseRoute.get('/GetBotSettings', botAuthMiddleware, (req, res) => {
     logger.info({
       route: 'GetBotSettings',
       method: 'GET',
@@ -51,7 +51,7 @@ export default function userRoute(app, db, createLogger) {
     res.status(200).send(res.bot);
   });
 
-  app.post('/SaveBotSettings', botAuthMiddleware, (req, res) => {
+  baseRoute.post('/SaveBotSettings', botAuthMiddleware, (req, res) => {
     logger.info({
       route: 'SaveBotSettings',
       method: 'POST',

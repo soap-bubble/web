@@ -3,7 +3,7 @@ import uuid from 'uuid/v4';
 
 import passport from 'passport';
 
-export default function (app, db, createLogger) {
+export default function (baseRoute, db, createLogger) {
   const logger = createLogger('routes:oauth');
 
   // Create OAuth 2.0 server
@@ -226,7 +226,7 @@ export default function (app, db, createLogger) {
     server.errorHandler(),
   ];
 
-  app.get('/oauth/decision', decision);
-  app.post('/oauth/token', token);
-  app.get('/oauth/auth', authorization);
+  baseRoute.get('/oauth/decision', decision);
+  baseRoute.post('/oauth/token', token);
+  baseRoute.get('/oauth/auth', authorization);
 }

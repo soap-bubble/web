@@ -1,10 +1,10 @@
 import uuid from 'uuid';
 import passport from 'passport';
 
-export default function userRoute(app, createLogger, db, permissions) {
+export default function userRoute(baseRoute, createLogger, db, permissions) {
   const logger = createLogger('routes:user');
 
-  app.get(
+  baseRoute.get(
     '/GetAllUsers',
     passport.authenticate('google-login-token'),
     (req, res) => {
@@ -32,12 +32,12 @@ export default function userRoute(app, createLogger, db, permissions) {
     },
   );
 
-  app.get('/usersTest', (req, res) => {
+  baseRoute.get('/usersTest', (req, res) => {
     logger.info('/usersTest');
     res.status(200).send(`ok ${req.user && req.user.displayName}`);
   });
 
-  app.post('/user/save', passport.authenticate(), (req, res) => {
+  baseRoute.post('/user/save', passport.authenticate(), (req, res) => {
     logger.info({
       route: '/user/save',
       method: 'POST',
@@ -57,7 +57,7 @@ export default function userRoute(app, createLogger, db, permissions) {
     return res.status(403).send('not logged in');
   });
 
-  app.get('/user/save/:id', passport.authenticate('google-login-token'), (req, res) => {
+  baseRoute.get('/user/save/:id', passport.authenticate('google-login-token'), (req, res) => {
     const gamestate = req.user.settings.saves.find(save => save.id === req.params.id);
     if (gamestate) {
       return res.status(200).send(gamestate);
@@ -67,7 +67,7 @@ export default function userRoute(app, createLogger, db, permissions) {
     });
   });
 
-  app.get('/user/saves', passport.authenticate('google-login-token'), (req, res) => {
+  baseRoute.get('/user/saves', passport.authenticate('google-login-token'), (req, res) => {
     const saves = req.user.settings.saves.map(({ id, timestamp }) => ({
       id,
       timestamp,

@@ -1,6 +1,7 @@
 {
   "devDependencies": {
     "axios": "^0.18.0",
+    "cross-env": "^5.2.0",
     "cross-spawn": "^5.1.0",
     "lerna": "^3.13.4",
     "minimist": "^1.2.0",
@@ -14,7 +15,7 @@
     "build:android": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:android",
     "build:ios": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:ios",
     "start:dev": "lerna exec npm run start:dev --parallel --no-bail",
-    "start:dev:ssl": "SOAPBUBBLE_LOCAL_SSL=true npm run start:dev",
+    "start:dev:ssl": "cross-env SOAPBUBBLE_LOCAL_SSL=true npm run start:dev",
     "release": "node ./scripts/release",
     "docker": "node ./scripts/docker"
   },

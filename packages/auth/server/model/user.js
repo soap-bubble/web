@@ -1,4 +1,5 @@
 import { Schema } from 'mongoose';
+import Role from './role';
 
 const user = new Schema({
   id: String,
@@ -11,7 +12,7 @@ const user = new Schema({
   settings: {
     saves: [{ type: Schema.Types.Mixed }],
   },
-  roles: [{ type: String }],
+  roles: [String],
   admin: Boolean,
 });
 

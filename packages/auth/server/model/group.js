@@ -1,14 +1,9 @@
 import { Schema } from 'mongoose';
+import Role from './role';
 
 const group = new Schema({
-  id: String,
   name: String,
-  entitlements: [{
-    name: String,
-  }],
-  users: [{
-    id: String,
-  }],
+  roles: [Role],
 });
 
 export default group;

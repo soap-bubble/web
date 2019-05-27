@@ -29,7 +29,6 @@ function redirectMiddleware(target) {
 
 module.exports = function init(routes) {
   const router = new Router();
-  router.use(logRequest);
   const middlewarePerRoute = {};
   for (let route of routes) {
     const {
@@ -50,12 +49,16 @@ module.exports = function init(routes) {
           return proxyReqOpts;
         };
       }
+      const proxyMiddleware = proxy(target, proxyOpts);
       middlewares.push({
         host,
         type: 'proxy',
         middleware: vhostDomainsRouter(
           host,
-          proxy(target, proxyOpts),
+          (req, res, next) => {
+            console.log(`${req.method} ${req.protocol}://${req.hostname}${req.originalUrl} => ${target}${req.path}`);
+            proxyMiddleware(req, res, next);
+          },
         ),
       });
     } else if (redirect) {

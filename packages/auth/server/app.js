@@ -1,5 +1,6 @@
 import config from 'config';
 import express from 'express';
+import morgan from 'morgan';
 import createLogger from './logger';
 import $, { define, init } from './factory';
 import * as models from './model';
@@ -18,6 +19,7 @@ define({
   baseRoute(app) {
     const router = new express.Router();
     app.use(config.rootPath, router);
+    router.use(morgan('combined'));
     return router;
   },
   models: () => models,

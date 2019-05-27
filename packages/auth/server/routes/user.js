@@ -16,6 +16,7 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
           error: 'Not Authorized',
         });
       }
+      logger.info('GetAllUsers');
       return db.model('User').find().exec()
         .then((users) => {
           res.status(200).send(users);

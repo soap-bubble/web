@@ -1,7 +1,7 @@
 {
   "name": "@soapbubble/gamedb",
   "private": true,
-  "version": "0.0.1",
+  "version": "1.12.0",
   "description": "For managing game assets",
   "main": "lib/index.js",
   "scripts": {

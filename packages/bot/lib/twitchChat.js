@@ -1,24 +1,8 @@
 import tmi from 'tmi.js';
 
-export default async function init(logger, profile, promiseTwitchUserToken, twitchClientId) {
-  const { twitchBotName } = profile;
-  const commandPrefix = "!";
+export default async function init(logger, profileProvider, provideTwitchUserToken, twitchClientId) {
+  const { twitchBotName } = await profileProvider();
   const defaultChannel = `#${twitchBotName}`;
-  const tmiOptions = {
-    options: {
-      clientId: twitchClientId,
-      debug: true,
-    },
-    connection: {
-      reconnect: true,
-    },
-    identity: {
-      username: twitchBotName,
-      password: `oauth:${await promiseTwitchUserToken()}`,
-    },
-    channels: [defaultChannel],
-  };
-  const client = new tmi.client(tmiOptions);
 
   // client.on("chat", function (channel, userstate, message, self) {
   //     // Don't listen to my own messages..
@@ -28,13 +12,37 @@ export default async function init(logger, profile, promiseTwitchUserToken, twit
   // });
 
 
-  client.connect();
-
   const api = {
     say(message) {
       client.say(defaultChannel, `MrDestructoid ${message} MrDestructoid`);
+    },
+    async connect() {
+      const commandPrefix = "!";
+      const tmiOptions = {
+        options: {
+          clientId: twitchClientId,
+          debug: true,
+        },
+        connection: {
+          reconnect: true,
+        },
+        identity: {
+          username: twitchBotName,
+          password: `oauth:${await provideTwitchUserToken()}`,
+        },
+        channels: [defaultChannel],
+      };
+      const client = new tmi.client(tmiOptions);
+
+      try {
+        await client.connect();
+      } catch (err) {
+        logger.warn('Failed to connecto to twitch chat');
+      }
     }
   };
+
+  await api.connect();
 
   return api;
 }

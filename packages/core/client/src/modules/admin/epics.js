@@ -7,6 +7,7 @@ import {
   BOT_FETCH_SUCCESS,
   BOT_FETCH_FAILURE,
   BOT_SETTINGS_SUBMIT,
+  BOT_RESTART,
 } from './actionTypes';
 
 const fetcBotSettingsResolved = response => ({ type: BOT_FETCH_SUCCESS, payload: response.data });
@@ -31,5 +32,16 @@ createEpic((action$, { getState }) => action$
         Authorization: `Bearer ${login.selectors.token(getState())}`,
       },
     }).then(fetcBotSettingsResolved)),
+  ),
+);
+
+createEpic((action$, { getState }) => action$
+  .ofType(BOT_RESTART)
+  .forEach(() => login.promiseLoggedIn
+    .then(() => axios.get(`${config.authHost}/RestartBot`, {
+      headers: {
+        Authorization: `Bearer ${login.selectors.token(getState())}`,
+      },
+    }))
   ),
 );

@@ -16,7 +16,6 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
           error: 'Not Authorized',
         });
       }
-      logger.info('GetAllUsers');
       return db.model('User').find().exec()
         .then((users) => {
           res.status(200).send(users);
@@ -82,7 +81,7 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
   });
 
   baseRoute.put('/user/:userId/roles', passport.authenticate('google-login-token'), async (req, res) => {
-    if (!permissions.isGranted('add role', req.user)) {
+    if (!permissions.isGranted('rolemaster', req.user)) {
       logger.info('Access not granted', {
         route: '/user/role',
       });
@@ -115,7 +114,7 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
   });
 
   baseRoute.post('/user/:userId/roles', passport.authenticate('google-login-token'), async (req, res) => {
-    if (!permissions.isGranted('add role', req.user)) {
+    if (!permissions.isGranted('rolemaster', req.user)) {
       logger.info('Access not granted', {
         route: '/user/role',
       });
@@ -147,7 +146,7 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
   });
 
   baseRoute.delete('/user/:userId/roles', passport.authenticate('google-login-token'), async (req, res) => {
-    if (!permissions.isGranted('add role', req.user)) {
+    if (!permissions.isGranted('rolemaster', req.user)) {
       logger.info('Access not granted', {
         route: '/user/role',
       });
@@ -179,8 +178,36 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
     }
   });
 
+  baseRoute.get('/user/:userId/roles', passport.authenticate('google-login-token'), async (req, res) => {
+    if (!permissions.isGranted('rolemaster', req.user)) {
+      logger.info('Access not granted', {
+        route: '/user/role',
+      });
+      return res.status(401).send({
+        error: 'Not Authorized',
+      });
+    }
+    try {
+      const user = await db.model('User').find({ id: userId }).exec();
+      if (user) {
+        res.status(200).send(user);
+      } else {
+        res.status(404).send({ message: 'User not found '});
+      }
+    } catch (e) {
+      const error = { message: 'Unable to delete role' };
+      if (process.env.NODE_ENV !== 'production') {
+        res.status(500).send({ ...error, error: e });
+      } else {
+        res.status(500).send(error);
+      }
+    }
+    const error = { message: 'Unable to read roles' };
+    return res.status(500).send(error)
+  });
+
   baseRoute.get('/user/roles', passport.authenticate('google-login-token'), async (req, res) => {
-    if (!permissions.isGranted('add role', req.user)) {
+    if (!permissions.isGranted('user', req.user)) {
       logger.info('Access not granted', {
         route: '/user/role',
       });

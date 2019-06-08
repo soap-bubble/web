@@ -3,7 +3,6 @@ var babel = require('gulp-babel');
 var nodemon = require('gulp-nodemon');
 var webpackConfig = require('./webpack.config');
 var runSequence = require('run-sequence');
-var browserSync = require('browser-sync');
 var _ = require('lodash');
 var spawn = require('child_process').spawn;
 var Server = require('karma').Server;

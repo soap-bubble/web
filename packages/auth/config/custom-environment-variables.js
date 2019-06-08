@@ -15,6 +15,9 @@ module.exports = {
       __format: 'json',
     },
   },
+  service: {
+    bot: 'AUTH_SERVICE_BOT',
+  },
   rootPath: 'ROOT_PATH',
   passport: {
     strategies: {

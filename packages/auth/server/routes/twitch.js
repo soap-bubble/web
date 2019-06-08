@@ -1,9 +1,15 @@
+import passport from 'passport';
 import axios from 'axios';
 import qs from 'qs';
 
-export default function (baseRoute, db, config, createLogger) {
+export default function (baseRoute, db, config, createLogger, socket) {
   const logger = createLogger('routes:twitch');
-  const { scope, state, clientID, clientSecret, callbackURL } = config.passport.strategies.twitch;
+  const { state, clientID, clientSecret, callbackURL } = config.passport.strategies.twitch;
+
+  baseRoute.get('/RestartBot', passport.authenticate('google-login-token'), (req, res) => {
+    socket.emit('reset');
+    res.status(200).send('OK');
+  });
 
   const Bot = db.model('Bot');
   baseRoute.get(

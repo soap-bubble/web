@@ -25,6 +25,7 @@
   "dependencies": {
     "async-retry": "^1.2.3",
     "axios": "^0.17.1",
+    "bluebird": "^3.5.5",
     "bufferutil": "^3.0.3",
     "bunyan": "^1.8.12",
     "config": "^1.29.4",

@@ -1,8 +1,8 @@
 import { get } from 'lodash';
 import { createSelector } from 'reselect';
 import { createClient } from 'contentful';
-import 'rxjs/add/operator/switchMap';
-import 'rxjs/add/operator/filter';
+import 'rxjs-compat/add/operator/switchMap';
+import 'rxjs-compat/add/operator/filter';
 import createEpic from '../../utils/createEpic';
 
 export const actionTypes = {

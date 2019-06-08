@@ -1,13 +1,13 @@
-import 'rxjs/add/operator/distinct';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/scan';
-import 'rxjs/add/operator/concat';
-import 'rxjs/add/operator/mergeMap';
-import 'rxjs/add/operator/catch';
-import 'rxjs/add/operator/takeUntil';
-import 'rxjs/add/observable/fromPromise';
-import 'rxjs/add/observable/interval';
-import 'rxjs/add/operator/take';
+import 'rxjs-compat/add/operator/distinct';
+import 'rxjs-compat/add/operator/map';
+import 'rxjs-compat/add/operator/scan';
+import 'rxjs-compat/add/operator/concat';
+import 'rxjs-compat/add/operator/mergeMap';
+import 'rxjs-compat/add/operator/catch';
+import 'rxjs-compat/add/operator/takeUntil';
+import 'rxjs-compat/add/observable/fromPromise';
+import 'rxjs-compat/add/observable/interval';
+import 'rxjs-compat/add/operator/take';
 import { combineEpics, createEpicMiddleware } from 'redux-observable';
 
 export const epics = [];

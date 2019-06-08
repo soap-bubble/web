@@ -1,5 +1,9 @@
 import { Observable } from 'rxjs';
-import 'rxjs/add/operator/concat';
+import { interval } from 'rxjs';
+import 'rxjs-compat/add/operator/last';
+import 'rxjs-compat/add/operator/takeUntil';
+import 'rxjs-compat/add/operator/concat';
+import 'rxjs-compat/add/observable/fromPromise';
 
 import {
   INIT,
@@ -13,8 +17,7 @@ const window = global;
 function epics(selectors, googleConfigProvider, loggedInDefer) {
   'ngInject';
 
-  const windowGapi$ = Observable
-    .interval(99)
+  const windowGapi$ = interval(99)
     .takeUntil(() => !window.gapi)
     .last();
 

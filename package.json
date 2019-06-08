@@ -1,4 +1,8 @@
 {
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
   "devDependencies": {
     "axios": "^0.18.0",
     "cross-env": "^5.2.0",

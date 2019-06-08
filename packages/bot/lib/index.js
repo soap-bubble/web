@@ -6,11 +6,9 @@ import factory, { init, define } from './factory';
 import clientFactory from './client';
 import appFactory from './app';
 import socketFactory from './socket';
-import { fetchBotProfile, saveBotProflie } from './profile';
+import { fetchBotProfileProvider, saveBotProflie } from './profile';
 import twitchApiFactory from './twitchApi';
 import twitchChatFactory from './twitchChat';
-
-const app = appFactory();
 
 define({
   app: appFactory,
@@ -18,7 +16,7 @@ define({
   morpheus: clientFactory,
   config: () => config,
   logger: () => bunyan.createLogger({ name: 'morpheus-bot' }),
-  profile: fetchBotProfile,
+  profileProvider: fetchBotProfileProvider,
   saveProfile: saveBotProflie,
   twitchApi: twitchApiFactory,
   twitchChat: twitchChatFactory,

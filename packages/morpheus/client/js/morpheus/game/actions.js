@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import { Observable, from } from 'rxjs';
 import storage from 'local-storage';
 import createEpic from 'utils/createEpic';
 import {
@@ -372,7 +372,7 @@ export const browserLoadEpic = createEpic((action$, store) => action$
       previousSceneId,
       rotation,
     },
-  }) => Observable.from([
+  }) => from([
     gamestateActions.inject(gamestates),
     sceneActions.goToScene(currentSceneId, true, previousSceneId, rotation),
   ])),
@@ -382,10 +382,10 @@ export const loadGameEpic = createEpic((action$, store) => action$
   .ofType(CLOUD_LOAD)
   .mergeMap(({
     payload: saveId,
-  }) => userService.getSaveGame({
+  }) => from(userService.getSaveGame({
     token: loginModule.selectors.token(store.getState()),
     saveId: saveId || gameSelectors.saveId(store.getState()),
-  }))
+  })))
   .map((response) => {
     const {
       currentSceneId,
@@ -405,7 +405,7 @@ export const loadGameEpic = createEpic((action$, store) => action$
     previousSceneId,
     gamestates,
     saveId,
-  }) => Observable.from([
+  }) => from([
     {
       type: SET_SAVE_ID,
       payload: saveId,

@@ -2,6 +2,7 @@ import config from 'config';
 import express from 'express';
 import morgan from 'morgan';
 import createLogger from './logger';
+import socket from './socket';
 import $, { define, init } from './factory';
 import * as models from './model';
 import routes from './routes';
@@ -22,6 +23,7 @@ define({
     router.use(morgan('combined'));
     return router;
   },
+  socket,
   models: () => models,
   config: () => {
     if (process.env.SOAPBUBBLE_LOCAL_SSL) {

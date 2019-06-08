@@ -3,6 +3,7 @@ import {
   BOT_SETTINGS_INPUT,
   BOT_SETTINGS_SUBMIT,
   BOT_SETTINGS_CANCEL,
+  BOT_RESTART,
 } from './actionTypes';
 
 export function fetchBotSettings() {
@@ -27,5 +28,11 @@ export function botSettingConfirm() {
 export function botSettingsCancel() {
   return {
     type: BOT_SETTINGS_CANCEL,
+  };
+}
+
+export function botRestart() {
+  return {
+    type: BOT_RESTART,
   };
 }

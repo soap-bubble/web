@@ -1,5 +1,6 @@
 import Discord from 'discord.js';
 import factory from './factory';
+import twitchTags from './twitchTags';
 
 export default function (config, twitchChat) {
   const {
@@ -28,6 +29,104 @@ export default function (config, twitchChat) {
       });
     }
   }
+
+  const getStream = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content === 'stream';
+    },
+    action(message) {
+      factory(async function channelAction(twitchApi) {
+        const stream = await twitchApi.getMyStream();
+        message.reply(JSON.stringify(stream, null, 2));
+      });
+    }
+  }
+
+  const listen = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content === 'listen';
+    },
+    action(message) {
+      factory(async function channelAction(twitchApi) {
+        await twitchApi.listenForFollow();
+        await twitchApi.listenForUserChanges();
+        await twitchApi.listenForStreamChanges();
+      });
+    }
+  }
+
+  const tags = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content === 'tags';
+    },
+    action(message) {
+      factory(async function channelAction(twitchApi) {
+        const id = await twitchApi.getMyUserId();
+        const tags = await twitchApi.getTags(id);
+        console.log(tags);
+        const response = tags.map(tag => tag.localization_names['en-us']).join(', ');
+        message.reply(response);
+      });
+    }
+  }
+
+  const allTags = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content.indexOf('find tags') === 0;
+    },
+    action(message) {
+      factory(async function channelAction(twitchApi) {
+        const tagsToFind =  message.content.split('find tags ')[1].split(',').map(t => t.trim());
+        const tags = await twitchApi.findAllStreamTags(tagsToFind);
+        //message.reply(response.map(r => JSON.stringify(r, null, 2)).join(', '));
+        const response = tags.map(tag => `${tag.tag_id} (${tag.localization_names['en-us']})`).join(', ');
+        const tagMap = tags.reduce((memo, tag) => {
+          const name = tag.localization_names['en-us'];
+          memo[name] = tag.tag_id;
+          return memo;
+        }, {});
+        message.reply(JSON.stringify(tagMap, null, 2));
+      });
+    }
+  }
+
+  const addTag = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content.indexOf('add tag') === 0;
+    },
+    action(message) {
+      factory(async function channelAction(twitchApi) {
+        const tagsToAdd = message.content.split('add tag ')[1].split(',').map(t => t.trim());
+        if (!tagsToAdd.length) {
+          return message.reply('Specify one or more tags to add');
+        }
+        // const userId = await twitchApi.getMyUserId();
+        const userId = await twitchApi.getMyUserId();
+        console.log(userId)
+        const myTags = await twitchApi.getTags(userId);
+        const tagIdsToAdd = tagsToAdd.filter(tagName => !myTags.find(myTag => myTag.localization_names['en-us'] === tagName)).map(tagName => twitchTags[tagName]);
+
+        if (tagIdsToAdd.length === 0) {
+          return message.reply('Already exists');
+        }
+        // await twitchApi.setTags(userId, []);
+        await twitchApi.setTags(userId, [...myTags.filter(t => !t.is_auto).map(t => t.tag_id), ...tagIdsToAdd]);
+        return message.reply('done');
+      });
+    },
+  };
+
+  const getMyUserId = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content === 'id';
+    },
+    action(message) {
+      factory(async function channelAction(twitchApi) {
+        const userId = await twitchApi.getMyUserId();
+        message.reply(userId);
+      });
+    },
+  };
 
   const editStatus = {
     selector(message) {
@@ -64,10 +163,16 @@ export default function (config, twitchChat) {
 
   function handleMessage(message, cb) {
     [
+      addTag,
+      allTags,
       pingPong,
       getChannel,
+      getMyUserId,
+      getStream,
       editStatus,
       editGame,
+      tags,
+      listen,
     ].forEach(({ selector, action }) => {
       if (selector(message)) {
         action(message);

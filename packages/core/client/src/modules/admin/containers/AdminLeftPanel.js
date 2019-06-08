@@ -1,7 +1,9 @@
 import React from 'react';
+import cn from 'classnames';
 import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
 import { SelectionList } from '@soapbubble/components';
+import styles from './AdminLeftPanel.css';
 
 const rows = [{
   key: 'users',
@@ -15,10 +17,13 @@ const rows = [{
   key,
   title,
   route,
-}) => ({
+}) => selected => ({
   route,
   key,
-  content: (<div>
+  content: (<div className={cn({
+    [styles.left]: true,
+    [styles.select]: selected === key,
+  })}>
     {title}
     <span className="pull-right">
       {'>'}
@@ -26,8 +31,8 @@ const rows = [{
   </div>),
 }));
 
-function delegate(index) {
-  return rows[index];
+function delegate(index, selected) {
+  return rows[index](selected);
 }
 
 function mapStateToProps() {
@@ -40,7 +45,7 @@ function mapStateToProps() {
 function mapDisptachToProps(dispatch) {
   return {
     onSelect(selectedSection) {
-      dispatch(push(rows.find(row => row.key === selectedSection).route));
+      dispatch(push(rows.find(row => row().key === selectedSection)().route));
     },
   };
 }

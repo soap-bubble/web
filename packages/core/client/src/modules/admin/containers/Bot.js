@@ -6,6 +6,7 @@ import {
   fetchBotSettings,
   botSettingsInput,
   botSettingConfirm,
+  botRestart,
 } from '../actions';
 import Bot from '../components/Bot';
 
@@ -26,8 +27,11 @@ function mapDisptachToProps(dispatch) {
     },
     onTwitchAuth(e) {
       e.preventDefault();
-      document.location = `https://id.twitch.tv/oauth2/authorize?client_id=${config.twitch.clientID}&redirect_uri=${config.twitch.callbackURL}&response_type=code&scope=${encodeURIComponent(config.twitch.scope)}`;
-    }
+      document.location = `https://id.twitch.tv/oauth2/authorize?client_id=${config.twitch.clientID}&redirect_uri=${config.twitch.callbackURL}&response_type=code&scope=${config.twitch.scope}`;
+    },
+    onRestartBot(e) {
+      dispatch(botRestart());
+    },
   };
 }
 const Page = connect(mapStateToProps, mapDisptachToProps)(Bot);

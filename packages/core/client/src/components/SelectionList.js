@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import { Nav, NavItem } from 'react-bootstrap';
 
@@ -7,24 +7,30 @@ const SelectionList = ({
   delegate,
   rowData,
   onSelect,
-}) => (
-  <Nav
-    bsStyle="pills"
-    stacked
-    activeKey={startKey}
-    onSelect={onSelect}
-  >
-    {rowData.map((data, index) => {
-      const {
-        key,
-        content,
-      } = delegate(data, index);
-      return (
-        <NavItem eventKey={key}>{content}</NavItem>
-      );
-    })}
-  </Nav>
-);
+}) => {
+  const [selectedKey, setSelected] = useState(null);
+  return (
+    <Nav
+      bsStyle="pills"
+      stacked
+      activeKey={startKey}
+      onSelect={(key) => {
+        setSelected(key);
+        onSelect(key);
+      }}
+    >
+      {rowData.map((data, index) => {
+        const {
+          key,
+          content,
+        } = delegate(data, index, key === selectedKey);
+        return (
+          <NavItem eventKey={key}>{content}</NavItem>
+        );
+      })}
+    </Nav>
+  )
+}
 
 SelectionList.propTypes = {
   startKey: PropTypes.string,

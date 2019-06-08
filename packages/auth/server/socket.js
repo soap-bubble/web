@@ -2,15 +2,20 @@ import io from 'socket.io-client';
 
 export default function (config, createLogger) {
   const logger = createLogger('socket');
-  logger.info('Connecting to bot');
-  
-  const socket = io(config.service.bot, {
-    reconnect: true,
-  });
+  if (config.service.bot) {
+    logger.info('Connecting to bot');
 
-  socket.on('connect', () => {
-    logger.info('socket connected');
-  });
+    const socket = io(config.service.bot, {
+      reconnect: true,
+    });
 
-  return socket;
+    socket.on('connect', () => {
+      logger.info('socket connected');
+    });
+
+    return socket;
+  }
+  return {
+    emit: () => {},
+  };
 }

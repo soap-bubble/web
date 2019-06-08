@@ -8,6 +8,9 @@ module.exports = {
     cookie: {
     },
   },
+  service: {
+    bot: false,
+  },
   passport: {
     strategies: {
       google: {

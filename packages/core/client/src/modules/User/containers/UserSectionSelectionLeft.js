@@ -1,4 +1,3 @@
-import { redirect } from 'react-router';
 import { connect } from 'react-redux';
 import * as User from '../../User';
 import SelectionList from '../../../components/SelectionList';
@@ -15,17 +14,17 @@ function mapStateToProps(state, {
   };
 }
 
-function mapDisptachToProps(dispatch) {
+function mapDispatchToProps(dispatch) {
   return {
     onSelect(selectedSection) {
-      dispatch(redirect(`/user/${selectedSection}`));
+
     },
   };
 }
 
 const SettingsLeftPanel = connect(
   mapStateToProps,
-  mapDisptachToProps,
+  mapDispatchToProps,
 )(SelectionList);
 
 export default SettingsLeftPanel;

@@ -1,5 +1,4 @@
 import React from 'react';
-import { LinkContainer } from 'react-router-bootstrap';
 import { Nav } from 'react-bootstrap';
 import LoggedIn from '../components/LoggedIn';
 
@@ -7,19 +6,21 @@ const LoggedStatusNavItem = ({
   isCheckingLogin,
   isLoggedIn,
   userName,
+  toSettings,
+  toLogin,
 }) => {
   if (isCheckingLogin) {
     return <Nav.Item>Checking...</Nav.Item>;
   } else if (isLoggedIn) {
-    return (<LinkContainer to={'/settings'}>
-      <Nav.Link>
+    return (
+      <Nav.Link onClick={toSettings}>
         <LoggedIn name={userName} />
       </Nav.Link>
-    </LinkContainer>);
+    );
   }
-  return (<LinkContainer to={'/login'}>
-    <Nav.Link>Login</Nav.Link>
-  </LinkContainer>);
+  return (
+    <Nav.Link onClick={toLogin}>Login</Nav.Link>
+  );
 };
 
 export default LoggedStatusNavItem;

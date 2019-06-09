@@ -1,6 +1,5 @@
 import React from 'react';
 import cn from 'classnames';
-import { push } from 'react-router-redux';
 import { connect } from 'react-redux';
 import { SelectionList } from '@soapbubble/components';
 import styles from './AdminLeftPanel.css';
@@ -8,16 +7,20 @@ import styles from './AdminLeftPanel.css';
 const rows = [{
   key: 'users',
   title: 'Users',
-  route: '/admin/users',
+  path: '/admin/users',
+  route: 'route/ADMIN_USERS',
 }, {
   key: 'bot',
   title: 'Bot',
-  route: '/admin/bot',
+  path: '/admin/bot',
+  route: 'route/ADMIN_BOT',
 }].map(({
   key,
   title,
+  path,
   route,
 }) => selected => ({
+  path,
   route,
   key,
   content: (<div className={cn({
@@ -42,17 +45,17 @@ function mapStateToProps() {
   };
 }
 
-function mapDisptachToProps(dispatch) {
+function mapDispatchToProps(dispatch) {
   return {
     onSelect(selectedSection) {
-      dispatch(push(rows.find(row => row().key === selectedSection)().route));
+      dispatch({ type: rows.find(row => row().key === selectedSection)().route });
     },
   };
 }
 
 const SettingsLeftPanel = connect(
   mapStateToProps,
-  mapDisptachToProps,
+  mapDispatchToProps,
 )(SelectionList);
 
 export default SettingsLeftPanel;

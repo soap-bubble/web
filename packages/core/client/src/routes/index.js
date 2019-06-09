@@ -1,30 +1,111 @@
 import React from 'react';
-import { Router, Route, IndexRedirect } from 'react-router';
-import { browserHistory, createMemoryHistory } from 'react-router';
-
-import { Page as Admin } from 'app/modules/admin';
 import Page from '../components/Page';
 import About from '../components/About';
 import Examples from '../containers/Examples';
 import Login from '../containers/Login';
 import Settings from '../containers/Settings';
 import { Page as User } from '../modules/User';
+import { Page as BlogPage, Entries, Entry } from '../modules/Blog';
 import Privacy from '../containers/Privacy';
-import history from './history';
+import {
+  Page as Admin,
+  Users as AdminUsers,
+  Bot as AdminBot,
+} from 'app/modules/admin';
 
-const routes = (
-  <Router history={history}>
-    <Route path="/" component={Page}>
-      <IndexRedirect to="/examples" />
-      <Route path="about" component={About} />
-      <Route path="examples" component={Examples} />
-      <Route path="login" component={Login} />
-      <Route path="settings" component={Settings} />
-      <Route path="user/:category" component={User} />
-      <Route path="admin" component={Admin} />
-      <Route path="privacy" component={Privacy} />
-    </Route>
-  </Router>
-);
-
-export default routes;
+export default {
+  ['route/HOME']: {
+    path: '/',
+    component: () => (
+      <Page/>
+    ),
+  },
+  ['route/ABOUT']: {
+    path: '/about',
+    component: () => (
+      <Page>
+        <About />
+      </Page>
+    ),
+  },
+  ['route/EXAMPLES']: {
+    path: '/examples',
+    component: () => (
+      <Page>
+        <Examples />
+      </Page>
+    ),
+  },
+  ['route/BLOG']: {
+    path: '/blog',
+    component: () => (
+      <Page>
+        <BlogPage>
+          <Entries />
+        </BlogPage>
+      </Page>
+    ),
+  },
+  ['route/BLOG_ARTICLE']: {
+    path: '/blog/:slug',
+    component: () => (
+      <Page>
+        <BlogPage>
+          <Entry />
+        </BlogPage>
+      </Page>
+    ),
+  },
+  ['route/LOGIN']: {
+    path: '/login',
+    component: () => (
+      <Page>
+        <Login />
+      </Page>
+    ),
+  },
+  ['route/SETTINGS']: {
+    path: '/settings',
+    component: () => (
+      <Page>
+        <Settings />
+      </Page>
+    ),
+  },
+  ['route/PRIVACY']: {
+    path: '/privacy',
+    component: () => (
+      <Page>
+        <Privacy />
+      </Page>
+    ),
+  },
+  ['route/ADMIN']: {
+    path: '/admin',
+    component: () => (
+      <Page>
+        <Admin />
+      </Page>
+    ),
+  },
+  ['route/ADMIN_USERS']: {
+    path: '/admin/users',
+    component: () => (
+      <Page>
+        <Admin>
+          <AdminUsers />
+        </Admin>
+      </Page>
+    ),
+  },
+  ['route/ADMIN_BOT']: {
+    path: '/admin/bot',
+    component: () => (
+      <Page>
+        <Admin>
+          <AdminBot />
+        </Admin>
+      </Page>
+    ),
+  },
+};

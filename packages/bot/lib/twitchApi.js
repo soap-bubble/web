@@ -147,7 +147,6 @@ define({
         logger.info('Token is expired because of timeout');
         isExpired = true;
         isExpiredTimeoutId = null;
-        profile = null;
       }, Math.max(0, twitchTokenExpiresIn * 1000 - 60000));
     }
 

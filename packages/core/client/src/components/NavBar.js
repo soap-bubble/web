@@ -1,7 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { Nav, Navbar, NavItem } from 'react-bootstrap';
-import { LinkContainer } from 'react-router-bootstrap';
 
 const NavBar = ({ onInit, page, onPageChange, rightToolbar }) => (
   <Navbar
@@ -21,11 +20,9 @@ const NavBar = ({ onInit, page, onPageChange, rightToolbar }) => (
     <Navbar.Toggle />
     <Navbar.Collapse>
       <Nav className="mr-auto" onSelect={onPageChange} className="mr-auto">
-        {page.available.map(({ label, route, matches }) => (
-          <LinkContainer key={`page:${route}`} to={`/${route}`}>
-            <Nav.Link active={page.current.route.match(matches) ? true : undefined} eventKey={route}>{label}</Nav.Link>
-          </LinkContainer>
-        ))}
+        <Nav.Link href="/about" eventKey="route/ABOUT" active={page === 'route/ABOUT' ? true : undefined}>About</Nav.Link>
+        <Nav.Link href="/examples" eventKey="route/EXAMPLES" active={page === 'route/EXAMPLES' ? true : undefined}>Examples</Nav.Link>
+        <Nav.Link href="/blog" eventKey="route/BLOG" active={page === 'route/BLOG' ? true : undefined}>Blog</Nav.Link>
       </Nav>
       <Nav className="justify-content-end">
         {rightToolbar}

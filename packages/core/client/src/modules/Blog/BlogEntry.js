@@ -16,7 +16,7 @@ class BlogEntry extends Component {
 
   componentDidMount() {
     this.setState({
-      entry: this.props.entries.find(e => e.fields.slug === this.props.params.slug),
+      entry: this.props.entries.find(e => e.fields.slug === this.props.slug),
       bodyPromise: null,
       document: null,
     });
@@ -24,11 +24,11 @@ class BlogEntry extends Component {
 
   componentDidUpdate(prevProps, prevState) {
     if (
-      this.props.params.slug && prevProps.entries.length !== this.props.entries.length
-      || this.props.params.slug !== prevProps.params.slug
+      this.props.slug && prevProps.entries.length !== this.props.entries.length
+      || this.props.slug !== prevProps.slug
     ) {
       this.setState({
-        entry: this.props.entries.find(e => e.fields.slug === this.props.params.slug),
+        entry: this.props.entries.find(e => e.fields.slug === this.props.slug),
         bodyPromise: null,
         document: null,
       });
@@ -47,7 +47,7 @@ class BlogEntry extends Component {
     const {
       entries,
       assets,
-      params: { slug },
+      slug,
     } = this.props;
     const {
       document,

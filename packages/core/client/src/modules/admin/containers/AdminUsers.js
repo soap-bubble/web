@@ -11,7 +11,7 @@ function mapStateToProps(state) {
   };
 }
 
-function mapDisptachToProps(dispatch) {
+function mapDispatchToProps(dispatch) {
   dispatch(usersActions.fetchAllUsers());
   return {
     onSelect(selectedSection) {
@@ -27,5 +27,5 @@ function mapDisptachToProps(dispatch) {
 
 export default connect(
   mapStateToProps,
-  mapDisptachToProps,
+  mapDispatchToProps,
 )(SelectionList);

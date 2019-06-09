@@ -1,7 +1,6 @@
 import React, { Fragment } from 'react';
 import { first, get } from 'lodash';
 import cn from 'classnames';
-import { LinkContainer } from 'react-router-bootstrap';
 import styles from './BlogEntries.css';
 import BlogEntry from './BlogEntryContainer';
 

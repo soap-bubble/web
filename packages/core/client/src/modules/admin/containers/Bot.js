@@ -15,7 +15,7 @@ function mapStateToProps(state) {
   return settings;
 }
 
-function mapDisptachToProps(dispatch) {
+function mapDispatchToProps(dispatch) {
   dispatch(fetchBotSettings());
   return {
     onSettingsChange(settings) {
@@ -34,6 +34,6 @@ function mapDisptachToProps(dispatch) {
     },
   };
 }
-const Page = connect(mapStateToProps, mapDisptachToProps)(Bot);
+const Page = connect(mapStateToProps, mapDispatchToProps)(Bot);
 
 export default Page;

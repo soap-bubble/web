@@ -9,6 +9,20 @@ function mapStateToProps(state) {
   };
 }
 
+function mapDispatchToProps(dispatch) {
+  return {
+    onEntry(slug) {
+      dispatch({
+        type: 'route/BLOG_ARTICLE',
+        params: {
+          slug,
+        },
+      });
+    }
+  }
+}
+
 export default connect(
   mapStateToProps,
+  mapDispatchToProps,
 )(Sidebar);

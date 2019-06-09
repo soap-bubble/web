@@ -24,6 +24,7 @@
   "dependencies": {
     "@contentful/rich-text-from-markdown": "^13.0.0",
     "@madebyconnor/rich-text-to-jsx": "^1.0.0",
+    "@respond-framework/rudy": "^0.1.1-test.3",
     "@soapbubble/components": "^1.12.0",
     "axios": "^0.16.2",
     "better-npm-run": "0.0.13",
@@ -48,9 +49,7 @@
     "react-google-login": "^2.9.3",
     "react-redux": "^5.0.1",
     "react-responsive-ui": "^0.1.44",
-    "react-router": "^3.0.0",
     "react-router-bootstrap": "^0.23.1",
-    "react-router-redux": "^4.0.8",
     "redux": "^3.6.0",
     "redux-logger": "^3.0.6",
     "redux-observable": "https://registry.npmjs.org/redux-observable/-/redux-observable-0.16.0.tgz",

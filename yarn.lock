@@ -1961,6 +1961,30 @@
     typed-styles "^0.0.5"
     warning "^3.0.0"
 
+"@respond-framework/middleware-change-page-title@^1.0.1-test.1":
+  version "1.0.1-test.1"
+  resolved "https://registry.yarnpkg.com/@respond-framework/middleware-change-page-title/-/middleware-change-page-title-1.0.1-test.1.tgz#a49b9cc602e8c1c933a7d604bf599355e9a5d7f8"
+  integrity sha512-OWfdfwJFHmN25GTOSe9dCAYPLaFol0Vpe51UF/BA8RChSCKdZxJ3DPDniPIbsvOmkbHDaUltLDZ0iC2RBq5C9g==
+  dependencies:
+    "@respond-framework/utils" "^0.1.1-test.1"
+
+"@respond-framework/rudy@^0.1.1-test.3":
+  version "0.1.1-test.3"
+  resolved "https://registry.yarnpkg.com/@respond-framework/rudy/-/rudy-0.1.1-test.3.tgz#126d1839202dce7ce86b3304d19f6780b3177370"
+  integrity sha512-7tfri0/h+LXCM+zoXCqk6hRFdK6Gc43kSjn8XE3g2L3mclQTs+v+ayQRmY5K1ftKvAd1J5HgLypPOommUNbVSQ==
+  dependencies:
+    "@respond-framework/middleware-change-page-title" "^1.0.1-test.1"
+    "@respond-framework/utils" "^0.1.1-test.1"
+    path-to-regexp "^2.1.0"
+    prop-types "^15.6.0"
+    qs "^6.5.1"
+    resolve-pathname "^2.2.0"
+
+"@respond-framework/utils@^0.1.1-test.1":
+  version "0.1.1-test.1"
+  resolved "https://registry.yarnpkg.com/@respond-framework/utils/-/utils-0.1.1-test.1.tgz#8b5164acbfcf4f33ef157661a5954dc1ccbe39cc"
+  integrity sha512-vj7lF/Fmtl6jFjllAbgV1up8WsJuAg0nD8R5Le0cpEGR+GWRWOOy6N74D1WAY9FG0kY2Oopuk7RtLty7aAyPYA==
+
 "@restart/context@^2.1.4":
   version "2.1.4"
   resolved "https://registry.yarnpkg.com/@restart/context/-/context-2.1.4.tgz#a99d87c299a34c28bd85bb489cb07bfd23149c02"
@@ -16069,7 +16093,7 @@ path-to-regexp@0.1.7:
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-0.1.7.tgz#df604178005f522f15eb4490e7247a1bfaa67f8c"
   integrity sha1-32BBeABfUi8V60SQ5yR6G/qmf4w=
 
-path-to-regexp@^2.2.1:
+path-to-regexp@^2.1.0, path-to-regexp@^2.2.1:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/path-to-regexp/-/path-to-regexp-2.4.0.tgz#35ce7f333d5616f1c1e1bfe266c3aba2e5b2e704"
   integrity sha512-G6zHoVqC6GGTQkZwF4lkuEyMbVOjoBKAEybQUypI1WTkqinCOrq2x6U2+phkJ1XsEMTy4LjtwPI7HW+NVrRR2w==
@@ -17654,7 +17678,7 @@ qs@6.5.1:
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.1.tgz#349cdf6eef89ec45c12d7d5eb3fc0c870343a6d8"
   integrity sha512-eRzhrN1WSINYCDCbrz796z37LOe3m5tmW7RQf6oBntukAG1nmovJvhnwHHRMAfeoItc1m2Hk02WER2aQ/iqs+A==
 
-qs@6.7.0, qs@^6.5.2, qs@^6.6.0:
+qs@6.7.0, qs@^6.5.1, qs@^6.5.2, qs@^6.6.0:
   version "6.7.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.7.0.tgz#41dc1a015e3d581f1621776be31afb2876a9b1bc"
   integrity sha512-VCdBRNFTX1fyE7Nb6FYoURo/SPe62QCaAyzJvUjwRaIsc+NePBEniHlvxFmmX56+HZphIGtV0XeCirBtpDrTyQ==
@@ -18952,6 +18976,11 @@ resolve-package@^1.0.1:
   integrity sha1-aG9wsYi9fWdfW7xCgszaBgq7nSc=
   dependencies:
     get-installed-path "^2.0.3"
+
+resolve-pathname@^2.2.0:
+  version "2.2.0"
+  resolved "https://registry.yarnpkg.com/resolve-pathname/-/resolve-pathname-2.2.0.tgz#7e9ae21ed815fd63ab189adeee64dc831eefa879"
+  integrity sha512-bAFz9ld18RzJfddgrO2e/0S2O81710++chRMUxHjXOYKF6jTAMrUNZrEZ1PvV0zlhfjidm08iRPdTLPno1FuRg==
 
 resolve-url@^0.2.1:
   version "0.2.1"

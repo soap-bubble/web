@@ -14,7 +14,7 @@ function mapStateToProps(state, {
   };
 }
 
-function mapDisptachToProps() {
+function mapDispatchToProps() {
   return {
     onSelect(selectedSection) {
       console.log(selectedSection);
@@ -24,7 +24,7 @@ function mapDisptachToProps() {
 
 const SettingsLeftPanel = connect(
   mapStateToProps,
-  mapDisptachToProps,
+  mapDispatchToProps,
 )(SelectionList);
 
 export default SettingsLeftPanel;

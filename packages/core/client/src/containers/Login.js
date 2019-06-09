@@ -1,5 +1,4 @@
 import React from 'react';
-import { redirect } from 'react-router';
 import { connect } from 'react-redux';
 import {
   login,
@@ -36,7 +35,9 @@ function mapStateToProps(state) {
 function mapDispatchToProps(dispatch) {
   return {
     handleLoggedIn() {
-      dispatch(redirect('/examples'));
+      dispatch({
+        type: 'route/EXAMPLES',
+      });
     },
   };
 }

@@ -6,7 +6,7 @@ import styles from './BlogPage.css';
 const BlogPage = ({
   children,
   init,
-  params: { slug }
+  slug,
 }) => {
   return (
     <div ref={(el) => {

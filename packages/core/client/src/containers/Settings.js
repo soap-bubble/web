@@ -1,5 +1,4 @@
 import React from 'react';
-import { redirect } from 'react-router';
 import { connect } from 'react-redux';
 import { Button } from 'react-bootstrap';
 import config from '../config';
@@ -41,7 +40,9 @@ function mapDispatchToProps(dispatch) {
   return {
     onSignOut() {
       dispatch(loginActions.logout())
-        .then(dispatch(redirect('/')));
+        .then(dispatch({
+          type: 'route/EXAMPLES',
+        }));
     },
   };
 }

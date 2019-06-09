@@ -2,9 +2,9 @@ import { connect } from 'react-redux';
 
 import PageComponent from '../components/Page';
 
-function mapStateToProps(state, props) {
-  const { router } = props;
-  const active = router.params.category;
+function mapStateToProps(state) {
+  const { location } = state;
+  const active = location.params.category;
   return {
     active,
   };

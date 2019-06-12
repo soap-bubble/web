@@ -5,10 +5,6 @@ import {
 import PropTypes from 'prop-types';
 import { ListGroup } from 'react-bootstrap';
 
-require('react-dom');
-window.React2 = require('react');
-console.log('same react', window.React1 === window.React2);
-
 const SelectionList = ({
   startKey,
   delegate,

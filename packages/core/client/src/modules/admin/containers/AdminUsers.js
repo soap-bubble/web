@@ -17,11 +17,6 @@ function mapDispatchToProps(dispatch) {
     onSelect(selectedSection) {
       console.log(selectedSection);
     },
-    ref(exists) {
-      if (exists) {
-
-      }
-    },
   };
 }
 

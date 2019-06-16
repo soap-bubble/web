@@ -1,13 +1,14 @@
 {
-  "presets": ["react", ["env", {
+  "presets": ["@babel/preset-react", ["@babel/preset-env", {
     "targets": {
-        "chrome": 72,
+        "browsers": ["defaults"]
       }
     }]],
   "plugins": [
-    "transform-export-extensions",
+    "@babel/plugin-proposal-export-default-from",
+    "@babel/plugin-proposal-export-namespace-from",
     ["angularjs-annotate", { "explicitOnly" : true}],
-    ["transform-object-rest-spread", { "useBuiltIns": true }],
+    ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }],
     ["module-resolver", {
       "root": ["./client/js"]
     }]

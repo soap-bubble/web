@@ -1,7 +1,7 @@
 import Page from './containers/Page';
 import Users from './containers/AdminUsers';
 import Bot from './containers/Bot';
-import actions from './actions';
+import * as actions from './actions';
 import reducer from './reducer';
 import selectorsFactory from './selectors';
 import './epics';

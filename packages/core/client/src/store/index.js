@@ -1,9 +1,10 @@
 import { createLogger } from 'redux-logger';
-import { createRouter } from '@respond-framework/rudy'
+import { createRouter } from '@respond-framework/rudy';
+import { createEpicMiddleware } from 'redux-observable';;
 import { createStore, compose, applyMiddleware, combineReducers } from 'redux';
 
 import routeMap from '../routes';
-import { middleware as epicMiddleware } from '../utils/createEpic';
+import { epics } from '../utils/createEpic';
 import reducers from '../reducers';
 
 export default (preloadedState, initialEntries) => {
@@ -12,9 +13,9 @@ export default (preloadedState, initialEntries) => {
     memo[route] = routeMap[route].path;
     return memo;
   }, {}), options);
-
+  const epicMiddleware = createEpicMiddleware();
   const middlewares = [
-    epicMiddleware(),
+    epicMiddleware,
     routerMiddleware,
   ];
 
@@ -32,6 +33,6 @@ export default (preloadedState, initialEntries) => {
   const enhancers = composeEnhancers(applyMiddleware(...middlewares));
 
   const store = createStore(rootReducer, preloadedState, enhancers);
-
+  epicMiddleware.run(epics());
   return { store, firstRoute };
 }

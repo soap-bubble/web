@@ -10,7 +10,7 @@ import {
   KEY_UP,
 } from './actionTypes';
 
-export default createEpic((action$, store) => action$
+export default createEpic((action$, store$) => action$
   .ofType(KEY_UP, KEY_DOWN)
   .mergeMap((action) => {
     if (inputObservables[action.payload]) {
@@ -22,7 +22,7 @@ export default createEpic((action$, store) => action$
           return h.up;
         })
         .filter(h => h)
-        .mergeMap(handler => Observable.of(handler(action, store)));
+        .mergeMap(handler => Observable.of(handler(action, store$)));
     }
     return [];
   })

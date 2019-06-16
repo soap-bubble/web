@@ -293,14 +293,14 @@ export function openSave() {
   };
 }
 
-export const cloudSaveEpic = createEpic((action$, store) => action$
+export const cloudSaveEpic = createEpic((action$, store$) => action$
   .ofType(CLOUD_SAVE)
   .mergeMap(() => userService.saveGame({
-    token: loginModule.selectors.token(store.getState()),
-    gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
-    currentSceneId: sceneSelectors.currentSceneId(store.getState()),
-    previousSceneId: sceneSelectors.previousSceneId(store.getState()),
-    saveId: gameSelectors.saveId(store.getState()),
+    token: loginModule.selectors.token(store$.value),
+    gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
+    currentSceneId: sceneSelectors.currentSceneId(store$.value),
+    previousSceneId: sceneSelectors.previousSceneId(store$.value),
+    saveId: gameSelectors.saveId(store$.value),
   }))
   .map((response) => {
     const { saveId } = response.data;
@@ -315,13 +315,13 @@ export const cloudSaveEpic = createEpic((action$, store) => action$
   })),
 );
 
-export const newSaveGameEpic = createEpic((action$, store) => action$
+export const newSaveGameEpic = createEpic((action$, store$) => action$
   .ofType(CLOUD_SAVE_NEW)
   .mergeMap(() => userService.newSaveGame({
-    token: loginModule.selectors.token(store.getState()),
-    gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
-    currentSceneId: sceneSelectors.currentSceneId(store.getState()),
-    previousSceneId: sceneSelectors.previousSceneId(store.getState()),
+    token: loginModule.selectors.token(store$.value),
+    gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
+    currentSceneId: sceneSelectors.currentSceneId(store$.value),
+    previousSceneId: sceneSelectors.previousSceneId(store$.value),
   }))
   .map((response) => {
     const { saveId } = response.data;
@@ -332,16 +332,16 @@ export const newSaveGameEpic = createEpic((action$, store) => action$
   }),
 );
 
-export const browserSaveEpic = createEpic((action$, store) => action$
+export const browserSaveEpic = createEpic((action$, store$) => action$
   .ofType(BROWSER_SAVE)
   .forEach(() => {
-    const pano = castSelectors.forScene(sceneSelectors.currentSceneData(store.getState()))
+    const pano = castSelectors.forScene(sceneSelectors.currentSceneData(store$.value))
       .pano;
     storage.set('save', {
-      gamestates: gamestateSelectors.gamestates(store.getState()).toJS(),
-      currentSceneId: sceneSelectors.currentSceneId(store.getState()),
-      previousSceneId: sceneSelectors.previousSceneId(store.getState()),
-      saveId: gameSelectors.saveId(store.getState()),
+      gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
+      currentSceneId: sceneSelectors.currentSceneId(store$.value),
+      previousSceneId: sceneSelectors.previousSceneId(store$.value),
+      saveId: gameSelectors.saveId(store$.value),
       rotation: (pano && pano.object3D.rotation) || null,
     });
   })
@@ -378,13 +378,13 @@ export const browserLoadEpic = createEpic((action$, store) => action$
   ])),
 );
 
-export const loadGameEpic = createEpic((action$, store) => action$
+export const loadGameEpic = createEpic((action$, store$) => action$
   .ofType(CLOUD_LOAD)
   .mergeMap(({
     payload: saveId,
   }) => from(userService.getSaveGame({
-    token: loginModule.selectors.token(store.getState()),
-    saveId: saveId || gameSelectors.saveId(store.getState()),
+    token: loginModule.selectors.token(store$.value),
+    saveId: saveId || gameSelectors.saveId(store$.value),
   })))
   .map((response) => {
     const {
@@ -426,10 +426,10 @@ export const openSaveEpic = createEpic(action$ => action$
   })),
 );
 
-export const loadSavesEpic = createEpic((action$, store) => action$
+export const loadSavesEpic = createEpic((action$, store$) => action$
   .ofType(SAVE_LOAD)
   .mergeMap(() => userService.getAllSaves({
-    token: loginModule.selectors.token(store.getState()),
+    token: loginModule.selectors.token(store$.value),
   }))
   .map(response => ({
     type: SAVE_LOAD_SUCCESS,

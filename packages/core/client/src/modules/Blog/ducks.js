@@ -31,8 +31,8 @@ export const actionCreators = {
   },
 };
 
-createEpic((action$, { getState }) => action$.ofType(actionTypes.FETCH)
-  .filter(() => !selectors.blogEntries(getState()).length)
+createEpic((action$, store$) => action$.ofType(actionTypes.FETCH)
+  .filter(() => !selectors.blogEntries(store$.value).length)
   .switchMap(() => Promise.resolve(createClient({
     space: config.contentfulSpace,
     accessToken: config.contentfulAccess,

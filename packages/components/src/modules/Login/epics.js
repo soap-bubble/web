@@ -33,12 +33,12 @@ function epics(selectors, googleConfigProvider, loggedInDefer) {
       return dispatch;
     });
 
-  const loggedInEpic = (action$, store) => action$
+  const loggedInEpic = (action$, store$) => action$
     .ofType(GOOGLE_API_INIT)
     .mergeMap(() => Observable.fromPromise(new Promise((resolve, reject) => {
       window.gapi.load('auth2', () => {
         if (!window.gapi.auth2.getAuthInstance()) {
-          const params = selectors.gapiConfig(store.getState());
+          const params = selectors.gapiConfig(store$.value);
 
           window.gapi.auth2.init(params).then(
             (res) => {

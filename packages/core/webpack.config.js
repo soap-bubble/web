@@ -98,14 +98,13 @@ module.exports = (env) => {
       rules: [
         {
           test: /\.jsx?$/,
-          include: [/@soapbubble/],
-          exclude: [/@soapbubble\/node_modules/],
-          use: ['babel-loader'],
-        },
-        {
-          test: /\.jsx?$/,
           exclude: [/node_modules/],
-          use: ['babel-loader'],
+          use: [{
+            loader: 'babel-loader',
+            options: {
+              rootMode: "upward",
+            },
+          }],
         },
         {
           test: /\.css$/,

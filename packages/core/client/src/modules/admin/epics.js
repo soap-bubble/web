@@ -13,34 +13,34 @@ import {
 const fetcBotSettingsResolved = response => ({ type: BOT_FETCH_SUCCESS, payload: response.data });
 const fetcBotSettingsRejected = response => ({ type: BOT_FETCH_FAILURE, payload: response.data });
 
-createEpic((action$, { getState }) => action$
+createEpic((action$, store$) => action$
   .ofType(BOT_FETCH)
   .mergeMap(() =>
     login.promiseLoggedIn.then(() => axios.get(`${config.authHost}/GetBotSettings`, {
       headers: {
-        Authorization: `Bearer ${login.selectors.token(getState())}`,
+        Authorization: `Bearer ${login.selectors.token(store$.value)}`,
       },
     })
       .then(fetcBotSettingsResolved, fetcBotSettingsRejected))),
 );
 
-createEpic((action$, { getState }) => action$
+createEpic((action$, store$) => action$
   .ofType(BOT_SETTINGS_SUBMIT)
   .mergeMap(() => login.promiseLoggedIn
-    .then(() => axios.post(`${config.authHost}/SaveBotSettings`, selectors.botCurrentSettings(getState()), {
+    .then(() => axios.post(`${config.authHost}/SaveBotSettings`, selectors.botCurrentSettings(store$.value), {
       headers: {
-        Authorization: `Bearer ${login.selectors.token(getState())}`,
+        Authorization: `Bearer ${login.selectors.token(store$.value)}`,
       },
     }).then(fetcBotSettingsResolved)),
   ),
 );
 
-createEpic((action$, { getState }) => action$
+createEpic((action$, store$) => action$
   .ofType(BOT_RESTART)
   .forEach(() => login.promiseLoggedIn
     .then(() => axios.get(`${config.authHost}/RestartBot`, {
       headers: {
-        Authorization: `Bearer ${login.selectors.token(getState())}`,
+        Authorization: `Bearer ${login.selectors.token(store$.value)}`,
       },
     }))
   ),

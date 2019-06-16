@@ -70,8 +70,8 @@ export function fullscreen() {
 setTimeout(() => {
   inputActions.inputHandler({
     key: 'esc',
-    down(_, store) {
-      const state = store.getState();
+    down(_, store$) {
+      const state = store$.value;
       if (saveOpened(state)) {
         return closeSave();
       }
@@ -87,8 +87,8 @@ setTimeout(() => {
 
   inputActions.inputHandler({
     key: 'p',
-    down(_, store) {
-      if (settingsClosed(store.getState())) {
+    down(_, store$) {
+      if (settingsClosed(store$.value)) {
         return openSettings();
       }
       return closeSettings();
@@ -97,8 +97,8 @@ setTimeout(() => {
 
   inputActions.inputHandler({
     key: 's',
-    down(_, store) {
-      if (saveClosed(store.getState())) {
+    down(_, store$) {
+      if (saveClosed(store$.value)) {
         return openSave();
       }
       return closeSave();

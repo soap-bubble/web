@@ -8,23 +8,14 @@ import 'rxjs-compat/add/operator/takeUntil';
 import 'rxjs-compat/add/observable/fromPromise';
 import 'rxjs-compat/add/observable/interval';
 import 'rxjs-compat/add/operator/take';
-import { combineEpics, createEpicMiddleware } from 'redux-observable';
+import { combineEpics } from 'redux-observable';
 
-export const epics = [];
+export const _epics = [];
 
-let epicMiddleware;
-
-export function middleware() {
-  if (!epicMiddleware) {
-    epicMiddleware = createEpicMiddleware(combineEpics(...epics));
-  }
-  return epicMiddleware;
+export function epics() {
+  return combineEpics(..._epics);
 }
 
 export default function createEpic(epic) {
-  epics.push(epic);
-  if (epicMiddleware) {
-    epicMiddleware.replaceEpic(combineEpics(...epics));
-  }
-  return epic;
+  _epics.push(epic);
 }

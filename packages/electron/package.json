@@ -24,18 +24,16 @@
   "author": "Soapbubble Productions",
   "license": "MIT",
   "devDependencies": {
-    "babel-cli": "^6.26.0",
-    "babel-plugin-transform-async-to-generator": "^6.24.1",
-    "babel-preset-env": "^1.7.0",
-    "babel-preset-react": "^6.24.1",
+    "@babel/cli": "^7.4.4",
+    "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
+    "@babel/preset-env": "^7.4.5",
     "concurrently": "^3.6.1",
     "cross-env": "^5.2.0",
-    "electromon": "^1.0.10",
-    "electron-forge": "^5.2.2",
-    "electron-prebuilt-compile": "1.8.4"
+    "electromon": "^1.0.10"
   },
   "dependencies": {
-    "electron-compile": "^6.4.3",
+    "@babel/cli": "^7.4.4",
     "electron-squirrel-startup": "^1.0.0",
     "mkdirp": "^0.5.1",
     "path-to-regexp": "^2.2.1",

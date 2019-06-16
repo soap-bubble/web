@@ -33,14 +33,19 @@ import {
   ACTION_TYPES,
 } from 'morpheus/constants';
 
-createEpic((action$, { dispatch, getState }) => action$
+// FIXME: assume all of these are BROKEN
+
+createEpic((action$, store$) => action$
   .ofType('AUTO_HOTSPOT_LOOK')
-  .forEach(({ payload: destSceneId, cb }) => {
+  .filter(({ payload: destSceneId, cb }) => {
     const scene = sceneSelectors.currentSceneData(getState());
     const hotspot = scene.casts.find(cast => cast.param1 === destSceneId);
-    if (hotspot) {
-      dispatch(castActions.forScene(scene).pano.sweepTo(hotspot, cb));
-    }
+    return hotspot
+  })
+  .map(({ payload: destSceneId, cb }) => {
+    const scene = sceneSelectors.currentSceneData(getState());
+    const hotspot = scene.casts.find(cast => cast.param1 === destSceneId);
+    return castActions.forScene(scene).pano.sweepTo(hotspot, cb);
   }),
 );
 

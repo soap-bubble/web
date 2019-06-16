@@ -22,12 +22,12 @@ export const actions = {
   fetchAllUsers,
 };
 
-createEpic((action$, { getState }) => action$
+createEpic((action$, store$) => action$
   .ofType(FETCH_ALL_PENDING)
   .mergeMap(() =>
     login.promiseLoggedIn.then(() => axios.get(`${config.authHost}/GetAllUsers`, {
       headers: {
-        Authorization: `Bearer ${login.selectors.token(getState())}`,
+        Authorization: `Bearer ${login.selectors.token(store$.value)}`,
       },
     })
       .then(fetchUsersFulfilled))),

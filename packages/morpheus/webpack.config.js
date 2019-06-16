@@ -144,16 +144,19 @@ module.exports = (env) => {
       rules: styleLoaders(env).concat([
         {
           test: /\.jsx?$/,
-          include: [/generic-pool/, /@soapbubble/],
-          exclude: [/generic-pool\/node_modules/, /@soapbubble\/.*\/node_modules/],
+          include: [/generic-pool/],
+          exclude: [/generic-pool\/node_modules/],
           use: ['babel-loader'],
         },
         {
           test: /\.jsx?$/,
-          include: dirSharedComponents.concat([
-            dirJs,
-          ]),
-          use: ['babel-loader'],
+          exclude: [/node_modules/],
+          use: [{
+            loader: 'babel-loader',
+            options: {
+              rootMode: "upward",
+            },
+          }],
         },
         {
           test: /\.png$/,
@@ -251,7 +254,6 @@ module.exports = (env) => {
         resolve: {
           extensions: ['.js', '.json'],
           mainFields,
-          symlinks: false,
         },
         module: {
           rules: styleLoaders(env).concat([

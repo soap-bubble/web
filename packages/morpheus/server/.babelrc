@@ -1,15 +1,12 @@
 {
-  "presets": ["react", ["env", {
-    "targets": {
-        "node": "current"
-      }
-    }]],
+  "presets": [
+    ["@babel/preset-env", {
+     "targets": {
+         "node": "current"
+       }
+     }]
+  ],
   "plugins": [
-    "transform-export-extensions",
-    ["angularjs-annotate", { "explicitOnly" : true}],
-    ["transform-object-rest-spread", { "useBuiltIns": true }],
-    ["module-resolver", {
-      "root": ["./client/js"]
-    }]
+    ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }]
   ]
 }

@@ -1,23 +1,21 @@
-import 'rxjs/add/operator/distinct';
-import 'rxjs/add/operator/map';
-import 'rxjs/add/operator/scan';
-import { combineEpics, createEpicMiddleware } from 'redux-observable';
+import 'rxjs-compat/add/operator/distinct';
+import 'rxjs-compat/add/operator/map';
+import 'rxjs-compat/add/operator/scan';
+import 'rxjs-compat/add/operator/concat';
+import 'rxjs-compat/add/operator/mergeMap';
+import 'rxjs-compat/add/operator/catch';
+import 'rxjs-compat/add/operator/takeUntil';
+import 'rxjs-compat/add/observable/fromPromise';
+import 'rxjs-compat/add/observable/interval';
+import 'rxjs-compat/add/operator/take';
+import { combineEpics } from 'redux-observable';
 
-export const epics = [];
+export const _epics = [];
 
-let _middleware;
-
-export function middleware() {
-  if (!_middleware) {
-    _middleware = createEpicMiddleware(combineEpics(...epics));
-  }
-  return _middleware;
+export function epics() {
+  return combineEpics(..._epics);
 }
 
 export default function createEpic(epic) {
-  epics.push(epic);
-  if (_middleware) {
-    _middleware.replaceEpic(combineEpics(...epics));
-  }
-  return epic;
+  _epics.push(epic);
 }

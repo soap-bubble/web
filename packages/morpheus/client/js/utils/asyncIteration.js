@@ -43,7 +43,7 @@ export const someSeries = async (array, callback, thisArg) => {
  * @param {Object} [initialValue] - Used as first argument to the first call of `callback`.
  * @return {Promise} - Returns a Promise with the resultant value from the reduction.
  */
-exports.reduce = async (array, callback, initialValue) => {
+export const reduce = async (array, callback, initialValue) => {
   if (array.length === 0 && initialValue === undefined) {
     throw TypeError('Reduce of empty array with no initial value');
   }

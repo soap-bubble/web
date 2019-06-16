@@ -1,5 +1,5 @@
 {
-  "presets": ["react", ["env", {
+  "presets": ["@babel/preset-react", ["@babel/preset-env", {
     "targets": {
         "browsers": ["defaults"]
       }
@@ -7,7 +7,7 @@
   "plugins": [
     "transform-export-extensions",
     ["angularjs-annotate", { "explicitOnly" : true}],
-    ["transform-object-rest-spread", { "useBuiltIns": true }],
+    ["@babel/plugin-proposal-object-rest-spread", { "loose": true, "useBuiltIns": true }],
     ["module-resolver", {
       "alias": {
         "app": ["./client/src"]

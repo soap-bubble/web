@@ -1,24 +1,29 @@
 const path = require('path');
 const config = require('config');
-const express = require('express');
 const builder = require('service-builder');
-const { uniq } = require('lodash');
+const http = require('http');
+const https = require('https');
+const spdy = require('spdy');
 
-const router = require('./router');
+const proxy = require('./proxy');
+const rulesMap = require('./proxy/rulesMap');
+const proxyWeb = require('./proxy/web');
+const proxyWs = require('./proxy/ws');
 
 const blueprint = builder({
-  app(router) {
-    const app = express();
-    app.use(router);
-    return app;
-  },
   config,
-  router,
+  proxy,
+  rulesMap,
+  proxyWeb,
+  proxyWs,
   routes(config) {
     return config.get('routes');
   },
-  domains(config) {
-    return uniq(config.routes.map(r => r.host));
+  rules(config) {
+    return config.get('rules');
+  },
+  domains(rules) {
+    return rules.map(r => r.host);
   },
   email(config) {
     return config.get('email');
@@ -47,9 +52,11 @@ const blueprint = builder({
       debug: isDebug,
     });
   },
-  greenlockOpts(app, store, email, httpChallenge, isDebug, server, domains) {
+  redir() {
+    return require('redirect-https')();
+  },
+  greenlockOpts(store, email, httpChallenge, isDebug, server, domains) {
     return {
-      app,
       approvedDomains: domains,
       email,
       server,
@@ -63,7 +70,7 @@ const blueprint = builder({
     };
   },
   greenlock(greenlockOpts) {
-    return require('greenlock-express').create(greenlockOpts);
+    return require('greenlock').create(greenlockOpts);
   },
   store(mongoUri, isDebug) {
     return require('le-store-mongodb').create({
@@ -75,7 +82,10 @@ const blueprint = builder({
 
 const factory = blueprint.construct();
 
-factory.$((greenlock, httpPort, httpsPort, domains) => {
+factory.$((greenlock, httpPort, httpsPort, domains, redir, proxyWeb, proxyWs) => {
   console.log(`Listening on ${httpPort} and ${httpsPort} for ${domains.join(', ')}`);
-  greenlock.listen(httpPort, httpsPort);
+  http.createServer(greenlock.middleware(redir)).listen(httpPort);
+  const httpsServer = https.createServer(greenlock.tlsOptions, proxyWeb);
+  httpsServer.listen(httpsPort);
+  httpsServer.on('upgrade', proxyWs);
 });

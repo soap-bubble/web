@@ -5710,7 +5710,7 @@ debug@3.1.0, debug@=3.1.0, debug@~3.1.0:
   dependencies:
     ms "2.0.0"
 
-debug@^3.0.0, debug@^3.0.1, debug@^3.1.0, debug@^3.2.5, debug@^3.2.6:
+debug@^3.0.0, debug@^3.1.0, debug@^3.2.5, debug@^3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/debug/-/debug-3.2.6.tgz#e83d17de16d8a7efb7717edbe5fb10135eee629b"
   integrity sha512-mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==
@@ -6453,7 +6453,7 @@ es6-promise@3.2.1:
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-3.2.1.tgz#ec56233868032909207170c39448e24449dd1fc4"
   integrity sha1-7FYjOGgDKQkgcXDDlEjiREndH8Q=
 
-es6-promise@^4.0.3, es6-promise@^4.1.1:
+es6-promise@^4.0.3:
   version "4.2.6"
   resolved "https://registry.yarnpkg.com/es6-promise/-/es6-promise-4.2.6.tgz#b685edd8258886365ea62b57d30de28fadcd974f"
   integrity sha512-aRVgGdnmW2OiySVPUC9e6m+plolMAJKjZnQlCwNSuK5yQ0JN61DZSO1X1Ufd1foqWRAlig0rhduTCHe7sVtK5Q==
@@ -7097,15 +7097,6 @@ expect@^24.8.0:
     jest-message-util "^24.8.0"
     jest-regex-util "^24.3.0"
 
-express-http-proxy@^1.5.1:
-  version "1.5.1"
-  resolved "https://registry.yarnpkg.com/express-http-proxy/-/express-http-proxy-1.5.1.tgz#cbf45695c759693c9c5f946117462d25b57e77a8"
-  integrity sha512-k1RdysZWZ8wdPnsLa4iyrrYyUFih/sYKkn6WfkU/q5A8eUdh3l+oXhrRuQmEYEsZmiexVvpiOCkogl03jYfcbg==
-  dependencies:
-    debug "^3.0.1"
-    es6-promise "^4.1.1"
-    raw-body "^2.3.0"
-
 express-session@^1.15.5:
   version "1.16.1"
   resolved "https://registry.yarnpkg.com/express-session/-/express-session-1.16.1.tgz#251ff9776c59382301de6c8c33411af357ed439c"
@@ -7120,7 +7111,7 @@ express-session@^1.15.5:
     safe-buffer "5.1.2"
     uid-safe "~2.1.5"
 
-express@^4.13.3, express@^4.14.0, express@^4.15.4, express@^4.16.2, express@^4.16.4, express@^4.17.0:
+express@^4.13.3, express@^4.14.0, express@^4.15.4, express@^4.16.2, express@^4.17.0:
   version "4.17.1"
   resolved "https://registry.yarnpkg.com/express/-/express-4.17.1.tgz#4491fc38605cf51f8629d39c2b5d026f98a4c134"
   integrity sha512-mHJ9O79RqluphRrcw2X/GTh3k9tVv8YcoyY4Kkh4WDMUYKRZUq0h1o0w2rrrxBqM7VoeUVqgb27xlEMXTnYt4g==
@@ -8256,14 +8247,6 @@ graphology@^0.13.1:
     events "~3.0.0"
     obliterator "~1.3.0"
 
-greenlock-express@^2.6.7:
-  version "2.7.8"
-  resolved "https://registry.yarnpkg.com/greenlock-express/-/greenlock-express-2.7.8.tgz#37225cd0c69743dbfde909f8c3aeef3c90c12806"
-  integrity sha512-t02uZLhWW8QBR7YYSbRJjXg2XTESiv5M9ZvMloC2OF8VseZZVDYMwehlv830oudajmsTGpVsHEZ+AQMe+k2GRA==
-  dependencies:
-    greenlock "^2.7.17"
-    redirect-https "^1.1.5"
-
 greenlock-store-fs@^3.0.2:
   version "3.0.2"
   resolved "https://registry.yarnpkg.com/greenlock-store-fs/-/greenlock-store-fs-3.0.2.tgz#54efe8f4977e6e62840b114361584ec34622b80a"
@@ -8272,7 +8255,7 @@ greenlock-store-fs@^3.0.2:
     "@root/mkdirp" "^1.0.0"
     safe-replace "^1.1.0"
 
-greenlock@^2.6.7, greenlock@^2.7.17:
+greenlock@^2.6.7:
   version "2.7.22"
   resolved "https://registry.yarnpkg.com/greenlock/-/greenlock-2.7.22.tgz#0ce436b2a09c8f90441cb95c2a233ac0b8c7dd7e"
   integrity sha512-7T9TCORfF0NxasHVyxBRosXlgnMg1ImmcHiq4PHkByS1sY2l+g5UZuwwVKPIzkqz5609qR9tD4ItBh0UCdB++A==
@@ -8784,6 +8767,11 @@ http-proxy-middleware@^0.19.1:
     is-glob "^4.0.0"
     lodash "^4.17.11"
     micromatch "^3.1.10"
+
+http-proxy-rules@^1.1.3:
+  version "1.1.3"
+  resolved "https://registry.yarnpkg.com/http-proxy-rules/-/http-proxy-rules-1.1.3.tgz#8cd93f60ebffb2a30ed4a9658832bd1238700a51"
+  integrity sha512-yMcNTDVivW+ff9tAtIxQVWU/l3LBPx7ck085aAknSYRV0bQxBLCi5M0jkq2r7c88B8hhuQwRsvGQ/7JNYXdL4w==
 
 http-proxy@^1.17.0:
   version "1.17.0"
@@ -14324,7 +14312,7 @@ raw-body@2.3.2:
     iconv-lite "0.4.19"
     unpipe "1.0.0"
 
-raw-body@2.4.0, raw-body@^2.3.0:
+raw-body@2.4.0:
   version "2.4.0"
   resolved "https://registry.yarnpkg.com/raw-body/-/raw-body-2.4.0.tgz#a1ce6fb9c9bc356ca52e89256ab59059e13d0332"
   integrity sha512-4Oz8DUIwdvoa5qMJelxipzi/iJIi40O5cGV1wNYp5hvZP8ZN0T+jiNkL0QepXs+EsQ9XJ8ipEDoiH70ySUJP3Q==
@@ -14837,7 +14825,7 @@ redent@^2.0.0:
     indent-string "^3.0.0"
     strip-indent "^2.0.0"
 
-redirect-https@^1.1.5:
+redirect-https@^1.3.0:
   version "1.3.0"
   resolved "https://registry.yarnpkg.com/redirect-https/-/redirect-https-1.3.0.tgz#54a1bceacddad0c3178d435bcc8d6420b63f087a"
   integrity sha512-9GzwI/+Cqw3jlSg0CW6TgBQbhiVhkHSDvW8wjgRQ9IK34wtxS71YJiQeazSCSEqbvowHCJuQZgmQFl1xUHKEgg==

@@ -13,15 +13,15 @@
   "license": "MIT",
   "dependencies": {
     "config": "^3.0.1",
-    "express": "^4.16.4",
-    "express-http-proxy": "^1.5.1",
     "greenlock": "^2.6.7",
-    "greenlock-express": "^2.6.7",
+    "http-proxy": "^1.17.0",
+    "http-proxy-rules": "^1.1.3",
     "le-acme-core": "^2.1.4",
     "le-challenge-standalone": "^2.1.0",
     "le-store-mongodb": "^2.1.0",
-    "lodash": "^4.17.11",
-    "service-builder": "^1.1.1"
+    "redirect-https": "^1.3.0",
+    "service-builder": "^1.1.1",
+    "spdy": "^4.0.0"
   },
   "devDependencies": {
     "nodemon": "^1.18.10"

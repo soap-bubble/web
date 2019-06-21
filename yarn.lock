@@ -10500,6 +10500,14 @@ le-store-certbot@^2.2.2:
     pyconf "^1.1.7"
     safe-replace "^1.1.0"
 
+le-store-fs@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/le-store-fs/-/le-store-fs-1.0.3.tgz#9f85c4badc6a24c8907cb518629873a314acaaea"
+  integrity sha512-JdnYvfBiJwgjNFQ55Qw5bgWd+MsnE466AgBMWw6dMzORTQ0F2a35u0l8VvZ9qRBeSoAv6Kt/y5saATzjNltcqQ==
+  dependencies:
+    mkdirp "^0.5.1"
+    safe-replace "^1.1.0"
+
 le-store-mongodb@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/le-store-mongodb/-/le-store-mongodb-2.1.0.tgz#caff9ac9ba8f9a2385821fc6d3977ba73a0b57d7"

@@ -28,12 +28,18 @@ const blueprint = builder({
   email(config) {
     return config.get('email');
   },
+  certDir(config) {
+    return config.get('certDir');
+  },
   isDebug(config) {
     const val = config.get('debug');
     if (val && val === 'false') {
       return false;
     }
     return !!val;
+  },
+  storeType(config) {
+    return config.get('store');
   },
   server(isDebug) {
     return isDebug ? 'https://acme-staging-v02.api.letsencrypt.org/directory' : 'https://acme-v02.api.letsencrypt.org/directory';
@@ -72,11 +78,25 @@ const blueprint = builder({
   greenlock(greenlockOpts) {
     return require('greenlock').create(greenlockOpts);
   },
-  store(mongoUri, isDebug) {
+  storeMongodb(mongoUri, isDebug) {
     return require('le-store-mongodb').create({
       mongoUri,
       debug: isDebug,
     });
+  },
+  storeFs(certDir, isDebug) {
+    return require('le-store-fs').create({
+      configDir: certDir,
+      debug: isDebug,
+    });
+  },
+  store($, storeType) {
+    if (storeType === 'mongodb') {
+      return $(storeMongodb => storeMongodb);
+    } else if (storeType === 'fs') {
+      return $(storeFs => storeFs);
+    }
+    throw new Error(`${storeType} not mongodb or fs`);
   },
 });
 

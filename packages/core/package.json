@@ -2,6 +2,7 @@
   "name": "@soapbubble/core",
   "version": "1.13.0",
   "description": "The root soapbubble.online site",
+  "browserslist": "last 2 Chrome versions",
   "private": true,
   "repository": {
     "type": "git",

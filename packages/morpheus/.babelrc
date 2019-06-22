@@ -1,9 +1,5 @@
 {
-  "presets": ["@babel/preset-react", ["@babel/preset-env", {
-    "targets": {
-        "browsers": ["defaults"]
-      }
-    }]],
+  "presets": ["@babel/preset-react", "@babel/preset-env"],
   "plugins": [
     "transform-export-extensions",
     ["angularjs-annotate", { "explicitOnly" : true}],

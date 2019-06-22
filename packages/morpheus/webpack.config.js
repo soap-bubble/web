@@ -144,6 +144,17 @@ module.exports = (env) => {
       rules: styleLoaders(env).concat([
         {
           test: /\.jsx?$/,
+          include: [/node_modules\/@soapbubble/, /node_modules\/generic-pool/],
+          exclude: [/@soapbubble\/.*\/node_modules/, /generic-pool\/node_modules/],
+          use: [{
+            loader: 'babel-loader',
+            options: {
+              rootMode: 'upward-optional',
+            },
+          }],
+        },
+        {
+          test: /\.jsx?$/,
           include: [/generic-pool/],
           exclude: [/generic-pool\/node_modules/],
           use: ['babel-loader'],

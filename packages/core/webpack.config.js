@@ -102,7 +102,7 @@ module.exports = (env) => {
           use: [{
             loader: 'babel-loader',
             options: {
-              rootMode: "upward",
+              rootMode: 'upward-optional',
             },
           }],
         },

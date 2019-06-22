@@ -9,6 +9,7 @@ const proxy = require('./proxy');
 const rulesMap = require('./proxy/rulesMap');
 const proxyWeb = require('./proxy/web');
 const proxyWs = require('./proxy/ws');
+const proxyAuths = require('./proxy/auths');
 
 const blueprint = builder({
   config,
@@ -16,6 +17,7 @@ const blueprint = builder({
   rulesMap,
   proxyWeb,
   proxyWs,
+  auths: proxyAuths,
   routes(config) {
     return config.get('routes');
   },

@@ -11,6 +11,13 @@ const proxyWeb = require('./proxy/web');
 const proxyWs = require('./proxy/ws');
 const proxyAuths = require('./proxy/auths');
 
+function envTruthiness(val) {
+  if (val && val === 'false') {
+    return false;
+  }
+  return !!val;
+}
+
 const blueprint = builder({
   config,
   proxy,
@@ -34,11 +41,13 @@ const blueprint = builder({
     return config.get('certDir');
   },
   isDebug(config) {
-    const val = config.get('debug');
-    if (val && val === 'false') {
-      return false;
-    }
-    return !!val;
+    return envTruthiness(config.get('debug'));
+  },
+  isHttpEnabled(config) {
+    return envTruthiness(config.get('httpEnabled'));
+  },
+  isHttpsEnabled(config) {
+    return envTruthiness(config.get('httpsEnabled'));
   },
   storeType(config) {
     return config.get('store');
@@ -65,7 +74,7 @@ const blueprint = builder({
   },
   greenlockOpts(store, email, httpChallenge, isDebug, server, domains) {
     return {
-      approvedDomains: domains,
+      approvedDomains: domains.map(d => d.split(':')[0]),
       email,
       server,
       store,
@@ -104,10 +113,31 @@ const blueprint = builder({
 
 const factory = blueprint.construct();
 
-factory.$((greenlock, httpPort, httpsPort, domains, redir, proxyWeb, proxyWs) => {
-  console.log(`Listening on ${httpPort} and ${httpsPort} for ${domains.join(', ')}`);
-  http.createServer(greenlock.middleware(redir)).listen(httpPort);
-  const httpsServer = https.createServer(greenlock.tlsOptions, proxyWeb);
-  httpsServer.listen(httpsPort);
-  httpsServer.on('upgrade', proxyWs);
-});
+factory.$(($, isHttpEnabled, isHttpsEnabled) => {
+  if (isHttpEnabled && isHttpsEnabled) {
+    $((greenlock, httpPort, httpsPort, domains, redir, proxyWeb, proxyWs) => {
+      console.log(`Listening on ${httpPort} and ${httpsPort} for ${domains.join(', ')}`);
+      http.createServer(greenlock.middleware(redir)).listen(httpPort);
+      const httpsServer = https.createServer(greenlock.tlsOptions, proxyWeb);
+      httpsServer.listen(httpsPort);
+      httpsServer.on('upgrade', proxyWs);
+    });
+  } else if (isHttpEnabled) {
+    $((httpPort, domains, proxyWeb, proxyWs) => {
+      console.log(`Listening on ${httpPort} for ${domains.join(', ')}`);
+      const httpServer = http.createServer(proxyWeb);
+      httpServer.listen(httpPort);
+      httpServer.on('upgrade', proxyWs);
+    });
+  } else if (isHttpsEnabled) {
+    $((greenlock, httpsPort, domains, proxyWeb, proxyWs) => {
+      console.log(`Listening on ${httpsPort} for ${domains.join(', ')}`);
+      const httpsServer = https.createServer(greenlock.tlsOptions, proxyWeb);
+      httpsServer.listen(httpsPort);
+      httpsServer.on('upgrade', proxyWs);
+    });
+  } else {
+    console.log('Must enable either HTTP or HTTPS');
+    process.exit(1);
+  }
+})

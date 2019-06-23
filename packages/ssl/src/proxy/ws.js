@@ -8,7 +8,7 @@ module.exports = function init(rulesMap, proxy) {
           target,
           ...proxyRule.wsOrigin ? {
             headers: {
-              'Origin': `http://${proxyRule.wsOrigin}`,
+              'Origin': proxyRule.wsOrigin,
             }
           } : null,
         });

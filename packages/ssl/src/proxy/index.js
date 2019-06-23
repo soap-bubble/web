@@ -1,10 +1,11 @@
 const httpProxy = require('http-proxy');
 
 module.exports = function init(rulesMap) {
-  const proxy = httpProxy.createServer({ ws: true, changeOrigin: true });
+  const proxy = httpProxy.createServer({ ws: true, changeOrigin: true, xfwd: true });
   proxy.on('error', (err, req, socket) => {
-    socket.send(JSON.stringify({ error: 'not responding' }));
-    socket.close();
+    if (socket && socket.close) {
+      socket.close();
+    }
   });
   return proxy;
 }

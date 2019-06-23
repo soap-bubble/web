@@ -5,6 +5,8 @@ module.exports = {
   httpsPort: 'LS_SSL_HTTPS_PORT',
   store: 'LE_SSL_STORE',
   certDir: 'LE_SSL_FS_CERT',
+  httpEnabled: 'LE_SSL_HTTP_ENABLED',
+  httpsEnabled: 'LE_SSL_HTTPS_ENABLED',
   rules: {
     __name: 'LE_SSL_RULES',
     __format: 'json',

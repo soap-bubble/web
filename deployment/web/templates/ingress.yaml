@@ -1,0 +1,40 @@
+{{- if .Values.ingress.enabled -}}
+{{- $fullName := include "web.fullname" . -}}
+{{- $coreName := include "web.coreFullname" . -}}
+{{- $morpheusName := include "web.morpheusFullname" . -}}
+{{- $authName := include "web.authFullname" . -}}
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{ $fullName }}
+  labels:
+{{ include "web.labels" . | indent 4 }}
+  {{- with .Values.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+    rancher.io/globalDNS.hostname: {{ .Values.ingress.host }}
+spec:
+{{- if .Values.ingress.tls }}
+  tls:
+    - hosts:
+       - {{ .Values.ingress.host }}
+      secretName: {{ .Values.ingress.secretName }}
+{{- end }}
+  rules:
+    - host: {{ .Values.ingress.host }}
+      http:
+        paths:
+          - path: "/morpheus"
+            backend:
+              serviceName: {{ $morpheusName }}
+              servicePort: http
+          - path: "/auth"
+            backend:
+              serviceName: {{ $authName }}
+              servicePort: http
+          - path: "/"
+            backend:
+              serviceName: {{ $coreName }}
+              servicePort: http
+{{- end }}

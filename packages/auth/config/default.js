@@ -5,8 +5,7 @@ module.exports = {
   session: {
     saveUninitialized: false,
     resave: false,
-    cookie: {
-    },
+    cookie: {},
   },
   service: {
     bot: false,

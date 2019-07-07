@@ -34,7 +34,8 @@ module.exports = (env) => {
     }
     return 'index.ejs';
   })();
-  const jsName = env.production ? '[name].[hash].js' : '[name].js';
+  const isProduction = env.production || env.staging;
+  const jsName = isProduction ? '[name].[hash].js' : '[name].js';
   const appConfig = {};
 
   if ((env.production || env.cordova || env.electron) && !env.debug) {
@@ -76,7 +77,7 @@ module.exports = (env) => {
   const mainFields = ['esnext', 'browser', 'module', 'main'];
 
   let nodeEnv = 'development';
-  if (env.production) {
+  if (isProduction) {
     nodeEnv = 'production';
   }
 
@@ -228,7 +229,7 @@ module.exports = (env) => {
     plugins: [
       new MiniCssExtractPlugin({
         chunkFilename: '[id].css',
-        disable: !env.production,
+        disable: !isProduction,
       }),
       new HtmlWebpackPlugin({
         title: 'Morpheus',

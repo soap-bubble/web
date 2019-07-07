@@ -1,32 +1,31 @@
 module.exports = {
   mongodb: {
-    uri: 'MONGODB_URI',
+    uri: 'AUTH_MONGODB_URI',
   },
   cookie: {
-    secret: 'COOKIE_SECRET',
+    secret: 'AUTH_COOKIE_SECRET',
   },
   session: {
-    secret: 'SESSION_SECRET',
+    secret: 'AUTH_SESSION_SECRET',
   },
-  domain: 'AUTH_DOMAIN',
   cors: {
     origin: {
-      __name: 'CORS_ORIGIN',
+      __name: 'AUTH_CORS_ORIGIN',
       __format: 'json',
     },
   },
   service: {
     bot: 'AUTH_SERVICE_BOT',
   },
-  rootPath: 'ROOT_PATH',
+  rootPath: 'AUTH_ROOT_PATH',
   passport: {
     strategies: {
       google: {
-        clientID: 'GOOGLE_CLIENT_ID',
-        clientSecret: 'GOOGLE_SECRET',
-        callbackURL: 'GOOGLE_CALLBACK_URL',
+        clientID: 'AUTH_GOOGLE_CLIENT_ID',
+        clientSecret: 'AUTH_GOOGLE_SECRET',
+        callbackURL: 'AUTH_GOOGLE_CALLBACK_URL',
       },
     },
   },
-  port: 'PORT',
+  port: 'AUTH_PORT',
 };

@@ -22,6 +22,7 @@ export default function (app, createLogger) {
 
   app.set('view engine', 'ejs');
 
+  app.get('/healthcheck', (req, res) => res.status(200).send('OK'));
   attempt('login', login, logger);
   attempt('google', google, logger);
   attempt('user', user, logger);
@@ -29,6 +30,6 @@ export default function (app, createLogger) {
   attempt('saves', saves, logger);
   attempt('bot', bot, logger);
   attempt('twitch', twitch, logger);
-  
+
   logger.info('Installing routes -- compelete');
 }

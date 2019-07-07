@@ -7,7 +7,7 @@ const logger = createLogger('db');
 
 export default function dbInit(config) {
   mongoose.Promise = Promise;
-  logger.info('Opening up connection to DB');
+  logger.info(`Opening up connection to DB (${config.mongodb.uri})`);
   const db = mongoose.createConnection(config.mongodb.uri, {
     useMongoClient: true,
     autoReconnect: true,

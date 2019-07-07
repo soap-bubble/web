@@ -13,6 +13,7 @@
   "license": "MIT",
   "scripts": {
     "build": "npm run build:server && npm run build:client:production",
+    "build:staging": "npm run build:server && npm run build:client:staging",
     "build:server": "babel server -d lib --copy-files",
     "build:client": "webpack --env.development=true",
     "build:client:production": "webpack --env.production=true",

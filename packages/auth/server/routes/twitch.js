@@ -11,10 +11,10 @@ export default function (baseRoute, db, config, createLogger, socket) {
       res.status(200).send('OK');
     });
 
-    const Bot = db.model('Bot');
     baseRoute.get(
       '/twitch/callback',
       (req, res) => {
+        const Bot = db.model('Bot');
         const { code } = req.query;
         const query = qs.stringify({
           client_id: clientID,

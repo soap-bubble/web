@@ -52,8 +52,8 @@ function createAppListener(app) {
 }
 
 Promise.resolve()
-  .then(() => $(installDb))
-  .then(() => $(createAppListener))
-  .then(() => $(passport))
+  .then(() => $(routes))
   .then(() => $(middleware))
-  .then(() => $(routes));
+  .then(() => $(passport))
+  .then(() => $(createAppListener))
+  .then(() => $(installDb));

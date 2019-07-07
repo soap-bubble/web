@@ -15,15 +15,16 @@ const dirSharedComponents = [
 // cheap-module-eval-source-map
 module.exports = (env) => {
   let nodeEnv = 'development';
-  if (env.production) {
+  const isProduction = env.production || env.staging;
+  if (isProduction) {
     nodeEnv = 'production';
   }
 
   const outputPath = path.join(__dirname, 'public');
   const htmlTemplate = 'index.ejs';
-  const cssName = env.production ? 'main.[contenthash].css' : 'main.css';
-  const jsName = env.production ? '[name].[hash].js' : '[name].js';
-  const vendorName = env.production ? '[name].[hash].js' : '[name].js';
+  const cssName = isProduction ? 'main.[contenthash].css' : 'main.css';
+  const jsName = isProduction ? '[name].[hash].js' : '[name].js';
+  const vendorName = isProduction ? '[name].[hash].js' : '[name].js';
   const appConfig = {
     twitch: config.twitch,
     contentfulSpace: config.contentfulSpace,
@@ -41,8 +42,8 @@ module.exports = (env) => {
   } else if (env.staging) {
     Object.assign(appConfig, {
       self: 'https://staging.soapbubble.online',
-      morpheusServer: 'https://morpheus.staging.soapbubble.online',
-      authHost: 'https://auth.staging.soapbubble.online',
+      morpheusServer: 'https://staging.soapbubble.online/morpheus',
+      authHost: 'https://staging.soapbubble.online/auth',
       contentfulEnv: 'master',
     });
   }
@@ -67,7 +68,7 @@ module.exports = (env) => {
   const webpackConfig = {
     target,
     mode: nodeEnv,
-    devtool: env.production ? false : 'source-map',
+    devtool: isProduction ? false : 'source-map',
     entry: {
       app: './client/src/app.js',
       vendor: [
@@ -194,7 +195,7 @@ module.exports = (env) => {
     plugins: [
       new MiniCssExtractPlugin({
         chunkFilename: '[id].css',
-        disable: !env.production,
+        disable: !isProduction,
       }),
       new HtmlWebpackPlugin({
         title: 'Soapbubble Productions',

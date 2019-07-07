@@ -5,5 +5,6 @@ WORKDIR /opt/app
 RUN npm install; \
   npm run build; \
   npm install --production
+ENV NODE_ENV=production
 CMD npm start
 EXPOSE 4000

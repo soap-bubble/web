@@ -1,7 +1,8 @@
 module.exports = {
   mongodb: {
-    uri: 'MONGODB_URI',
+    uri: 'MORPHEUS_MONGODB_URI',
   },
-  googleAnalyticsClientId: 'GOOGLE_ANALYTICS_ID',
-  gameDbPath: 'GAME_DB_PATH',
+  googleAnalyticsClientId: 'MORPHEUS_GOOGLE_ANALYTICS_ID',
+  gameDbPath: 'MORPHEUS_GAME_DB_PATH',
+  port: "MORPHEUS_PORT",
 };

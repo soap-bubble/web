@@ -43,6 +43,6 @@ app.db = db()
     });
   });
 
-server.listen(8050, () => {
+server.listen(config.port, () => {
   logger.info('server up and running on 8050');
 });

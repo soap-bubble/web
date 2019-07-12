@@ -12,11 +12,18 @@ export { default as prime } from './prime';
 export { get as getModel } from './install';
 
 export default function () {
-  return mongoose.connect(config.mongodb.uri, {
-    server: {
-      auto_reconnect: true,
-    },
-  })
+  let uri = config.mongodb.uri;
+  const connectOptions = {
+    useMongoClient: true,
+    autoReconnect: true,
+  };
+  if (config.mongodb.username && config.mongodb.password) {
+    const url = new URL(uri);
+    url.username = config.mongodb.username;
+    url.password = config.mongodb.password;
+    uri = url.href;
+  }
+  return mongoose.connect(uri, connectOptions)
     .then(() => install(mongoose, morpheus))
     .then(() => mongoose);
 }

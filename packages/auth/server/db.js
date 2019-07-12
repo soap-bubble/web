@@ -7,11 +7,19 @@ const logger = createLogger('db');
 
 export default function dbInit(config) {
   mongoose.Promise = Promise;
-  logger.info(`Opening up connection to DB (${config.mongodb.uri})`);
-  const db = mongoose.createConnection(config.mongodb.uri, {
+  logger.info('Opening up connection to DB');
+  let uri = config.mongodb.uri;
+  const connectOptions = {
     useMongoClient: true,
     autoReconnect: true,
-  });
+  };
+  if (config.mongodb.username && config.mongodb.password) {
+    const url = new URL(uri);
+    url.username = config.mongodb.username;
+    url.password = config.mongodb.password;
+    uri = url.href;
+  }
+  const db = mongoose.connect(uri, connectOptions);
 
   db.on('open', () => {
     logger.info('Opening up connection to DB -- complete');

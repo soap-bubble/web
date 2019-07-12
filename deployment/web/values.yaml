@@ -1,6 +1,20 @@
-# Default values for web.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Requires a configMap with the following values:
+# auth-google-callack-url       Google auth callback URL for the client ID and secret
+# auth-google-client-id         Google auth client ID
+# auth-google-cors-url		      Probably going to go away, but allow access to auth from these domains (JSON array)
+# auth-mongodb-username         MongoDB username for auth service
+# core-contentful-space         Contentful space for blog
+# core-fb-app-id                FB app ID for main website
+# core-google-analytics-id	    Google analytics ID for main website
+# morpheus-google-analytics-id  Google analytics ID for game
+# morpheus-mongodb-username		  MongoDB username for game
+
+# Requires the following secrets
+# auth-google-secret            Google auth secret
+# auth-mongodb-password         Password for auth database
+# auth-session-secret           Session secret for backend
+# core-contentful-access        Contentful access key for blog
+# morpheus-mongodb-password     Password for game database
 
 replicaCount: 1
 
@@ -9,31 +23,21 @@ pullPolicy: IfNotPresent
 configMap: soapbubble-web
 secrets: soapbubble-web
 
+mongoDbUri: mongodb
+
 soapbubble:
   core:
     image: docker.soapbubble.online:5000/soapbubble/core
     tag: latest
-    env:
-    - name: CORE_PORT
-      value: "80"
+    healthcheck: "/"
   auth:
     image: docker.soapbubble.online:5000/soapbubble/auth
     tag: latest
-    env:
-    - name: AUTH_PORT
-      value: "80"
-    - name: AUTH_ROOT_PATH
-      value: "/auth"
+    healthcheck: "/healthcheck"
   morpheus:
     image: docker.soapbubble.online:5000/soapbubble/morpheus
     tag: latest
-    env:
-    - name: MORPHEUS_PORT
-      value: "80"
-    - name: MORPHEUS_PRIME_DB
-      value: "true"
-    - name: MORPHEUS_UPDATE_DB
-      value: "true"
+    healthcheck: "/morpheus"
 
 imagePullSecrets:
   - name: soapbubble
@@ -70,12 +74,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-mongodb:
-  enabled: true
-  replicaSet:
-    enabled: true
-  persistence:
-    enabled: true
-    accessMode: ReadWriteOnce
-    size: 1Gi

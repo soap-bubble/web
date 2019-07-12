@@ -197,7 +197,6 @@ export function resize({
     height -= heightOffset;
     verticalPadding = heightOffset / 2;
   }
-  console.log(new Error('stack'));
   return (dispatch, getState) => {
     dispatch({
       type: DIMENSIONS_RESIZE,

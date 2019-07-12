@@ -25,15 +25,7 @@ define({
   },
   socket,
   models: () => models,
-  config: () => {
-    if (process.env.SOAPBUBBLE_LOCAL_SSL) {
-      return {
-        ...config,
-        rootPath: '/auth',
-      };
-    }
-    return config;
-  },
+  config: () => config,
   createLogger: () => createLogger,
 });
 init();

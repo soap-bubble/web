@@ -32,7 +32,7 @@ export default function () {
       );
     } else {
       middleware = applyMiddleware(
-        epicMiddleware(),
+        epicMiddleware,
         thunkMiddleware,
         promiseMiddleware,
       );

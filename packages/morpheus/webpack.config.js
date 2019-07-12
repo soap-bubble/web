@@ -54,6 +54,9 @@ module.exports = (env) => {
       apiHost: 'https://staging.soapbubble.online/morpheus',
       authHost: 'https://staging.soapbubble.online/auth',
     });
+    if (!(env.cordova || env.electron)) {
+      publicPath = '/morpheus/';
+    }
   }
   if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
     Object.assign(appConfig, {

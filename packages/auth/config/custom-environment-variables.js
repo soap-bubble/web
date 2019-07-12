@@ -1,6 +1,8 @@
 module.exports = {
   mongodb: {
     uri: 'AUTH_MONGODB_URI',
+    username: 'MONGODB_USERNAME',
+    password: 'MONGODB_PASSWORD',
   },
   cookie: {
     secret: 'AUTH_COOKIE_SECRET',

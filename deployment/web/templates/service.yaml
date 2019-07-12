@@ -12,7 +12,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "web.name" . }}
+    app.kubernetes.io/name: core
     app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: v1
@@ -29,7 +29,7 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "web.name" . }}
+    app.kubernetes.io/name: auth
     app.kubernetes.io/instance: {{ .Release.Name }}
 ---
 apiVersion: v1
@@ -46,5 +46,5 @@ spec:
       protocol: TCP
       name: http
   selector:
-    app.kubernetes.io/name: {{ include "web.name" . }}
+    app.kubernetes.io/name: morpheus
     app.kubernetes.io/instance: {{ .Release.Name }}

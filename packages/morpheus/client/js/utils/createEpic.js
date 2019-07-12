@@ -3,6 +3,7 @@ import 'rxjs-compat/add/operator/map';
 import 'rxjs-compat/add/operator/scan';
 import 'rxjs-compat/add/operator/concat';
 import 'rxjs-compat/add/operator/mergeMap';
+import 'rxjs-compat/add/operator/filter';
 import 'rxjs-compat/add/operator/catch';
 import 'rxjs-compat/add/operator/takeUntil';
 import 'rxjs-compat/add/observable/fromPromise';

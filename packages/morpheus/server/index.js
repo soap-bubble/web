@@ -18,9 +18,9 @@ const server = socket(app);
 
 const gameDbPath = path.resolve(config.gameDbPath);
 logger.info('static game dir', { gameDbPath });
-app.use('/GameDB', express.static(gameDbPath));
-app.use(express.static('public'));
-app.use('/api', routes);
+app.use(`${config.rootPath ? config.rootPath : ''}/GameDB`, express.static(gameDbPath));
+app.use(config.rootPath ? config.rootPath : '', express.static('public'));
+app.use(`${config.rootPath ? config.rootPath : ''}/api`, routes);
 
 
 app.db = db()

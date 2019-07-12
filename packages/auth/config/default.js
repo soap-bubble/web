@@ -17,4 +17,5 @@ module.exports = {
       },
     },
   },
+  rootPath: process.env.SOAPBUBBLE_LOCAL_SSL ? '/auth' : null,
 };

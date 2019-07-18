@@ -37,7 +37,7 @@ class Sound extends Component {
 
   onResume() {
     const { assetsUrl } = this.props;
-    
+
     assetsUrl.map(asset => this[`${asset}El`]).forEach(el => {
       el.play();
     });
@@ -91,6 +91,9 @@ class Sound extends Component {
             key={asset}
             ref={(el) => {
               this[assetKey] = el;
+              if (el) {
+                this[assetKey].volume = volume;
+              }
             }}
             loop
             autoPlay

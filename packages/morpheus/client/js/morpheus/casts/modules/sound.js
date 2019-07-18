@@ -11,6 +11,9 @@ import {
   Tween,
 } from 'tween';
 import {
+  selectors as gameSelectors,
+} from 'morpheus/game';
+import {
   actions as gamestateActions,
   selectors as gamestateSelectors,
   isActive,
@@ -165,6 +168,7 @@ export const delegate = memoize((scene) => {
         const sound = createSound(getAssetUrl(fileName), {
           autoplay,
         });
+        sound.volume = gameSelectors.htmlVolume(getState());
         function onSoundEnded() {
           let startAngle;
           if (nextSceneId && nextSceneId !== 0x3FFFFFFF && !onSoundEnded.__aborted) {
@@ -347,7 +351,7 @@ export const delegate = memoize((scene) => {
   }) {
     return (dispatch, getState) => {
       const v = {
-        volume: 1,
+        volume: Number(gameSelectors.htmlVolume(getState())),
       };
       const tween = new Tween(v)
         .to({

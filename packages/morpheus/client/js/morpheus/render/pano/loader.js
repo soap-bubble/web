@@ -42,7 +42,7 @@ export default ({
          el.play()
       }));
     },
-    load(gamestates) {
+    load(gamestates, volume) {
       const panoCastData = sceneMatchers.panoCastData(scene);
       const videoCastsData = sceneMatchers.panoAnimData(scene).filter(
         cast => !existsInAssets(cast) && sceneMatchers.isEnabledCast({
@@ -124,6 +124,7 @@ export default ({
             video: true,
             videoOptions: {
               loop: looping,
+              volume,
               onended,
             },
             renderer({

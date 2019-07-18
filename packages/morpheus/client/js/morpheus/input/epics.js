@@ -1,7 +1,7 @@
-import 'rxjs/add/observable/of';
 import 'rxjs/add/operator/mergeMap';
 import 'rxjs/add/operator/filter';
 import 'rxjs/add/operator/catch';
+import { of } from 'rxjs';
 import { Observable } from 'rxjs/Observable';
 import createEpic from 'utils/createEpic';
 import inputObservables from './inputKeyHandlers';
@@ -14,7 +14,7 @@ export default createEpic((action$, store$) => action$
   .ofType(KEY_UP, KEY_DOWN)
   .mergeMap((action) => {
     if (inputObservables[action.payload]) {
-      return Observable.of(...inputObservables[action.payload])
+      return of(...inputObservables[action.payload])
         .map((h) => {
           if (action.type === KEY_DOWN) {
             return h.down;
@@ -22,7 +22,7 @@ export default createEpic((action$, store$) => action$
           return h.up;
         })
         .filter(h => h)
-        .mergeMap(handler => Observable.of(handler(action, store$)));
+        .mergeMap(handler => of(handler(action, store$)));
     }
     return [];
   })

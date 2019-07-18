@@ -32,6 +32,7 @@
     "cors": "^2.8.4",
     "discord.js": "^11.3.0",
     "express": "^4.16.2",
+    "obs-websocket-js": "^3.1.0",
     "qs": "^6.6.0",
     "reselect": "^3.0.1",
     "service-builder": "^1.1.1",

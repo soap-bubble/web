@@ -22,6 +22,9 @@ class Main extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
+    if (this.props.volume !== nextProps.volume && this.audio && !this.state.isLeaving) {
+      this.audio.volume = nextProps.volume;
+    }
     if (this.props.leaving === false && (nextProps.leaving === true || nextProps.done === true)) {
       this.fadeOut();
     }
@@ -63,7 +66,7 @@ class Main extends React.Component {
   }
 
   render() {
-    const { style } = this.props;
+    const { style, volume } = this.props;
     const {
       target,
       started,
@@ -83,7 +86,7 @@ class Main extends React.Component {
         {!started ? <WhyAmISeeingThis
           reason={WHY_DO_I_NEED_TO_CLICK_PLAY}
         /> : null}
-        <audio ref={(e) => { this.audio = e; }} loop>
+        <audio ref={(e) => { this.audio = e; if (e && !this.state.isLeaving) this.audio.volume = volume }} loop>
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'aac')} type="audio/aac" />
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'mp3')} type="audio/mp3" />
           <source src={getAssetUrl('GameDB/OAsounds/claireSRMSC', 'ogg')} type="audio/ogg" />

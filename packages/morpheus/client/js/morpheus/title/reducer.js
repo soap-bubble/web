@@ -9,7 +9,7 @@ import {
 const reducer = createReducer(
   'title',
   {
-    done: true,
+    done: false,
     leaving: false,
   },
   {

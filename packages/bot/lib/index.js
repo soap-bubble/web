@@ -9,6 +9,7 @@ import socketFactory from './socket';
 import { fetchBotProfileProvider, saveBotProflie } from './profile';
 import twitchApiFactory from './twitchApi';
 import twitchChatFactory from './twitchChat';
+import obsClientFactory from './obsClient';
 
 define({
   app: appFactory,
@@ -20,6 +21,7 @@ define({
   saveProfile: saveBotProflie,
   twitchApi: twitchApiFactory,
   twitchChat: twitchChatFactory,
+  obsClient: obsClientFactory
 });
 
 init();

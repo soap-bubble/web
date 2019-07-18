@@ -139,6 +139,16 @@ export function canvasCreated(canvas) {
             dispatch(done());
             buttonsActions.stop();
           }
+        } else if(name === 'exitButton') {
+          if (process.env.ELECTRON_ENV) {
+            const remote = require('electron').remote;
+            const window = remote.getCurrentWindow();
+            window.close();
+          } else if (window.hasOwnProperty('cordova')) {
+            navigator.app.exitApp();
+          } else if (window.close) {
+            window.close();
+          }
         }
       };
 

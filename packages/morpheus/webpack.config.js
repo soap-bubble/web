@@ -19,7 +19,7 @@ module.exports = (env) => {
       return path.resolve(__dirname, '../cordova/www');
     }
     if (env.electron) {
-      return path.resolve(__dirname, '../electron/build');
+      return path.resolve(__dirname, '../electron2/dist');
     }
     return path.resolve(__dirname, 'public');
   })();
@@ -64,7 +64,9 @@ module.exports = (env) => {
       apiHost: 'https://dev.soapbubble.online/morpheus',
       authHost: 'https://dev.soapbubble.online/auth',
     });
-    publicPath = '/morpheus/';
+    if (!(env.cordova || env.electron)) {
+      publicPath = '/morpheus/';
+    }
   } else if (env.development) {
     Object.assign(appConfig, {
       assetHost: 'http://localhost:8050',
@@ -73,9 +75,6 @@ module.exports = (env) => {
     });
   }
 
-  if (env.electron) {
-    appConfig.apiHost = 'morpheus://';
-  }
   const target = env.electron ? 'electron-renderer' : 'web';
   const mainFields = ['esnext', 'browser', 'module', 'main'];
 
@@ -97,6 +96,11 @@ module.exports = (env) => {
     if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
       // devToolOptions.publicPath = 'https://dev.soapbubble.online/morpheus/';
     }
+  }
+
+  const externals = {};
+  if (!env.electron) {
+    externals.electron = '_';
   }
 
   let webpackConfig = {
@@ -135,6 +139,7 @@ module.exports = (env) => {
         'ua-parser-js',
       ],
     },
+    externals,
     output: {
       path: outputPath,
       filename: jsName,

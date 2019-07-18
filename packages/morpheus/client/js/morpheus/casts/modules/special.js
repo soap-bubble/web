@@ -450,6 +450,7 @@ export const delegate = memoize((scene) => {
           autoplay,
           onerror: reject,
         });
+        video.volume = gameSelectors.htmlVolume(getState());
         video.classList.add('MovieSpecialCast');
         function onVideoEnded() {
           let startAngle;
@@ -817,7 +818,7 @@ export const delegate = memoize((scene) => {
     return () => {
       assets.forEach(({ el }) => {
         if (!el.__mWasPaused) {
-          el.play();  
+          el.play();
         }
       });
     };

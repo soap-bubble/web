@@ -1,5 +1,8 @@
 import { connect } from 'react-redux';
 import {
+  selectors as gameSelectors
+} from 'morpheus/game';
+import {
   isLeaving,
   isDone,
   titleStyle,
@@ -11,6 +14,7 @@ function mapStateToProps(state) {
     leaving: isLeaving(state),
     done: isDone(state),
     style: titleStyle(state),
+    volume: gameSelectors.htmlVolume(state),
   };
 }
 

@@ -443,7 +443,7 @@ export const delegate = memoize((scene) => {
             };
           },
         });
-        const assets = loader.load(gamestateSelectors.forState(getState()));
+        const assets = loader.load(gamestateSelectors.forState(getState()), gameSelectors.htmlVolume(getState()));
 
         const geometry = createGeometry();
         map.flipY = false;
@@ -578,7 +578,7 @@ export const delegate = memoize((scene) => {
         camera,
         renderer,
         update: () => {
-          loader.load(gamestateSelectors.forState(getState()))
+          loader.load(gamestateSelectors.forState(getState()), gameSelectors.htmlVolume(getState()))
             .forEach((contextProvider) => {
               if (canvasTexture.version !== textureVersion) {
                 const ctx = renderedCanvas.getContext('2d');

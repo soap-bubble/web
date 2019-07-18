@@ -107,7 +107,7 @@ define({
           retries: 1,
         });
       } catch (err) {
-        logger.error('Failed to refresh twitch token', err);
+        logger.error('Failed to refresh twitch token');
         return {
           access_token: null,
           refresh_token: null,

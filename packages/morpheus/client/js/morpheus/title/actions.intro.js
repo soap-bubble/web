@@ -71,7 +71,7 @@ function createObject({
 }
 
 export default function factory({ canvas: sourceCanvas }) {
-  return (dispatch) => {
+  return (dispatch, getState) => {
     const canvas = document.createElement('canvas');
     canvas.width = 1024;
     canvas.height = 1024;
@@ -80,7 +80,7 @@ export default function factory({ canvas: sourceCanvas }) {
       canvas,
     );
     const video = createVideo(getAssetUrl('GameDB/Deck1/introMOV'));
-
+    video.volume = gameSelectors.htmlVolume(getState());
     const videoTexture = new VideoTexture(
       video,
     );

@@ -30,7 +30,7 @@ const reducer = createReducer(
     location: { x: 0, y: 0 },
     menuOpen: false,
     settingsOpen: false,
-    volume: 100,
+    volume: 20,
     isLoggingIn: false,
     saveOpen: false,
     savesAreLoading: false,

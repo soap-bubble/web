@@ -116,6 +116,12 @@ export default function factory() {
               screen,
             });
           },
+          exitButton(screen) {
+            buttonCallback({
+              name: 'exitButton',
+              screen,
+            });
+          }
         };
         const mouseIn = {
           newButton: false,

@@ -8,6 +8,12 @@ export default function (config, twitchChat) {
   } = config.discord;
   const client = new Discord.Client();
 
+  function debugResponse(message, response) {
+    if (config.debug === true) {
+      message.reply(JSON.stringify(response, null, 2));
+    }
+    return response;
+  }
 
   const pingPong = {
     selector(message) {
@@ -38,6 +44,32 @@ export default function (config, twitchChat) {
       factory(async function channelAction(twitchApi) {
         const stream = await twitchApi.getMyStream();
         message.reply(JSON.stringify(stream, null, 2));
+      });
+    }
+  }
+
+  const startStream = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content === 'start stream';
+    },
+    action(message) {
+      factory(async function channelAction(obsClient, obsConfig) {
+        debugResponse(message, await obsClient.switchProfile(obsConfig.profile));
+        debugResponse(message, await obsClient.switchScene(obsConfig.scenes.start));
+        debugResponse(message, await obsClient.startStream());
+        message.reply('Stream started');
+      });
+    }
+  }
+
+  const stopStream = {
+    selector(message) {
+      return message.channel.name === 'bot-admin' && message.content === 'stop stream';
+    },
+    action(message) {
+      factory(async function channelAction(obsClient, obsConfig) {
+        await obsClient.stopStream();
+        message.reply('Stream stopped');
       });
     }
   }
@@ -160,7 +192,6 @@ export default function (config, twitchChat) {
     }
   }
 
-
   function handleMessage(message, cb) {
     [
       addTag,
@@ -173,6 +204,8 @@ export default function (config, twitchChat) {
       editGame,
       tags,
       listen,
+      startStream,
+      stopStream,
     ].forEach(({ selector, action }) => {
       if (selector(message)) {
         action(message);

@@ -67,6 +67,8 @@ build-auth:
 deploy-staging:
   image: rancher/cli
   stage: deploy
+  tags:
+    - docker
   environment:
     name: staging
     url: https://staging.soapbubble.online

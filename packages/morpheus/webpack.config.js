@@ -34,6 +34,7 @@ module.exports = (env) => {
     }
     return 'index.ejs';
   })();
+  let htmlFilename = 'index.html';
   const isProduction = env.production || env.staging;
   const jsName = isProduction ? '[name].[hash].js' : '[name].js';
   const appConfig = {};
@@ -47,6 +48,7 @@ module.exports = (env) => {
     });
     if (env.production && !(env.cordova || env.electron)) {
       publicPath = '/morpheus/';
+      htmlFilename = 'index-production.html';
     }
   } else if (env.staging) {
     Object.assign(appConfig, {
@@ -56,6 +58,7 @@ module.exports = (env) => {
     });
     if (!(env.cordova || env.electron)) {
       publicPath = '/morpheus/';
+      htmlFilename = 'index-staging.html';
     }
   }
   if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
@@ -236,22 +239,15 @@ module.exports = (env) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        chunkFilename: '[id].css',
+        filename: '[id].[contenthash].css',
         disable: !isProduction,
       }),
       new HtmlWebpackPlugin({
         title: 'Morpheus',
-        filename: 'index.html',
+        filename: htmlFilename,
         template: `client/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
         chunks: ['vendor', 'app'],
-      }),
-      new HtmlWebpackPlugin({
-        title: 'Morpheus Browser',
-        filename: 'browser.html',
-        template: 'client/html/index.ejs',
-        googleAnalyticsClientId: config.googleAnalyticsClientId,
-        chunks: ['vendor', 'browser'],
       }),
       new webpack.DefinePlugin(webpackDefineConfig),
     ].concat(env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : []),

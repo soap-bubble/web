@@ -16,11 +16,25 @@ app.set('views', path.resolve(__dirname, '../client/html'));
 
 const server = socket(app);
 
+const indexHtml = (function () {
+  if (process.env.NODE_ENV === 'production' && process.env.MORPHEUS_ENVIRONMENT === 'staging') {
+    return 'index-staging.html';
+  }
+  if (process.env.NODE_ENV === 'production') {
+    return 'index-production.html';
+  }
+  return 'index.html';
+})();
+
 const gameDbPath = path.resolve(config.gameDbPath);
 logger.info('static game dir', { gameDbPath });
-app.use(`${config.rootPath ? config.rootPath : ''}/GameDB`, express.static(gameDbPath));
-app.use(config.rootPath ? config.rootPath : '', express.static('public'));
-app.use(`${config.rootPath ? config.rootPath : ''}/api`, routes);
+const rootPath = config.rootPath ? config.rootPath : '';
+app.use(`${rootPath}/GameDB`, express.static(gameDbPath));
+app.get(`${rootPath}/index.html`, (req, res) => {
+  res.sendFile(path.join(__dirname, `../public/${indexHtml}`));
+});
+app.use(rootPath, express.static('public'));
+app.use(`${rootPath}/api`, routes);
 
 
 app.db = db()

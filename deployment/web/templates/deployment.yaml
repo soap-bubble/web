@@ -114,6 +114,10 @@ spec:
         - name: core-{{ .Chart.Name }}
           image: "{{ .Values.soapbubble.core.image }}:{{ .Values.soapbubble.core.tag }}"
           env:
+            {{- range $key, $value := .Values.soapbubble.core.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
             - name: CORE_PORT
               value: "80"
             - name: CORE_FB_APP_ID
@@ -191,6 +195,10 @@ spec:
           image: "{{ .Values.soapbubble.morpheus.image }}:{{ .Values.soapbubble.morpheus.tag }}"
           imagePullPolicy: {{ .Values.pullPolicy }}
           env:
+            {{- range $key, $value := .Values.soapbubble.core.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
             - name: MORPHEUS_PORT
               value: "80"
             - name: MORPHEUS_PRIME_DB

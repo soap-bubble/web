@@ -22,9 +22,9 @@ module.exports = (env) => {
 
   const outputPath = path.join(__dirname, 'public');
   const htmlTemplate = 'index.ejs';
-  const cssName = isProduction ? 'main.[contenthash].css' : 'main.css';
   const jsName = isProduction ? '[name].[hash].js' : '[name].js';
   const vendorName = isProduction ? '[name].[hash].js' : '[name].js';
+  let htmlFilename = 'index.html';
   const appConfig = {
     twitch: config.twitch,
     contentfulSpace: config.contentfulSpace,
@@ -39,6 +39,7 @@ module.exports = (env) => {
       authHost: 'https://soapbubble.online/auth',
       contentfulEnv: 'master',
     });
+    htmlFilename = 'index-production.html';
   } else if (env.staging) {
     Object.assign(appConfig, {
       self: 'https://staging.soapbubble.online',
@@ -46,6 +47,7 @@ module.exports = (env) => {
       authHost: 'https://staging.soapbubble.online/auth',
       contentfulEnv: 'master',
     });
+    htmlFilename = 'index-staging.html';
   }
   if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
     Object.assign(appConfig, {
@@ -194,12 +196,12 @@ module.exports = (env) => {
     },
     plugins: [
       new MiniCssExtractPlugin({
-        chunkFilename: '[id].css',
+        filename: '[name].[chunkhash].css',
         disable: !isProduction,
       }),
       new HtmlWebpackPlugin({
         title: 'Soapbubble Productions',
-        filename: 'index.html',
+        filename: htmlFilename,
         template: `client/assets/html/${htmlTemplate}`,
         googleAnalyticsClientId: config.googleAnalyticsClientId,
         fbAppId: config.fbAppId,

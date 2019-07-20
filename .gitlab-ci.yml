@@ -75,5 +75,5 @@ deploy-staging:
   only:
     - master
   script:
-    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-c8qmh
+    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-p9ngq
     - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web

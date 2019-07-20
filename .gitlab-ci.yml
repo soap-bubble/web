@@ -13,7 +13,7 @@ variables:
   SOAPBUBBLE_FB_APP_ID: ""
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
-  RANCHER_CONFIG: "" # rancher config contents
+  RANCHER_TOKEN: "" # rancher config contents
 # Job: Install
 build-morpheus:
   image: docker:stable

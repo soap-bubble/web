@@ -4,6 +4,7 @@
 # Deploy - Deploy application to S3/ElasticBeanstalk
 stages:
   - build
+  - deployment
 # Configuration
 variables:
   BUTLER_API_KEY: ""

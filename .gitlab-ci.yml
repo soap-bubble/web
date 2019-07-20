@@ -65,7 +65,7 @@ build-auth:
     - docker push docker.soapbubble.online:5000/soapbubble/auth:latest
     - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
 deploy-staging:
-  image: rancher/cli
+  image: soapbubble/rancher-cli
   stage: deploy
   tags:
     - docker
@@ -75,5 +75,5 @@ deploy-staging:
   only:
     - master
   script:
-    - login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-c8qmh
-    - app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web
+    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-c8qmh
+    - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web

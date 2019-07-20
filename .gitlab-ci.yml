@@ -13,6 +13,7 @@ variables:
   SOAPBUBBLE_FB_APP_ID: ""
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
+  RANCHER_CONFIG: "" # rancher config contents
 # Job: Install
 build-morpheus:
   image: docker:stable
@@ -21,6 +22,8 @@ build-morpheus:
   tags:
     - docker
   stage: build
+  only:
+    - master
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
     - docker build -t soapbubble/morpheus packages/morpheus
@@ -35,27 +38,15 @@ build-core:
   tags:
     - docker
   stage: build
+  only:
+    - master
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
-    - docker build --build-arg GOOGLE_ANALYTICS_ID=${GOOGLE_ANALYTICS_ID} --build-arg SOAPBUBBLE_CONTENTFUL_ACCESS=${SOAPBUBBLE_CONTENTFUL_ACCESS} --build-arg SOAPBUBBLE_CONTENTFUL_SPACE=${SOAPBUBBLE_CONTENTFUL_SPACE} --build-arg SOAPBUBBLE_FB_APP_ID=${SOAPBUBBLE_FB_APP_ID} -t soapbubble/core packages/core
+    - docker build -t soapbubble/core packages/core
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/core:latest
     - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
-build-ssl:
-  image: docker:stable
-  services:
-    - docker:dind
-  tags:
-    - docker
-  stage: build
-  script:
-    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
-    - docker build --build-arg LE_SSL_EMAIL=${LE_SSL_EMAIL} --build-arg LE_SSL_RULES=${LE_SSL_RULES} -t soapbubble/ssl packages/ssl
-    - docker tag soapbubble/ssl docker.soapbubble.online:5000/soapbubble/ssl:latest
-    - docker tag soapbubble/ssl docker.soapbubble.online:5000/soapbubble/ssl:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/ssl:latest
-    - docker push docker.soapbubble.online:5000/soapbubble/ssl:${CI_COMMIT_SHA:0:7}
 build-auth:
   image: docker:stable
   services:
@@ -63,6 +54,8 @@ build-auth:
   tags:
     - docker
   stage: build
+  only:
+    - master
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
     - docker build -t soapbubble/auth packages/auth
@@ -70,3 +63,14 @@ build-auth:
     - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/auth:latest
     - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
+deploy-staging:
+  image: rancher/cli
+  stage: deploy
+  environment:
+    name: staging
+    url: https://staging.soapbubble.online
+  only:
+    - master
+  script:
+    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context soapbubble
+    - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web

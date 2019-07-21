@@ -122,7 +122,7 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: [/@soapbubble\/style\/dist\/soapbubble.css/],
+          include: [/(@soapbubble\/style\/dist\/soapbubble.css|packages\/style\/dist\/soapbubble.css)/],include: [/(@soapbubble\/style\/dist\/soapbubble.css|packages\/style\/dist\/soapbubble.css)/],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -137,7 +137,6 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          exclude: [/@soapbubble\/style\/dist\/soapbubble.css/],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,

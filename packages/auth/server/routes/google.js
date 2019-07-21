@@ -16,6 +16,7 @@ export default function (baseRoute, db, config, createLogger) {
       CLIENT_ID,
       (err, login) => {
         if (err) {
+          logger.error('Failed to verify token', err);
           return res.status(403).send('not authorized');
         }
         const payload = login.getPayload();
@@ -32,7 +33,7 @@ export default function (baseRoute, db, config, createLogger) {
             logger.info('Found user', { id: user._id });
             if (user.profiles.find(p => p.providerType === 'google').id === userid) {
               return res.status(200).send({
-                id: user.id,
+                id: user._id,
                 emails: user.emails,
                 displayName: user.displayName,
                 profiles: user.profiles,

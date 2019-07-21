@@ -8,6 +8,7 @@ export default function userRoute(baseRoute, createLogger, db, permissions) {
     '/GetAllUsers',
     passport.authenticate('google-login-token'),
     (req, res) => {
+      logger.info('GetAllUsers route start');
       if (!permissions.isGranted('GetAllUsers', req.user)) {
         logger.info('Access not granted', {
           route: '/GetAllUsers',

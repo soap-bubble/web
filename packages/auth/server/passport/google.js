@@ -1,4 +1,5 @@
 import {
+  get,
   pick,
   endsWith,
 } from 'lodash';
@@ -135,7 +136,7 @@ export default function (db, createLogger) {
                       this.fail(userModel);
                     });
                 }
-                logger.info('Found user', { id: user.id });
+                logger.info('Found user', { id: user._id });
                 if (user.profiles.find(p => p.providerType === 'google').id === userid) {
                   logger.info('success');
                   return this.success(user);
@@ -148,7 +149,7 @@ export default function (db, createLogger) {
               });
           } catch (err1) {
             if (process.env.NODE_ENV !== 'production') {
-              this.fail({ error: err1 });
+              return this.fail({ error: err1 });
             }
             this.fail({ error: 'Failed to save' });
           }

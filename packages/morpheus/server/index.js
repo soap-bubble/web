@@ -30,7 +30,7 @@ const gameDbPath = path.resolve(config.gameDbPath);
 logger.info('static game dir', { gameDbPath });
 const rootPath = config.rootPath ? config.rootPath : '';
 app.use(`${rootPath}/GameDB`, express.static(gameDbPath));
-app.get(`${rootPath}/index.html`, (req, res) => {
+app.get(`${rootPath}/($|index.html)`, (req, res) => {
   res.sendFile(path.join(__dirname, `../public/${indexHtml}`));
 });
 app.use(rootPath, express.static('public'));

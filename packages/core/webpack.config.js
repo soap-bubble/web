@@ -24,6 +24,7 @@ module.exports = (env) => {
   const htmlTemplate = 'index.ejs';
   const jsName = isProduction ? '[name].[hash].js' : '[name].js';
   let htmlFilename = 'index.html';
+  console.log(`Building with twitch config clientID: ${config.twitch.clientID} callbackURL: ${config.twitch.callbackURL}`)
   const appConfig = {
     twitch: config.twitch,
     contentfulSpace: config.contentfulSpace,

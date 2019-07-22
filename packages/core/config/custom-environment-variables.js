@@ -5,7 +5,13 @@ module.exports = {
   contentfulAccess: 'CORE_CONTENTFUL_ACCESS',
   port: 'CORE_PORT',
   twitch: {
-    clientID: 'BOT_TWITCH_CLIENT_ID',
-    callbackURL: 'BOT_TWITCH_CALLBACK_URL',
+    staging: {
+      clientID: 'BOT_STAGING_TWITCH_CLIENT_ID',
+      callbackURL: 'BOT_STAGING_TWITCH_CALLBACK_URL',
+    },
+    production: {
+      clientID: 'BOT_PRODUCTION_TWITCH_CLIENT_ID',
+      callbackURL: 'BOT_PRODUCTION_TWITCH_CALLBACK_URL',
+    }
   },
 };

@@ -24,9 +24,9 @@ module.exports = (env) => {
   const htmlTemplate = 'index.ejs';
   const jsName = isProduction ? '[name].[hash].js' : '[name].js';
   let htmlFilename = 'index.html';
-  console.log(`Building with twitch config clientID: ${config.twitch.clientID} callbackURL: ${config.twitch.callbackURL}`)
+  let environment = 'local';
+
   const appConfig = {
-    twitch: config.twitch,
     contentfulSpace: config.contentfulSpace,
     contentfulAccess: config.contentfulAccess,
     contentfulEnv: 'development',
@@ -38,6 +38,7 @@ module.exports = (env) => {
       morpheusServer: 'https://soapbubble.online/morpheus',
       authHost: 'https://soapbubble.online/auth',
       contentfulEnv: 'master',
+      twitch: config.twitch.production,
     });
     htmlFilename = 'index-production.html';
   } else if (env.staging) {
@@ -46,6 +47,7 @@ module.exports = (env) => {
       morpheusServer: 'https://staging.soapbubble.online/morpheus',
       authHost: 'https://staging.soapbubble.online/auth',
       contentfulEnv: 'master',
+      twitch: config.twitch.staging,
     });
     htmlFilename = 'index-staging.html';
   }
@@ -54,15 +56,17 @@ module.exports = (env) => {
       self: 'https://dev.soapbubble.online',
       morpheusServer: 'https://dev.soapbubble.online/morpheus',
       authHost: 'https://dev.soapbubble.online/auth',
+      twitch: config.twitch.local,
     });
   } else if (env.development) {
     Object.assign(appConfig, {
       self: 'http://localhost:8060',
       morpheusServer: 'http://localhost:8050',
       authHost: 'http://localhost:4000',
+      twitch: config.twitch.local,
     });
   }
-
+  console.log(`Building with twitch config clientID: ${appConfig.twitch.clientID} callbackURL: ${appConfig.twitch.callbackURL}`)
   const publicPath = `${appConfig.self}/`;
   const target = 'web';
   const mainFields = ['esnext', 'browser', 'module', 'main'];

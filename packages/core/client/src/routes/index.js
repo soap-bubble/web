@@ -17,7 +17,9 @@ export default {
   ['route/HOME']: {
     path: '/',
     component: () => (
-      <Page/>
+      <Page>
+        <About />
+      </Page>
     ),
   },
   ['route/ABOUT']: {

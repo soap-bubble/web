@@ -11,7 +11,7 @@
     "webpack": "webpack",
     "build": "npm run webpack -- --env.production=true",
     "prepublishOnly": "npm run build",
-    "start:dev": "npm run webpack -- --env --watch"
+    "start:dev": "npm run webpack -- --env.production=true --watch"
   },
   "files": [
     "dist/*",

@@ -20,7 +20,7 @@ First log in to docker:
 docker login docker.soapbubble.online:5000
 ```
 
-Then apply the credentials to the kubernetes:
+Then apply the credentials to the kubernetes (note with rancher you can also add to the registry panel):
 ```
 kubectl create secret generic regcred \
     --from-file=.dockerconfigjson=$HOME/.docker/config.json \
@@ -42,4 +42,10 @@ helm install --name mongodb --set persistence.enabled=false stable/mongodb
 
 ```
 rancher app install --namespace soapbubble-staging --values deployment/web/values-staging.yaml deployment/web web-staging
+```
+
+## Production
+
+```
+rancher app install --namespace soapbubble-production --values deployment/web/values-production.yaml deployment/web web-production
 ```

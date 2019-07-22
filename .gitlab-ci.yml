@@ -12,8 +12,10 @@ variables:
   CORE_CONTENTFUL_ACCESS: ""
   CORE_CONTENTFUL_SPACE: ""
   CORE_FB_APP_ID: ""
-  BOT_TWITCH_CLIENT_ID: ""
-  BOT_TWITCH_CALLBACK_URL: ""
+  BOT_PRODUCTION_TWITCH_CLIENT_ID: ""
+  BOT_PRODUCTION_CALLBACK_URL: ""
+  BOT_STAGING_TWITCH_CLIENT_ID: ""
+  BOT_STAGING_CALLBACK_URL: ""
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
   RANCHER_TOKEN: "" # rancher config contents
@@ -45,7 +47,7 @@ build-core:
     - master
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
-    - docker build -t soapbubble/core --build-arg BOT_TWITCH_CLIENT_ID=${BOT_TWITCH_CLIENT_ID} --build-arg BOT_TWITCH_CALLBACK_URL=${BOT_TWITCH_CALLBACK_URL} --build-arg CORE_GOOGLE_ANALYTICS_ID=${CORE_GOOGLE_ANALYTICS_ID} --build-arg CORE_CONTENTFUL_ACCESS=${CORE_CONTENTFUL_ACCESS} --build-arg CORE_CONTENTFUL_SPACE=${CORE_CONTENTFUL_SPACE} --build-arg CORE_FB_APP_ID=${CORE_FB_APP_ID} packages/core
+    - docker build -t soapbubble/core --build-arg BOT_PRODUCTION_TWITCH_CLIENT_ID=${BOT_PRODUCTION_TWITCH_CLIENT_ID} --build-arg BOT_PRODUCTION_TWITCH_CALLBACK_URL=${BOT_PRODUCTION_TWITCH_CALLBACK_URL} --build-arg BOT_STAGING_TWITCH_CLIENT_ID=${BOT_STAGING_TWITCH_CLIENT_ID} --build-arg BOT_STAGING_TWITCH_CALLBACK_URL=${BOT_STAGING_TWITCH_CALLBACK_URL} --build-arg CORE_GOOGLE_ANALYTICS_ID=${CORE_GOOGLE_ANALYTICS_ID} --build-arg CORE_CONTENTFUL_ACCESS=${CORE_CONTENTFUL_ACCESS} --build-arg CORE_CONTENTFUL_SPACE=${CORE_CONTENTFUL_SPACE} --build-arg CORE_FB_APP_ID=${CORE_FB_APP_ID} packages/core
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/core:latest
@@ -79,3 +81,17 @@ deploy-staging:
   script:
     - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-p9ngq
     - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web
+deploy-production:
+  image: soapbubble/rancher-cli
+  stage: deploy
+  tags:
+    - docker
+  environment:
+    name: production
+    url: https://soapbubble.online
+  when: manual
+  only:
+    - master
+  script:
+    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-p9ngq
+    - rancher app upgrade --values deployment/web/values-production.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-production deployment/web

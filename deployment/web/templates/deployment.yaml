@@ -135,36 +135,6 @@ spec:
             {{- end }}
             - name: CORE_PORT
               value: "80"
-            - name: CORE_FB_APP_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configMap }}
-                  key: core-fb-app-id
-            - name: CORE_GOOGLE_ANALYTICS_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configMap }}
-                  key: core-google-analytics-id
-            - name: CORE_CONTENTFUL_SPACE
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configMap }}
-                  key: core-contentful-space
-            - name: CORE_CONTENTFUL_ACCESS
-              valueFrom:
-                secretKeyRef:
-                  name: {{ .Values.secrets }}
-                  key: core-contentful-access
-            - name: BOT_TWITCH_CLIENT_ID
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configMap }}
-                  key: bot-twitch-client-id
-            - name: BOT_TWITCH_CALLBACK_URL
-              valueFrom:
-                configMapKeyRef:
-                  name: {{ .Values.configMap }}
-                  key: bot-twitch-callback-url
           imagePullPolicy: {{ .Values.pullPolicy }}
           ports:
             - name: http

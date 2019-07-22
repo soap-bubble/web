@@ -32,8 +32,8 @@ ingress:
 
 requirements:
   limits:
-    cpu: 250m
-    memory: 400Mi
+    cpu: 100m
+    memory: 300Mi
   requests:
-    cpu: 250m
-    memory: 400Mi
+    cpu: 100m
+    memory: 300Mi

@@ -1,0 +1,36 @@
+# Staging values
+
+pullPolicy: Always
+
+mongoDbUri: mongodb-production.soapbubble-production.svc.cluster.local
+
+soapbubble:
+  core:
+    env:
+      CORE_ENVIRONMENT: production
+  auth:
+    mongoDbUri: "mongodb://mongodb-production.soapbubble-production.svc.cluster.local:27017/auth"
+  morpheus:
+    mongoDbUri: "mongodb://mongodb-production.soapbubble-production.svc.cluster.local:27017/morpheus"
+    env:
+      MORPHEUS_ENVIRONMENT: production
+
+configMap: soapbubble-production-web
+secrets: soapbubble-production-web
+
+letsencrypt:
+  certificate: soapbubble-online-crt
+  tlsSecretName: soapbubble-online-tls
+  host: soapbubble.online
+
+ingress:
+  host: soapbubble.online
+  secretName: soapbubble-online-tls
+
+requirements:
+  limits:
+    cpu: 100m
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi

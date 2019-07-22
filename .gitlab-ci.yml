@@ -45,7 +45,7 @@ build-core:
     - master
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
-    - docker build -t soapbubble/core --build-arg BOT_TWITCH_CLIENT_ID=${BOT_TWITCH_CLIENT_ID} --build-arg BOT_TWITCH_CLIENT_ID=${BOT_TWITCH_CLIENT_ID} --build-arg CORE_GOOGLE_ANALYTICS_ID=${CORE_GOOGLE_ANALYTICS_ID} --build-arg CORE_CONTENTFUL_ACCESS=${CORE_CONTENTFUL_ACCESS} --build-arg CORE_CONTENTFUL_SPACE=${CORE_CONTENTFUL_SPACE} --build-arg CORE_FB_APP_ID=${CORE_FB_APP_ID} packages/core
+    - docker build -t soapbubble/core --build-arg BOT_TWITCH_CLIENT_ID=${BOT_TWITCH_CLIENT_ID} --build-arg BOT_TWITCH_CALLBACK_URL=${BOT_TWITCH_CALLBACK_URL} --build-arg CORE_GOOGLE_ANALYTICS_ID=${CORE_GOOGLE_ANALYTICS_ID} --build-arg CORE_CONTENTFUL_ACCESS=${CORE_CONTENTFUL_ACCESS} --build-arg CORE_CONTENTFUL_SPACE=${CORE_CONTENTFUL_SPACE} --build-arg CORE_FB_APP_ID=${CORE_FB_APP_ID} packages/core
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
     - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online:5000/soapbubble/core:latest

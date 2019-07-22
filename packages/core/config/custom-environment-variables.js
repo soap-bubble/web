@@ -4,4 +4,8 @@ module.exports = {
   contentfulSpace: 'CORE_CONTENTFUL_SPACE',
   contentfulAccess: 'CORE_CONTENTFUL_ACCESS',
   port: 'CORE_PORT',
+  twitch: {
+    clientId: 'BOT_TWITCH_CLIENT_ID',
+    callbackURL: 'BOT_TWITCH_CALLBACK_URL',
+  },
 };

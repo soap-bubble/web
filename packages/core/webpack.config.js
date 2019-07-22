@@ -23,7 +23,6 @@ module.exports = (env) => {
   const outputPath = path.join(__dirname, 'public');
   const htmlTemplate = 'index.ejs';
   const jsName = isProduction ? '[name].[hash].js' : '[name].js';
-  const vendorName = isProduction ? '[name].[hash].js' : '[name].js';
   let htmlFilename = 'index.html';
   const appConfig = {
     twitch: config.twitch,
@@ -122,7 +121,7 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: [/(@soapbubble\/style\/dist\/soapbubble.css|packages\/style\/dist\/soapbubble.css)/],include: [/(@soapbubble\/style\/dist\/soapbubble.css|packages\/style\/dist\/soapbubble.css)/],
+          include: [/@soapbubble\/style\/dist\/soapbubble.css/, /packages\/style\/dist\/soapbubble.css/],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -137,6 +136,8 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
+          include: [/@soapbubble/].concat(dirSharedComponents).concat(dirJs),
+          exclude: [/@soapbubble\/style\/dist\/soapbubble.css/, /packages\/style\/dist\/soapbubble.css/],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,

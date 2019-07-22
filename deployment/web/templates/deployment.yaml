@@ -61,6 +61,21 @@ spec:
                 configMapKeyRef:
                   name: {{ .Values.configMap }}
                   key: auth-google-cors-url
+            - name: BOT_TWITCH_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap }}
+                  key: bot-twitch-client-id
+            - name: BOT_TWITCH_CALLBACK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap }}
+                  key: bot-twitch-callback-url
+            - name: BOT_TWITCH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.secrets }}
+                  key: bot-twitch-client-secret
           ports:
             - name: http
               containerPort: 80
@@ -140,6 +155,16 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.secrets }}
                   key: core-contentful-access
+            - name: BOT_TWITCH_CLIENT_ID
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap }}
+                  key: bot-twitch-client-id
+            - name: BOT_TWITCH_CALLBACK_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: {{ .Values.configMap }}
+                  key: bot-twitch-callback-url
           imagePullPolicy: {{ .Values.pullPolicy }}
           ports:
             - name: http

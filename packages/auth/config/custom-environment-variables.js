@@ -27,6 +27,11 @@ module.exports = {
         clientSecret: 'AUTH_GOOGLE_SECRET',
         callbackURL: 'AUTH_GOOGLE_CALLBACK_URL',
       },
+      twitch: {
+        clientID: 'BOT_TWITCH_CLIENT_ID',
+        clientSecret: 'BOT_TWITCH_CLIENT_SECRET',
+        callbackURL: 'BOT_TWITCH_CALLBACK_URL',
+      }
     },
   },
   port: 'AUTH_PORT',

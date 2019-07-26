@@ -38,14 +38,56 @@ helm install --name mongodb --set persistence.enabled=false stable/mongodb
 1. Must add credentials to docker registry
 1. Create a config map
 
-## Staging
+## Setting up a new environment
+
+Requirements:
+ - `rancher` CLI connected to the rancher instance
+ - `kubectl` CLI connected to the cluster to install to on the rancher instance
+
+### Install mongodb chart
+
+Create a PVC named `mongodb-${environment}` in the `soabpbuble-${environment}` namespace
 
 ```
-rancher app install --namespace soapbubble-staging --values deployment/web/values-staging.yaml deployment/web web-staging
+rancher app install --namespace soapbubble-${environment} --values deployment/mongodb/values.yaml deployment/mongodb mongodb-${environment}
 ```
 
-## Production
+This command will return a root password. A secret will also be created with it. Note it down.
+
+### DB setup
+
+Connect to the datase:
+```
+kubectl --namespace soapbubble-${environment} get po
+```
+to list pods.  Find mongodb
 
 ```
-rancher app install --namespace soapbubble-production --values deployment/web/values-production.yaml deployment/web web-production
+kubectl port-forward --namespace soapbubble-${environment} pod/mongodb-${environment}-7f98bf4c96-vcxdx mongodb:mongodb
+```
+
+Run `mongo -u root -p ${mognoRootPassword}` to connect to DB as root
+
+Create users:
+
+```
+db.createUser({ user: 'soapbubble-morpheus', pwd: '${morpheus-mongodb-password}', roles: [{ role: 'readWrite', db: 'morpheus' }] });
+db.createUser({ user: 'soapbubble-auth', pwd: '${auth-mongodb-password}', roles: [{ role: 'readWrite', db: 'auth' }] });
+
+```
+
+The passwords can be anything, but note them. They will need to added the `soapbubble-${environment}-web` secret
+
+Now quit and with the morpheus.map.json file handy prime and update the DB:
+
+```
+MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=${morpheus-mongodb-password} npm run db:prime
+
+MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=${morpheus-mongodb-password} npm run db:update
+```
+
+### Installing Soapbubble app
+
+```
+rancher app install --namespace soapbubble-${environment} --values deployment/web/values-staging.yaml deployment/web web-${environment}
 ```

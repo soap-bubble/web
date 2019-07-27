@@ -12,9 +12,13 @@ metrics:
 
 mongodbDatabase: nil
 persistence:
-  enabled: false
+  enabled: true
+  storageClass: standard
 
 replicaSet:
+  enabled: false
+
+ingress:
   enabled: false
 
 usePassword: "true"

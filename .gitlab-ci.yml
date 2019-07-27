@@ -18,7 +18,10 @@ variables:
   BOT_STAGING_CALLBACK_URL: ""
   DOCKER_USERNAME: "" # credentials to repo (saving to private docker registry for now)
   DOCKER_PASSWORD: "" # password for private docker repo
-  RANCHER_TOKEN: "" # rancher config contents
+  RANCHER_TOKEN_STAGING: ""
+  RANCHER_CONTEXT_STAGING: ""
+  RANCHER_TOKEN_PRODUCTION: ""
+  RANCHER_CONTEXT_PRODUCTION: ""
 # Job: Install
 build-morpheus:
   image: docker:stable
@@ -76,10 +79,11 @@ deploy-staging:
   environment:
     name: staging
     url: https://staging.soapbubble.online
+  when: manual
   only:
     - master
   script:
-    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-p9ngq
+    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN_STAGING} --context ${RANCHER_CONTEXT_STAGING}
     - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web
 deploy-production:
   image: soapbubble/rancher-cli
@@ -93,5 +97,5 @@ deploy-production:
   only:
     - master
   script:
-    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN} --context c-dpnkh:p-p9ngq
+    - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN_PRODUCTION} --context ${RANCHER_CONTEXT_PRODUCTION}
     - rancher app upgrade --values deployment/web/values-production.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-production deployment/web

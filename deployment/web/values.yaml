@@ -27,15 +27,15 @@ mongoDbUri: mongodb
 
 soapbubble:
   core:
-    image: docker.soapbubble.online:5000/soapbubble/core
+    image: docker.soapbubble.online/soapbubble/core
     tag: latest
     healthcheck: "/"
   auth:
-    image: docker.soapbubble.online:5000/soapbubble/auth
+    image: docker.soapbubble.online/soapbubble/auth
     tag: latest
     healthcheck: "/healthcheck"
   morpheus:
-    image: docker.soapbubble.online:5000/soapbubble/morpheus
+    image: docker.soapbubble.online/soapbubble/morpheus
     tag: latest
     healthcheck: "/morpheus"
 

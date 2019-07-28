@@ -2,16 +2,16 @@
 
 pullPolicy: Always
 
-mongoDbUri: mongodb-production.soapbubble-production.svc.cluster.local
+mongoDbUri: mongodb.soapbubble.svc.cluster.local
 
 soapbubble:
   core:
     env:
       CORE_ENVIRONMENT: production
   auth:
-    mongoDbUri: "mongodb://mongodb-production.soapbubble-production.svc.cluster.local:27017/auth"
+    mongoDbUri: "mongodb://mongodb.soapbubble.svc.cluster.local:27017/auth"
   morpheus:
-    mongoDbUri: "mongodb://mongodb-production.soapbubble-production.svc.cluster.local:27017/morpheus"
+    mongoDbUri: "mongodb://mongodb.soapbubble.svc.cluster.local:27017/morpheus"
     env:
       MORPHEUS_ENVIRONMENT: production
 

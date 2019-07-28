@@ -81,7 +81,7 @@ The passwords can be anything, but note them. They will need to added the `soapb
 Now quit and with the morpheus.map.json file handy prime and update the DB:
 
 ```
-MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=${morpheus-mongodb-password} npm run db:prime
+MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=RyenEthEthUranerbuct6wreibCilnud npm run db:prime
 
 MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=${morpheus-mongodb-password} npm run db:update
 ```

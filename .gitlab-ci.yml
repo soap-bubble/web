@@ -33,12 +33,12 @@ build-morpheus:
   only:
     - master
   script:
-    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online
     - docker build -t soapbubble/morpheus packages/morpheus
-    - docker tag soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:latest
-    - docker tag soapbubble/morpheus docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/morpheus:latest
-    - docker push docker.soapbubble.online:5000/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
+    - docker tag soapbubble/morpheus docker.soapbubble.online/soapbubble/morpheus:latest
+    - docker tag soapbubble/morpheus docker.soapbubble.online/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online/soapbubble/morpheus:latest
+    - docker push docker.soapbubble.online/soapbubble/morpheus:${CI_COMMIT_SHA:0:7}
 build-core:
   image: docker:stable
   services:
@@ -49,12 +49,12 @@ build-core:
   only:
     - master
   script:
-    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online
     - docker build -t soapbubble/core --build-arg BOT_PRODUCTION_TWITCH_CLIENT_ID=${BOT_PRODUCTION_TWITCH_CLIENT_ID} --build-arg BOT_PRODUCTION_TWITCH_CALLBACK_URL=${BOT_PRODUCTION_TWITCH_CALLBACK_URL} --build-arg BOT_STAGING_TWITCH_CLIENT_ID=${BOT_STAGING_TWITCH_CLIENT_ID} --build-arg BOT_STAGING_TWITCH_CALLBACK_URL=${BOT_STAGING_TWITCH_CALLBACK_URL} --build-arg CORE_GOOGLE_ANALYTICS_ID=${CORE_GOOGLE_ANALYTICS_ID} --build-arg CORE_CONTENTFUL_ACCESS=${CORE_CONTENTFUL_ACCESS} --build-arg CORE_CONTENTFUL_SPACE=${CORE_CONTENTFUL_SPACE} --build-arg CORE_FB_APP_ID=${CORE_FB_APP_ID} packages/core
-    - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:latest
-    - docker tag soapbubble/core docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/core:latest
-    - docker push docker.soapbubble.online:5000/soapbubble/core:${CI_COMMIT_SHA:0:7}
+    - docker tag soapbubble/core docker.soapbubble.online/soapbubble/core:latest
+    - docker tag soapbubble/core docker.soapbubble.online/soapbubble/core:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online/soapbubble/core:latest
+    - docker push docker.soapbubble.online/soapbubble/core:${CI_COMMIT_SHA:0:7}
 build-auth:
   image: docker:stable
   services:
@@ -65,12 +65,12 @@ build-auth:
   only:
     - master
   script:
-    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online:5000
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online
     - docker build -t soapbubble/auth packages/auth
-    - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:latest
-    - docker tag soapbubble/auth docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
-    - docker push docker.soapbubble.online:5000/soapbubble/auth:latest
-    - docker push docker.soapbubble.online:5000/soapbubble/auth:${CI_COMMIT_SHA:0:7}
+    - docker tag soapbubble/auth docker.soapbubble.online/soapbubble/auth:latest
+    - docker tag soapbubble/auth docker.soapbubble.online/soapbubble/auth:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online/soapbubble/auth:latest
+    - docker push docker.soapbubble.online/soapbubble/auth:${CI_COMMIT_SHA:0:7}
 deploy-staging:
   image: soapbubble/rancher-cli
   stage: deploy

@@ -71,6 +71,22 @@ build-auth:
     - docker tag soapbubble/auth docker.soapbubble.online/soapbubble/auth:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online/soapbubble/auth:latest
     - docker push docker.soapbubble.online/soapbubble/auth:${CI_COMMIT_SHA:0:7}
+build-proxy:
+  image: docker:stable
+  services:
+    - docker:dind
+  tags:
+    - docker
+  stage: build
+  only:
+    - master
+  script:
+    - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online
+    - docker build -t soapbubble/proxy packages/proxy
+    - docker tag soapbubble/proxy docker.soapbubble.online/soapbubble/proxy:latest
+    - docker tag soapbubble/proxy docker.soapbubble.online/soapbubble/proxy:${CI_COMMIT_SHA:0:7}
+    - docker push docker.soapbubble.online/soapbubble/proxy:latest
+    - docker push docker.soapbubble.online/soapbubble/proxy:${CI_COMMIT_SHA:0:7}
 deploy-staging:
   image: soapbubble/rancher-cli
   stage: deploy
@@ -84,7 +100,7 @@ deploy-staging:
     - master
   script:
     - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN_STAGING} --context ${RANCHER_CONTEXT_STAGING}
-    - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web
+    - rancher app upgrade --values deployment/web/values-staging.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.proxy.tag=${CI_COMMIT_SHA:0:7} web-staging deployment/web
 deploy-production:
   image: soapbubble/rancher-cli
   stage: deploy
@@ -98,4 +114,4 @@ deploy-production:
     - master
   script:
     - rancher login https://rancher.soapbubble.online --token ${RANCHER_TOKEN_PRODUCTION} --context ${RANCHER_CONTEXT_PRODUCTION}
-    - rancher app upgrade --values deployment/web/values-production.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} web-production deployment/web
+    - rancher app upgrade --values deployment/web/values-production.yaml --set soapbubble.core.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.morpheus.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.auth.tag=${CI_COMMIT_SHA:0:7} --set soapbubble.proxy.tag=${CI_COMMIT_SHA:0:7} web-production deployment/web

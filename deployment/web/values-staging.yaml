@@ -2,29 +2,16 @@
 
 pullPolicy: Always
 
-mongoDbUri: mongodb.soapbubble-staging.svc.cluster.local
-
 soapbubble:
   core:
-    tag: staging
     env:
       CORE_ENVIRONMENT: staging
-  auth:
-    mongoDbUri: "mongodb://mongodb.soapbubble-staging.svc.cluster.local:27017/auth"
-    tag: staging
   morpheus:
-    mongoDbUri: "mongodb://mongodb.soapbubble-staging.svc.cluster.local:27017/morpheus"
-    tag: staging
     env:
       MORPHEUS_ENVIRONMENT: staging
 
 configMap: soapbubble-staging-web
 secrets: soapbubble-staging-web
-
-letsencrypt:
-  certificate: staging-soapbubble-online-crt
-  tlsSecretName: staging-soapbubble-online-tls
-  host: staging.soapbubble.online
 
 ingress:
   host: staging.soapbubble.online

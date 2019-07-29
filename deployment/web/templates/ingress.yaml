@@ -3,6 +3,7 @@
 {{- $coreName := include "web.coreFullname" . -}}
 {{- $morpheusName := include "web.morpheusFullname" . -}}
 {{- $authName := include "web.authFullname" . -}}
+{{- $proxyName := include "web.proxyFullname" . -}}
 apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
@@ -21,20 +22,15 @@ spec:
        - {{ .Values.ingress.host }}
       secretName: {{ .Values.ingress.secretName }}
 {{- end }}
+  backend:
+    serviceName: {{ $proxyName }}
+    servicePort: http
   rules:
     - host: {{ .Values.ingress.host }}
       http:
         paths:
-          - path: "/morpheus"
-            backend:
-              serviceName: {{ $morpheusName }}
-              servicePort: http
-          - path: "/auth"
-            backend:
-              serviceName: {{ $authName }}
-              servicePort: http
           - path: "/"
             backend:
-              serviceName: {{ $coreName }}
+              serviceName: {{ $proxyName }}
               servicePort: http
 {{- end }}

@@ -71,7 +71,9 @@ Run `mongo -u root -p ${mognoRootPassword}` to connect to DB as root
 Create users:
 
 ```
+use morpheus;
 db.createUser({ user: 'soapbubble-morpheus', pwd: '${morpheus-mongodb-password}', roles: [{ role: 'readWrite', db: 'morpheus' }] });
+use auth;
 db.createUser({ user: 'soapbubble-auth', pwd: '${auth-mongodb-password}', roles: [{ role: 'readWrite', db: 'auth' }] });
 
 ```
@@ -84,6 +86,12 @@ Now quit and with the morpheus.map.json file handy prime and update the DB:
 MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=RyenEthEthUranerbuct6wreibCilnud npm run db:prime
 
 MORPHEUS_MONGODB_URI=mongodb://localhost/morpheus MONGODB_USERNAME=soapbubble-morpheus MONGODB_PASSWORD=${morpheus-mongodb-password} npm run db:update
+```
+
+### Installing docker registry
+
+```
+rancher app install --namespace docker-registry deplyoment/docker-registry
 ```
 
 ### Installing Soapbubble app

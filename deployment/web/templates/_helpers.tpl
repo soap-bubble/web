@@ -59,3 +59,7 @@ Create some names for the various endpoints
 {{- $name := include "web.fullname" . -}}
 {{- printf "morpheus-%s" $name | trunc 63 | trimSuffix "-" -}}
 {{- end -}}
+{{- define "web.proxyFullname" -}}
+{{- $name := include "web.fullname" . -}}
+{{- printf "proxy-%s" $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}

@@ -1,11 +1,15 @@
 
 
-module.exports = function init(rulesMap, proxy) {
+module.exports = function init(rulesMap, proxy, isDebug) {
   return (req, res) => {
-    const proxyRule = rulesMap[req.headers.host];
+    let proxyRule = rulesMap[req.headers.host];
+    proxyRule = proxyRule || rulesMap['/default/'];
     if (proxyRule) {
       const target = proxyRule.match(req);
       if (target) {
+        if (isDebug) {
+          console.log(`${req.headers.host}/${req.url} => ${target}`);
+        }
         const proxyHandler = () => proxy.web(req, res, {
           target,
         });

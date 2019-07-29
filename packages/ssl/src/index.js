@@ -61,6 +61,10 @@ const blueprint = builder({
   httpsPort(config) {
     return Number(config.get('httpsPort'));
   },
+  healthCheckPort(config) {
+    const value = config.get('healthCheckPort');
+    return value ? Number(value) : null;
+  },
   mongoUri(config, isDebug) {
     return `${config.get('mongoUri')}${isDebug ? '-staging' : ''}`;
   },
@@ -113,7 +117,7 @@ const blueprint = builder({
 
 const factory = blueprint.construct();
 
-factory.$(($, isHttpEnabled, isHttpsEnabled) => {
+factory.$(($, isHttpEnabled, isHttpsEnabled, healthCheckPort) => {
   if (isHttpEnabled && isHttpsEnabled) {
     $((greenlock, httpPort, httpsPort, domains, redir, proxyWeb, proxyWs) => {
       console.log(`Listening on ${httpPort} and ${httpsPort} for ${domains.join(', ')}`);
@@ -140,4 +144,11 @@ factory.$(($, isHttpEnabled, isHttpsEnabled) => {
     console.log('Must enable either HTTP or HTTPS');
     process.exit(1);
   }
-})
+  if (healthCheckPort) {
+    const healthCheckServer = http.createServer((req, res) => {
+      res.writeHead(200);
+      res.end('UP');
+    });
+    healthCheckServer.listen(healthCheckPort);
+  }
+});

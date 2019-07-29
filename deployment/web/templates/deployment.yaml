@@ -245,3 +245,79 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "web.proxyFullname" . }}
+  labels:
+{{ include "web.labels" . | indent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: proxy
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: proxy
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      containers:
+        - name: auth-{{ .Chart.Name }}
+          image: "{{ .Values.soapbubble.proxy.image }}:{{ .Values.soapbubble.proxy.tag }}"
+          imagePullPolicy: {{ .Values.pullPolicy }}
+          env:
+            {{- range $key, $value := .Values.soapbubble.proxy.env }}
+            - name: {{ $key }}
+              value: {{ $value | quote }}
+            {{- end }}
+            - name: LE_SSL_HTTPS_ENABLED
+              value: "false"
+            - name: LE_SSL_RULES
+              value: >-
+                [ { "default": true,
+                    "fallback": "http://{{ include "web.coreFullname" . }}:80",
+                    "rules":
+                     { "/": "http://{{ include "web.coreFullname" . }}:80"} },
+                   { "host": "{{ .Values.ingress.host }}",
+                     "fallback": "http://{{ include "web.coreFullname" . }}:80",
+                     "rules":
+                      { "/auth": "http://{{ include "web.authFullname" . }}:80/auth",
+                        "/morpheus": "http://{{ include "web.morpheusFullname" . }}:80/morpheus",
+                        "/": "http://{{ include "web.coreFullname" . }}:80" } }
+                ]
+            - name: LE_SSL_HEALTHCHECK_PORT
+              value: "{{ .Values.soapbubble.proxy.healthcheckPort }}"
+          ports:
+            - name: http
+              containerPort: 80
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: {{ .Values.soapbubble.proxy.healthcheck }}
+              port: {{ .Values.soapbubble.proxy.healthcheckPort }}
+          readinessProbe:
+            httpGet:
+              path: {{ .Values.soapbubble.proxy.healthcheck }}
+              port: {{ .Values.soapbubble.proxy.healthcheckPort }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+---

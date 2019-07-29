@@ -23,8 +23,6 @@ pullPolicy: IfNotPresent
 configMap: soapbubble-web
 secrets: soapbubble-web
 
-mongoDbUri: mongodb
-
 soapbubble:
   core:
     image: docker.soapbubble.online/soapbubble/core
@@ -33,37 +31,45 @@ soapbubble:
   auth:
     image: docker.soapbubble.online/soapbubble/auth
     tag: latest
+    mongoDbUri: "mongodb://mongodb:27017/auth"
     healthcheck: "/healthcheck"
   morpheus:
     image: docker.soapbubble.online/soapbubble/morpheus
     tag: latest
+    mongoDbUri: "mongodb://mongodb:27017/morpheus"
     healthcheck: "/morpheus"
+  proxy:
+    image: docker.soapbubble.online/soapbubble/proxy
+    tag: latest
+    healthcheck: "/"
+    healthcheckPort: 8888
 
 imagePullSecrets:
   - name: soapbubble
 nameOverride: ""
 fullnameOverride: ""
 
-letsencrypt:
-  enabled: true
-  # Resource name of the letsencrypt cert
-  certificate: soapbubble-online-crt
-  # Where the cert secret is stored (should match ingress.tls[].secretName)
-  tlsSecretName: soapbubble-online-tls
-  # Host for the cert (should match ingress.tls[].hosts[0])
-  host: soapbubble.online
+# letsencrypt:
+#   enabled: true
+#   # Resource name of the letsencrypt cert
+#   certificate: soapbubble-online-crt
+#   # Where the cert secret is stored (should match ingress.tls[].secretName)
+#   tlsSecretName: soapbubble-online-tls
+#   # Host for the cert (should match ingress.tls[].hosts[0])
+#   host: soapbubble.online
 
 service:
-  type: ClusterIP
+  type: NodePort
   port: 80
 
 ingress:
   enabled: true
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    kubernetes.io/tls-acme: "true"
-    certmanager.k8s.io/cluster-issuer: letsencrypt-prod
   tls: true
+  annotations:
+    kubernetes.io/tls-acme: "true"
+    certmanager.k8s.io/acme-challenge-type: "dns01"
+    certmanager.k8s.io/acme-dns01-provider: "soapbubble-online-route53"
+    certmanager.k8s.io/cluster-issuer: "letsencrypt-prod"
   host: soapbubble.online
   secretName: soapbubble-online-tls
 

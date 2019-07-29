@@ -82,7 +82,7 @@ build-proxy:
     - master
   script:
     - docker login -u ${DOCKER_USERNAME} -p ${DOCKER_PASSWORD} docker.soapbubble.online
-    - docker build -t soapbubble/proxy packages/proxy
+    - docker build -t soapbubble/proxy packages/ssl
     - docker tag soapbubble/proxy docker.soapbubble.online/soapbubble/proxy:latest
     - docker tag soapbubble/proxy docker.soapbubble.online/soapbubble/proxy:${CI_COMMIT_SHA:0:7}
     - docker push docker.soapbubble.online/soapbubble/proxy:latest

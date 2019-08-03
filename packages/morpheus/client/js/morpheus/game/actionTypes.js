@@ -21,3 +21,5 @@ export const SAVE_LOAD_SUCCESS = 'GAME_SAVE_LOAD_SUCCESS';
 export const SAVE_LOAD_ERROR = 'GAME_SAVE_LOAD_ERROR';
 export const SAVE_ERROR = 'GAME_SAVE_ERROR';
 export const SET_SAVE_ID = 'GAME_SET_SAVE_ID';
+export const LOCAL_LOAD = 'GAME_LOCAL_LOAD';
+export const LOCAL_SAVE = 'GAME_LOCAL_SAVE';

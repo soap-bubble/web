@@ -1,9 +1,10 @@
 import { connect } from 'react-redux';
 import qs from 'query-string';
-import { SelectionList } from '@soapbubble/components';
+import { login } from 'soapbubble';
+import MenuList from '../components/MenuList';
 import {
-  menuDelegate,
-  menuSize,
+  browserSaveData,
+  isOpenSave,
 } from '../selectors';
 import {
   browserLoad,
@@ -11,8 +12,10 @@ import {
   cloudSaveNew,
   cloudSave,
   openSave,
-  login,
+  login as loginAction,
   logout,
+  localLoad,
+  localSave,
 } from '../actions';
 import {
   closeMenu,
@@ -22,50 +25,75 @@ import {
 import './MenuList.scss';
 
 function mapStateToProps(state) {
-  const delegate = menuDelegate(state);
-  const rows = menuSize(state);
   return {
-    delegate,
-    rows,
+    browserSaveData: browserSaveData(state),
+    isOpenSave: isOpenSave(state),
+    isLoggedIn: login.selectors.isLoggedIn(state),
   };
 }
 
 function mapDispatchToPros(dispatch) {
   return {
-    onSelect(key) {
-      if (key === 'cloudSaveNew') {
-        dispatch(cloudSaveNew());
-        dispatch(closeMenu());
-      } else if (key === 'cloudSave') {
-        dispatch(cloudSave());
-        dispatch(closeMenu());
-      } else if (key === 'browserLoad') {
-        dispatch(browserLoad());
-        dispatch(closeMenu());
-      } else if (key === 'browserSave') {
-        dispatch(browserSave());
-        dispatch(closeMenu());
-      } else if (key === 'openSave') {
-        dispatch(openSave());
-        dispatch(closeMenu());
-      } else if (key === 'login') {
-        dispatch(login());
-        dispatch(closeMenu());
-      } else if (key === 'logout') {
-        dispatch(logout());
-      } else if (key === 'settings') {
-        dispatch(openSettings());
-        dispatch(closeMenu());
-      } else if (key === 'reload') {
-        const qp = qs.parse(document.location.search);
-        qp.reload = true;
-        const newUrl = `${document.location.protocol}//${document.location.host}${document.location.pathname}?${qs.stringify(qp)}`;
-        document.location.assign(newUrl);
-      } else {
-        dispatch(closeMenu());
+    doLogout() {
+      dispatch(logout());
+    },
+    doCloudSave() {
+      dispatch(cloudSave());
+      dispatch(closeMenu());
+    },
+    doLogin() {
+      dispatch(loginAction());
+      dispatch(closeMenu());
+    },
+    doCloudSaveNew() {
+      dispatch(cloudSaveNew());
+      dispatch(closeMenu());
+    },
+    doCloudLoad() {
+      dispatch(openSave());
+      dispatch(closeMenu());
+    },
+    doBrowserSave() {
+      dispatch(browserSave());
+      dispatch(closeMenu());
+    },
+    doBrowserLoad() {
+      dispatch(browserLoad());
+      dispatch(closeMenu());
+    },
+    doLocalLoad({ target: { files } }) {
+      const [file] = files;
+      if (!file) {
+        return;
       }
+      var reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const contents = JSON.parse(e.target.result);
+          dispatch(localLoad(contents))
+        } catch (err) {
+          console.error('Unable to load savefile', err)
+        } finally {
+          dispatch(closeMenu());
+        }
+      };
+      reader.readAsText(file);
+    },
+    doLocalSave() {
+      dispatch(localSave());
+      dispatch(closeMenu());
+    },
+    doSettings() {
+      dispatch(openSettings());
+      dispatch(closeMenu());
+    },
+    doReload() {
+      const qp = qs.parse(document.location.search);
+      qp.reload = true;
+      const newUrl = `${document.location.protocol}//${document.location.host}${document.location.pathname}?${qs.stringify(qp)}`;
+      document.location.assign(newUrl);
     },
   };
 }
 
-export default connect(mapStateToProps, mapDispatchToPros)(SelectionList);
+export default connect(mapStateToProps, mapDispatchToPros)(MenuList);

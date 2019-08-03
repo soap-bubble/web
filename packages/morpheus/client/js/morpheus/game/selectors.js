@@ -190,6 +190,10 @@ const menuDefinition = createSelector(
       }
     }
     menuData.push({
+      key: 'localSave',
+      title: 'Save to local file',
+    });
+    menuData.push({
       key: 'browserSave',
       title: 'Save to browser',
     });
@@ -205,6 +209,11 @@ const menuDefinition = createSelector(
         title: 'Load from browser',
       });
     }
+    menuData.push({
+      key: 'localLoad',
+      title: 'Load from local file',
+      localFile: true,
+    });
     menuData.push({
       key: 'settings',
       title: 'Settings',
@@ -226,7 +235,7 @@ export const menuDelegate = createSelector(
   menuDefinition,
   md => (index) => {
     const item = md[index];
-    const { title, key } = item;
+    const { title, key, localFile } = item;
     const content = (
       <div className="menuListItem">
         {title}

@@ -149,6 +149,7 @@
     "raf": "^3.2.0",
     "react": "^16.7.0",
     "react-addons-update": "^15.4.1",
+    "react-bootstrap": "1.0.0-beta.9",
     "react-dom": "^16.7.0",
     "react-redux": "^7.1.0",
     "redux": "^4.0.1",

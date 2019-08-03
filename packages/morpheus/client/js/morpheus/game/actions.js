@@ -46,6 +46,8 @@ import {
   CREATE_CANVAS,
   LOGGED_IN,
   LOGIN_START,
+  LOCAL_LOAD,
+  LOCAL_SAVE,
   SAVE_ERROR,
   SAVE_LOAD,
   SAVE_LOAD_SUCCESS,
@@ -286,6 +288,19 @@ export function cloudLoad(saveId) {
   };
 }
 
+export function localSave() {
+  return {
+    type: LOCAL_SAVE,
+  };
+}
+
+export function localLoad(payload) {
+  return {
+    type: LOCAL_LOAD,
+    payload,
+  };
+}
+
 export function openSave() {
   return {
     type: CLOUD_SAVE_OPEN,
@@ -346,6 +361,52 @@ export const browserSaveEpic = createEpic((action$, store$) => action$
   })
   .catch(err => ({
     type: SAVE_ERROR,
+    payload: err,
+  })),
+);
+
+export const localSaveEpic = createEpic((action$, store$) => action$
+  .ofType(LOCAL_SAVE)
+  .forEach(() => {
+    const pano = castSelectors.forScene(sceneSelectors.currentSceneData(store$.value))
+      .pano;
+    const saveFile = {
+      gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
+      currentSceneId: sceneSelectors.currentSceneId(store$.value),
+      previousSceneId: sceneSelectors.previousSceneId(store$.value),
+      saveId: gameSelectors.saveId(store$.value),
+      rotation: (pano && pano.object3D.rotation) || null,
+    };
+
+    const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(JSON.stringify(saveFile))}`;
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute('href', dataStr);
+    downloadAnchorNode.setAttribute('download', 'morpheus.save.json');
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  })
+  .catch(err => ({
+    type: SAVE_ERROR,
+    payload: err,
+  })),
+);
+
+export const localLoadEpic = createEpic((action$, store$) => action$
+  .ofType(LOCAL_LOAD)
+  .mergeMap(({
+    payload: {
+      gamestates,
+      currentSceneId,
+      previousSceneId,
+      rotation,
+    },
+  }) => from([
+    gamestateActions.inject(gamestates),
+    sceneActions.goToScene(currentSceneId, true, previousSceneId),
+  ]))
+  .catch(err => ({
+    type: 'GAME_LOAD_ERROR',
     payload: err,
   })),
 );

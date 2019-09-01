@@ -1,5 +1,5 @@
 import React from 'react'
-import Stage from 'morpheus/casts/components/Stage'
+import Stage from 'morpheus/casts/containers/Stage'
 import { Scene } from '../casts/types'
 
 interface NewGameProps {

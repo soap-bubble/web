@@ -31,9 +31,10 @@ export function castEnabled({ comparators }) {
   )
 }
 
-export function forState(state) {
-  const gs = state.gamestate.get('idMap')
-  return {
+const gamestateMap = state => state.gamestate.get('idMap')
+export const forState = createSelector(
+  gamestateMap,
+  gs => ({
     byId(id) {
       const gamestate = gs.get(id)
 
@@ -59,5 +60,5 @@ export function forState(state) {
         },
       }
     },
-  }
-}
+  }),
+)

@@ -1,16 +1,13 @@
-import { connect } from 'react-redux';
-import React from 'react';
-import PropTypes from 'prop-types';
-import Mouse from 'react/Mouse';
-import castFactory from 'morpheus/casts/factory';
-import {
-  selectors as gameSelectors,
-} from 'morpheus/game';
-import Menu from '../components/Menu';
-import MenuButton from '../containers/MenuButton';
-import Login from './Login';
-import Settings from './Settings';
-import SaveList from './SaveList';
+import { connect } from 'react-redux'
+import React from 'react'
+import PropTypes from 'prop-types'
+import Mouse from 'react/Mouse'
+import castFactory from 'morpheus/casts/factory'
+import { selectors as gameSelectors } from 'morpheus/game'
+import Menu from '../components/Menu'
+import MenuButton from '../containers/MenuButton'
+import Settings from './Settings'
+import SaveList from './SaveList'
 
 function mapStateToProps(state) {
   return {
@@ -20,7 +17,7 @@ function mapStateToProps(state) {
     settingsOpen: gameSelectors.settingsOpened(state),
     saveOpen: gameSelectors.saveOpened(state),
     isLoggingIn: gameSelectors.isLoggingIn(state),
-  };
+  }
 }
 
 const Game = ({
@@ -33,26 +30,25 @@ const Game = ({
   saveOpen,
   isLoggingIn,
 }) => {
-  const menu = [];
+  const menu = []
   if (menuOpen) {
-    menu.push(<Menu />);
-  }
-  if (isLoggingIn) {
-    menu.push(<Login />);
+    menu.push(<Menu />)
   }
   if (settingsOpen) {
-    menu.push(<Settings />);
+    menu.push(<Settings />)
   }
   if (saveOpen) {
-    menu.push(<SaveList />);
+    menu.push(<SaveList />)
   }
-  return (<div id={id} className={className} style={style}>
-    {casts}
-    <MenuButton />
-    <Mouse />
-    {menu}
-  </div>);
-};
+  return (
+    <div id={id} className={className} style={style}>
+      {casts}
+      <MenuButton />
+      <Mouse />
+      {menu}
+    </div>
+  )
+}
 
 Game.propTypes = {
   isLoggingIn: PropTypes.bool.isRequired,
@@ -62,12 +58,10 @@ Game.propTypes = {
   saveOpen: PropTypes.bool.isRequired,
   casts: PropTypes.arrayOf(PropTypes.mixed).isRequired,
   style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-};
+}
 
 Game.defaultProps = {
   style: {},
-};
+}
 
-export default connect(
-  mapStateToProps,
-)(Game);
+export default connect(mapStateToProps)(Game)

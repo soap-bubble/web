@@ -1,0 +1,38 @@
+{
+  "database": {
+    "rules": "database.rules.json"
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "functions": {
+    "predeploy": ["npm --prefix \"$RESOURCE_DIR\" run build"],
+    "source": "packages/functions"
+  },
+  "hosting": {
+    "public": "public",
+    "predeploy": [
+      "npm --prefix \"$RESOURCE_DIR/../packages/morpheus\" run build:client:firebase:production"
+    ],
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "rewrites": [
+      {
+        "source": "/api/gamestates",
+        "function": "gamestates"
+      },
+      {
+        "source": "/api/scene",
+        "function": "scene"
+      },
+      {
+        "source": "/morpheus{,/**}",
+        "destination": "/public/morpheus/index.html"
+      },
+      {
+        "source": "**",
+        "destination": "/public/core/index.html"
+      }
+    ]
+  }
+}

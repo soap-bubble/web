@@ -1,11 +1,9 @@
-import '@babel/runtime';
 import path from 'path';
 import fs from 'fs';
 import url from 'url';
 import { protocol, app, BrowserWindow } from 'electron';
-import initService from './service';
+// import initService from './service';
 import install from './install';
-
 process.on('uncaughtException', (err) => {
   console.error(err);
 })
@@ -18,19 +16,18 @@ install().then(() => {
       app.setPath('appData', process.env.LOCALAPPDATA);
       app.setPath('userData', path.join(process.env.LOCALAPPDATA, app.getName()));
   }
-
+  app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required');
   // Keep a global reference of the window object, if you don't, the window will
   // be closed automatically when the JavaScript object is garbage collected.
   let mainWindow
 
   function createWindow () {
-    initService();
     // Create the browser window.
     mainWindow = new BrowserWindow({width: 800, height: 600, webPreferences: { nodeIntegration: true } })
 
     // and load the index.html of the app.
     mainWindow.loadURL(url.format({
-      pathname: path.resolve(__dirname, '../build/index.html'),
+      pathname: path.resolve(__dirname, './index.html'),
       protocol: 'file:',
       slashes: true
     }))
@@ -47,9 +44,20 @@ install().then(() => {
       // when you should delete the corresponding element.
       mainWindow = null
     })
+    let hadVolume;
+    mainWindow.on('focus', () => {
+      if (hadVolume) {
+        mainWindow.webContents.setAudioMuted(false);
+      }
+    });
+
+    mainWindow.on('blur', () => {
+      hadVolume = !mainWindow.webContents.isAudioMuted();
+      mainWindow.webContents.setAudioMuted(true);
+    });
   }
 
-  protocol.registerSchemesAsPrivileged([{ scheme: 'morpheus', privileges: { standard: true, secure: true } }]);
+  // protocol.registerSchemesAsPrivileged([{ scheme: 'morpheus', privileges: { standard: true, secure: true } }]);
 
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
@@ -58,11 +66,7 @@ install().then(() => {
 
   // Quit when all windows are closed.
   app.on('window-all-closed', function () {
-    // On OS X it is common for applications and their menu bar
-    // to stay active until the user quits explicitly with Cmd + Q
-    if (process.platform !== 'darwin') {
-      app.quit()
-    }
+    app.quit();
   })
 
   app.on('activate', function () {

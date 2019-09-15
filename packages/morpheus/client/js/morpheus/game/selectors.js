@@ -56,6 +56,13 @@ export const dimensions = createSelector(
   }),
 )
 
+export const isLoggedIn = createSelector(
+  game,
+  g => {
+    return !g.user || !g.user.isAnonymous
+  },
+)
+
 export const isLoggingIn = createSelector(
   game,
   g => !!g.isLoginStart,

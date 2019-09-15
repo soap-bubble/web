@@ -1,4 +1,5 @@
-import { Observable, from } from 'rxjs'
+import { from } from 'rxjs'
+import { map, mergeMap, filter, catchError } from 'rxjs/operators'
 import storage from 'local-storage'
 import createEpic from 'utils/createEpic'
 import {
@@ -40,6 +41,7 @@ import {
   SAVE_LOAD_SUCCESS,
   SAVE_LOAD_ERROR,
   SET_SAVE_ID,
+  LOGOUT_START,
 } from './actionTypes'
 
 function createCanvas({ width, height }) {
@@ -58,9 +60,15 @@ function promiseCursor(id) {
   return loadedCursors[realId] || Promise.resolve(null)
 }
 
-export function login() {
+export function loginAction() {
   return {
     type: LOGIN_START,
+  }
+}
+
+export function logoutAction() {
+  return {
+    type: LOGOUT_START,
   }
 }
 
@@ -301,6 +309,48 @@ export function openSave() {
     type: CLOUD_SAVE_OPEN,
   }
 }
+
+export const loginEpic = createEpic(action$ =>
+  action$.pipe(
+    filter(action => action.type === LOGIN_START),
+    mergeMap(() =>
+      from(
+        firebase
+          .auth()
+          .currentUser.linkWithPopup(new firebase.auth.GoogleAuthProvider()),
+        // .then(googleUser => {
+        //   const credential = firebase.auth.GoogleAuthProvider.credential(
+        //     googleUser.credential.idToken,
+        //   )
+        //   return firebase
+        //     .auth()
+        //     .currentUser.linkAndRetrieveDataWithCredential(credential)
+        // })
+      ),
+    ),
+    catchError(err => {
+      if ((err.code = 'auth/credential-already-in-use')) {
+        return firebase
+          .auth()
+          .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      }
+      throw err
+    }),
+    catchError(err => ({
+      type: SAVE_ERROR,
+      payload: err,
+    })),
+    map(user => ({ type: LOGGED_IN, payload: user })),
+  ),
+)
+
+export const logoutEpic = createEpic(action$ =>
+  action$.pipe(
+    filter(action => action.type === LOGOUT_START),
+    mergeMap(() => from(firebase.auth().signOut())),
+    map(user => ({ type: LOGGED_IN, payload: user })),
+  ),
+)
 
 export const cloudSaveEpic = createEpic((action$, store$) =>
   action$

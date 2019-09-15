@@ -1,5 +1,5 @@
 {
-  "gameDbPath": "../../../GameDB",
+  "gameDbPath": "../../GameDB",
   "googleAnalyticsClientId": "UA-92268324-2",
   "port": 8050
 }

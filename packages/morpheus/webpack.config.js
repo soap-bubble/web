@@ -43,7 +43,7 @@ module.exports = env => {
   if (env.firebase) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
-      apiHost: '',
+      apiHost: '/api',
       authHost: 'https://soapbubble.web.app/auth',
       botHost: 'https://soapbubble.web.app/bot',
     })
@@ -81,7 +81,7 @@ module.exports = env => {
   } else if (env.development) {
     Object.assign(appConfig, {
       assetHost: 'http://localhost:8050',
-      apiHost: 'http://localhost:8050',
+      apiHost: '/api',
       authHost: 'http://localhost:4000',
     })
   }

@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import qs from 'query-string'
 import MenuList from '../components/MenuList'
-import { browserSaveData, isOpenSave } from '../selectors'
+import { browserSaveData, isOpenSave, isLoggedIn } from '../selectors'
 import {
   browserLoad,
   browserSave,
@@ -10,6 +10,8 @@ import {
   openSave,
   localLoad,
   localSave,
+  loginAction,
+  logoutAction,
 } from '../actions'
 import { closeMenu, openSettings } from '../commands'
 
@@ -19,20 +21,21 @@ function mapStateToProps(state) {
   return {
     browserSaveData: browserSaveData(state),
     isOpenSave: isOpenSave(state),
+    isLoggedIn: isLoggedIn(state),
   }
 }
 
 function mapDispatchToPros(dispatch) {
   return {
     doLogout() {
-      // dispatch(logout())
+      dispatch(logoutAction())
     },
     doCloudSave() {
       dispatch(cloudSave())
       dispatch(closeMenu())
     },
     doLogin() {
-      // dispatch(loginAction());
+      dispatch(loginAction())
       dispatch(closeMenu())
     },
     doCloudSaveNew() {

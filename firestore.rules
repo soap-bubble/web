@@ -1,6 +1,15 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
+    match /gamestates/{gamestateId} {
+    	allow read: if request.auth.uid != null
+    }
+  	match /scenes/{sceneId} {
+    	allow read: if request.auth.uid != null
+    }
+    match /casts/{castId} {
+    	allow read: if request.auth.uid != null
+    }
     match /{document=**} {
       allow read, write: if false;
     }

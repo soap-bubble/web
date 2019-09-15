@@ -1,49 +1,36 @@
-import thunkMiddleware from 'redux-thunk';
-import promiseMiddleware from 'redux-promise';
-import { createStore, applyMiddleware } from 'redux';
+import thunkMiddleware from 'redux-thunk'
+import promiseMiddleware from 'redux-promise'
+import { createStore, applyMiddleware, compose } from 'redux'
 import { createEpicMiddleware } from 'redux-observable'
-import qs from 'query-string';
-import { reducer } from 'utils/createReducer';
-import { epics } from 'utils/createEpic';
-import isDebug from 'utils/isDebug';
+import qs from 'query-string'
+import { reducer } from 'utils/createReducer'
+import { epics } from 'utils/createEpic'
+import isDebug from 'utils/isDebug'
+import loggingMiddleware from './logger'
 
-import loggingMiddleware from './logger';
+const qp = qs.parse(location.search)
+let store
 
-const qp = qs.parse(location.search);
-let store;
-
-export default function () {
+export default function() {
   if (!store) {
-    let middleware;
-    const epicMiddleware = createEpicMiddleware();
+    let middleware
+    const epicMiddleware = createEpicMiddleware()
     if (isDebug) {
-      // eslint-disable-next-line
-      const compose = qp.reduxDev ? require('redux-devtools-extension').composeWithDevTools({})
-      // eslint-disable-next-line
-        : require('redux').compose;
-
-      middleware = compose(
-        applyMiddleware(
-          epicMiddleware,
-          thunkMiddleware,
-          promiseMiddleware,
-          loggingMiddleware,
-        ),
-      );
+      const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+            actionsBlacklist: ['INPUT_CURSOR_SET_POS', 'GAME_SET_CURSOR'],
+          })
+        : compose
+      middleware = composeEnhancers(
+        applyMiddleware(epicMiddleware, thunkMiddleware, loggingMiddleware),
+      )
     } else {
-      middleware = applyMiddleware(
-        epicMiddleware,
-        thunkMiddleware,
-        promiseMiddleware,
-      );
+      middleware = applyMiddleware(epicMiddleware, thunkMiddleware)
     }
 
-    store = createStore(
-      reducer,
-      middleware,
-    );
+    store = createStore(reducer, middleware)
 
-    epicMiddleware.run(epics());
+    epicMiddleware.run(epics())
   }
-  return store;
+  return store
 }

@@ -1,4 +1,4 @@
-import { from } from 'rxjs'
+import { from, of } from 'rxjs'
 import { map, mergeMap, filter, catchError } from 'rxjs/operators'
 import storage from 'local-storage'
 import createEpic from 'utils/createEpic'
@@ -317,25 +317,10 @@ export const loginEpic = createEpic(action$ =>
       from(
         firebase
           .auth()
-          .currentUser.linkWithPopup(new firebase.auth.GoogleAuthProvider()),
-        // .then(googleUser => {
-        //   const credential = firebase.auth.GoogleAuthProvider.credential(
-        //     googleUser.credential.idToken,
-        //   )
-        //   return firebase
-        //     .auth()
-        //     .currentUser.linkAndRetrieveDataWithCredential(credential)
-        // })
+          .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+          .then(({ user }) => user),
       ),
     ),
-    catchError(err => {
-      if ((err.code = 'auth/credential-already-in-use')) {
-        return firebase
-          .auth()
-          .signInWithPopup(new firebase.auth.GoogleAuthProvider())
-      }
-      throw err
-    }),
     catchError(err => ({
       type: SAVE_ERROR,
       payload: err,
@@ -352,49 +337,133 @@ export const logoutEpic = createEpic(action$ =>
   ),
 )
 
-export const cloudSaveEpic = createEpic((action$, store$) =>
-  action$
-    .ofType(CLOUD_SAVE)
-    .mergeMap(() =>
-      userService.saveGame({
-        // token: loginModule.selectors.token(store$.value),
-        gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
-        currentSceneId: sceneSelectors.currentSceneId(store$.value),
-        previousSceneId: sceneSelectors.previousSceneId(store$.value),
-        saveId: gameSelectors.saveId(store$.value),
-      }),
-    )
-    .map(response => {
-      const { saveId } = response.data
-      return {
-        type: SET_SAVE_ID,
-        payload: saveId,
-      }
-    })
-    .catch(err => ({
-      type: SAVE_ERROR,
-      payload: err,
-    })),
-)
+export const newSaveGameEpic = createEpic((action$, state$) =>
+  action$.pipe(
+    filter(({ type }) => type === CLOUD_SAVE_NEW),
+    mergeMap(async () => {
+      try {
+        const { uid } = firebase.auth().currentUser
+        const db = firebase.firestore()
+        const saveRef = db.collection('saves')
+        const saveData = {
+          gamestates: gamestateSelectors.gamestates(state$.value).toJS() || [],
+          currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
+          previousSceneId: sceneSelectors.previousSceneId(state$.value) || null,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }
 
-export const newSaveGameEpic = createEpic((action$, store$) =>
-  action$
-    .ofType(CLOUD_SAVE_NEW)
-    .mergeMap(() =>
-      userService.newSaveGame({
-        // token: loginModule.selectors.token(store$.value),
-        gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
-        currentSceneId: sceneSelectors.currentSceneId(store$.value),
-        previousSceneId: sceneSelectors.previousSceneId(store$.value),
-      }),
-    )
-    .map(response => {
-      const { saveId } = response.data
-      return {
-        type: SET_SAVE_ID,
-        payload: saveId,
+        const response = await saveRef.add({
+          ...saveData,
+          roles: {
+            [uid]: 'owner',
+          },
+        })
+        const { id } = response
+        return {
+          type: SET_SAVE_ID,
+          payload: id,
+        }
+      } catch (err) {
+        return {
+          type: SAVE_ERROR,
+          payload: err,
+        }
       }
     }),
+  ),
+)
+
+export const cloudSaveEpic = createEpic((action$, state$) =>
+  action$.pipe(
+    filter(({ type }) => type === CLOUD_SAVE),
+    mergeMap(async () => {
+      try {
+        const db = firebase.firestore()
+        const saveRef = db
+          .collection('saves')
+          .doc(gameSelectors.saveId(state$.value))
+        const saveData = {
+          gamestates: gamestateSelectors.gamestates(state$.value).toJS() || [],
+          currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
+          previousSceneId: sceneSelectors.previousSceneId(state$.value) || null,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+        }
+        const response = await saveRef.set(saveData, { merge: true })
+        const { id } = response
+        return {
+          type: SET_SAVE_ID,
+          payload: id,
+        }
+      } catch (err) {
+        return {
+          type: SAVE_ERROR,
+          payload: err,
+        }
+      }
+    }),
+  ),
+)
+
+export const loadSavesEpic = createEpic((action$, state$) =>
+  action$.pipe(
+    filter(({ type }) => type === SAVE_LOAD),
+    mergeMap(async () => {
+      try {
+        const { uid } = firebase.auth().currentUser
+        const db = firebase.firestore()
+        const saveDocs = await db
+          .collection('saves')
+          .where(`roles.${uid}`, '==', 'owner')
+          .get()
+        return {
+          type: SAVE_LOAD_SUCCESS,
+          payload: saveDocs.docs.map(doc => {
+            const { updatedAt } = doc.data()
+            return {
+              saveId: doc.id,
+              timestamp: updatedAt.toDate(),
+            }
+          }),
+        }
+      } catch (err) {
+        return {
+          type: SAVE_LOAD_ERROR,
+          payload: err,
+        }
+      }
+    }),
+  ),
+)
+
+export const loadGameEpic = createEpic((action$, state$) =>
+  action$.pipe(
+    filter(({ type }) => type === CLOUD_LOAD),
+    mergeMap(async ({ payload: saveId }) => {
+      try {
+        const db = firebase.firestore()
+        const saveDoc = await db
+          .collection('saves')
+          .doc(saveId || gameSelectors.saveId(store$.value))
+          .get()
+        const { currentSceneId, previousSceneId, gamestates } = saveDoc.data()
+        return [
+          {
+            type: SET_SAVE_ID,
+            payload: saveDoc.id,
+          },
+          gamestateActions.inject(gamestates),
+          sceneActions.goToScene(currentSceneId, true, previousSceneId),
+        ]
+      } catch (err) {
+        return {
+          type: 'GAME_LOAD_ERROR',
+          payload: err,
+        }
+      }
+    }),
+    mergeMap(from),
+  ),
 )
 
 export const browserSaveEpic = createEpic((action$, store$) =>
@@ -498,67 +567,8 @@ export const browserLoadEpic = createEpic((action$, store) =>
     ),
 )
 
-export const loadGameEpic = createEpic((action$, store$) =>
-  action$
-    .ofType(CLOUD_LOAD)
-    .mergeMap(({ payload: saveId }) =>
-      from(
-        userService.getSaveGame({
-          // token: loginModule.selectors.token(store$.value),
-          saveId: saveId || gameSelectors.saveId(store$.value),
-        }),
-      ),
-    )
-    .map(response => {
-      const {
-        currentSceneId,
-        previousSceneId,
-        gamestates,
-        saveId,
-      } = response.data
-      return {
-        currentSceneId,
-        previousSceneId,
-        gamestates,
-        saveId,
-      }
-    })
-    .mergeMap(({ currentSceneId, previousSceneId, gamestates, saveId }) =>
-      from([
-        {
-          type: SET_SAVE_ID,
-          payload: saveId,
-        },
-        gamestateActions.inject(gamestates),
-        sceneActions.goToScene(currentSceneId, true, previousSceneId),
-      ]),
-    )
-    .catch(err => ({
-      type: 'GAME_LOAD_ERROR',
-      payload: err,
-    })),
-)
-
 export const openSaveEpic = createEpic(action$ =>
   action$.ofType(CLOUD_SAVE_OPEN).map(() => ({
     type: SAVE_LOAD,
   })),
-)
-
-export const loadSavesEpic = createEpic((action$, store$) =>
-  action$
-    .ofType(SAVE_LOAD)
-    .mergeMap(() =>
-      userService.getAllSaves({
-        // token: loginModule.selectors.token(store$.value),
-      }),
-    )
-    .map(response => ({
-      type: SAVE_LOAD_SUCCESS,
-      payload: response.data,
-    }))
-    .catch(err => ({
-      type: SAVE_LOAD_ERROR,
-      payload: err,
-    })),
 )

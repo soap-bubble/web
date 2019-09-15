@@ -1,7 +1,10 @@
 service firebase.storage {
   match /b/{bucket}/o {
+    match /gamestates {
+      allow read: if true;
+    }
     match /{allPaths=**} {
-      allow read: if request.auth!=null;
+      allow read, write: if false;
     }
   }
 }

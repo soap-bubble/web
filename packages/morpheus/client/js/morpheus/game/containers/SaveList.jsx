@@ -1,40 +1,43 @@
-import { connect } from 'react-redux';
-import SaveList from '../components/SaveList';
-import * as gameSelectors from '../selectors';
-import {
-  cloudLoad,
-} from '../actions';
+import { connect } from 'react-redux'
+import SaveList from '../components/SaveList'
+import * as gameSelectors from '../selectors'
+import { cloudLoad } from '../actions'
+import { closeSave } from '../commands'
 
-import './MenuList.scss';
+import './MenuList.scss'
 
 function mapStateToProps(state) {
-  const savesAreLoading = gameSelectors.savesAreLoading(state);
+  const savesAreLoading = gameSelectors.savesAreLoading(state)
   if (savesAreLoading) {
     return {
       loading: savesAreLoading,
-    };
+    }
   }
-  const savesError = gameSelectors.savesMetaError(state);
+  const savesError = gameSelectors.savesMetaError(state)
   if (savesError) {
     return {
       loading: false,
       error: savesError,
-    };
+    }
   }
-  const delegate = gameSelectors.saveDelegate(state);
-  const rows = gameSelectors.saveSize(state);
+  const delegate = gameSelectors.saveDelegate(state)
+  const rows = gameSelectors.saveSize(state)
   return {
     delegate,
     rows,
-  };
+  }
 }
 
 function mapDispatchToPros(dispatch) {
   return {
     onSelect(saveId) {
-      dispatch(cloudLoad(saveId));
+      dispatch(cloudLoad(saveId))
+      dispatch(closeSave())
     },
-  };
+  }
 }
 
-export default connect(mapStateToProps, mapDispatchToPros)(SaveList);
+export default connect(
+  mapStateToProps,
+  mapDispatchToPros,
+)(SaveList)

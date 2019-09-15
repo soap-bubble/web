@@ -1,7 +1,5 @@
 /* eslint-env browser */
 import React from 'react'
-import { initializeApp } from 'firebase/app'
-import 'firebase/auth'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { once } from 'lodash'
@@ -124,25 +122,12 @@ window.onload = () => {
       }
     }
   }
-  let isInit = false
-  let triedAnonymousLogin = false
-  firebase.auth().onAuthStateChanged(async user => {
-    if (user) {
+  firebase.auth().onAuthStateChanged(
+    once(async user => {
       store.dispatch(gameActions.loggedIn(user))
-      if (!isInit) {
-        isInit = true
-        init()
-      }
-    } else if (!triedAnonymousLogin) {
-      triedAnonymousLogin = true
-      try {
-        await firebase.auth().signInAnonymously()
-      } catch (error) {
-        triedAnonymousLogin = false
-        console.error(error)
-      }
-    }
-  })
+      init()
+    }),
+  )
 }
 
 if (window.hasOwnProperty('cordova')) {

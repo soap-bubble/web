@@ -13,20 +13,15 @@ let store
 
 export default function() {
   if (!store) {
-    let middleware
     const epicMiddleware = createEpicMiddleware()
-    if (isDebug) {
-      const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
-        ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-            actionsBlacklist: ['INPUT_CURSOR_SET_POS', 'GAME_SET_CURSOR'],
-          })
-        : compose
-      middleware = composeEnhancers(
-        applyMiddleware(epicMiddleware, thunkMiddleware, loggingMiddleware),
-      )
-    } else {
-      middleware = applyMiddleware(epicMiddleware, thunkMiddleware)
-    }
+    const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
+      ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
+          actionsBlacklist: ['INPUT_CURSOR_SET_POS', 'GAME_SET_CURSOR'],
+        })
+      : compose
+    const middleware = composeEnhancers(
+      applyMiddleware(epicMiddleware, thunkMiddleware, loggingMiddleware),
+    )
 
     store = createStore(reducer, middleware)
 

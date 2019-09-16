@@ -1,59 +1,48 @@
-import React from 'react';
-import {
-  once,
-} from 'lodash';
-import { connect } from 'react-redux';
-import NavBar from '../components/NavBar';
-import LoginStatusNavItemContainer from './LoginStatusNavItemContainer';
-import { changePage } from '../actions';
-import {
-  login,
-} from '../modules/soapbubble';
+import { once } from 'lodash'
+import { connect } from 'react-redux'
+import NavBar from '../components/NavBar'
 
-const {
-  selectors: loginSelectors,
-  actions: loginActions,
-} = login;
+let onInit
 
-let onInit;
-
-const mapStateToProps = (state) => {
-  const { location: { type: page } } = state;
-  const isLoggedIn = loginSelectors.isLoggedIn(state);
-  const isCheckingLogin = loginSelectors.isCheckingLogin(state);
-  const userName = loginSelectors.userName(state);
+const mapStateToProps = state => {
+  const {
+    location: { type: page },
+  } = state
+  // const isLoggedIn = loginSelectors.isLoggedIn(state);
+  // const isCheckingLogin = loginSelectors.isCheckingLogin(state);
+  // const userName = loginSelectors.userName(state);
 
   return {
     page,
-    rightToolbar:
-      (<LoginStatusNavItemContainer
-        isCheckingLogin={isCheckingLogin}
-        isLoggedIn={isLoggedIn}
-        userName={userName}
-      />),
-  };
-};
+    // rightToolbar:
+    //   (<LoginStatusNavItemContainer
+    //     isCheckingLogin={isCheckingLogin}
+    //     isLoggedIn={isLoggedIn}
+    //     userName={userName}
+    //   />),
+  }
+}
 
-const mapDispatchToProps = (dispatch) => {
+const mapDispatchToProps = dispatch => {
   if (!onInit) {
     onInit = once(() => {
-      dispatch(loginActions.init());
-    });
+      // dispatch(loginActions.init());
+    })
   }
   return {
     onPageChange(page, e) {
-      e.preventDefault();
+      e.preventDefault()
       dispatch({
         type: page,
-      });
+      })
     },
     onInit,
-  };
-};
+  }
+}
 
 const Header = connect(
   mapStateToProps,
   mapDispatchToProps,
-)(NavBar);
+)(NavBar)
 
-export default Header;
+export default Header

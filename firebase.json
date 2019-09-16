@@ -16,7 +16,8 @@
   "hosting": {
     "public": "public",
     "predeploy": [
-      "npm --prefix \"$RESOURCE_DIR/../packages/morpheus\" run build:client:firebase:production"
+      "npm --prefix \"$RESOURCE_DIR/../packages/morpheus\" run build:client:firebase:production",
+      "npm --prefix \"$RESOURCE_DIR/../packages/core\" run build:client:firebase:production"
     ],
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
@@ -30,11 +31,11 @@
       },
       {
         "source": "/morpheus{,/**}",
-        "destination": "/public/morpheus/index.html"
+        "destination": "/morpheus/index.html"
       },
       {
         "source": "**",
-        "destination": "/public/core/index.html"
+        "destination": "/index.html"
       }
     ]
   }

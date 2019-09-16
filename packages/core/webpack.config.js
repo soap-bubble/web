@@ -1,36 +1,38 @@
-const webpack = require('webpack');
-const styleLoaders = require('@soapbubble/style').loaders;
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const config = require('config');
+process.env.NODE_CONFIG_DIR = `${__dirname}/config`
+const webpack = require('webpack')
+const styleLoaders = require('@soapbubble/style').loaders
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const config = require('config')
 
-const dirJs = path.resolve(__dirname, 'client/src');
-const dirParent = path.resolve(__dirname, '../');
+const dirJs = path.resolve(__dirname, 'client/src')
+const dirParent = path.resolve(__dirname, '../')
 const dirSharedComponents = [
   path.join(dirParent, 'components'),
   path.join(dirParent, 'style'),
-];
+]
 
 // cheap-module-eval-source-map
-module.exports = (env) => {
-  let nodeEnv = 'development';
-  const isProduction = env.production || env.staging;
+module.exports = env => {
+  let nodeEnv = 'development'
+  const isProduction = env.production || env.staging
   if (isProduction) {
-    nodeEnv = 'production';
+    nodeEnv = 'production'
   }
 
-  const outputPath = path.join(__dirname, 'public');
-  const htmlTemplate = 'index.ejs';
-  const jsName = isProduction ? '[name].[hash].js' : '[name].js';
-  let htmlFilename = 'index.html';
-  let environment = 'local';
+  const outputPath = env.firebase
+    ? path.resolve(__dirname, '../../public')
+    : path.join(__dirname, 'public')
+  const htmlTemplate = 'index.ejs'
+  const jsName = isProduction ? '[name].[hash].js' : '[name].js'
+  let htmlFilename = 'index.html'
 
   const appConfig = {
     contentfulSpace: config.contentfulSpace,
     contentfulAccess: config.contentfulAccess,
     contentfulEnv: 'development',
-  };
+  }
 
   if (env.production) {
     Object.assign(appConfig, {
@@ -39,8 +41,8 @@ module.exports = (env) => {
       authHost: 'https://soapbubble.online/auth',
       contentfulEnv: 'master',
       twitch: config.twitch.production,
-    });
-    htmlFilename = 'index-production.html';
+    })
+    htmlFilename = 'index-production.html'
   } else if (env.staging) {
     Object.assign(appConfig, {
       self: 'https://staging.soapbubble.online',
@@ -48,35 +50,41 @@ module.exports = (env) => {
       authHost: 'https://staging.soapbubble.online/auth',
       contentfulEnv: 'master',
       twitch: config.twitch.staging,
-    });
-    htmlFilename = 'index-staging.html';
+    })
+    htmlFilename = 'index-staging.html'
   }
-  if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
+  if (env.firebase) {
+    Object.assign(appConfig, {
+      self: '',
+      morpheusServer: '/morpheus',
+      contentfulEnv: 'master',
+    })
+    htmlFilename = 'index.html'
+  } else if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
     Object.assign(appConfig, {
       self: 'https://dev.soapbubble.online',
       morpheusServer: 'https://dev.soapbubble.online/morpheus',
       authHost: 'https://dev.soapbubble.online/auth',
       twitch: config.twitch.local,
-    });
+    })
   } else if (env.development) {
     Object.assign(appConfig, {
       self: 'http://localhost:8060',
       morpheusServer: 'http://localhost:8050',
       authHost: 'http://localhost:4000',
       twitch: config.twitch.local,
-    });
+    })
   }
-  console.log(`Building with twitch config clientID: ${appConfig.twitch.clientID} callbackURL: ${appConfig.twitch.callbackURL}`)
-  const publicPath = `${appConfig.self}/`;
-  const target = 'web';
-  const mainFields = ['esnext', 'browser', 'module', 'main'];
+  const publicPath = `${appConfig.self}/`
+  const target = 'web'
+  const mainFields = ['esnext', 'browser', 'module', 'main']
 
   const webpackConfig = {
     target,
     mode: nodeEnv,
     devtool: isProduction ? false : 'source-map',
     entry: {
-      app: './client/src/app.js',
+      app: ['babel-polyfill', './client/src/app.js'],
       vendor: [
         '@soapbubble/style/dist/soapbubble.css',
         'axios',
@@ -107,26 +115,33 @@ module.exports = (env) => {
           test: /\.jsx?$/,
           include: [/node_modules\/@soapbubble/],
           exclude: [/@soapbubble\/.*\/node_modules/],
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              rootMode: 'upward-optional',
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                rootMode: 'upward-optional',
+              },
             },
-          }],
+          ],
         },
         {
           test: /\.jsx?$/,
           exclude: [/node_modules/],
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              rootMode: 'upward-optional',
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                rootMode: 'upward-optional',
+              },
             },
-          }],
+          ],
         },
         {
           test: /\.css$/,
-          include: [/@soapbubble\/style\/dist\/soapbubble.css/, /packages\/style\/dist\/soapbubble.css/],
+          include: [
+            /@soapbubble\/style\/dist\/soapbubble.css/,
+            /packages\/style\/dist\/soapbubble.css/,
+          ],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -142,7 +157,10 @@ module.exports = (env) => {
         {
           test: /\.css$/,
           include: [/@soapbubble/].concat(dirSharedComponents).concat(dirJs),
-          exclude: [/@soapbubble\/style\/dist\/soapbubble.css/, /packages\/style\/dist\/soapbubble.css/],
+          exclude: [
+            /@soapbubble\/style\/dist\/soapbubble.css/,
+            /packages\/style\/dist\/soapbubble.css/,
+          ],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -160,33 +178,55 @@ module.exports = (env) => {
         },
         {
           test: /\.less/,
-          use: [{
-            loader: MiniCssExtractPlugin.loader,
-          }, {
-            loader: 'css-loader', // translates CSS into CommonJS modules
-          }, {
-            loader: 'postcss-loader', // Run post css actions
-          }, {
-            loader: 'sass-loader', // compiles Sass to CSS
-          }],
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            {
+              loader: 'css-loader', // translates CSS into CommonJS modules
+            },
+            {
+              loader: 'postcss-loader', // Run post css actions
+            },
+            {
+              loader: 'sass-loader', // compiles Sass to CSS
+            },
+          ],
         },
         {
           test: /\.(scss|sass)$/,
-          use: [{
-            loader: MiniCssExtractPlugin.loader,
-          }, {
-            loader: 'css-loader', // translates CSS into CommonJS modules
-          }, {
-            loader: 'postcss-loader', // Run post css actions
-          }, {
-            loader: 'sass-loader', // compiles Sass to CSS
-          }],
+          use: [
+            {
+              loader: MiniCssExtractPlugin.loader,
+            },
+            {
+              loader: 'css-loader', // translates CSS into CommonJS modules
+            },
+            {
+              loader: 'postcss-loader', // Run post css actions
+            },
+            {
+              loader: 'sass-loader', // compiles Sass to CSS
+            },
+          ],
         },
-        { test: /\.woff(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-        { test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/font-woff' },
-        { test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=application/octet-stream' },
+        {
+          test: /\.woff(\?v=\d+\.\d+\.\d+)?$/,
+          loader: 'url-loader?limit=10000&mimetype=application/font-woff',
+        },
+        {
+          test: /\.woff2(\?v=\d+\.\d+\.\d+)?$/,
+          loader: 'url-loader?limit=10000&mimetype=application/font-woff',
+        },
+        {
+          test: /\.ttf(\?v=\d+\.\d+\.\d+)?$/,
+          loader: 'url-loader?limit=10000&mimetype=application/octet-stream',
+        },
         { test: /\.eot(\?v=\d+\.\d+\.\d+)?$/, loader: 'file-loader' },
-        { test: /\.svg(\?v=\d+\.\d+\.\d+)?$/, loader: 'url-loader?limit=10000&mimetype=image/svg+xml' },
+        {
+          test: /\.svg(\?v=\d+\.\d+\.\d+)?$/,
+          loader: 'url-loader?limit=10000&mimetype=image/svg+xml',
+        },
         {
           test: /\.png/,
           use: {
@@ -217,7 +257,7 @@ module.exports = (env) => {
         config: JSON.stringify(appConfig),
       }),
     ],
-  };
+  }
 
-  return webpackConfig;
-};
+  return webpackConfig
+}

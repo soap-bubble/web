@@ -1,8 +1,10 @@
+process.env.NODE_CONFIG_DIR = `${__dirname}/config`
 const webpack = require('webpack')
 const styleLoaders = require('@soapbubble/style').loaders
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
 const config = require('config')
 
 const dirJs = path.resolve(__dirname, 'client/js')
@@ -18,7 +20,7 @@ module.exports = env => {
     if (env.cordova) {
       return path.resolve(__dirname, '../cordova/www')
     } else if (env.electron) {
-      return path.resolve(__dirname, '../electron2/dist')
+      return path.resolve(__dirname, '../electron/dist')
     } else if (env.firebase) {
       return path.resolve(__dirname, '../../public/morpheus')
     }
@@ -259,6 +261,7 @@ module.exports = env => {
       ]),
     },
     plugins: [
+      new CleanWebpackPlugin(),
       new MiniCssExtractPlugin({
         filename: '[id].[contenthash].css',
         disable: !isProduction,
@@ -274,37 +277,6 @@ module.exports = env => {
     ].concat(
       env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : [],
     ),
-  }
-  if (env.electron) {
-    const { output } = webpackConfig
-
-    // convert to an array to also build service worker
-    webpackConfig = [
-      webpackConfig,
-      {
-        target,
-        devtool: false,
-        output,
-        entry: {
-          sw: './client/js/sw.js',
-        },
-        resolve: {
-          extensions: ['.js', '.json'],
-          mainFields,
-        },
-        module: {
-          rules: styleLoaders(env).concat([
-            {
-              test: /\.js?$/,
-              include: dirSharedComponents.concat([dirJs]),
-              exclude: [/node_modules/],
-              use: ['babel-loader'],
-            },
-          ]),
-        },
-        plugins: [new webpack.DefinePlugin(webpackDefineConfig)],
-      },
-    ]
   }
 
   return webpackConfig

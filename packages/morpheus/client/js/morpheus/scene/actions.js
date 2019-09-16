@@ -83,32 +83,10 @@ export function fetch(sceneId) {
   }
 }
 
-export function fetchFunction(id) {
-  return (dispatch, getState) => {
-    logger.info('fetch', id)
-    const loadedScenes = sceneSelectors.loadedScenes(getState())
-    const cachedScene = loadedScenes.find(scene => scene.sceneId === id)
-    if (cachedScene) {
-      return Promise.resolve(cachedScene)
-    }
-    const fetchPromise = bySceneId(id)
-      .then(response => response.data)
-      .then(scene => {
-        dispatch({
-          type: SCENE_LOAD_COMPLETE,
-          payload: scene,
-        })
-        return scene
-      })
-    dispatch(sceneLoadStarted(id, fetchPromise))
-    return fetchPromise
-  }
-}
-
 export function fetchScene(id) {
   logger.info('fetchScene', id)
   return dispatch =>
-    dispatch(fetch(id)).then(sceneData => {
+    dispatch(fetch(Number(id))).then(sceneData => {
       dispatch(sceneLoadComplete(sceneData))
       return sceneData
     })

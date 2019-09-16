@@ -3,13 +3,13 @@
   "productName": "Morpheus",
   "version": "1.14.0",
   "description": "My Electron application description",
-  "main": "dist/main.js",
+  "main": "lib/main.js",
   "scripts": {
     "start": "electron-forge start",
     "package": "electron-forge package",
     "make": "electron-forge make",
     "publish": "electron-forge publish",
-    "build": "babel src -d dist",
+    "build": "babel src -d lib",
     "lint": "echo \"No linting configured\""
   },
   "keywords": [],
@@ -18,7 +18,7 @@
   "config": {
     "forge": {
       "packagerConfig": {
-        "icon": "res/icon.ico"
+        "icon": "res/icon.icns"
       },
       "makers": [
         {
@@ -38,11 +38,29 @@
         },
         {
           "name": "@electron-forge/maker-deb",
-          "config": {}
+          "config": {
+            "options": {
+              "maintainer": "John Dean",
+              "productName": "Morpheus",
+              "homepage": "https://soapbubble.online",
+              "icon": "res/icon96.png",
+              "description": "Where dreams never die",
+              "productDescription": "Soap Bubble Productions Morpheus point-n-click adventure"
+            }
+          }
         },
         {
           "name": "@electron-forge/maker-rpm",
-          "config": {}
+          "config": {
+            "options": {
+              "maintainer": "John Dean",
+              "productName": "Morpheus",
+              "homepage": "https://soapbubble.online",
+              "icon": "res/icon96.png",
+              "description": "Where dreams never die",
+              "productDescription": "Soap Bubble Productions Morpheus point-n-click adventure"
+            }
+          }
         }
       ]
     }

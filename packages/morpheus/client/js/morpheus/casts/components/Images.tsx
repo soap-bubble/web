@@ -6,7 +6,7 @@ import React, {
   SyntheticEvent,
 } from 'react'
 import { getAssetUrl } from 'service/gamedb'
-import { MovieCast } from '../types'
+import { MovieCast, MovieSpecialCast } from '../types'
 
 interface ImageElProps {
   url: string
@@ -50,8 +50,14 @@ const Images = ({
     () =>
       movieSpecialCasts.reduce(
         (memo: MovieCastCollectionMap, curr: MovieCast) => {
-          const { fileName, url } = curr
-          let key = (fileName && getAssetUrl(fileName, 'png')) || url
+          const { fileName, url, image, startFrame } = curr as MovieSpecialCast
+          let key =
+            (fileName &&
+              getAssetUrl(
+                image ? `${fileName}.${startFrame}` : fileName,
+                'png',
+              )) ||
+            url
           const ref = (memo[key] = memo[key] || [])
           ref.push(curr)
           return memo

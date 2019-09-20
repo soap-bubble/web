@@ -1,15 +1,25 @@
-import React, { useRef, useEffect, MouseEvent, TouchEvent } from 'react'
+import React, {
+  useRef,
+  useEffect,
+  useMemo,
+  MouseEvent,
+  TouchEvent,
+} from 'react'
+import { useSelector } from 'react-redux'
 import raf from 'raf'
-
-const canvas = document.createElement('canvas')
-const ctx = canvas.getContext('2d')
+// @ts-ignore
+import { selectors as gameSelectors } from 'morpheus/game'
+// @ts-ignore
+import { selectors as inputSelectors } from 'morpheus/input'
+import { number } from 'prop-types'
 
 export type Renderable = (ctx: CanvasRenderingContext2D) => void
 
 interface CanvasProps {
   width: number
   height: number
-  style: object
+  top: number
+  left: number
   enteringRenderables: Renderable[]
   stageRenderables: Renderable[]
   exitingRenderables: Renderable[]
@@ -36,7 +46,8 @@ export function render(
 const Canvas = ({
   height,
   width,
-  style,
+  top,
+  left,
   enteringRenderables: entering,
   stageRenderables: onstage,
   exitingRenderables: exiting,
@@ -48,17 +59,42 @@ const Canvas = ({
   onTouchEnd,
   onTouchCancel,
 }: CanvasProps) => {
+  const cursor = useSelector(gameSelectors.cursorImg) as CanvasImageSource
+  const cursorPos = useSelector(inputSelectors.cursorPosition) as {
+    left: number
+    top: number
+  }
+  const cursorRenderable = useMemo(() => {
+    return (ctx: CanvasRenderingContext2D) => {
+      if (cursor) {
+        const screenPos = {
+          x: cursorPos.left - (cursor.width as number) / 2,
+          y: cursorPos.top - (cursor.height as number) / 2,
+        }
+        ctx.drawImage(
+          cursor,
+          0,
+          0,
+          cursor.width as number,
+          cursor.height as number,
+          screenPos.x,
+          screenPos.y,
+          cursor.width as number,
+          cursor.height as number,
+        )
+      }
+    }
+  }, [cursor, cursorPos])
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const allRenderables = useMemo(() => {
+    return [...exiting, ...entering, ...onstage, cursorRenderable]
+  }, [exiting, entering, onstage, cursorRenderable])
   useEffect(() => {
     let isRunning = true
     function loop() {
       if (isRunning && canvasRef.current) {
         try {
-          render(canvasRef.current.getContext('2d'), [
-            ...exiting,
-            ...entering,
-            ...onstage,
-          ])
+          render(canvasRef.current.getContext('2d'), allRenderables)
         } catch (e) {
           console.error('While running render loop', e)
         }
@@ -71,7 +107,7 @@ const Canvas = ({
     return () => {
       isRunning = false
     }
-  }, [canvasRef.current, onstage])
+  }, [canvasRef.current, allRenderables])
   return (
     <canvas
       width={width}
@@ -85,8 +121,11 @@ const Canvas = ({
       onTouchEnd={onTouchEnd}
       onTouchCancel={onTouchCancel}
       style={{
-        ...style,
         cursor: 'none',
+        width: `${width}px`,
+        height: `${height}px`,
+        left: `${left}px`,
+        top: `${top}px`,
       }}
     />
   )

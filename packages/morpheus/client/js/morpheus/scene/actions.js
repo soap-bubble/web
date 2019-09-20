@@ -7,6 +7,10 @@ import { actions as castActions } from 'morpheus/casts'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import loggerFactory from 'utils/logger'
 import SceneQueue from './queue'
+<<<<<<< HEAD
+=======
+import menuDecorator from './menu'
+>>>>>>> fd3b9b5... Adds the menu button as an implicit cast
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,
@@ -152,15 +156,15 @@ export function runScene(scene) {
       const existingScene = currentScenes.find(s => s.sceneId === scene.sceneId)
 
       if (!existingScene) {
-        await dispatch(castActions.lifecycle.doLoad(scene))
+        // await dispatch(castActions.lifecycle.doLoad(scene))
       }
-      await dispatch(castActions.lifecycle.doEnter(scene))
+      // await dispatch(castActions.lifecycle.doEnter(scene))
       const sceneToUnload = dispatch(doSceneEntering(scene))
-      await dispatch(castActions.lifecycle.onStage(scene))
+      // await dispatch(castActions.lifecycle.onStage(scene))
       if (sceneToUnload) {
-        await dispatch(castActions.lifecycle.doUnload(sceneToUnload))
+        // await dispatch(castActions.lifecycle.doUnload(sceneToUnload))
       }
-      await dispatch(castActions.unpreloadAll())
+      // await dispatch(castActions.unpreloadAll())
 
       dispatch({
         type: SCENE_ENTER_DONE,
@@ -220,24 +224,25 @@ export function goToScene(id, dissolve) {
 
           function doSceneTransition() {
             isTransitioning = true
-            return dispatch(
-              castActions.lifecycle.doExit(currentSceneData),
-            ).then(() => {
-              logger.info('goToScene:exiting', id)
-              dispatch({
-                type: SCENE_DO_EXITING,
-                payload: {
-                  sceneId: currentSceneData && currentSceneData.sceneId,
-                  dissolve,
-                },
-              })
-              dispatch(inputActions.disableControl())
-              reset()
-              return dispatch(startAtScene(id)).then(scene => {
-                isTransitioning = false
-                return scene
-              })
+            logger.info('goToScene:exiting', id)
+            dispatch({
+              type: SCENE_DO_EXITING,
+              payload: {
+                sceneId: currentSceneData && currentSceneData.sceneId,
+                dissolve,
+              },
             })
+            dispatch(inputActions.disableControl())
+            reset()
+            return dispatch(startAtScene(id)).then(scene => {
+              isTransitioning = false
+              return scene
+            })
+            // return dispatch(
+            //   castActions.lifecycle.doExit(currentSceneData),
+            // ).then(() => {
+
+            // })
           }
 
           if (

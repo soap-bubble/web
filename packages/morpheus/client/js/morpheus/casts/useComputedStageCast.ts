@@ -158,7 +158,7 @@ function* generateMovieCastDrawOps({
   for (let image of images) {
     const [img, casts] = image
     const cast = casts[0]
-    const location = cast.location
+    const { location } = cast
     yield calculateImageOperation({
       cast,
       img,
@@ -176,7 +176,7 @@ function* generateMovieCastDrawOps({
     const [img, casts] = movieRef
     if (img && casts.length && matchActiveImages(movieRef)) {
       const cast = casts[0]
-      const location = cast.location
+      const { location } = cast
       if (img.el) {
         yield calculateImageOperation({
           cast,
@@ -336,13 +336,23 @@ export default function useComputedStageCast(
     const imageCasts = movieSpecialCasts.filter(isImage)
     const videoCasts = movieSpecialCasts.filter(isMovie)
     const enteringRenderables = [] as Renderable[]
+    const images = imageCasts.reduce(
+      (memo, curr) => {
+        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+        if (loaded) {
+          memo.push(loaded)
+        }
+        return memo
+      },
+      [] as ImageDrawable<MovieCast>[],
+    )
     const stageRenderables = [
       ...generateRenderables(
         [
           ...generateMovieCastDrawOps({
-            images: imagesLoaded.filter(
-              matchMovieSpecialCasts,
-            ) as ImageDrawable<MovieSpecialCast>[],
+            images: images.filter(matchMovieSpecialCasts) as ImageDrawable<
+              MovieSpecialCast
+            >[],
             activeMovieCasts: availableVideos.filter(matchMovieSpecialCasts),
             width,
             height,
@@ -351,7 +361,7 @@ export default function useComputedStageCast(
         ],
         [
           ...generateControlledRenderables({
-            controlledCasts: imagesLoaded.filter(
+            controlledCasts: images.filter(
               matchControlledCasts,
             ) as ImageDrawable<ControlledMovieCast>[],
             width,

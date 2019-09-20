@@ -9,15 +9,15 @@ import { getAssetUrl } from 'service/gamedb'
 import { MovieCast } from '../types'
 
 interface ImageElProps {
-  fileName: string
+  url: string
   onLoad: (e: SyntheticEvent<HTMLImageElement>) => void
   onError: (e: SyntheticEvent<HTMLImageElement>) => void
 }
 
-const ImageEl = ({ fileName, onLoad, onError }: ImageElProps) => {
+const ImageEl = ({ url, onLoad, onError }: ImageElProps) => {
   return (
     <img
-      src={getAssetUrl(fileName, 'png')}
+      src={url}
       style={{
         display: 'none',
       }}
@@ -50,8 +50,9 @@ const Images = ({
     () =>
       movieSpecialCasts.reduce(
         (memo: MovieCastCollectionMap, curr: MovieCast) => {
-          const { fileName } = curr
-          const ref = (memo[fileName] = memo[fileName] || [])
+          const { fileName, url } = curr
+          let key = (fileName && getAssetUrl(fileName, 'png')) || url
+          const ref = (memo[key] = memo[key] || [])
           ref.push(curr)
           return memo
         },
@@ -61,11 +62,11 @@ const Images = ({
   )
   return (
     <React.Fragment>
-      {Object.entries(aggregatedImageRefs).map(([fileName, casts]) => {
+      {Object.entries(aggregatedImageRefs).map(([url, casts]) => {
         return (
           <ImageEl
-            key={fileName}
-            fileName={fileName}
+            key={url}
+            url={url}
             onLoad={e => onImageCastLoad([e.currentTarget, casts])}
             onError={e => onImageCastError([e.currentTarget, casts])}
           />

@@ -40,6 +40,7 @@ export interface Hotspot extends Morpheus {
 
 export interface MovieCast extends Cast {
   fileName: string
+  url: string
   audioOnly: boolean
   width: number
   height: number

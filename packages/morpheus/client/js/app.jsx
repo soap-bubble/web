@@ -43,40 +43,41 @@ function resizeToWindow() {
   )
 }
 
-window.onload = () => {
-  function init() {
-    store.dispatch(
-      gameActions.resize({
-        width: window.innerWidth,
-        height: window.innerHeight,
-      }),
-    )
-    store.dispatch(gameActions.createUIOverlay())
-    store.dispatch(gameActions.setCursor(10000))
-    store.dispatch(gamestateActions.fetchInitial()).then(() => {
-      let savedGame
-      if (qp.reload && !qp.scene) {
-        savedGame = store.dispatch(gameActions.browserLoad())
-      }
-      if (!qp.reload && qp.scene) {
-        store.dispatch(sceneActions.startAtScene(qp.scene))
-      }
-      if (!qp.scene && !savedGame) {
-        store
-          .dispatch(sceneActions.runScene(titleSceneData))
-          .then(() => store.dispatch(titleActions.start()))
-      }
-    })
-
-    const root = document.getElementById('root')
-    window.addEventListener('resize', resizeToWindow)
-    render(
-      <Provider store={store}>
-        <NewGame sceneData={sceneData} />
-        {/* <Game className="game" /> */}
-      </Provider>,
-      root,
-    )
+window.onload = async () => {
+  store.dispatch(
+    gameActions.resize({
+      width: window.innerWidth,
+      height: window.innerHeight,
+    }),
+  )
+  //store.dispatch(gameActions.createUIOverlay())
+  store.dispatch(gameActions.setCursor(10000))
+  store.dispatch(gamestateActions.fetchInitial()).then(() => {
+    let savedGame
+    if (qp.reload && !qp.scene) {
+      savedGame = store.dispatch(gameActions.browserLoad())
+    }
+    if (!qp.reload && qp.scene) {
+      store.dispatch(sceneActions.startAtScene(qp.scene))
+    }
+    if (!qp.scene && !savedGame) {
+      store
+        .dispatch(sceneActions.runScene(titleSceneData))
+        .then(() => store.dispatch(titleActions.start()))
+    }
+  })
+  // store.dispatch(gameActions.setCursor(10000))
+  // const sceneData = (await bySceneId(qp.scene)).data
+  // await store.dispatch(gamestateActions.fetchInitial())
+  const root = document.getElementById('root')
+  window.addEventListener('resize', resizeToWindow)
+  render(
+    <Provider store={store}>
+      {/* <NewGame sceneData={sceneData} /> */}
+      <Game className="game" />
+    </Provider>,
+    root,
+  )
 
     if (qp.channel) {
       socketPromise().then(socket => {

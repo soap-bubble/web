@@ -13,14 +13,16 @@ interface StateProps {
   width: number
   height: number
   volume: number
-  style: object
+  top: number
+  left: number
   gamestates: Gamestates
 }
 
 export default connect<StateProps>(state => ({
   width: gameSelectors.width(state),
   height: gameSelectors.height(state),
-  style: gameSelectors.style(state),
+  top: gameSelectors.top(state),
+  left: gameSelectors.left(state),
   volume: gameSelectors.htmlVolume(state),
   gamestates: gamestateSelectors.forState(state),
 }))(Stage)

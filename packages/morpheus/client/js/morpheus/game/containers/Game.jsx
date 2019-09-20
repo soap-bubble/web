@@ -1,17 +1,17 @@
 import { connect } from 'react-redux'
 import React from 'react'
 import PropTypes from 'prop-types'
-import Mouse from 'react/Mouse'
 import castFactory from 'morpheus/casts/factory'
-import { selectors as gameSelectors } from 'morpheus/game'
+import { NewGame, selectors as gameSelectors } from 'morpheus/game'
+import { selectors as sceneSelectors } from 'morpheus/scene'
 import Menu from '../components/Menu'
-import MenuButton from '../containers/MenuButton'
 import Login from './Login'
 import Settings from './Settings'
 import SaveList from './SaveList'
 
 function mapStateToProps(state) {
   return {
+    currentScene: sceneSelectors.currentSceneData(state),
     casts: castFactory(state),
     style: gameSelectors.style(state),
     menuOpen: gameSelectors.menuOpened(state),
@@ -26,6 +26,7 @@ const Game = ({
   id,
   className,
   style,
+  currentScene,
   menuOpen,
   settingsOpen,
   saveOpen,
@@ -46,9 +47,7 @@ const Game = ({
   }
   return (
     <div id={id} className={className} style={style}>
-      {casts}
-      <MenuButton />
-      <Mouse />
+      {currentScene && <NewGame sceneData={currentScene} />}
       {menu}
     </div>
   )

@@ -266,7 +266,14 @@ export const delegate = memoize(scene => {
             gamestates: gamestateSelectors.forState(getState()),
           }),
         )
-        lastPlayed.forEach(({ el: sound }) => sound.play())
+        lastPlayed.forEach(({ el: sound }) => {
+          const response = sound.play()
+          if (response && response.catch) {
+            response.catch(err => {
+              console.error(err)
+            })
+          }
+        })
         startRenderLoop({
           update() {
             updateAssets({

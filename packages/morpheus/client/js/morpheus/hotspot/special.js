@@ -36,145 +36,140 @@ export default function({ dispatch, scene }) {
   let lastTouchPosition
   let lastMouseDown
 
-  function updateState({ clientX, clientY }, isTouchEnd) {
+  async function updateState({ clientX, clientY }, isTouchEnd) {
     const state = store.getState()
-    const currentScene = sceneSelectors.currentSceneData(state)
-    if (currentScene === scene && !document.hidden) {
-      mouseQueue.add(() => {
-        const inputEnabled = inputSelectors.enabled(state)
-        if (!inputEnabled) {
-          return null
-        }
-        const location = gameSelectors.location(state)
-        const hotspots = scene.casts.filter(isHotspot)
-        const isCurrent = sceneSelectors.currentSceneData(state) === scene
-        const isExiting = castSelectorForScene.isExiting
-        const acceptsMouseEvents = isCurrent && !isExiting
-        if (!acceptsMouseEvents) {
-          return null
-        }
-        const nowInHotspots = []
-        const left = clientX - location.x
-        const top = clientY - location.y
+    const currentScene = scene
+    if (!document.hidden) {
+      const inputEnabled = inputSelectors.enabled(state)
+      if (!inputEnabled) {
+        return null
+      }
+      const location = gameSelectors.location(state)
+      const hotspots = scene.casts.filter(isHotspot)
 
-        const newWidth = gameSelectors.width(store.getState())
-        const newHeight = gameSelectors.height(store.getState())
+      // Disable for new hook to work. TODO Figure out later;
+      // const isCurrent = sceneSelectors.currentSceneData(state) === scene
+      // const isExiting = castSelectorForScene.isExiting
+      // const acceptsMouseEvents = isCurrent && !isExiting
+      // if (!acceptsMouseEvents) {
+      //   return null
+      // }
+      const nowInHotspots = []
+      const left = clientX - location.x
+      const top = clientY - location.y
 
-        const adjustedClickPos = screenToGame({
-          height: newHeight,
-          width: newWidth,
-          top,
-          left,
-        })
+      const newWidth = gameSelectors.width(store.getState())
+      const newHeight = gameSelectors.height(store.getState())
 
-        each(hotspots, hotspot => {
-          const { rectTop, rectBottom, rectLeft, rectRight } = hotspot
-          if (
-            (adjustedClickPos.top > rectTop &&
-              adjustedClickPos.top < rectBottom &&
-              adjustedClickPos.left > rectLeft &&
-              adjustedClickPos.left < rectRight) ||
-            (rectTop === 0 &&
-              rectLeft === 0 &&
-              rectRight === 0 &&
-              rectBottom === 0)
-          ) {
-            nowInHotspots.push(hotspot)
-          }
-        })
-
-        const leavingHotspots = difference(wasInHotspots, nowInHotspots)
-        const enteringHotspots = difference(nowInHotspots, wasInHotspots)
-        const noInteractionHotspots = difference(hotspots, nowInHotspots)
-        const isClick = wasMouseUpped && Date.now() - lastMouseDown < 800
-
-        if (wasMouseUpped) {
-          mouseDown = false
-        }
-
-        if (!mouseDown && wasMouseDowned) {
-          mouseDown = true
-          clickStartPos = adjustedClickPos
-          lastMouseDown = Date.now()
-        }
-        const isMouseDown = mouseDown
-        const eventOptions = {
-          currentPosition: adjustedClickPos,
-          startingPosition: clickStartPos,
-          hotspots,
-          nowInHotspots,
-          leavingHotspots,
-          enteringHotspots,
-          noInteractionHotspots,
-          isClick,
-          isMouseDown,
-          wasMouseMoved,
-          wasMouseUpped,
-          wasMouseDowned,
-          currentScene: currentScene.sceneId,
-          handleHotspot: gamestateActions.handleHotspot,
-        }
-
-        const promise = actionQueue.add(async () => {
-          await dispatch(handleEvent(eventOptions))
-          await dispatch(inputActions.cursorSetPosition({ top, left }))
-          await dispatch(castActionsForScene.update(eventOptions))
-        })
-
-        if (wasMouseUpped) {
-          clickStartPos = { top: -1, left: -1 }
-        }
-
-        wasInHotspots = nowInHotspots
-        wasMouseMoved = false
-        wasMouseUpped = false
-        wasMouseDowned = false
-        lastTouchPosition = {
-          top: clientX,
-          left: clientY,
-        }
-
-        return promise
+      const adjustedClickPos = screenToGame({
+        height: newHeight,
+        width: newWidth,
+        top,
+        left,
       })
+
+      each(hotspots, hotspot => {
+        const { rectTop, rectBottom, rectLeft, rectRight } = hotspot
+        if (
+          (adjustedClickPos.top > rectTop &&
+            adjustedClickPos.top < rectBottom &&
+            adjustedClickPos.left > rectLeft &&
+            adjustedClickPos.left < rectRight) ||
+          (rectTop === 0 &&
+            rectLeft === 0 &&
+            rectRight === 0 &&
+            rectBottom === 0)
+        ) {
+          nowInHotspots.push(hotspot)
+        }
+      })
+
+      const leavingHotspots = difference(wasInHotspots, nowInHotspots)
+      const enteringHotspots = difference(nowInHotspots, wasInHotspots)
+      const noInteractionHotspots = difference(hotspots, nowInHotspots)
+      const isClick = wasMouseUpped && Date.now() - lastMouseDown < 800
+
+      if (wasMouseUpped) {
+        mouseDown = false
+      }
+
+      if (!mouseDown && wasMouseDowned) {
+        mouseDown = true
+        clickStartPos = adjustedClickPos
+        lastMouseDown = Date.now()
+      }
+      const isMouseDown = mouseDown
+      const eventOptions = {
+        currentPosition: adjustedClickPos,
+        startingPosition: clickStartPos,
+        hotspots,
+        nowInHotspots,
+        leavingHotspots,
+        enteringHotspots,
+        noInteractionHotspots,
+        isClick,
+        isMouseDown,
+        wasMouseMoved,
+        wasMouseUpped,
+        wasMouseDowned,
+        currentScene: currentScene.sceneId,
+        handleHotspot: gamestateActions.handleHotspot,
+      }
+
+      if (wasMouseUpped) {
+        clickStartPos = { top: -1, left: -1 }
+      }
+
+      wasInHotspots = nowInHotspots
+      wasMouseMoved = false
+      wasMouseUpped = false
+      wasMouseDowned = false
+      lastTouchPosition = {
+        top: clientX,
+        left: clientY,
+      }
+      await dispatch(handleEvent(eventOptions))
+      await dispatch(inputActions.cursorSetPosition({ top, left }))
+      await dispatch(castActionsForScene.update(eventOptions))
     }
     return null
   }
 
-  function onMouseDown(mouseEvent) {
+  async function onMouseDown(mouseEvent) {
     wasMouseDowned = true
-    updateState(mouseEvent)
+    await updateState(mouseEvent)
   }
 
-  function onMouseMove(mouseEvent) {
+  async function onMouseMove(mouseEvent) {
     wasMouseMoved = true
-    updateState(mouseEvent)
+    await updateState(mouseEvent)
   }
 
-  function onMouseUp(mouseEvent) {
+  async function onMouseUp(mouseEvent) {
     wasMouseUpped = true
-    updateState(mouseEvent)
+    await updateState(mouseEvent)
   }
 
-  function onTouchStart(touchEvent) {
+  async function onTouchStart(touchEvent) {
     const { touches } = touchEvent
     if (touches.length) {
       wasMouseDowned = true
-      updateState(touches[0])
+      await updateState(touches[0])
     }
   }
 
-  function onTouchMove(touchEvent) {
+  async function onTouchMove(touchEvent) {
     const { touches } = touchEvent
     if (touches.length) {
       wasMouseMoved = true
-      updateState(touches[0])
+      await updateState(touches[0])
     }
   }
 
-  function onTouchEnd({ changedTouches: touches }) {
+  async function onTouchEnd({ changedTouches: touches }) {
     if (touches.length) {
       wasMouseUpped = true
-      updateState(touches[0], true)
+      await updateState(touches[0], true)
     }
   }
 

@@ -28,6 +28,14 @@ export const location = createSelector(
   game,
   _game => _game.location,
 )
+export const top = createSelector(
+  location,
+  _location => _location && _location.y,
+)
+export const left = createSelector(
+  location,
+  _location => _location && _location.x,
+)
 export const volume = createSelector(
   game,
   _game => _game.volume,

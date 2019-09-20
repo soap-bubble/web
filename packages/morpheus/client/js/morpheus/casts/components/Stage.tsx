@@ -20,7 +20,8 @@ interface StageProps {
   exitingScene?: Scene
   gamestates: Gamestates
   volume: number
-  style: object
+  top: number
+  left: number
   width: number
   height: number
 }
@@ -30,7 +31,8 @@ const Stage = ({
   width,
   volume,
   height,
-  style,
+  top,
+  left,
   gamestates,
   enteringScene,
   exitingScene,
@@ -90,7 +92,8 @@ const Stage = ({
       <Canvas
         width={width}
         height={height}
-        style={style}
+        top={top}
+        left={left}
         enteringRenderables={enteringRenderables}
         stageRenderables={stageRenderables}
         exitingRenderables={exitingRenderables}

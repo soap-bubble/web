@@ -34,6 +34,7 @@ enum CastActionTypes {
   ChangeCursor,
   ReturnFromHelp,
   NoAction,
+  Menu,
   DoGameAction = 99,
 }
 
@@ -55,6 +56,7 @@ export const ACTION_TYPES: { [key: number]: CastActionTypeStrings } = {
   12: 'ChangeCursor',
   13: 'ReturnFromHelp',
   14: 'NoAction',
+  15: 'Menu',
   99: 'DoGameAction',
 }
 

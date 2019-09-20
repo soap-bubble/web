@@ -111,11 +111,11 @@ module.exports = env => {
     }
   }
 
-  const externals = {}
+  const externals = {
+    greenworks: 'require("greenworks")',
+  }
   if (!env.electron) {
     externals.electron = '_'
-  } else {
-    externals.greenworks = 'require("greenworks")'
   }
 
   let webpackConfig = {

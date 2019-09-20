@@ -7,10 +7,7 @@ import { actions as castActions } from 'morpheus/casts'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import loggerFactory from 'utils/logger'
 import SceneQueue from './queue'
-<<<<<<< HEAD
-=======
 import menuDecorator from './menu'
->>>>>>> fd3b9b5... Adds the menu button as an implicit cast
 import {
   SCENE_LOAD_START,
   SCENE_LOAD_ERROR,
@@ -77,6 +74,7 @@ export function fetch(sceneId) {
         })
         scene.casts = casts
       }
+      scene.casts = menuDecorator(scene.casts)
       dispatch({
         type: SCENE_LOAD_COMPLETE,
         payload: scene,

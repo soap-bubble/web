@@ -5,7 +5,6 @@ import castFactory from 'morpheus/casts/factory'
 import { NewGame, selectors as gameSelectors } from 'morpheus/game'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import Menu from '../components/Menu'
-import Login from './Login'
 import Settings from './Settings'
 import SaveList from './SaveList'
 
@@ -35,9 +34,6 @@ const Game = ({
   const menu = []
   if (menuOpen) {
     menu.push(<Menu />)
-  }
-  if (isLoggingIn) {
-    menu.push(<Login />)
   }
   if (settingsOpen) {
     menu.push(<Settings />)

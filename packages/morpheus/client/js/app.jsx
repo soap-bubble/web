@@ -27,7 +27,6 @@ import { data as titleSceneData, actions as titleActions } from 'morpheus/title'
 import { bySceneId } from 'service/scene'
 import { Game, NewGame, actions as gameActions } from 'morpheus/game'
 import socketPromise from 'utils/socket'
-import { login } from 'soapbubble'
 import storeFactory from 'store'
 import '../css/main.scss'
 
@@ -44,86 +43,87 @@ function resizeToWindow() {
 }
 
 window.onload = async () => {
-  store.dispatch(
-    gameActions.resize({
-      width: window.innerWidth,
-      height: window.innerHeight,
-    }),
-  )
-  //store.dispatch(gameActions.createUIOverlay())
-  store.dispatch(gameActions.setCursor(10000))
-  store.dispatch(gamestateActions.fetchInitial()).then(() => {
-    let savedGame
-    if (qp.reload && !qp.scene) {
-      savedGame = store.dispatch(gameActions.browserLoad())
-    }
-    if (!qp.reload && qp.scene) {
-      store.dispatch(sceneActions.startAtScene(qp.scene))
-    }
-    if (!qp.scene && !savedGame) {
-      store
-        .dispatch(sceneActions.runScene(titleSceneData))
-        .then(() => store.dispatch(titleActions.start()))
-    }
-  })
-  // store.dispatch(gameActions.setCursor(10000))
-  // const sceneData = (await bySceneId(qp.scene)).data
-  // await store.dispatch(gamestateActions.fetchInitial())
-  const root = document.getElementById('root')
-  window.addEventListener('resize', resizeToWindow)
-  render(
-    <Provider store={store}>
-      {/* <NewGame sceneData={sceneData} /> */}
-      <Game className="game" />
-    </Provider>,
-    root,
-  )
+  function init() {
+    store.dispatch(
+      gameActions.resize({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }),
+    )
+    //store.dispatch(gameActions.createUIOverlay())
+    store.dispatch(gameActions.setCursor(10000))
+    store.dispatch(gamestateActions.fetchInitial()).then(() => {
+      let savedGame
+      if (qp.reload && !qp.scene) {
+        savedGame = store.dispatch(gameActions.browserLoad())
+      }
+      if (!qp.reload && qp.scene) {
+        store.dispatch(sceneActions.startAtScene(qp.scene))
+      }
+      if (!qp.scene && !savedGame) {
+        store
+          .dispatch(sceneActions.runScene(titleSceneData))
+          .then(() => store.dispatch(titleActions.start()))
+      }
+    })
+    // store.dispatch(gameActions.setCursor(10000))
+    // const sceneData = (await bySceneId(qp.scene)).data
+    // await store.dispatch(gamestateActions.fetchInitial())
+    const root = document.getElementById('root')
+    window.addEventListener('resize', resizeToWindow)
+    render(
+      <Provider store={store}>
+        {/* <NewGame sceneData={sceneData} /> */}
+        <Game className="game" />
+      </Provider>,
+      root,
+    )
+  }
 
-    if (qp.channel) {
-      socketPromise().then(socket => {
-        socket.emit('letsplay', qp.channel)
-        socket.on('CREATE_CHANNEL', uChannel => {
-          socket.channel = uChannel
-          socket.on(uChannel, (action, cb) => {
-            if (typeof cb === 'function') {
-              return store.dispatch({
-                ...action,
-                cb,
-              })
-            }
-            return store.dispatch(action)
-          })
+  if (qp.channel) {
+    socketPromise().then(socket => {
+      socket.emit('letsplay', qp.channel)
+      socket.on('CREATE_CHANNEL', uChannel => {
+        socket.channel = uChannel
+        socket.on(uChannel, (action, cb) => {
+          if (typeof cb === 'function') {
+            return store.dispatch({
+              ...action,
+              cb,
+            })
+          }
+          return store.dispatch(action)
         })
       })
+    })
+  }
+
+  document.addEventListener('keydown', event => {
+    const keyName = keycode.names[event.which]
+    if (!inputSelectors.isKeyPressed(keyName)(store.getState())) {
+      store.dispatch(inputActions.keyDown(keyName))
+    }
+  })
+
+  document.addEventListener('keyup', event => {
+    store.dispatch(inputActions.keyUp(keycode.names[event.which]))
+  })
+
+  if (process.env.NODE_ENV !== 'production') {
+    window.updateGameState = function updateGameState(gamestateId, value) {
+      store.dispatch(gamestateActions.updateGameState(gamestateId, value))
     }
 
-    document.addEventListener('keydown', event => {
-      const keyName = keycode.names[event.which]
-      if (!inputSelectors.isKeyPressed(keyName)(store.getState())) {
-        store.dispatch(inputActions.keyDown(keyName))
-      }
-    })
-
-    document.addEventListener('keyup', event => {
-      store.dispatch(inputActions.keyUp(keycode.names[event.which]))
-    })
-
-    if (process.env.NODE_ENV !== 'production') {
-      window.updateGameState = function updateGameState(gamestateId, value) {
-        store.dispatch(gamestateActions.updateGameState(gamestateId, value))
-      }
-
-      window.getGameState = function getgameState(gamestateId) {
-        const state = gamestateSelectors
-          .forState(store.getState())
-          .byId(gamestateId)
-        return {
-          value: state.value,
-          maxValue: state.maxValue,
-          minValue: state.minValue,
-          stateId: state.stateId,
-          stateWraps: state.stateWraps,
-        }
+    window.getGameState = function getgameState(gamestateId) {
+      const state = gamestateSelectors
+        .forState(store.getState())
+        .byId(gamestateId)
+      return {
+        value: state.value,
+        maxValue: state.maxValue,
+        minValue: state.minValue,
+        stateId: state.stateId,
+        stateWraps: state.stateWraps,
       }
     }
   }

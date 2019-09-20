@@ -1,7 +1,8 @@
 import React, { useState, useCallback, useMemo, SyntheticEvent } from 'react'
+import { connect } from 'react-redux'
 import { Dispatch } from 'redux'
 import { useEventCallback } from 'rxjs-hooks'
-import { map, withLatestFrom, combineLatest } from 'rxjs/operators'
+import { map, withLatestFrom } from 'rxjs/operators'
 import { get, uniqBy, flatten } from 'lodash'
 
 import {
@@ -9,24 +10,21 @@ import {
   eventInterface,
   // @ts-ignore
 } from 'morpheus/hotspot'
-import { Observable } from 'rxjs'
+import {
+  selectors as gameSelectors,
+  // @ts-ignore
+} from 'morpheus/game'
+import { Observable, Subscribable } from 'rxjs'
+// @ts-ignore
+import { selectors as gamestateSelectors } from 'morpheus/gamestate'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
 import { and, not } from 'utils/matchers'
-import { resizeToScreen, generateMovieTransform } from 'utils/resize'
+// @ts-ignore
+import { resizeToScreen } from '../../../utils/resize'
 
 import Canvas, { Renderable, render } from './Canvas'
-import {
-  Matcher,
-  isMovie,
-  isImage,
-  isAudio,
-  isControlledCast,
-} from '../matchers'
-import Videos, {
-  VideoController,
-  VideoCastEventCallback,
-  VideoCastRefCallback,
-} from './Videos'
+import { Matcher, isMovie, isImage, isControlledCast } from '../matchers'
+import Videos, { VideoController, VideoCastRefCallback } from './Videos'
 import Images from './Images'
 import {
   Scene,
@@ -118,7 +116,7 @@ type DrawOperation = [
   number,
   number,
   number,
-  number
+  number,
 ]
 
 function calculateImageOperation({
@@ -151,20 +149,11 @@ function calculateImageOperation({
     rect.sizeY * scale,
   ]
 }
-
-interface CastContainer<T extends Cast> {
-  casts: T[]
-}
-
-interface ImageDrawable<T extends MovieCast> extends CastContainer<T> {
-  el: DrawSource
-}
+type CastSource<T, C extends Cast> = [T, C[]]
+type ImageDrawable<C extends Cast> = CastSource<DrawSource, C>
 type ImageRef = ImageDrawable<MovieSpecialCast>
 type ControlledImageRef = ImageDrawable<ControlledMovieCast>
-
-interface VideoRef extends CastContainer<MovieSpecialCast> {
-  ref: VideoController
-}
+type VideoRef = CastSource<VideoController, MovieSpecialCast>
 
 function* generateMovieCastDrawOps({
   images,
@@ -181,14 +170,12 @@ function* generateMovieCastDrawOps({
 }) {
   const generatedImages: DrawOperation[] = []
   const matchActiveImage = matchActiveCast(gamestates)
-  const matchActiveImages: Matcher<CastContainer<MovieCast>> = and<
-    CastContainer<MovieCast>
-  >(
-    ({ casts }) => !!casts.length,
-    ({ casts }) => !!casts.find(matchActiveImage),
+  const matchActiveImages = and<CastSource<any, MovieCast>>(
+    ([_, casts]) => !!casts.length,
+    ([_, casts]) => !!casts.find(matchActiveImage),
   )
   for (let image of images) {
-    const { el: img, casts } = image
+    const [img, casts] = image
     const cast = casts[0]
     const location = cast.location
     yield calculateImageOperation({
@@ -205,25 +192,24 @@ function* generateMovieCastDrawOps({
     })
   }
   for (let movieRef of activeMovieCasts) {
-    const {
-      casts,
-      ref: { el: img },
-    } = movieRef
+    const [img, casts] = movieRef
     if (img && casts.length && matchActiveImages(movieRef)) {
       const cast = casts[0]
       const location = cast.location
-      yield calculateImageOperation({
-        cast,
-        img,
-        rect: resizeToScreen({
-          left: location.x,
-          top: location.y,
-          right: location.x + cast.width,
-          bottom: location.y + cast.height,
-          width,
-          height,
-        }),
-      })
+      if (img.el) {
+        yield calculateImageOperation({
+          cast,
+          img: img.el,
+          rect: resizeToScreen({
+            left: location.x,
+            top: location.y,
+            right: location.x + cast.width,
+            bottom: location.y + cast.height,
+            width,
+            height,
+          }),
+        })
+      }
     }
   }
 }
@@ -239,7 +225,7 @@ function generateControlledRenderables({
   height: number
   gamestates: Gamestates
 }): Renderable[] {
-  return controlledCasts.map(({ casts, el: img }) => {
+  return controlledCasts.map(([img, casts]) => {
     const cast = casts[0]
     const location = cast.location || cast.controlledLocation
     return calculateControlledFrameOperation({
@@ -272,39 +258,39 @@ function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
 }
 
 function matchCastIds<T extends Cast>(castIds: number[]) {
-  return ({ casts }: CastContainer<T>) =>
+  return ([_, casts]: CastSource<any, T>) =>
     casts.find((cast: T) => castIds.includes(cast.castId))
 }
 
 interface ComputedStageCast {
-  imageCasts: MovieCast[]
-  videoCasts: MovieCast[]
+  imageCasts: MovieSpecialCast[]
+  videoCasts: MovieSpecialCast[]
   enteringRenderables: Renderable[]
   stageRenderables: Renderable[]
   exitingRenderables: Renderable[]
 }
-
+// CastRef<HtmlImageElement, MovieCast>[]
 function useComputedStageCast(
   gamestates: Gamestates,
   width: number,
   height: number,
-  imageRefs: ImageDrawable<MovieSpecialCast>[],
-  controlledRefs: ImageDrawable<ControlledMovieCast>[],
-  videoRefs: VideoRef[],
+  imagesLoaded: ImageDrawable<MovieCast>[],
+  availableVideos: VideoRef[],
+  // controlledRefs: ImageDrawable<ControlledMovieCast>[],
   stageScenes: Scene[],
-  enteringScene?: Scene,
-  exitingScene?: Scene,
+  enteringScene: Scene | undefined,
+  exitingScene: Scene | undefined,
+  deps: any[],
 ) {
   return useMemo<ComputedStageCast>(() => {
     const matchActive = matchActiveCast(gamestates)
-    const matchActiveMovie = and<MovieSpecialCast>(isMovie, matchActive)
     const enteringActiveMovieCasts: MovieSpecialCast[] = enteringScene
-      ? (enteringScene.casts.filter(matchActiveMovie as Matcher<
+      ? (enteringScene.casts.filter(matchActive as Matcher<
           Cast
         >) as MovieSpecialCast[])
       : []
     const exitingActiveMovieCasts: MovieSpecialCast[] = exitingScene
-      ? (exitingScene.casts.filter(matchActiveMovie as Matcher<
+      ? (exitingScene.casts.filter(matchActive as Matcher<
           Cast
         >) as MovieSpecialCast[])
       : []
@@ -312,7 +298,7 @@ function useComputedStageCast(
     const stageActiveMovieCasts = flatten<MovieSpecialCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(matchActiveMovie as Matcher<
+          scene.casts.filter(matchActive as Matcher<
             Cast
           >) as MovieSpecialCast[],
       ),
@@ -366,84 +352,115 @@ function useComputedStageCast(
     const controlledCastIds = controlledCasts.map(cast => cast.castId)
     const matchControlledCasts = matchCastIds(controlledCastIds)
 
-    return {
-      imageCasts: movieSpecialCasts.filter(isImage),
-      videoCasts: movieSpecialCasts.filter(isMovie),
-      enteringRenderables: [],
-      stageRenderables: [
-        ...generateRenderables(
-          [
-            ...generateMovieCastDrawOps({
-              images: imageRefs.filter(matchMovieSpecialCasts),
-              activeMovieCasts: videoRefs.filter(matchMovieSpecialCasts),
-              width,
-              height,
-              gamestates,
-            }),
-          ],
-          [
-            ...generateControlledRenderables({
-              controlledCasts: controlledRefs.filter(matchControlledCasts),
-              width,
-              height,
-              gamestates,
-            }),
-          ],
-        ),
-      ],
-      exitingRenderables: [],
-    } as ComputedStageCast
-  }, [enteringScene, exitingScene, stageScenes, gamestates])
-}
-
-function useCastEventNoticer<T, C extends Cast>(): [
-  (e: T, cast: C[]) => void,
-  C[]
-] {
-  const [onCastEventedSpread, events] = useEventCallback<[T, C[]], C[]>(
-    (event$: Observable<[T, C[]]>, state$: Observable<C[]>) =>
-      event$.pipe(
-        withLatestFrom(state$),
-        map(([[el, casts], state]) => [...state, ...casts] as C[]),
+    const imageCasts = movieSpecialCasts.filter(isImage)
+    const videoCasts = movieSpecialCasts.filter(isMovie)
+    const enteringRenderables = [] as Renderable[]
+    const stageRenderables = [
+      ...generateRenderables(
+        [
+          ...generateMovieCastDrawOps({
+            images: imagesLoaded.filter(
+              matchMovieSpecialCasts,
+            ) as ImageDrawable<MovieSpecialCast>[],
+            activeMovieCasts: availableVideos.filter(matchMovieSpecialCasts),
+            width,
+            height,
+            gamestates,
+          }),
+        ],
+        [
+          ...generateControlledRenderables({
+            controlledCasts: imagesLoaded.filter(
+              matchControlledCasts,
+            ) as ImageDrawable<ControlledMovieCast>[],
+            width,
+            height,
+            gamestates,
+          }),
+        ],
       ),
-    [] as C[],
-  )
-  const onCastEvented = useCallback(
-    (e: T, casts: C[]) => onCastEventedSpread([e, casts]),
-    [onCastEventedSpread],
-  )
-  return [onCastEvented, events]
+    ]
+    const exitingRenderables = [] as Renderable[]
+
+    return {
+      imageCasts,
+      videoCasts,
+      enteringRenderables,
+      stageRenderables,
+      exitingRenderables,
+    } as ComputedStageCast
+  }, [
+    enteringScene,
+    exitingScene,
+    stageScenes,
+    gamestates,
+    availableVideos,
+    imagesLoaded,
+    ...deps,
+  ])
 }
 
-function useCastRefNoticer<T, C extends Cast>(): [
-  (e: T, cast: C[]) => void,
-  ({ ref: T; casts: C[] })[]
-] {
-  const [onCastRefSpread, refs] = useEventCallback<
-    [T, C[]],
-    ({ ref: T; casts: C[] })[]
+type CastRef<T, C extends Cast> = [T, C[]]
+
+function useCastEventNoticer<T, C extends Cast>(
+  subs?: Subscribable<[T, C[]]>,
+): [CastRef<T, C>[], (ref: CastRef<T, C>) => void] {
+  const [onCastEventedSpread, events] = useEventCallback<
+    CastRef<T, C>,
+    CastRef<T, C>[]
   >(
-    (
-      event$: Observable<[T, C[]]>,
-      state$: Observable<({ ref: T; casts: C[] })[]>,
-    ) =>
+    (event$: Observable<CastRef<T, C>>, state$: Observable<CastRef<T, C>[]>) =>
       event$.pipe(
         withLatestFrom(state$),
-        map(([[ref, casts], state]) => {
-          if (ref) {
-            return [...state, { ref, casts }] as ({ ref: T; casts: C[] })[]
-          }
-          return [...state.filter(s => s.ref === ref)]
+        map(([[el, casts], state]) => {
+          return [...state, [el, casts]] as CastRef<T, C>[]
         }),
       ),
-    [] as ({ ref: T; casts: C[] })[],
+    [] as CastRef<T, C>[],
+  )
+  const onCastEvented = useCallback(
+    (e: CastRef<T, C>) => onCastEventedSpread(e),
+    [onCastEventedSpread],
+  )
+  return [events, onCastEvented]
+}
+
+function useCastRefNoticer<T, C extends Cast>(
+  obs?: Observable<[T, C[]]>,
+): [CastRef<T, C>[], (ref: CastRef<T, C>) => void] {
+  const [onCastRefSpread, refs] = useEventCallback<[T, C[]], CastRef<T, C>[]>(
+    (event$: Observable<[T, C[]]>, state$: Observable<(CastRef<T, C>)[]>) =>
+      event$.pipe(
+        withLatestFrom(state$),
+        map(([[ref, inCast], state]) => {
+          if (ref) {
+            return [...state, [ref, inCast]] as CastRef<T, C>[]
+          }
+          return [
+            ...state.reduce(
+              (memo, e) => {
+                const [ref, casts] = e
+                if (!casts.find(c => inCast.includes(c))) {
+                  memo.push(e)
+                } else if (casts.length == 1) {
+                  return memo
+                } else {
+                  memo.push([ref, casts.filter(c => inCast.includes(c))])
+                }
+                return memo
+              },
+              [] as CastRef<T, C>[],
+            ),
+          ]
+        }),
+      ),
+    [] as CastRef<T, C>[],
   )
 
-  const onCastRef = useCallback(
-    (e: T, casts: C[]) => onCastRefSpread([e, casts]),
-    [onCastRefSpread],
-  )
-  return [onCastRef, refs]
+  const onCastRef = useCallback((ref: CastRef<T, C>) => onCastRefSpread(ref), [
+    onCastRefSpread,
+  ])
+  return [refs, onCastRef]
 }
 
 interface StageProps {
@@ -469,9 +486,26 @@ const Stage = ({
   exitingScene,
   stageScenes,
 }: StageProps) => {
-  const [imageRefs, setImageRefs] = useState<ImageRef[]>([])
-  const [controlledRefs, setControlledRefs] = useState<ControlledImageRef[]>([])
-  const [videoRefs, setVideoRefs] = useState<VideoRef[]>([])
+  const [canPlayThroughVideos, onVideoCastCanPlayThrough] = useCastRefNoticer<
+    HTMLVideoElement,
+    MovieCast
+  >()
+  const [endedVideos, onVideoCastEnded] = useCastRefNoticer<
+    HTMLVideoElement,
+    MovieCast
+  >()
+  const [availableVideos, onVideoCastRef] = useCastRefNoticer<
+    VideoController,
+    MovieSpecialCast
+  >()
+  const [imagesLoaded, onImageLoad] = useCastRefNoticer<
+    HTMLImageElement,
+    MovieCast
+  >()
+  const [imagesErrored, onImageError] = useCastRefNoticer<
+    HTMLImageElement,
+    MovieCast
+  >()
 
   const {
     imageCasts,
@@ -483,12 +517,12 @@ const Stage = ({
     gamestates,
     width,
     height,
-    imageRefs,
-    controlledRefs,
-    videoRefs,
+    imagesLoaded,
+    availableVideos,
     stageScenes,
     enteringScene,
     exitingScene,
+    [canPlayThroughVideos, endedVideos, imagesErrored],
   )
 
   const specialHandler = useMemo(
@@ -501,27 +535,6 @@ const Stage = ({
       ),
     [stageScenes[0]],
   )
-
-  const [onVideoCastCanPlayThrough, canPlayThroughVideos] = useCastEventNoticer<
-    SyntheticEvent<HTMLVideoElement>,
-    MovieCast
-  >()
-  const [onVideoCastEnded, endedVideos] = useCastEventNoticer<
-    SyntheticEvent<HTMLVideoElement>,
-    MovieCast
-  >()
-  const [onVideoCastRef, availableVideos] = useCastRefNoticer<
-    VideoController,
-    MovieCast
-  >()
-  const [onImageLoad, imagesLoaded] = useCastEventNoticer<
-    SyntheticEvent<HTMLImageElement>,
-    MovieCast
-  >()
-  const [onImageError, imagesErrored] = useCastEventNoticer<
-    SyntheticEvent<HTMLImageElement>,
-    MovieCast
-  >()
   return (
     <React.Fragment>
       <Canvas
@@ -554,3 +567,19 @@ const Stage = ({
     </React.Fragment>
   )
 }
+
+interface StateProps {
+  width: number
+  height: number
+  volume: number
+  style: object
+  gamestates: Gamestates
+}
+
+export default connect<StateProps>(state => ({
+  width: gameSelectors.width(state),
+  height: gameSelectors.height(state),
+  style: gameSelectors.style(state),
+  volume: gameSelectors.htmlVolume(state),
+  gamestates: gamestateSelectors.forState(state),
+}))(Stage)

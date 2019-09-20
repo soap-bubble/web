@@ -161,7 +161,7 @@ module.exports = env => {
       publicPath,
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.json'],
+      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
       mainFields,
       alias: {
         service: path.resolve(__dirname, 'client/js/service'),

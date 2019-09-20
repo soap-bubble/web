@@ -107,9 +107,7 @@ export const delegate = memoize(scene => {
                   startAngle -= Math.PI - Math.PI / 6
                 }
                 logger.info(
-                  `End of movie transition from ${
-                    scene.sceneId
-                  } to ${nextSceneId}`,
+                  `End of movie transition from ${scene.sceneId} to ${nextSceneId}`,
                 )
                 dispatch(
                   sceneActions.goToScene(nextSceneId, dissolveToNextScene),

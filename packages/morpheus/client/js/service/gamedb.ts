@@ -1,5 +1,5 @@
 import { endsWith } from 'lodash'
-import { isIOS } from 'utils/isSafari'
+import { isIOS } from '../utils/isSafari'
 export const url = config.assetHost
 
 enum VideoMedia {

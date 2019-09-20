@@ -71,11 +71,12 @@ const Canvas = ({
     return () => {
       isRunning = false
     }
-  }, [canvasRef.current])
+  }, [canvasRef.current, onstage])
   return (
     <canvas
       width={width}
       height={height}
+      ref={canvasRef}
       onMouseDown={onMouseDown}
       onMouseMove={onMouseMove}
       onMouseUp={onMouseUp}

@@ -1,4 +1,5 @@
 import { VideoController } from '../components/Videos'
+import { MovieCast } from '../types'
 
 interface Item extends VideoController {
   url: string

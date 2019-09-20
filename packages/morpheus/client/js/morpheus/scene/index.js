@@ -1,8 +1,8 @@
-import * as selectors from './selectors';
-import reducer from './reducer';
-import * as actions from './actions';
-import * as matchers from './matchers';
-import './epics';
+import * as selectors from './selectors'
+import reducer from './reducer'
+import * as actions from './actions'
+import * as matchers from './matchers'
+import './epics'
 
 export const SCENE_TYPE_LIST = {
   1: 'panorama',
@@ -13,18 +13,13 @@ export const SCENE_TYPE_LIST = {
   6: 'credits',
   7: 'finalCredits',
   8: 'title',
-};
-
-export function getSceneType(sceneData) {
-  if (!sceneData) return 'none';
-
-  const sceneType = sceneData.sceneType;
-  return SCENE_TYPE_LIST[sceneType];
 }
 
-export {
-  selectors,
-  reducer,
-  actions,
-  matchers,
-};
+export function getSceneType(sceneData) {
+  if (!sceneData) return 'none'
+
+  const sceneType = sceneData.sceneType
+  return SCENE_TYPE_LIST[sceneType]
+}
+
+export { selectors, reducer, actions, matchers }

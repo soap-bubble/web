@@ -20,12 +20,10 @@ export interface VideoController {
 }
 type VideoControllerRef = (a: VideoController) => void
 export type VideoCastEventCallback = (
-  e: SyntheticEvent<HTMLVideoElement>,
-  movieCasts: MovieSpecialCast[],
+  ref: [HTMLVideoElement, MovieSpecialCast[]],
 ) => void
 export type VideoCastRefCallback = (
-  ref: VideoController,
-  movieCasts: MovieSpecialCast[],
+  ref: [VideoController, MovieSpecialCast[]],
 ) => void
 
 interface VidelElProps {
@@ -136,13 +134,13 @@ const Video = ({
           // autoplay: !!castRefs.find(({ autoplay }) => autoplay),
           looping: !!movieCasts.find(({ looping }) => looping),
           onVideoRef(ref) {
-            onVideoCastRef(ref, movieCasts)
+            onVideoCastRef([ref, movieCasts])
           },
           onVideoCanPlaythrough(e: SyntheticEvent<HTMLVideoElement>) {
-            onVideoCastCanPlaythrough(e, movieCasts)
+            onVideoCastCanPlaythrough([e.currentTarget, movieCasts])
           },
           onVideoEnded(e: SyntheticEvent<HTMLVideoElement>) {
-            onVideoCastEnded(e, movieCasts)
+            onVideoCastEnded([e.currentTarget, movieCasts])
           },
         } as VideoMovieCastCollection
       }),

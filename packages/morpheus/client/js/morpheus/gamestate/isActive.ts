@@ -1,5 +1,5 @@
 // @ts-ignore
-import scripts from 'morpheus/gamestate/scripts'
+import scripts from './scripts'
 import { Cast, Comparator, Gamestate, Hotspot } from '../casts/types'
 import { TEST_TYPES } from '../constants'
 

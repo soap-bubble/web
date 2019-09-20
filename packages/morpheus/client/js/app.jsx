@@ -24,8 +24,10 @@ import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate'
 import { data as titleSceneData, actions as titleActions } from 'morpheus/title'
-import { Game, actions as gameActions } from 'morpheus/game'
+import { bySceneId } from 'service/scene'
+import { Game, NewGame, actions as gameActions } from 'morpheus/game'
 import socketPromise from 'utils/socket'
+import { login } from 'soapbubble'
 import storeFactory from 'store'
 import '../css/main.scss'
 
@@ -70,7 +72,8 @@ window.onload = () => {
     window.addEventListener('resize', resizeToWindow)
     render(
       <Provider store={store}>
-        <Game className="game" />
+        <NewGame sceneData={sceneData} />
+        {/* <Game className="game" /> */}
       </Provider>,
       root,
     )

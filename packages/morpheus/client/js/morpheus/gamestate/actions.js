@@ -13,7 +13,7 @@ import {
 } from 'morpheus/casts'
 import loggerFactory from 'utils/logger'
 import { API_ERROR, LOAD_COMPLETE, UPDATE, INJECT } from './actionTypes'
-import { ACTION_TYPES, GESTURES } from '../constants'
+import { ACTION_TYPES } from '../constants'
 
 const logger = loggerFactory('gamestate:actions')
 

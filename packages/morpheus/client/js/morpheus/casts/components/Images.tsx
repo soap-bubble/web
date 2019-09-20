@@ -28,10 +28,7 @@ const ImageEl = ({ fileName, onLoad, onError }: ImageElProps) => {
   )
 }
 
-type ImageCastEventCallback = (
-  e: SyntheticEvent<HTMLImageElement>,
-  casts: MovieCast[],
-) => void
+type ImageCastEventCallback = (ref: [HTMLImageElement, MovieCast[]]) => void
 
 // Used to compute VideoMovieCastCollection
 interface MovieCastCollectionMap {
@@ -69,8 +66,8 @@ const Images = ({
           <ImageEl
             key={fileName}
             fileName={fileName}
-            onLoad={e => onImageCastLoad(e, casts)}
-            onError={e => onImageCastError(e, casts)}
+            onLoad={e => onImageCastLoad([e.currentTarget, casts])}
+            onError={e => onImageCastError([e.currentTarget, casts])}
           />
         )
       })}

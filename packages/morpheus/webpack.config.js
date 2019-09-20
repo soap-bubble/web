@@ -114,6 +114,8 @@ module.exports = env => {
   const externals = {}
   if (!env.electron) {
     externals.electron = '_'
+  } else {
+    externals.greenworks = 'require("greenworks")'
   }
 
   let webpackConfig = {

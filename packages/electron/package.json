@@ -67,7 +67,8 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.4",
-    "electron-squirrel-startup": "^1.0.0"
+    "electron-squirrel-startup": "^1.0.0",
+    "greenworks": "git+https://github.com/greenheartgames/greenworks.git"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

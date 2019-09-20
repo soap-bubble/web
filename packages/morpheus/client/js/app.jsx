@@ -3,6 +3,7 @@ import React from 'react'
 import { render } from 'react-dom'
 import { Provider } from 'react-redux'
 import { once } from 'lodash'
+import 'steam'
 import qs from 'query-string'
 import keycode from 'keycode'
 // Loads all modules

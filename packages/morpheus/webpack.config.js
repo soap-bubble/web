@@ -163,6 +163,12 @@ module.exports = env => {
     resolve: {
       extensions: ['.js', '.jsx', '.json'],
       mainFields,
+      alias: {
+        service: path.resolve(__dirname, 'client/js/service'),
+        morpheus: path.resolve(__dirname, 'client/js/morpheus'),
+        utils: path.resolve(__dirname, 'client/js/utils'),
+        soapbubble: path.resolve(__dirname, 'client/js/soapbubble'),
+      },
     },
     module: {
       rules: styleLoaders(env).concat([
@@ -187,6 +193,15 @@ module.exports = env => {
           include: [/generic-pool/],
           exclude: [/generic-pool\/node_modules/],
           use: ['babel-loader'],
+        },
+        {
+          test: /\.tsx?$/,
+          exclude: [/node_modules/],
+          use: [
+            {
+              loader: 'ts-loader',
+            },
+          ],
         },
         {
           test: /\.jsx?$/,

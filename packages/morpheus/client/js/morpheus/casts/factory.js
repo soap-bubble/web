@@ -33,6 +33,7 @@ export const createLiveSceneSelector = createSceneMapper({
 
 export const createEnteringSceneSelector = createSceneMapper({
   panorama: Pano,
+  special: Special,
 });
 
 export const createExitingSceneSelector = createSceneMapper({

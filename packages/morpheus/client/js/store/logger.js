@@ -12,10 +12,10 @@ function immutableConverter(state) {
     return value;
   });
 }
-
+//  && (action.type === 'GAMESTATE_UPDATE' || action.type.indexOf('CAST') === 0)
 export default createLogger({
   stateTransformer: immutableConverter,
   actionTransformer: immutableConverter,
   errorTransformer: immutableConverter,
-  predicate: (getState, action) => action && action.logging !== false,
+  predicate: (getState, action) => false, // action && action.logging !== false,
 });

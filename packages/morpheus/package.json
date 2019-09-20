@@ -23,6 +23,9 @@
     "build:client:electron:dev": "cross-env SOAPBUBBLE_LOCAL_SSL=true webpack --env.electron=true --env.development=true --watch",
     "build:client:staging": "webpack --env.staging=true",
     "build:client:watch": "webpack --env.development=true --watch",
+    "build:types": "tsc --emitDeclarationOnly",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
     "gulp": "gulp",
     "lint": "eslint client config server",
     "db:update": "gulp db:update | bunyan",
@@ -31,14 +34,14 @@
     "start": "node lib/index",
     "start:firebase": "firebase serve -p 4040",
     "start:staging": "npm run build:client:staging & npm run build:server && node lib/index",
-    "start:dev": "npm run build:server && concurrently --kill-others \"npm run start:firebase\" \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\"",
+    "start:dev": "npm run build:server && concurrently --kill-others \"npm run type-check:watch\" \"npm run start:firebase\" \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\"",
     "start:safari:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:safari:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
   "author": "",
   "license": "ISC",
   "jest": {
     "collectCoverageFrom": [
-      "client/**/*.{js,jsx}"
+      "client/**/*.{ts,tsx,js,jsx}"
     ],
     "setupFiles": [
       "<rootDir>/config/polyfills.js"
@@ -49,7 +52,7 @@
     "testEnvironment": "node",
     "testURL": "http://localhost",
     "transform": {
-      "^.+\\.(js|jsx)$": "<rootDir>/jestBabelProcessor.js",
+      "^.+\\.((j|t)sx?)$": "<rootDir>/jestBabelProcessor.js",
       "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
       "^(?!.*\\.(js|jsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
     },
@@ -60,11 +63,20 @@
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
+    "@babel/plugin-proposal-class-properties": "^7.5.5",
     "@babel/plugin-proposal-export-default-from": "^7.2.0",
     "@babel/plugin-proposal-export-namespace-from": "^7.2.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.3.3",
+    "@types/bluebird": "^3.5.27",
+    "@types/lodash": "^4.14.137",
+    "@types/raf": "^3.4.0",
+    "@types/react": "^16.9.2",
+    "@types/react-dom": "^16.8.5",
+    "@types/react-redux": "^7.1.2",
+    "@types/ua-parser-js": "^0.7.33",
     "babel-jest": "24.8.0",
     "babel-loader": "8.0.5",
     "babel-plugin-angularjs-annotate": "^0.9.0",
@@ -115,6 +127,8 @@
     "sinon-chai": "^2.8.0",
     "sprintf": "^0.1.5",
     "style-loader": "^0.23.1",
+    "ts-loader": "^6.0.4",
+    "typescript": "^3.5.3",
     "url-loader": "^1.1.2",
     "webpack": "^4.28.2",
     "webpack-cli": "^3.3.4",
@@ -167,6 +181,7 @@
     "reselect": "^3.0.1",
     "rxjs": "^6.5.2",
     "rxjs-compat": "^6.5.2",
+    "rxjs-hooks": "^0.5.1",
     "service-builder": "^0.2.2",
     "sigma": "^2.0.0-alpha18",
     "socket.io": "^2.0.4",

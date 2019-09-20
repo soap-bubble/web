@@ -79,14 +79,10 @@ export function loggedIn(user) {
   }
 }
 
-export function createUIOverlay() {
-  return (dispatch, getState) => {
-    const { width, height } = gameSelectors.dimensions(getState())
-    const canvas = createCanvas({ width, height })
-    dispatch({
-      type: CREATE_CANVAS,
-      payload: canvas,
-    })
+export function createUIOverlay(canvas) {
+  return {
+    type: CREATE_CANVAS,
+    payload: canvas,
   }
 }
 

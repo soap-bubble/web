@@ -1,5 +1,5 @@
 {
-  "name": "Morpheus",
+  "name": "morpheus-electron",
   "productName": "Morpheus",
   "version": "1.14.0",
   "description": "My Electron application description",
@@ -67,8 +67,7 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.5.4",
-    "electron-squirrel-startup": "^1.0.0",
-    "greenworks": "git+https://github.com/greenheartgames/greenworks.git"
+    "electron-squirrel-startup": "^1.0.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

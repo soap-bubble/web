@@ -147,7 +147,13 @@ export function runScene(scene) {
     logger.info('runScene', scene.sceneId)
     let userIncontrol = false
     try {
-      await dispatch(castActions.lifecycle.doLoad(scene))
+      let currentScenes = sceneSelectors.currentScenesData(getState())
+      // Check if scene is already in scene stack
+      const existingScene = currentScenes.find(s => s.sceneId === scene.sceneId)
+
+      if (!existingScene) {
+        await dispatch(castActions.lifecycle.doLoad(scene))
+      }
       await dispatch(castActions.lifecycle.doEnter(scene))
       const sceneToUnload = dispatch(doSceneEntering(scene))
       await dispatch(castActions.lifecycle.onStage(scene))

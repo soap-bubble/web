@@ -1,6 +1,8 @@
-import './commands';
-export * as selectors from './selectors';
-export reducer from './reducer';
-export * as actions from './actions';
-export Game from './containers/Game.jsx';
-export MenuButton from './containers/MenuButton';
+import './commands'
+import * as selectors from './selectors'
+import * as actions from './actions'
+
+export { selectors, actions }
+export { default as reducer } from './reducer'
+export { default as Game } from './containers/Game.jsx'
+export { default as MenuButton } from './containers/MenuButton'

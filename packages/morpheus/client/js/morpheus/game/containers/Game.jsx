@@ -4,8 +4,10 @@ import PropTypes from 'prop-types'
 import Mouse from 'react/Mouse'
 import castFactory from 'morpheus/casts/factory'
 import { selectors as gameSelectors } from 'morpheus/game'
+import Video from 'morpheus/casts/components/Video.tsx'
 import Menu from '../components/Menu'
 import MenuButton from '../containers/MenuButton'
+import Login from './Login'
 import Settings from './Settings'
 import SaveList from './SaveList'
 
@@ -33,6 +35,9 @@ const Game = ({
   const menu = []
   if (menuOpen) {
     menu.push(<Menu />)
+  }
+  if (isLoggingIn) {
+    menu.push(<Login />)
   }
   if (settingsOpen) {
     menu.push(<Settings />)

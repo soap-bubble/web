@@ -5,8 +5,6 @@ import { createEpicMiddleware } from 'redux-observable'
 import qs from 'query-string'
 import { reducer } from 'utils/createReducer'
 import { epics } from 'utils/createEpic'
-import isDebug from 'utils/isDebug'
-import loggingMiddleware from './logger'
 
 const qp = qs.parse(location.search)
 let store
@@ -20,7 +18,7 @@ export default function() {
         })
       : compose
     const middleware = composeEnhancers(
-      applyMiddleware(epicMiddleware, thunkMiddleware, loggingMiddleware),
+      applyMiddleware(epicMiddleware, thunkMiddleware),
     )
 
     store = createStore(reducer, middleware)

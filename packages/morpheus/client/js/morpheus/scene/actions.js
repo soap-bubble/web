@@ -44,42 +44,14 @@ export function sceneLoadStarted(id, fetchPromise) {
 
 export function fetch(sceneId) {
   return async dispatch => {
-    const db = firebase.firestore()
-    const sceneDoc = await db
-      .collection('scenes')
-      .where('sceneId', '==', sceneId)
-      .get()
-    const [sceneRef] = sceneDoc.docs
-    if (sceneRef) {
-      const scene = sceneRef.data()
-      const needToLoadCasts = scene.casts.filter(cast => !!cast.ref)
-      if (needToLoadCasts.length) {
-        logger.info(`Normalizing scene: ${sceneId}`)
-        // Normalize casts
-        const loadedCasts = await Promise.all(
-          needToLoadCasts.map(async ({ ref }) => {
-            const castDoc = await db
-              .collection('casts')
-              .where('castId', '==', Number(ref.castId))
-              .get()
-            return castDoc.docs[0].data()
-          }),
-        )
-        const casts = scene.casts.map(cast => {
-          if (cast.ref) {
-            return loadedCasts.find(({ castId }) => castId === cast.ref.castId)
-          }
-          return cast
-        })
-        scene.casts = casts
-      }
+    const scene = await bySceneId(sceneId)
+    if (scene) {
       dispatch({
         type: SCENE_LOAD_COMPLETE,
         payload: scene,
       })
-      return scene
     }
-    return null
+    return scene
   }
 }
 
@@ -174,6 +146,7 @@ export function runScene(scene) {
         dispatch(inputActions.enableControl())
       }
     }
+    return scene
   }
 }
 

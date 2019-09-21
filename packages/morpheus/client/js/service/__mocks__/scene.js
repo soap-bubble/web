@@ -1,14 +1,12 @@
-import * as sceneFixtures from '../__fixtures__/scenes';
+import * as sceneFixtures from '../__fixtures__/scenes'
 
-const scene = jest.genMockFromModule('service/scene');
+const scene = jest.genMockFromModule('service/scene')
 
 function bySceneId(sceneId) {
-  const fixture = sceneFixtures[`scene${sceneId}`] || sceneFixtures.scene1010;
-  return Promise.resolve({
-    data: fixture,
-  });
+  const fixture = sceneFixtures[`scene${sceneId}`] || sceneFixtures.scene1010
+  return Promise.resolve(fixture)
 }
 
-scene.bySceneId = bySceneId;
+scene.bySceneId = bySceneId
 
-module.exports = scene;
+module.exports = scene

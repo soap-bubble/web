@@ -23,10 +23,9 @@ import {
 import { getAssetUrl } from 'service/gamedb'
 import { loadAsImage } from 'service/image'
 import { createVideo } from 'utils/video'
-import linkPreload from 'utils/linkPreload'
 import renderEvents from 'utils/render'
 import { GESTURES } from 'morpheus/constants'
-import { and, or, not } from 'utils/matchers'
+import { and, not } from '../../../utils/matchers'
 import { forMorpheusType, isMovie, isAudio, isHotspot } from '../matchers'
 
 const logger = loggerFactory('cast:special')

@@ -11,6 +11,9 @@
     "test:play": "jest playthrough",
     "test:play:local": "cross-env NO_LAUNCH=true jest playthrough",
     "build": "npm run build:server && npm run build:client:production && npm run build:client:staging",
+    "build:types": "tsc --emitDeclarationOnly",
+    "type-check": "tsc --noEmit",
+    "type-check:watch": "npm run type-check -- --watch",
     "build:server": "babel server -d lib --copy-files",
     "build:client:dev": "webpack --env.development=true",
     "build:client:safari:dev": "webpack --env.development=true --env.safari=true",
@@ -31,32 +34,11 @@
     "start": "node lib/index",
     "start:firebase": "firebase serve -p 4040",
     "start:staging": "npm run build:client:staging & npm run build:server && node lib/index",
-    "start:dev": "npm run build:server && concurrently --kill-others \"npm run start:firebase\" \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\"",
+    "start:dev": "npm run build:server && concurrently --kill-others \"npm run type-check:watch\" \"npm run start:firebase\" \"npm run build:client:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\"",
     "start:safari:dev": "npm run build:server && concurrently --kill-others \"npm run build:client:safari:watch\" \"npm run build:server -- --watch --skip-initial-build\" \"nodemon lib/index.js --watch lib | bunyan\""
   },
   "author": "",
   "license": "ISC",
-  "jest": {
-    "collectCoverageFrom": [
-      "client/**/*.{js,jsx}"
-    ],
-    "setupFiles": [
-      "<rootDir>/config/polyfills.js"
-    ],
-    "watchPathIgnorePatterns": [
-      "<rootDir>//public"
-    ],
-    "testEnvironment": "node",
-    "testURL": "http://localhost",
-    "transform": {
-      "^.+\\.(js|jsx)$": "<rootDir>/jestBabelProcessor.js",
-      "^.+\\.css$": "<rootDir>/config/jest/cssTransform.js",
-      "^(?!.*\\.(js|jsx|css|json)$)": "<rootDir>/config/jest/fileTransform.js"
-    },
-    "transformIgnorePatterns": [
-      "[/\\\\]node_modules[/\\\\].+\\.(js|jsx)$"
-    ]
-  },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
     "@babel/core": "^7.4.5",
@@ -65,6 +47,9 @@
     "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
     "@babel/preset-env": "^7.4.5",
     "@babel/preset-react": "^7.0.0",
+    "@babel/preset-typescript": "^7.6.0",
+    "@types/jest": "^24.0.18",
+    "@types/lodash": "^4.14.138",
     "babel-jest": "24.8.0",
     "babel-loader": "8.0.5",
     "babel-plugin-angularjs-annotate": "^0.9.0",
@@ -90,7 +75,7 @@
     "gulp-babel": "^8.0.0",
     "gulp-nodemon": "^2.1.0",
     "html-webpack-plugin": "^3.2.0",
-    "jest": "24.7.1",
+    "jest": "^24.9.0",
     "jsdom": "^9.12.0",
     "jsonfile": "^2.3.1",
     "mini-css-extract-plugin": "^0.5.0",
@@ -115,6 +100,9 @@
     "sinon-chai": "^2.8.0",
     "sprintf": "^0.1.5",
     "style-loader": "^0.23.1",
+    "ts-jest": "^24.1.0",
+    "ts-loader": "^6.1.2",
+    "typescript": "^3.6.3",
     "url-loader": "^1.1.2",
     "webpack": "^4.28.2",
     "webpack-cli": "^3.3.4",

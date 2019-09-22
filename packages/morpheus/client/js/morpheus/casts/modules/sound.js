@@ -15,7 +15,7 @@ import renderEvents from 'utils/render'
 import { createSound } from 'utils/sound'
 import { getAssetUrl } from 'service/gamedb'
 import { forMorpheusType, isAudio } from '../matchers'
-import { and, or, not } from 'utils/matchers'
+import { and, or } from '../../../utils/matchers'
 
 function startRenderLoop({ update }) {
   renderEvents.onRender(update)

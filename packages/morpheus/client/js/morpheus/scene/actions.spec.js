@@ -63,5 +63,7 @@ describe('goToScene', () => {
       .then(() => store.dispatch(actions.goToScene(5555)))
       .then(() => expect(store.getState().scene).toHaveActiveScenes(5))
       .then(() => store.dispatch(actions.goToScene(6666)))
-      .then(() => expect(store.getState().scene).toHaveActiveScenes(5)))
+      .then(() => expect(store.getState().scene).toHaveActiveScenes(6))
+      .then(() => store.dispatch(actions.goToScene(7777)))
+      .then(() => expect(store.getState().scene).toHaveActiveScenes(6)))
 })

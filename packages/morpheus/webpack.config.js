@@ -99,6 +99,7 @@ module.exports = env => {
   const webpackDefineConfig = {
     'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
+    'process.env.ELECTRON': JSON.stringify(env.electron),
     config: JSON.stringify(appConfig),
   }
 
@@ -161,8 +162,14 @@ module.exports = env => {
       publicPath,
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.json'],
+      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
       mainFields,
+      alias: {
+        service: path.resolve(__dirname, 'client/js/service'),
+        morpheus: path.resolve(__dirname, 'client/js/morpheus'),
+        utils: path.resolve(__dirname, 'client/js/utils'),
+        soapbubble: path.resolve(__dirname, 'client/js/soapbubble'),
+      },
     },
     module: {
       rules: styleLoaders(env).concat([
@@ -187,6 +194,15 @@ module.exports = env => {
           include: [/generic-pool/],
           exclude: [/generic-pool\/node_modules/],
           use: ['babel-loader'],
+        },
+        {
+          test: /\.tsx?$/,
+          exclude: [/node_modules/],
+          use: [
+            {
+              loader: 'ts-loader',
+            },
+          ],
         },
         {
           test: /\.jsx?$/,

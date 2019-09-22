@@ -92,6 +92,8 @@ function testSteamAPI() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-  testSteamAPI()
-})
+if (process.env.ELECTRON) {
+  document.addEventListener('DOMContentLoaded', function() {
+    testSteamAPI()
+  })
+}

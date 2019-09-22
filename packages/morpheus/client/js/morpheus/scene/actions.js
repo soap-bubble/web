@@ -1,10 +1,12 @@
-import { flow } from 'lodash'
+import { List } from 'immutable'
 import { reset } from 'utils/render'
 import Events from 'events'
 import { bySceneId } from 'service/scene'
 import { actions as inputActions } from 'morpheus/input'
 import { actions as castActions } from 'morpheus/casts'
 import { selectors as sceneSelectors } from 'morpheus/scene'
+import { gamestates } from '../gamestate/selectors'
+import { isFullscreen } from './matchers'
 import loggerFactory from 'utils/logger'
 import SceneQueue from './queue'
 import {
@@ -123,16 +125,38 @@ export function runScene(scene) {
       await dispatch(castActions.lifecycle.doEnter(scene))
       const sceneToUnload = dispatch(doSceneEntering(scene))
       await dispatch(castActions.lifecycle.onStage(scene))
+
+      // Remove anything past the first fullscreen scene
+      const isFullscreenForState = isFullscreen(gamestates(getState()))
+      const oldCurrentScenes = sceneSelectors.currentScenesData(getState())
+      const previousScene = sceneSelectors.currentSceneData(getState())
+      let currentScenes = new List()
+      const scenesToUnload = []
       if (sceneToUnload) {
-        await dispatch(castActions.lifecycle.doUnload(sceneToUnload))
+        scenesToUnload.push(sceneToUnload)
+      }
+      let foundFullscreen = false
+      for (let scene of oldCurrentScenes) {
+        if (foundFullscreen) {
+          scenesToUnload.push(scene)
+          continue
+        }
+        foundFullscreen = isFullscreenForState(scene)
+        currentScenes = currentScenes.push(scene)
       }
       await dispatch(castActions.unpreloadAll())
 
       dispatch({
         type: SCENE_ENTER_DONE,
-        payload: scene.sceneId,
+        payload: { sceneId: scene.sceneId, currentScenes },
       })
-
+      if (scenesToUnload.length) {
+        await Promise.all(
+          scenesToUnload.map(scene =>
+            dispatch(castActions.lifecycle.doUnload(scene)),
+          ),
+        )
+      }
       dispatch(inputActions.enableControl())
       userIncontrol = true
       events.emit(`sceneEnter:${scene.sceneId}`)
@@ -155,6 +179,7 @@ export function startAtScene(id) {
     dispatch(fetchScene(id))
       .then(scene => dispatch(runScene(scene)))
       .catch(error => {
+        logger.error(error)
         dispatch(inputActions.enableControl())
         dispatch({
           type: SCENE_LOAD_ERROR,

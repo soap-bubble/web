@@ -6,22 +6,27 @@
     "no-underscore-dangle": 0,
     "no-plusplus": 0,
     "no-restricted-syntax": [
-    'error',
-       'ForInStatement',
-       'LabeledStatement',
-       'WithStatement',
+      "error",
+      "ForInStatement",
+      "LabeledStatement",
+      "WithStatement"
     ],
     "react/jsx-filename-extension": 0,
     "jsx-a11y/no-static-element-interactions": 0,
-    "import/no-extraneous-dependencies": ["error", {"devDependencies": [
-      "**/*.spec.js",
-      "**/__mocks__/*.js",
-      "**/__mocks_/*.js",
-      "webpack.config.js"
-      ]}],
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/*.spec.js",
+          "**/__mocks__/*.js",
+          "**/__mocks_/*.js",
+          "webpack.config.js"
+        ]
+      }
+    ]
   },
   "globals": {
-    "config": true,
+    "config": true
   },
   "settings": {
     "import/resolver": {

@@ -87,7 +87,7 @@ export interface MovieSpecialCast extends MovieCast {
   actionAtEnd: boolean
 }
 
-type PanoCast = MovieCast
+export type PanoCast = MovieCast
 type PreloadCast = MovieCast
 type SoundCast = MovieCast
 

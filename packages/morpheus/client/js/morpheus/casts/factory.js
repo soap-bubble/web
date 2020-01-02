@@ -6,7 +6,7 @@ import { selectors as sceneSelectors, getSceneType } from 'morpheus/scene'
 import './modules'
 
 import { decorate as faderDecorator } from './components/Fader'
-import Pano from './components/Pano'
+import Pano from './components/WebGl'
 import Sound from './components/Sound'
 import Stage from './components/Stage'
 

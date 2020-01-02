@@ -71,3 +71,4 @@ export const PANO_CHUNK = 620
 export const PANO_DRAW_NUDGE = 240
 export const PANO_UV_NUDGE = 300
 export const DST_PANO_RATIO = DST_WIDTH / PANO_CHUNK
+export const PANO_SCROLL_OVERFLOW = 128 

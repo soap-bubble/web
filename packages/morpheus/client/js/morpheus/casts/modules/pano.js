@@ -86,52 +86,6 @@ function createGeometry() {
   return geometry
 }
 
-function createGeometryOld() {
-  const positionsArray = []
-  const uvsArray = []
-  const indicesArray = []
-  for (let i = -12; i < 12; i++) {
-    const index = (i + 12) * 4
-    const xleft = Math.sin(i * sliceOffset)
-    const xright = Math.sin((i + 1) * sliceOffset)
-    const yleft = Math.cos(i * sliceOffset)
-    const yright = Math.cos((i + 1) * sliceOffset)
-    positionsArray.push(
-      xleft,
-      -sliceDepth,
-      yleft,
-      xright,
-      -sliceDepth,
-      yleft,
-      xright,
-      sliceDepth,
-      yright,
-      xleft,
-      sliceDepth,
-      yright,
-    )
-    indicesArray.push(
-      0 + index,
-      1 + index,
-      2 + index,
-      0 + index,
-      2 + index,
-      3 + index,
-    )
-  }
-  const geometry = new BufferGeometry()
-  geometry.setIndex(new Uint16BufferAttribute(uvsArray, 1))
-  geometry.addAttribute(
-    'uv',
-    new BufferAttribute(new Float32Array([1, 0, 0, 0, 0, 1, 1, 1]), 2),
-  )
-  geometry.addAttribute(
-    'position',
-    new BufferAttribute(new Float32Array(positionsArray), 3),
-  )
-  return geometry
-}
-
 function createObject3D({
   theta = Math.PI,
   geometry,
@@ -142,11 +96,6 @@ function createObject3D({
   mesh.rotation.y = theta
   mesh.name = 'pano'
   return mesh
-
-  const object3D = new Object3D()
-  object3D.add(mesh)
-  // object3D.rotation.y += startAngle;
-  return object3D
 }
 
 function createMaterial(map) {
@@ -198,93 +147,6 @@ function startRenderLoop({ scene3D, camera, renderer, update }) {
     renderer.dispose()
   })
 }
-
-// const selectors = memoize((scene) => {
-//   const selectSceneCache = castSelectors.forScene(scene).cache;
-
-//   const selectPanoCastData = createSelector(
-//     () => scene,
-//     s => get(s, 'casts', []).find(c => c.__t === 'PanoCast'),
-//   );
-//   const selectPanoCastAnimData = createSelector(
-//     () => scene,
-//     s => get(s, 'casts', []).filter(c => c.__t === 'PanoAnim'),
-//   );
-//   const selectPano = createSelector(
-//     selectSceneCache,
-//     castCache => get(castCache, 'pano'),
-//   );
-//   const selectPanoScene3D = createSelector(
-//     selectPano,
-//     pano => get(pano, 'scene3D'),
-//   );
-//   const selectPanoObject3D = createSelector(
-//     selectPano,
-//     pano => get(pano, 'object3D'),
-//   );
-//   const selectRenderElements = createSelector(
-//     selectPano,
-//     pano => get(pano, 'webgl'),
-//   );
-//   const selectCanvas = createSelector(
-//     selectRenderElements,
-//     re => get(re, 'canvas'),
-//   );
-//   const selectRotation = createSelector(
-//     selectPano,
-//     pano => get(pano, 'rotation'),
-//   );
-//   const selectAssets = createSelector(
-//     selectPano,
-//     pano => get(pano, 'assets'),
-//   );
-//   const selectRenderedCanvas = createSelector(
-//     selectPano,
-//     pano => get(pano, 'renderedCanvas'),
-//   );
-//   const selectCanvasTexture = createSelector(
-//     selectPano,
-//     pano => get(pano, 'canvasTexture'),
-//   );
-//   const selectIsLoaded = createSelector(
-//     selectPano,
-//     pano => get(pano, 'isLoaded'),
-//   );
-//   const selectIsLoading = createSelector(
-//     selectPano,
-//     pano => get(pano, 'isLoading'),
-//   );
-//   const selectPanoHandler = createSelector(
-//     selectPano,
-//     pano => get(pano, 'panoHandler'),
-//   );
-//   const selectInputHandler = createSelector(
-//     selectPano,
-//     pano => get(pano, 'inputHandler'),
-//   );
-//   const selectLoader = createSelector(
-//     selectPano,
-//     pano => get(pano, 'loader'),
-//   );
-//   return {
-//     panoCastData: selectPanoCastData,
-//     panoAnimData: selectPanoCastAnimData,
-//     panoScene3D: selectPanoScene3D,
-//     panoObject3D: selectPanoObject3D,
-//     cache: selectPano,
-//     renderElements: selectRenderElements,
-//     rotation: selectRotation,
-//     canvas: selectCanvas,
-//     renderedCanvas: selectRenderedCanvas,
-//     canvasTexture: selectCanvasTexture,
-//     assets: selectAssets,
-//     isLoaded: selectIsLoaded,
-//     isLoading: selectIsLoading,
-//     panoHandler: selectPanoHandler,
-//     inputHandler: selectInputHandler,
-//     loader: selectLoader,
-//   };
-// });
 
 const radToMorpheus = 3600 / (Math.PI * 2)
 const radToMorpheusTexture = 3072 / (Math.PI * 2)

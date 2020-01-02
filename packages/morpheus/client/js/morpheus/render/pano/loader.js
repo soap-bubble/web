@@ -52,7 +52,6 @@ export default ({ scene, canvasTexture, onVideoEndFactory }) => {
             data: panoCastData,
             video: false,
             renderer({ srcContext, dstContext, rotation: { morpheusX: x } }) {
-              const dstRatio = global.ratio || DST_RATIO
               if (x > PANO_CANVAS_WIDTH - PANO_CHUNK) {
                 const firstChunkWidth = PANO_CANVAS_WIDTH - x
                 const firstChunkWidthMorpheus = PANO_CHUNK - firstChunkWidth
@@ -100,12 +99,6 @@ export default ({ scene, canvasTexture, onVideoEndFactory }) => {
               canvas.height = 512
 
               const ctx = canvas.getContext('2d')
-              const preCanvas = createCanvas({
-                width: canvas.width,
-                height: canvas.height,
-              })
-              const pCtx = preCanvas.getContext('2d')
-
               ctx.drawImage(image, 0, 0, 2048, 512, 0, 0, 2048, 512)
               ctx.drawImage(image, 0, 512, 1024, 512, 2048, 0, 1024, 512)
               canvasTexture.needsUpdate = true

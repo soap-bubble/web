@@ -15,9 +15,6 @@ import {
   actions as gameActions,
 } from 'morpheus/game';
 import {
-  actions as gamestateActions,
-} from 'morpheus/gamestate';
-import {
   titleDimensions,
 } from './selectors';
 import titleActionsFactory from './actions.title';

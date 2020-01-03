@@ -12,7 +12,7 @@ import {
 import { selectors as gameSelectors } from 'morpheus/game'
 import { actions as gamestateActions } from 'morpheus/gamestate'
 import Queue from 'promise-queue'
-import storeFactory from 'store'
+import storeFactory from '../../store'
 import loggerFactory from 'utils/logger'
 import { screenToGame } from 'utils/coordinates'
 import { isHotspot } from 'morpheus/casts/matchers'

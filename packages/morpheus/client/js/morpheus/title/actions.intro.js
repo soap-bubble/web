@@ -10,19 +10,13 @@ import {
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
-import {
-  Tween,
-  Easing,
-} from 'tween';
+import Tween from '@tweenjs/tween.js';
 import { getAssetUrl } from 'service/gamedb';
 import renderEvents from 'utils/render';
 import { createVideo } from 'utils/video';
 import {
   titleDone,
 } from './actions';
-import {
-  titleDimensions,
-} from './selectors';
 import {
   basicVertexShader,
   rippleDissolveFragmentShader,
@@ -148,14 +142,14 @@ export default function factory({ canvas: sourceCanvas }) {
           .to({
             freq: 3.0,
           }, 2000)
-          .easing(Easing.Exponential.Out)
+          .easing(Tween.Easing.Exponential.Out)
           .onComplete(() => {
             video.play();
             rippleTween = new Tween(v)
               .to({
                 freq: 0.0,
               }, 2000)
-              .easing(Easing.Exponential.Out);
+              .easing(Tween.Easing.Exponential.Out);
             rippleTween.start();
           })
           .start();
@@ -163,7 +157,7 @@ export default function factory({ canvas: sourceCanvas }) {
           .to({
             dissolve: 1.0,
           }, 4000)
-          .easing(Easing.Sinusoidal.InOut);
+          .easing(Tween.Easing.Sinusoidal.InOut);
 
         rippleTween.start();
         dissolveTween.start();

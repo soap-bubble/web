@@ -14,8 +14,12 @@ function immutableConverter(state) {
 }
 //  && (action.type === 'GAMESTATE_UPDATE' || action.type.indexOf('CAST') === 0)
 export default createLogger({
+  // @ts-ignore
   stateTransformer: immutableConverter,
+  // @ts-ignore
   actionTransformer: immutableConverter,
+  // @ts-ignore
   errorTransformer: immutableConverter,
+  // @ts-ignore
   predicate: (getState, action) => false, // action && action.logging !== false,
 });

@@ -149,7 +149,7 @@ module.exports = env => {
         'redux-promise',
         'redux-thunk',
         'reselect',
-        'tween',
+        '@tweenjs/tween.js',
         'three',
         'ua-parser-js',
       ],

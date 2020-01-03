@@ -1,7 +1,7 @@
 import { get, once, differenceBy } from 'lodash'
 import memoize from 'utils/memoize'
 import { createSelector } from 'reselect'
-import { Tween } from 'tween'
+import Tween from '@tweenjs/tween.js'
 import { selectors as gameSelectors } from 'morpheus/game'
 import {
   actions as gamestateActions,

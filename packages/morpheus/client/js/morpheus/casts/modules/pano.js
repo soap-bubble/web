@@ -15,7 +15,7 @@ import {
   CylinderBufferGeometry,
   RepeatWrapping,
 } from 'three'
-import { Tween, Easing } from 'tween'
+import Tween from '@tweenjs/tween.js'
 import { get } from 'lodash'
 import memoize from 'utils/memoize'
 import { createSelector } from 'reselect'
@@ -231,7 +231,7 @@ export const actions = scene => {
                 },
                 Math.sqrt(distance) * 1000,
               )
-              .easing(Easing.Quadratic.Out)
+              .easing(Tween.Easing.Quadratic.Out)
             tween.onUpdate(() => {
               dispatch(rotate(v))
             })

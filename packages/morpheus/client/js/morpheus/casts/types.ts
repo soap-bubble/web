@@ -98,3 +98,12 @@ export interface Scene {
   palette: number
   casts: Cast[]
 }
+
+export interface UnresolvedScene {
+  sceneId: number
+  cdFlags: number
+  sceneType: number
+  palette: number
+  casts: (Cast|{ ref: { castId: string } })[]
+}
+

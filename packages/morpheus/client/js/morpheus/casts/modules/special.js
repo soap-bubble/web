@@ -2,8 +2,6 @@ import { get, isUndefined, once, remove } from 'lodash'
 import Promise from 'bluebird'
 import memoize from 'utils/memoize'
 import uasParser from 'ua-parser-js'
-import { Tween } from 'tween'
-import { createSelector } from 'reselect'
 import loggerFactory from 'utils/logger'
 import {
   actions as gamestateActions,

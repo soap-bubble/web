@@ -1,6 +1,6 @@
 import React from 'react';
 import cx from 'classnames';
-import { Tween, Easing } from 'tween';
+import Tween from '@tweenjs/tween.js';
 import { getAssetUrl } from 'service/gamedb';
 import Title from '../containers/Title';
 import qs from 'query-string';
@@ -52,7 +52,7 @@ class Main extends React.Component {
         .to({
           target: 0,
         })
-        .easing(Easing.Sinusoidal.Out)
+        .easing(Tween.Easing.Sinusoidal.Out)
         .onUpdate(() => {
           this.audio.volume = v.target;
           // this.setState({

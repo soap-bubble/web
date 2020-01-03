@@ -1,6 +1,6 @@
 import { difference } from 'lodash'
 import createEpic from 'utils/createEpic'
-import { Tween, Easing, update as tweenUpdate } from 'tween'
+import Tween from '@tweenjs/tween.js'
 import * as sceneSelectors from 'morpheus/scene/selectors'
 import * as sceneActions from 'morpheus/scene/actions'
 import * as castActions from 'morpheus/casts/actions'
@@ -193,7 +193,7 @@ createEpic((action$, { dispatch, getState }) =>
           top: rectTop + endingRatio * (rectBottom - rectTop),
         })
 
-        const tweenInterval = setInterval(tweenUpdate, 1000 / 30)
+        const tweenInterval = setInterval(Tween.update, 1000 / 30)
         const tween = new Tween(loc)
           .to(
             {
@@ -202,7 +202,7 @@ createEpic((action$, { dispatch, getState }) =>
             },
             1000,
           )
-          .easing(Easing.Quadratic.InOut)
+          .easing(Tween.Easing.Quadratic.InOut)
         tween.onUpdate(() => {
           mouseHandlers.onMouseMove(loc)
         })
@@ -237,7 +237,7 @@ createEpic((action$, { dispatch, getState }) =>
           top: rectTop + (rectBottom - rectTop) / 2,
           left: rectLeft + endingRatio * (rectRight - rectLeft),
         })
-        const tweenInterval = setInterval(tweenUpdate, 1000 / 30)
+        const tweenInterval = setInterval(Tween.update, 1000 / 30)
         const tween = new Tween(loc)
           .to(
             {
@@ -246,7 +246,7 @@ createEpic((action$, { dispatch, getState }) =>
             },
             1000,
           )
-          .easing(Easing.Quadratic.InOut)
+          .easing(Tween.Easing.Quadratic.InOut)
         tween.onUpdate(() => {
           mouseHandlers.onMouseMove(loc)
         })

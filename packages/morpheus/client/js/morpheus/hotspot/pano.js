@@ -11,7 +11,7 @@ import { actions as inputActions, handleEventFactory } from 'morpheus/input'
 import { hotspotRectMatchesPosition } from './matchers'
 import createOrientation from 'morpheus/input/orientation'
 import { actions as gamestateActions } from 'morpheus/gamestate'
-import storeFactory from 'store'
+import storeFactory from '../../store'
 import { isHotspot } from 'morpheus/casts/matchers'
 import {
   PANO_CANVAS_WIDTH,

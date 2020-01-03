@@ -27,7 +27,7 @@ import { data as titleSceneData, actions as titleActions } from 'morpheus/title'
 import { bySceneId } from 'service/scene'
 import { Game, NewGame, actions as gameActions } from 'morpheus/game'
 import socketPromise from 'utils/socket'
-import storeFactory from 'store'
+import storeFactory from './store'
 import '../css/main.scss'
 
 const qp = qs.parse(location.search)

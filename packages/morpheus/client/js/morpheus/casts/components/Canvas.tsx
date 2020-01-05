@@ -6,12 +6,9 @@ import React, {
   TouchEvent,
 } from 'react'
 import { useSelector } from 'react-redux'
-import raf from 'raf'
-// @ts-ignore
+import useRaf from '@rooks/use-raf'
 import { selectors as gameSelectors } from 'morpheus/game'
-// @ts-ignore
 import { selectors as inputSelectors } from 'morpheus/input'
-import { number } from 'prop-types'
 
 export type Renderable = (ctx: CanvasRenderingContext2D) => void
 
@@ -89,25 +86,15 @@ const Canvas = ({
   const allRenderables = useMemo(() => {
     return [...exiting, ...entering, ...onstage, cursorRenderable]
   }, [exiting, entering, onstage, cursorRenderable])
-  useEffect(() => {
-    let isRunning = true
-    function loop() {
-      if (isRunning && canvasRef.current) {
-        try {
-          render(canvasRef.current.getContext('2d'), allRenderables)
-        } catch (e) {
-          console.error('While running render loop', e)
-        }
-      }
-      if (isRunning) {
-        raf(loop)
+  useRaf(() => {
+    if (canvasRef.current) {
+      try {
+        render(canvasRef.current.getContext('2d'), allRenderables)
+      } catch (e) {
+        console.error('While running render loop', e)
       }
     }
-    raf(loop)
-    return () => {
-      isRunning = false
-    }
-  }, [canvasRef.current, allRenderables])
+  }, !!(canvasRef.current && allRenderables.length))
   return (
     <canvas
       width={width}

@@ -9,54 +9,6 @@ import {
   PANO_CANVAS_WIDTH,
 } from 'morpheus/constants'
 
-export function updateCanvas(input: HTMLCanvasElement, output: HTMLCanvasElement, rotX: number) {
-  const chunk = Math.floor((rotX % 3072) / 24)
-  const x = chunk * 24
-  const dstContext = output.getContext('2d')
-  if (dstContext) {
-    if (x > PANO_CANVAS_WIDTH - DST_WIDTH) {
-      const firstChunkWidth = PANO_CANVAS_WIDTH - x
-      const firstChunkWidthMorpheus = DST_WIDTH - firstChunkWidth
-      const secondChunkOffset = DST_WIDTH - firstChunkWidthMorpheus
-      dstContext.drawImage(
-        input,
-        x,
-        0,
-        DST_WIDTH,
-        DST_HEIGHT,
-        0,
-        0,
-        DST_WIDTH,
-        DST_HEIGHT,
-      )
-      dstContext.drawImage(
-        input,
-        0,
-        0,
-        firstChunkWidthMorpheus,
-        DST_HEIGHT,
-        secondChunkOffset,
-        0,
-        firstChunkWidthMorpheus,
-        DST_HEIGHT,
-      )
-    } else {
-      dstContext.drawImage(
-        input,
-        x,
-        0,
-        DST_WIDTH,
-        DST_HEIGHT,
-        0,
-        0,
-        DST_WIDTH,
-        DST_HEIGHT,
-      )
-    }
-  }
-  return x
-}
-
 export default function usePanoChunk(img: HTMLImageElement|undefined, rotX: number): [CanvasTexture|undefined, number] {
   const canvas = useMemo(() => createCanvas({
     width: 1024,

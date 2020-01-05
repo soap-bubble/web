@@ -8,7 +8,7 @@ interface NewGameProps {
 }
 
 const NewGame: React.FC<NewGameProps> = ({ sceneData }) => {
-  return <WebGl stageScenes={[sceneData]} />
+  return <Stage stageScenes={[sceneData]} />
 }
 
 export default NewGame

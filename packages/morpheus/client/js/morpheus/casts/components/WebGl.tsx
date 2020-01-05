@@ -4,13 +4,14 @@ import React, {
   useState,
   useEffect,
   FunctionComponent,
+  useCallback,
 } from 'react'
 import {
   createPortal
 } from 'react-dom'
 import { Dispatch } from 'redux'
 import { cloneDeep, map } from 'lodash'
-import { Canvas, useThree, useFrame } from 'react-three-fiber'
+import { Canvas, PointerEvent, useThree, useFrame } from 'react-three-fiber'
 import {
   BufferAttribute,
   CylinderBufferGeometry,
@@ -26,18 +27,19 @@ import createCanvas from 'utils/canvas'
 import panoShader from '../shader/panoChunk'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
 import { VideoController } from './Videos'
-import WebGlCanvas from './WebGlCanvas'
 import { getAssetUrl } from 'service/gamedb'
 import useCastRefNoticer from '../useCastRefNoticer'
 import { Scene, PanoCast, MovieSpecialCast, Cast } from '../types'
 import { flatten } from 'lodash'
-import usePanoChunk, { updateCanvas } from '../hooks/panoChunk'
+import usePanoInput from '../hooks/panoInputHandler'
+import usePanoChunk from '../hooks/panoChunk'
+import usePanoMomentum from '../hooks/panoMomentum'
+import { usePointerEvents } from 'morpheus/hotspot/eventInterface'
 import { Matcher, forMorpheusType } from '../matchers'
 import { and } from 'utils/matchers'
 import {
-  DST_WIDTH,
-  PANO_CANVAS_WIDTH,
-  PANO_SCROLL_OVERFLOW
+  PANO_OFFSET,
+  PANO_CANVAS_WIDTH
 } from '../../constants'
 
 enum SceneType {
@@ -58,8 +60,19 @@ const sliceOffset = (600 / 3072) * Math.PI * 2
 // The length of the panorama is a 1024 wide canvas texture which shows a portion of the
 // 3076 pixel wide image. The texture is updated every 128 pixels, so the total length
 // of the pano is 1024 / 3076 of a circle - 128 / 3076 of a circle
-const PANO_LENGTH = 2 * Math.PI * ((DST_WIDTH - PANO_SCROLL_OVERFLOW) / PANO_CANVAS_WIDTH)
+const PANO_LENGTH = 2 * Math.PI * PANO_OFFSET
+const UP_DOWN_LIMIT = 5.30 * (Math.PI / 180)
 
+const clampNumber = (num: number, a: number, b: number) => Math.max(Math.min(num, Math.max(a, b)), Math.min(a, b))
+
+const step = (num: number, max: number) => {
+  if (num > max) {
+    return num - max
+  } else if (num < 0) {
+    return num + max
+  }
+  return num
+}
 interface GlStageProps {
   dispatch: Dispatch
   stageScenes: Scene[]
@@ -120,29 +133,13 @@ const WebGlScene = ({
 
     return stageActivePanoCasts
   }, [stageScenes, gamestates])
+  const meshRef = useRef<Mesh>()
   const panoUrl = onStagePano && getAssetUrl(onStagePano.fileName, 'png')
   const textureLoader = useMemo(() => new TextureLoader(), [])
-  const [rotation, setRotation] = useState(0)
+  const [rotation, setRotation] = useState({
+    x: 0, y: 0
+  })
   const [texImage, setTexImage] = useState<HTMLImageElement>()
-  // const panoCanvas = useMemo(() => createCanvas({
-  //   width: 1024,
-  //   height: 512,
-  // }), [])
-  // const fullPanoCanvas = useMemo(() => {
-  //   if (texImage) {
-  //     const fullPano = createCanvas({
-  //       width: 3072,
-  //       height: 512,
-  //     })
-  //     const ctx = fullPano.getContext('2d')
-  //     if (ctx) {
-  //       ctx.drawImage(texImage, 0, 0, 2048, 512, 0, 0, 2048, 512)
-  //       ctx.drawImage(texImage, 0, 512, 1024, 512, 2048, 0, 1024, 512)
-  //       return fullPano
-  //     }
-  //   }
-  //   return undefined
-  // }, [texImage])
   useEffect(() => {
     if (panoUrl) {
       const tex = textureLoader.load(panoUrl, t => {
@@ -153,7 +150,7 @@ const WebGlScene = ({
       }
     }
   }, [panoUrl, textureLoader])
-  const [texture, offsetX] = usePanoChunk(texImage, rotation)
+  const [texture, offsetX] = usePanoChunk(texImage, rotation.x)
   useEffect(() => {
     const preview = document.getElementById('preview')
     if (preview && texture && texture.image) {
@@ -172,23 +169,54 @@ const WebGlScene = ({
  
   useEffect(() => {
     if (camera) {
-      camera.lookAt(0, 0, 0)
+      camera.lookAt(0, 0, 1)
     }
   }, [camera])
   
+
+  const panoInput = usePanoInput(dispatch, meshRef.current, camera, stageScenes.length && stageScenes[stageScenes.length - 1] || undefined, top, left, width, height, offsetX, rotation.x)
+  const momentumInput = usePanoMomentum(5, 100)
+  const pointerEvents = usePointerEvents({
+    onPointerDown: panoInput.onPointerDown,
+    onPointerMove: panoInput.onPointerMove,
+    onPointerUp: panoInput.onPointerUp
+  }, {
+    onPointerDown: momentumInput.onPointerDown,
+    onPointerMove: momentumInput.onPointerMove,
+    onPointerUp: momentumInput.onPointerUp,
+    onPointerOut: momentumInput.onPointerOut,
+    onPointerLeave: momentumInput.onPointerLeave
+  })
+  const { onPointerDown, onPointerMove, onPointerUp, onPointerLeave } = pointerEvents
+  const { delta } = momentumInput
   useFrame(() => {
-    setRotation((rotation + 1) % 3072)
+    let newRotationX = rotation.x - delta.y
+    const newRotationY = clampNumber(rotation.y + (delta.x * Math.PI / 720), -UP_DOWN_LIMIT, UP_DOWN_LIMIT)
+    setRotation({
+      x: step(newRotationX, 3072),
+      y: newRotationY
+    })
     if (ref.current) {
-      ref.current.uniforms.offset.value = rotation - offsetX
+      const offset = newRotationX - offsetX
+      ref.current.uniforms.offset.value = offset
+    }
+    if (meshRef.current) {
+      meshRef.current.rotation.x = newRotationY
     }
   })
   const shaderArgs = useMemo<[ShaderMaterialParameters]>(() => [cloneDeep(panoShader)], [])
   return (
     <React.Fragment>
-      <mesh>
+      <mesh 
+        ref={meshRef} 
+        onPointerUp={onPointerUp}
+        onPointerDown={onPointerDown} 
+        onPointerMove={onPointerMove}
+        onPointerLeave={onPointerLeave}
+      >
         <cylinderBufferGeometry
           attach="geometry"
-          args={[1, 1, sliceHeight * 2, 128, 1, true, -PANO_LENGTH / 2, PANO_LENGTH]}
+          args={[1, 1, sliceHeight * 2, 128, 1, true, -PANO_LENGTH / PANO_CANVAS_WIDTH / 2, PANO_LENGTH / PANO_CANVAS_WIDTH]}
         />
         <shaderMaterial
           attach="material"
@@ -208,7 +236,7 @@ const WebGl: FunctionComponent<GlStageProps> = props => (
       aspect: 640 / 420,
       near: 0.01,
       far: 1000,
-      position: [0, 0, -0.09],
+      position: [0, 0, 0.09],
     }}
     style={{
       cursor: 'none',

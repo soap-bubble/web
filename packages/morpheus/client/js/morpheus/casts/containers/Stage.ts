@@ -2,9 +2,7 @@ import { connect } from 'react-redux'
 
 import {
   selectors as gameSelectors,
-  // @ts-ignore
 } from 'morpheus/game'
-// @ts-ignore
 import { selectors as gamestateSelectors } from 'morpheus/gamestate'
 import { Gamestates } from 'morpheus/gamestate/isActive'
 import Stage from '../components/Stage'

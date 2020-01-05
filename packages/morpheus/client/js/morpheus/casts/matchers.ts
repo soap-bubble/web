@@ -20,11 +20,6 @@ export function forMorpheusType(type: string) {
 
 export const isHotspot = (c: Cast | Hotspot) => c.castId === 0
 
-export const isMovie = and(
-  forMorpheusType('MovieSpecialCast'),
-  (c: MovieSpecialCast) => !c.audioOnly && !c.image,
-) as Matcher<Cast>
-
 export const isAudio = (cast: MovieCast) => cast.audioOnly
 
 export const isControlledCast = and<ControlledMovieCast>(
@@ -33,5 +28,10 @@ export const isControlledCast = and<ControlledMovieCast>(
 )
 
 export const isImage = (cast: MovieSpecialCast) => cast.image
+
+export const isMovie = and(
+  forMorpheusType('MovieSpecialCast'),
+  and(not(isAudio), not(isImage))
+) as Matcher<Cast>
 
 export { Matcher }

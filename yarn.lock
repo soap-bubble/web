@@ -2939,6 +2939,13 @@
   resolved "https://registry.yarnpkg.com/@restart/hooks/-/hooks-0.3.0.tgz#176a73e703133230e613cca4e536265657099bb5"
   integrity sha512-meqDR+pO53h6Aq1Fk/I1U9uF0pj4tugZb3PWWwYFwKGtr7fPwgyxxkkdddSo1zhL/VDAUxwqFKB3wuP2Z1txjg==
 
+"@rooks/use-raf@^3.6.0":
+  version "3.6.0"
+  resolved "https://registry.yarnpkg.com/@rooks/use-raf/-/use-raf-3.6.0.tgz#89f5d099dba35a5a1e3250a8b3efe9baff44dd1e"
+  integrity sha512-JV0v3bZiCYzT7evOu3kToaTJQbI0ASdKL56zPF9BuR8Dcn1wx8Q7EkYizcYRREZERg/zKPVLawAXVTIS1fgJcA==
+  dependencies:
+    raf "3.4.1"
+
 "@root/mkdirp@^1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@root/mkdirp/-/mkdirp-1.0.0.tgz#f200e29568d711d3357151af0d2648e7eaf21b6f"

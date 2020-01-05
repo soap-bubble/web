@@ -4,11 +4,11 @@ import WebGl from 'morpheus/casts/containers/WebGl'
 import { Scene } from '../casts/types'
 
 interface NewGameProps {
-  sceneData: Scene
-}
+  stageScenes: Scene[]
+}   
 
-const NewGame: React.FC<NewGameProps> = ({ sceneData }) => {
-  return <WebGl stageScenes={[sceneData]} />
+const NewGame: React.FC<NewGameProps> = ({ stageScenes }) => {
+  return <Stage stageScenes={stageScenes} />
 }
 
 export default NewGame

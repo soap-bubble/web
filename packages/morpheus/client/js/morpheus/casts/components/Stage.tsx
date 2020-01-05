@@ -5,7 +5,7 @@ import {
   eventInterface,
   // @ts-ignore
 } from 'morpheus/hotspot'
-import { Gamestates } from 'morpheus/gamestate/isActive'
+import { Gamestates, isActive } from 'morpheus/gamestate/isActive'
 import Canvas from './Canvas'
 import Videos, { VideoController, VideoCastRefCallback } from './Videos'
 import Images from './Images'
@@ -76,6 +76,18 @@ const Stage = ({
     exitingScene,
     [canPlayThroughVideos, endedVideos, imagesErrored],
   )
+
+  useEffect(() => {
+    console.log('stageScenes', stageScenes)
+  }, [stageScenes])
+
+  useEffect(() => {
+    for (const [controller, casts] of availableVideos) {
+      if (casts.find(cast => isActive({ cast, gamestates }))) {
+        controller.play()
+      }
+    }
+  }, [availableVideos])
 
   const specialHandler = useMemo(
     () =>

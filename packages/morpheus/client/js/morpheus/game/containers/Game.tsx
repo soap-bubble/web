@@ -1,5 +1,6 @@
 import { connect } from 'react-redux'
 import React, { CSSProperties } from 'react'
+import { List } from 'immutable'
 import PropTypes from 'prop-types'
 import { NewGame, selectors as gameSelectors } from 'morpheus/game'
 import { selectors as sceneSelectors } from 'morpheus/scene'
@@ -7,10 +8,11 @@ import Menu from '../components/Menu'
 import Settings from './Settings'
 import SaveList from './SaveList'
 import { Scene } from 'morpheus/casts/types'
+import { currentScenesData } from 'morpheus/scene/selectors'
 
 function mapStateToProps(state: any) {
   return {
-    currentScene: sceneSelectors.currentSceneData(state),
+    stageScenes: sceneSelectors.currentScenesData(state),
     style: gameSelectors.style(state),
     menuOpen: gameSelectors.menuOpened(state),
     settingsOpen: gameSelectors.settingsOpened(state),
@@ -22,7 +24,7 @@ const Game = ({
   id,
   className,
   style,
-  currentScene,
+  stageScenes,
   menuOpen,
   settingsOpen,
   saveOpen,
@@ -30,7 +32,7 @@ const Game = ({
   id: string
   className?: string
   style: CSSProperties,
-  currentScene?: Scene
+  stageScenes: List<Scene>
   menuOpen: boolean
   settingsOpen: boolean
   saveOpen: boolean
@@ -48,7 +50,7 @@ const Game = ({
   }
   return (
     <div id={id} className={className} style={style}>
-      {currentScene && <NewGame sceneData={currentScene} />}
+      {stageScenes.size && <NewGame stageScenes={stageScenes.toArray()} />}
       {menu}
     </div>
   )

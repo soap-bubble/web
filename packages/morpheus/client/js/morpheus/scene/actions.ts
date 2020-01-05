@@ -27,7 +27,7 @@ export const sceneLoadQueue = createSceneQueue()
 
 export const sceneLoadComplete: ActionCreator<ThunkAction<void, any, any, Action>> = (responseData: any) => {
   return (dispatch: Dispatch) => {
-    logger.info('sceneLoadComplete', responseData.sceneId)
+    logger.info(responseData)
     dispatch({
       type: SCENE_SET_CURRENT_SCENE,
       payload: responseData,

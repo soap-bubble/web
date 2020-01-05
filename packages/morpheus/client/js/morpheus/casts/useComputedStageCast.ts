@@ -1,7 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect } from 'react'
 import { get, uniqBy, flatten } from 'lodash'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
-import { and } from 'utils/matchers'
+import { and, not } from 'utils/matchers'
 // @ts-ignore
 import { resizeToScreen } from '../../utils/resize'
 import { Renderable } from './components/Canvas'
@@ -162,39 +162,41 @@ function* generateMovieCastDrawOps({
   )
   for (let image of images) {
     const [img, casts] = image
-    const cast = casts[0]
-    const { location } = cast
-    yield calculateImageOperation({
-      cast,
-      img,
-      rect: resizeToScreen({
-        left: location.x,
-        top: location.y,
-        right: location.x + cast.width,
-        bottom: location.y + cast.height,
-        width,
-        height,
-      }),
-    })
+    for (const cast of casts) {
+      const { location } = cast
+      yield calculateImageOperation({
+        cast,
+        img,
+        rect: resizeToScreen({
+          left: location.x,
+          top: location.y,
+          right: location.x + cast.width,
+          bottom: location.y + cast.height,
+          width,
+          height,
+        }),
+      })
+    }
   }
   for (let movieRef of activeMovieCasts) {
     const [img, casts] = movieRef
     if (img && casts.length && matchActiveImages(movieRef)) {
-      const cast = casts[0]
-      const { location } = cast
-      if (img.el) {
-        yield calculateImageOperation({
-          cast,
-          img: img.el,
-          rect: resizeToScreen({
-            left: location.x,
-            top: location.y,
-            right: location.x + cast.width,
-            bottom: location.y + cast.height,
-            width,
-            height,
-          }),
-        })
+      for (const cast of casts) {
+        const { location } = cast
+        if (img.el) {
+          yield calculateImageOperation({
+            cast,
+            img: img.el,
+            rect: resizeToScreen({
+              left: location.x,
+              top: location.y,
+              right: location.x + cast.width,
+              bottom: location.y + cast.height,
+              width,
+              height,
+            }),
+          })
+        }
       }
     }
   }
@@ -211,23 +213,25 @@ function generateControlledRenderables({
   height: number
   gamestates: Gamestates
 }): Renderable[] {
-  return controlledCasts.map(([img, casts]) => {
-    const cast = casts[0]
-    const location = cast.location || cast.controlledLocation
-    return calculateControlledFrameOperation({
-      cast,
-      img,
-      gamestates,
-      rect: resizeToScreen({
-        left: location.x,
-        top: location.y,
-        right: location.x + cast.width,
-        bottom: location.y + cast.height,
-        width,
-        height,
-      }),
-    })
-  }, {})
+  return controlledCasts.reduce((memo, [img, casts]) => {
+    for (const cast of casts) {
+      const location = cast.location || cast.controlledLocation
+      memo.push(calculateControlledFrameOperation({
+        cast,
+        img,
+        gamestates,
+        rect: resizeToScreen({
+          left: location.x,
+          top: location.y,
+          right: location.x + cast.width,
+          bottom: location.y + cast.height,
+          width,
+          height,
+        }),
+      }))
+    }
+    return memo
+  }, [] as Renderable[])
 }
 
 function* generateRenderables(ops: DrawOperation[], renderables: Renderable[]) {
@@ -271,7 +275,7 @@ export default function useComputedStageCast(
   exitingScene: Scene | undefined,
   deps: any[],
 ) {
-  return useMemo<ComputedStageCast>(() => {
+  const result = useMemo<ComputedStageCast>(() => {
     const matchActive = matchActiveCast(gamestates)
     const matchSpecialMovies = and<MovieSpecialCast>(
       forMorpheusType('MovieSpecialCast'),
@@ -364,7 +368,6 @@ export default function useComputedStageCast(
       },
       [] as ImageDrawable<MovieCast>[],
     ) as ImageDrawable<ControlledMovieCast>[]
-
     const stageRenderables = [
       ...generateRenderables(
         [
@@ -404,4 +407,6 @@ export default function useComputedStageCast(
     imagesLoaded,
     ...deps,
   ])
+
+  return result
 }

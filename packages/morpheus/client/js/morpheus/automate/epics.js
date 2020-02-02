@@ -31,7 +31,7 @@ createEpic((action$, store$) =>
       const scene = sceneSelectors.currentSceneData(getState())
       const hotspot = scene.casts.find(cast => cast.param1 === destSceneId)
       return castActions.forScene(scene).pano.sweepTo(hotspot, cb)
-    }),
+    })
 )
 
 function getPositionOfHotspot(hotspot) {
@@ -55,7 +55,7 @@ function inSceneState({ scene, dispatch, getState }) {
         .hotspot.hotspotsData(getState())
       const isPano = castSelectors.forScene(scene).hotspot.isPano(getState())
       const nowInHotspots = scene.casts.filter(
-        hotspotRectMatchesPosition(position),
+        hotspotRectMatchesPosition(position)
       )
       const enteringHotspots = nowInHotspots
       const leavingHotspots = []
@@ -78,7 +78,7 @@ function inSceneState({ scene, dispatch, getState }) {
           handleHotspot: isPano
             ? gamestateActions.handlePanoHotspot
             : gamestateActions.handleHotspot,
-        }),
+        })
       )
       await dispatch(
         handleEvent({
@@ -97,7 +97,7 @@ function inSceneState({ scene, dispatch, getState }) {
           handleHotspot: isPano
             ? gamestateActions.handlePanoHotspot
             : gamestateActions.handleHotspot,
-        }),
+        })
       )
     },
   }
@@ -109,7 +109,7 @@ createEpic((action$, { dispatch, getState }) =>
   action$.ofType('AUTO_HOTSPOT_GO').forEach(({ payload: destSceneId, cb }) => {
     const scene = sceneSelectors.currentSceneData(getState())
     const cast = scene.casts.find(
-      ({ param1, castId }) => param1 === destSceneId && castId === 0,
+      ({ param1, castId }) => param1 === destSceneId && castId === 0
     )
 
     if (cast) {
@@ -120,15 +120,15 @@ createEpic((action$, { dispatch, getState }) =>
         function handleSceneEnd() {
           sceneActions.events.removeListener(
             `sceneEnter:${destSceneId}`,
-            handleSceneEnd,
+            handleSceneEnd
           )
           cb()
-        },
+        }
       )
     } else {
       cb('nope')
     }
-  }),
+  })
 )
 
 createEpic(action$ =>
@@ -136,11 +136,11 @@ createEpic(action$ =>
     sceneActions.events.on(`sceneEnter:${sceneId}`, function handleSceneEnd() {
       sceneActions.events.removeListener(
         `sceneEnter:${sceneId}`,
-        handleSceneEnd,
+        handleSceneEnd
       )
       cb()
     })
-  }),
+  })
 )
 
 createEpic((action$, { dispatch, getState }) =>
@@ -157,15 +157,15 @@ createEpic((action$, { dispatch, getState }) =>
           isActive({
             cast,
             gamestates,
-          }),
+          })
       )
       if (!targetHotspot) {
         return cb(`Hotspot for gamestate ${targetState} not found`)
       }
-      const mouseHandlers = flatspot({
-        dispatch,
-        scene,
-      })
+      // const mouseHandlers = flatspot({
+      //   dispatch,
+      //   scene,
+      // })
       const location = gameSelectors.location(getState())
 
       if (ACTION_TYPES[targetHotspot.type] === 'VertSlider') {
@@ -200,18 +200,18 @@ createEpic((action$, { dispatch, getState }) =>
               clientX: endGameLoc.left + location.x,
               clientY: endGameLoc.top + location.y,
             },
-            1000,
+            1000
           )
           .easing(Tween.Easing.Quadratic.InOut)
-        tween.onUpdate(() => {
-          mouseHandlers.onMouseMove(loc)
-        })
-        tween.onComplete(() => {
-          mouseHandlers.onMouseUp(loc)
-          clearInterval(tweenInterval)
-          cb()
-        })
-        mouseHandlers.onMouseDown(loc)
+        // tween.onUpdate(() => {
+        //   mouseHandlers.onMouseMove(loc)
+        // })
+        // tween.onComplete(() => {
+        //   mouseHandlers.onMouseUp(loc)
+        //   clearInterval(tweenInterval)
+        //   cb()
+        // })
+        // mouseHandlers.onMouseDown(loc)
         return tween.start()
       } else if (ACTION_TYPES[targetHotspot.type] === 'HorizSlider') {
         const { rectLeft, rectTop, rectRight, rectBottom } = targetHotspot
@@ -244,7 +244,7 @@ createEpic((action$, { dispatch, getState }) =>
               clientX: endGameLoc.left + location.x,
               clientY: endGameLoc.top + location.y,
             },
-            1000,
+            1000
           )
           .easing(Tween.Easing.Quadratic.InOut)
         tween.onUpdate(() => {
@@ -260,7 +260,7 @@ createEpic((action$, { dispatch, getState }) =>
         return tween.start()
       }
       return cb()
-    }),
+    })
 )
 
 createEpic((action$, { dispatch }) =>
@@ -269,7 +269,7 @@ createEpic((action$, { dispatch }) =>
     .forEach(({ payload: { stateId, value }, cb }) => {
       dispatch(gamestateActions.updateGameState(stateId, value))
       cb()
-    }),
+    })
 )
 
 createEpic((action$, { getState }) =>
@@ -279,7 +279,7 @@ createEpic((action$, { getState }) =>
       currentSceneId: sceneSelectors.currentSceneId(getState()),
       previousSceneId: sceneSelectors.previousSceneId(getState()),
     })
-  }),
+  })
 )
 
 createEpic((action$, { dispatch }) =>
@@ -287,7 +287,7 @@ createEpic((action$, { dispatch }) =>
     const { currentSceneId, previousSceneId, gamestates } = payload
     dispatch(gamestateActions.inject(gamestates))
     dispatch(
-      sceneActions.goToScene(currentSceneId, true, previousSceneId),
+      sceneActions.goToScene(currentSceneId, true, previousSceneId)
     ).then(cb)
-  }),
+  })
 )

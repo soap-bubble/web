@@ -1,15 +1,21 @@
-import { useMemo } from 'react'
+import { useMemo, PointerEvent as ReactPointerEvent } from 'react'
 import { PointerEvent as RTFPointerEvent } from 'react-three-fiber'
 
-type SupportRTFPointerEvent = PointerEvent|RTFPointerEvent
-type PointerEventKeys = "onPointerUp" | "onPointerMove" | "onPointerDown" | "onPointerOut" | "onPointerCancel" | "onPointerLeave"
-interface PointerEvents {
-  onPointerUp?(event: SupportRTFPointerEvent): void
-  onPointerMove?(event: SupportRTFPointerEvent): void
-  onPointerDown?(event: SupportRTFPointerEvent): void
-  onPointerOut?(event: SupportRTFPointerEvent): void
-  onPointerCancel?(event: SupportRTFPointerEvent): void
-  onPointerLeave?(event: SupportRTFPointerEvent): void
+type SupportRTFPointerEvent<T> = ReactPointerEvent<T>
+type PointerEventKeys =
+  | 'onPointerUp'
+  | 'onPointerMove'
+  | 'onPointerDown'
+  | 'onPointerOut'
+  | 'onPointerCancel'
+  | 'onPointerLeave'
+export interface PointerEvents<T> {
+  onPointerUp?(event: SupportRTFPointerEvent<T>): void
+  onPointerMove?(event: SupportRTFPointerEvent<T>): void
+  onPointerDown?(event: SupportRTFPointerEvent<T>): void
+  onPointerOut?(event: SupportRTFPointerEvent<T>): void
+  onPointerCancel?(event: SupportRTFPointerEvent<T>): void
+  onPointerLeave?(event: SupportRTFPointerEvent<T>): void
 }
 
 export const pointerInterface: PointerEventKeys[] = [
@@ -18,33 +24,43 @@ export const pointerInterface: PointerEventKeys[] = [
   'onPointerDown',
   'onPointerOut',
   'onPointerCancel',
-  'onPointerLeave'
-];
+  'onPointerLeave',
+]
 
-export function usePointerEvents(...delegates: PointerEvents[]) {
-  return useMemo(() => composePointer(delegates), pointerInterface.reduce((memo, curr) => {
-    for (const delegate of delegates) {
-      memo.push(delegate[curr])
-    }
-    return memo
-  }, [] as (((event: SupportRTFPointerEvent) => void)|undefined)[]))
+export function usePointerEvents<T>(...delegates: PointerEvents<T>[]) {
+  return useMemo(
+    () => composePointer(delegates),
+    pointerInterface.reduce((memo, curr) => {
+      for (const delegate of delegates) {
+        memo.push(delegate[curr])
+      }
+      return memo
+    }, [] as (((event: SupportRTFPointerEvent<T>) => void) | undefined)[])
+  )
 }
 
-export function composePointer(delegate: PointerEvents[]) { 
+export function composePointer<T>(delegate: PointerEvents<T>[]) {
   return pointerInterface.reduce((tmi, method) => {
     tmi[method] = function composePointerDelegate(event: any) {
-      delegate.forEach(d =>  {
+      delegate.forEach(d => {
         const handler = d[method]
         if (handler) {
-          handler(event) 
+          handler(event)
         }
-      });
-    };
-    return tmi;
-  }, {} as PointerEvents)
-};
+      })
+    }
+    return tmi
+  }, {} as PointerEvents<T>)
+}
 
-type MouseTouchEventKeys = "onMouseUp" | "onMouseMove" | "onMouseDown" | "onTouchStart" | "onTouchMove" | "onTouchEnd" | "onTouchCancel"
+type MouseTouchEventKeys =
+  | 'onMouseUp'
+  | 'onMouseMove'
+  | 'onMouseDown'
+  | 'onTouchStart'
+  | 'onTouchMove'
+  | 'onTouchEnd'
+  | 'onTouchCancel'
 interface MouseTouchEvents {
   onMouseUp?(event: MouseEvent): any
   onMouseMove?(event: MouseEvent): any
@@ -63,60 +79,61 @@ export const touchMouseInterface: MouseTouchEventKeys[] = [
   'onTouchMove',
   'onTouchEnd',
   'onTouchCancel',
-];
+]
 
-export const composeMouseTouch = (...delegate: MouseTouchEvents[]) => touchMouseInterface.reduce((tmi, method) => {
-  tmi[method] = function composeMouseTouchDelegate(event: any) {
-    delegate.forEach(d =>  {
-      const handler = d[method]
-      if (handler) {
-        handler(event) 
-      }
-    });
-  };
-  return tmi;
-}, {} as MouseTouchEvents);
+export const composeMouseTouch = (...delegate: MouseTouchEvents[]) =>
+  touchMouseInterface.reduce((tmi, method) => {
+    tmi[method] = function composeMouseTouchDelegate(event: any) {
+      delegate.forEach(d => {
+        const handler = d[method]
+        if (handler) {
+          handler(event)
+        }
+      })
+    }
+    return tmi
+  }, {} as MouseTouchEvents)
 
 export const touchDisablesMouse = (delegate: MouseTouchEvents) => {
-  let isTouch = false;
+  let isTouch = false
   return {
     onMouseUp(event: MouseEvent) {
       if (!isTouch && delegate.onMouseUp) {
-        delegate.onMouseUp(event);
+        delegate.onMouseUp(event)
       }
     },
     onMouseMove(event: MouseEvent) {
       if (!isTouch && delegate.onMouseMove) {
-        delegate.onMouseMove(event);
+        delegate.onMouseMove(event)
       }
     },
     onMouseDown(event: MouseEvent) {
       if (!isTouch && delegate.onMouseDown) {
-        delegate.onMouseDown(event);
+        delegate.onMouseDown(event)
       }
     },
     onTouchStart(event: TouchEvent) {
-      isTouch = true;
+      isTouch = true
       if (delegate.onTouchStart) {
-        delegate.onTouchStart(event);
+        delegate.onTouchStart(event)
       }
     },
     onTouchMove(event: TouchEvent) {
-      isTouch = true;
+      isTouch = true
       if (delegate.onTouchMove) {
-        delegate.onTouchMove(event);
-      } 
+        delegate.onTouchMove(event)
+      }
     },
     onTouchEnd(event: TouchEvent) {
-      isTouch = true;
-      if ( delegate.onTouchEnd) {
-        delegate.onTouchEnd(event);
+      isTouch = true
+      if (delegate.onTouchEnd) {
+        delegate.onTouchEnd(event)
       }
     },
     onTouchCancel(event: TouchEvent) {
       if (delegate.onTouchCancel) {
-        delegate.onTouchCancel(event);
+        delegate.onTouchCancel(event)
       }
     },
-  };
-};
+  }
+}

@@ -1,11 +1,10 @@
 import React from 'react'
 import Stage from 'morpheus/casts/containers/Stage'
-import WebGl from 'morpheus/casts/containers/WebGl'
 import { Scene } from '../casts/types'
 
 interface NewGameProps {
   stageScenes: Scene[]
-}   
+}
 
 const NewGame: React.FC<NewGameProps> = ({ stageScenes }) => {
   return <Stage stageScenes={stageScenes} />

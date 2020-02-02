@@ -23,7 +23,7 @@ export interface Gamestate {
   value: number
 }
 
-export interface Hotspot extends Morpheus {
+export interface Hotspot extends Cast {
   castId: number
   rectTop: number
   rectBottom: number
@@ -104,6 +104,5 @@ export interface UnresolvedScene {
   cdFlags: number
   sceneType: number
   palette: number
-  casts: (Cast|{ ref: { castId: string } })[]
+  casts: (Cast | { ref: { castId: string } })[]
 }
-

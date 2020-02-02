@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { Raycaster, Object3D, Camera, Vector2 } from 'three'
 import { PointerEvent } from 'react-three-fiber'
+import useRaf from '@rooks/use-raf'
 import { difference, sortBy, uniq, get } from 'lodash'
 import {
   selectors as castSelectors,
@@ -22,8 +23,10 @@ import {
   DST_RATIO,
   PANO_OFFSET,
 } from 'morpheus/constants'
+import { screenToGame } from 'utils/coordinates'
 import { ThunkDispatch } from 'redux-thunk'
 import { Scene, Hotspot } from '../types'
+import { isPano } from '../matchers'
 import { Action } from 'redux'
 
 const actionQueue = new Queue(1, 128)
@@ -33,17 +36,25 @@ type Position = {
   left: number
 }
 
-interface ClientPosition {
+interface ClientInputState {
   clientX: number
   clientY: number
 }
-interface ClientInputState extends ClientPosition {
-  uv?: Vector2
- }
 
 const raycaster = new Raycaster()
 
-export default function(dispatch: ThunkDispatch<any, any, Action>, panoObject: Object3D|undefined, camera: Camera, scene: Scene|undefined, screenTop: number,screenLleft: number, screenWidth: number, screenHeight: number, offsetX: number, rotX: number) {
+export default function(
+  dispatch: ThunkDispatch<any, any, Action>,
+  panoObject: Object3D | undefined,
+  camera: Camera,
+  scene: Scene | undefined,
+  screenTop: number,
+  screenLeft: number,
+  screenWidth: number,
+  screenHeight: number,
+  offsetX: number,
+  rotX: number
+) {
   // const store = useMemo(() => storeFactory(), [])
   // const handleEvent = useMemo(() => handleEventFactory(), [])
   // const [hotspots, castActionsForScene]: [Hotspot[], any] = useMemo(() => [scene.casts.filter(isHotspot) as any, castActions.forScene(scene)], [scene])
@@ -56,35 +67,69 @@ export default function(dispatch: ThunkDispatch<any, any, Action>, panoObject: O
   const [wasMouseDowned, setWasMouseDowned] = useState<boolean>(false)
   const [wasMouseMoved, setWasMouseMoved] = useState<boolean>(false)
   const [wasMouseUpped, setWasMouseUpped] = useState<boolean>(false)
-  const [lastUpdate, setLastUpdatePosition] = useState<ClientInputState>()
+
+  const [lastUpdate, setLastUpdatePosition] = useState<ClientInputState>({
+    clientY: screenTop,
+    clientX: screenLeft,
+  })
+
+  const { top, left } = useMemo(
+    () =>
+      screenToGame({
+        top: lastUpdate.clientY - screenTop,
+        left: lastUpdate.clientX - screenLeft,
+        height: screenHeight,
+        width: screenWidth,
+      }),
+    [lastUpdate, screenTop, screenLeft, screenWidth, screenHeight]
+  )
+
+  const isPanoScene = useMemo(() => {
+    return scene && isPano(scene)
+  }, [scene])
 
   const currentPanoPosition = useMemo(() => {
-    if (lastUpdate) {
-      const { clientX, clientY, uv } = lastUpdate
+    if (lastUpdate && isPanoScene) {
+      const { clientX, clientY } = lastUpdate
       const currentScreenPosition = {
         top: clientY - screenTop,
         left: clientX - screenLeft,
       }
-      if (!document.hidden && currentScreenPosition && uv) {
+      if (!document.hidden && currentScreenPosition && panoObject) {
         // Convert mouse coordinates to x, y clamped between -1 and 1.  Also invert y
         const y =
           ((screenHeight - currentScreenPosition.top) / screenHeight) * 2 - 1
         const x =
           ((currentScreenPosition.left - screenWidth) / screenWidth) * 2 + 1
 
-        const top = uv.y * -512 + 512
+        raycaster.setFromCamera({ x, y }, camera)
+        const panoIntersects = raycaster.intersectObject(panoObject)
+        const panoIntersect = panoIntersects.find(intersect => {
+          if (intersect && intersect.uv) {
+            return true
+          }
+          return false
+        })
+        if (panoIntersect) {
+          const { uv } = panoIntersect
+          if (uv) {
+            const top = uv.y * -512 + 512
 
-        // This logic is the reverse of the panoChunk shader logic
-        let left = ((8 / 7) * ((1.0 - uv.x) - offsetX / 1024) + rotX - PANO_OFFSET) * DST_RATIO
-        if (left < 0) {
-          left += 3600
-        } else if (left > 3600) {
-          left -= 3600
+            // This is the inverse of the panoChunk shader math
+            let left =
+              ((8 / 7) * (1.0 - uv.x - offsetX / 1024) + rotX - PANO_OFFSET) *
+              DST_RATIO
+            if (left < 0) {
+              left += 3600
+            } else if (left > 3600) {
+              left -= 3600
+            }
+            return { top, left }
+          }
         }
-        return { top, left }
       }
     }
-  }, [lastUpdate])
+  }, [lastUpdate, isPanoScene, camera, panoObject])
 
   // function updateGame({ clientX, clientY }: { clientX: number; clientY: number}, isTouch?: boolean, isTouchEnd?: boolean) {
   //   const location = gameSelectors.location(store.getState())
@@ -220,10 +265,13 @@ export default function(dispatch: ThunkDispatch<any, any, Action>, panoObject: O
   //   }
   // })
 
-  const update = useCallback(function update(event: PointerEvent) {
-    const { clientX, clientY, uv } = event
-    setLastUpdatePosition({ clientX, clientY, uv })
-  }, [setLastUpdatePosition])
+  const update = useCallback(
+    function update(event: PointerEvent) {
+      const { clientX, clientY } = event
+      setLastUpdatePosition({ clientX, clientY })
+    },
+    [setLastUpdatePosition]
+  )
 
   // function off() {
   //   if (orientation) {
@@ -235,29 +283,38 @@ export default function(dispatch: ThunkDispatch<any, any, Action>, panoObject: O
   //   update(mouseEvent, isTouch)
   // }
 
+  const onPointerUp = useCallback(
+    function onMouseUp(event: PointerEvent) {
+      setWasMouseUpped(true)
+      update(event)
+    },
+    [update, setWasMouseUpped]
+  )
 
-  const onPointerUp = useCallback(function onMouseUp(event: PointerEvent) {
-    setWasMouseUpped(true)
-    update(event)
-  }, [update, setWasMouseUpped])
+  const onPointerMove = useCallback(
+    function onMouseMove(event: PointerEvent) {
+      setWasMouseMoved(true)
+      update(event)
+    },
+    [update, setWasMouseMoved]
+  )
 
-  const onPointerMove = useCallback(function onMouseMove(event: PointerEvent) {
-    setWasMouseMoved(true)
-    update(event)
-  }, [update, setWasMouseMoved])
+  const onPointerDown = useCallback(
+    function onMouseDown(event: PointerEvent) {
+      setWasMouseDowned(true)
+      update(event)
+    },
+    [update, setWasMouseDowned]
+  )
 
-  const onPointerDown = useCallback(function onMouseDown(event: PointerEvent) {
-    setWasMouseDowned(true)
-    update(event)
-  }, [update, setWasMouseDowned]);
-  
   return {
-    currentPanoPosition,
+    top,
+    left,
     onPointerUp,
     onPointerMove,
     onPointerDown,
     wasMouseDowned,
     wasMouseMoved,
-    wasMouseUpped
+    wasMouseUpped,
   }
 }

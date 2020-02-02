@@ -1,25 +1,25 @@
-import { useMemo, useEffect } from 'react'
+import { useMemo } from 'react'
 import { get, uniqBy, flatten } from 'lodash'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
 import { and, not } from 'utils/matchers'
 // @ts-ignore
-import { resizeToScreen } from '../../utils/resize'
-import { Renderable } from './components/Canvas'
-import { VideoController } from './components/Videos'
+import { resizeToScreen } from '../../../utils/resize'
+import { Renderable } from '../components/Canvas'
+import { VideoController } from '../components/Videos'
 import {
   Matcher,
   forMorpheusType,
   isMovie,
   isImage,
   isControlledCast,
-} from './matchers'
+} from '../matchers'
 import {
   Scene,
   MovieCast,
   ControlledMovieCast,
   MovieSpecialCast,
   Cast,
-} from './types'
+} from '../types'
 
 type DrawSource = HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
 
@@ -89,7 +89,7 @@ function calculateControlledFrameOperation({
       rect.x,
       rect.y,
       rect.sizeX,
-      rect.sizeY,
+      rect.sizeY
     )
   }
 }
@@ -103,7 +103,7 @@ type DrawOperation = [
   number,
   number,
   number,
-  number,
+  number
 ]
 
 function calculateImageOperation({
@@ -158,7 +158,7 @@ function* generateMovieCastDrawOps({
   const matchActiveImage = matchActiveCast(gamestates)
   const matchActiveImages = and<CastSource<any, MovieCast>>(
     ([_, casts]) => !!casts.length,
-    ([_, casts]) => !!casts.find(matchActiveImage),
+    ([_, casts]) => !!casts.find(matchActiveImage)
   )
   for (let image of images) {
     const [img, casts] = image
@@ -216,33 +216,32 @@ function generateControlledRenderables({
   return controlledCasts.reduce((memo, [img, casts]) => {
     for (const cast of casts) {
       const location = cast.location || cast.controlledLocation
-      memo.push(calculateControlledFrameOperation({
-        cast,
-        img,
-        gamestates,
-        rect: resizeToScreen({
-          left: location.x,
-          top: location.y,
-          right: location.x + cast.width,
-          bottom: location.y + cast.height,
-          width,
-          height,
-        }),
-      }))
+      memo.push(
+        calculateControlledFrameOperation({
+          cast,
+          img,
+          gamestates,
+          rect: resizeToScreen({
+            left: location.x,
+            top: location.y,
+            right: location.x + cast.width,
+            bottom: location.y + cast.height,
+            width,
+            height,
+          }),
+        })
+      )
     }
     return memo
   }, [] as Renderable[])
 }
 
 function* generateRenderables(ops: DrawOperation[], renderables: Renderable[]) {
-  for (let op of ops.slice(0, -1)) {
+  for (let op of ops) {
     yield (ctx: CanvasRenderingContext2D) => ctx.drawImage(...op)
   }
   for (let renderable of renderables) {
     yield (ctx: CanvasRenderingContext2D) => renderable(ctx)
-  }
-  for (let op of ops.slice(-1)) {
-    yield (ctx: CanvasRenderingContext2D) => ctx.drawImage(...op)
   }
 }
 
@@ -255,13 +254,7 @@ function matchCastIds<T extends Cast>(castIds: number[]) {
     casts.find((cast: T) => castIds.includes(cast.castId))
 }
 
-interface ComputedStageCast {
-  imageCasts: MovieCast[]
-  videoCasts: MovieSpecialCast[]
-  enteringRenderables: Renderable[]
-  stageRenderables: Renderable[]
-  exitingRenderables: Renderable[]
-}
+type ComputedStageCast = [MovieCast[], MovieSpecialCast[], Renderable[]]
 // CastRef<HtmlImageElement, MovieCast>[]
 export default function useComputedStageCast(
   gamestates: Gamestates,
@@ -269,61 +262,83 @@ export default function useComputedStageCast(
   height: number,
   imagesLoaded: ImageDrawable<MovieCast>[],
   availableVideos: VideoRef[],
+  cursor: { left: number; top: number; image: CanvasImageSource | undefined },
   // controlledRefs: ImageDrawable<ControlledMovieCast>[],
   stageScenes: Scene[],
   enteringScene: Scene | undefined,
   exitingScene: Scene | undefined,
-  deps: any[],
+  deps: any[]
 ) {
+  const cursorRenderable = useMemo(() => {
+    return (ctx: CanvasRenderingContext2D) => {
+      if (cursor.image) {
+        const screenPos = {
+          x: cursor.left - (cursor.image.width as number) / 2,
+          y: cursor.top - (cursor.image.height as number) / 2,
+        }
+        ctx.drawImage(
+          cursor.image,
+          0,
+          0,
+          cursor.image.width as number,
+          cursor.image.height as number,
+          screenPos.x,
+          screenPos.y,
+          cursor.image.width as number,
+          cursor.image.height as number
+        )
+      }
+    }
+  }, [cursor.image, cursor.left, cursor.top])
   const result = useMemo<ComputedStageCast>(() => {
     const matchActive = matchActiveCast(gamestates)
     const matchSpecialMovies = and<MovieSpecialCast>(
       forMorpheusType('MovieSpecialCast'),
-      matchActive,
+      matchActive
     )
     const enteringActiveMovieCasts: MovieSpecialCast[] = enteringScene
-      ? (enteringScene.casts.filter(matchSpecialMovies as Matcher<
-          Cast
-        >) as MovieSpecialCast[])
+      ? (enteringScene.casts.filter(
+          matchSpecialMovies as Matcher<Cast>
+        ) as MovieSpecialCast[])
       : []
     const exitingActiveMovieCasts: MovieSpecialCast[] = exitingScene
-      ? (exitingScene.casts.filter(matchSpecialMovies as Matcher<
-          Cast
-        >) as MovieSpecialCast[])
+      ? (exitingScene.casts.filter(
+          matchSpecialMovies as Matcher<Cast>
+        ) as MovieSpecialCast[])
       : []
 
     const stageActiveMovieCasts = flatten<MovieSpecialCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(matchSpecialMovies as Matcher<
-            Cast
-          >) as MovieSpecialCast[],
-      ),
+          scene.casts.filter(
+            matchSpecialMovies as Matcher<Cast>
+          ) as MovieSpecialCast[]
+      )
     )
 
     const matchControlledMovies = and<ControlledMovieCast>(
       isControlledCast,
-      matchActive,
+      matchActive
     )
     const enterActiveControlledCasts: ControlledMovieCast[] = enteringScene
-      ? (enteringScene.casts.filter(matchControlledMovies as Matcher<
-          Cast
-        >) as ControlledMovieCast[])
+      ? (enteringScene.casts.filter(
+          matchControlledMovies as Matcher<Cast>
+        ) as ControlledMovieCast[])
       : []
 
     const exitingActiveControlledCasts: ControlledMovieCast[] = exitingScene
-      ? (exitingScene.casts.filter(matchControlledMovies as Matcher<
-          Cast
-        >) as ControlledMovieCast[])
+      ? (exitingScene.casts.filter(
+          matchControlledMovies as Matcher<Cast>
+        ) as ControlledMovieCast[])
       : []
 
     const stageActiveControlledCasts = flatten<ControlledMovieCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(matchControlledMovies as Matcher<
-            Cast
-          >) as ControlledMovieCast[],
-      ),
+          scene.casts.filter(
+            matchControlledMovies as Matcher<Cast>
+          ) as ControlledMovieCast[]
+      )
     )
 
     const movieSpecialCasts = uniqBy<MovieSpecialCast>(
@@ -332,7 +347,7 @@ export default function useComputedStageCast(
         ...exitingActiveMovieCasts,
         ...stageActiveMovieCasts,
       ],
-      (cast: Cast) => cast.castId,
+      (cast: Cast) => cast.castId
     )
     let controlledCasts = uniqBy<ControlledMovieCast>(
       [
@@ -340,34 +355,28 @@ export default function useComputedStageCast(
         ...exitingActiveControlledCasts,
         ...stageActiveControlledCasts,
       ],
-      (cast: Cast) => cast.castId,
+      (cast: Cast) => cast.castId
     )
     const imageCasts = (movieSpecialCasts.filter(
-      isImage,
+      isImage
     ) as MovieCast[]).concat(controlledCasts)
     const videoCasts = movieSpecialCasts.filter(isMovie)
     const enteringRenderables = [] as Renderable[]
-    const images = movieSpecialCasts.reduce(
-      (memo, curr) => {
-        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
-        if (loaded) {
-          memo.push(loaded)
-        }
-        return memo
-      },
-      [] as ImageDrawable<MovieCast>[],
-    ) as ImageDrawable<MovieSpecialCast>[]
+    const images = movieSpecialCasts.reduce((memo, curr) => {
+      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+      if (loaded) {
+        memo.push(loaded)
+      }
+      return memo
+    }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<MovieSpecialCast>[]
 
-    const controlledCastsDrawable = controlledCasts.reduce(
-      (memo, curr) => {
-        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
-        if (loaded) {
-          memo.push(loaded)
-        }
-        return memo
-      },
-      [] as ImageDrawable<MovieCast>[],
-    ) as ImageDrawable<ControlledMovieCast>[]
+    const controlledCastsDrawable = controlledCasts.reduce((memo, curr) => {
+      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+      if (loaded) {
+        memo.push(loaded)
+      }
+      return memo
+    }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<ControlledMovieCast>[]
     const stageRenderables = [
       ...generateRenderables(
         [
@@ -386,18 +395,20 @@ export default function useComputedStageCast(
             height,
             gamestates,
           }),
-        ],
+        ]
       ),
     ]
     const exitingRenderables = [] as Renderable[]
-
-    return {
+    return [
       imageCasts,
       videoCasts,
-      enteringRenderables,
-      stageRenderables,
-      exitingRenderables,
-    } as ComputedStageCast
+      [
+        ...enteringRenderables,
+        ...stageRenderables,
+        ...exitingRenderables,
+        cursorRenderable,
+      ],
+    ] as ComputedStageCast
   }, [
     enteringScene,
     exitingScene,
@@ -405,6 +416,7 @@ export default function useComputedStageCast(
     gamestates,
     availableVideos,
     imagesLoaded,
+    cursorRenderable,
     ...deps,
   ])
 

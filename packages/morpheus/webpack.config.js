@@ -292,7 +292,7 @@ module.exports = env => {
       }),
       new webpack.DefinePlugin(webpackDefineConfig),
     ].concat(
-      env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : [],
+      env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : []
     ),
   }
 

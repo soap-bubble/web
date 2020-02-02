@@ -1,19 +1,20 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useLayoutEffect } from 'react'
 import createCanvas from 'utils/canvas'
-import {
-  CanvasTexture
-} from 'three'
-import {
-  DST_WIDTH,
-  DST_HEIGHT,
-  PANO_CANVAS_WIDTH,
-} from 'morpheus/constants'
+import { CanvasTexture } from 'three'
+import { DST_WIDTH, DST_HEIGHT, PANO_CANVAS_WIDTH } from 'morpheus/constants'
 
-export default function usePanoChunk(img: HTMLImageElement|undefined, rotX: number): [CanvasTexture|undefined, number] {
-  const canvas = useMemo(() => createCanvas({
-    width: 1024,
-    height: 512,
-  }), [])
+export default function usePanoChunk(
+  img: HTMLImageElement | undefined,
+  offsetX: number
+): CanvasTexture | undefined {
+  const canvas = useMemo(
+    () =>
+      createCanvas({
+        width: 1024,
+        height: 512,
+      }),
+    []
+  )
   const texture = useMemo(() => {
     if (canvas) {
       const texture = new CanvasTexture(canvas)
@@ -37,27 +38,26 @@ export default function usePanoChunk(img: HTMLImageElement|undefined, rotX: numb
     }
     return undefined
   }, [img])
-  const chunk = Math.floor((rotX % 3072) / 24)
-  const x = chunk * 24
-  useEffect(() => {
+
+  useLayoutEffect(() => {
     if (sourceCanvas && texture) {
       const dstContext = canvas.getContext('2d')
       const srcContext = sourceCanvas.getContext('2d')
       if (dstContext && srcContext) {
-        if (x > PANO_CANVAS_WIDTH - DST_WIDTH) {
-          const firstChunkWidth = PANO_CANVAS_WIDTH - x
+        if (offsetX > PANO_CANVAS_WIDTH - DST_WIDTH) {
+          const firstChunkWidth = PANO_CANVAS_WIDTH - offsetX
           const firstChunkWidthMorpheus = DST_WIDTH - firstChunkWidth
           const secondChunkOffset = DST_WIDTH - firstChunkWidthMorpheus
           dstContext.drawImage(
             sourceCanvas,
-            x,
+            offsetX,
             0,
             DST_WIDTH,
             DST_HEIGHT,
             0,
             0,
             DST_WIDTH,
-            DST_HEIGHT,
+            DST_HEIGHT
           )
           dstContext.drawImage(
             sourceCanvas,
@@ -68,24 +68,24 @@ export default function usePanoChunk(img: HTMLImageElement|undefined, rotX: numb
             secondChunkOffset,
             0,
             firstChunkWidthMorpheus,
-            DST_HEIGHT,
+            DST_HEIGHT
           )
         } else {
           dstContext.drawImage(
             sourceCanvas,
-            x,
+            offsetX,
             0,
             DST_WIDTH,
             DST_HEIGHT,
             0,
             0,
             DST_WIDTH,
-            DST_HEIGHT,
+            DST_HEIGHT
           )
         }
         texture.needsUpdate = true
       }
     }
-  }, [canvas, img, x])
-  return [texture, x]
+  }, [canvas, img, offsetX])
+  return texture
 }

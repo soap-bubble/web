@@ -14,6 +14,8 @@ import { CURSOR_IDS } from 'morpheus/game/cursors'
 import isDebug from 'utils/isDebug'
 import { ActionCreator, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
+import { Hotspot } from 'morpheus/casts/types'
+import { Gamestates } from 'morpheus/gamestate/isActive'
 
 const logger = loggerFactory('input:handlers')
 
@@ -23,79 +25,118 @@ const isHotspotActive = ({ hotspot, gamestates }: any) =>
     gamestates,
   })
 
-export const resolveCursor: ActionCreator<ThunkAction<number, any, any, Action>> = ({
-  hotspots,
-  currentPosition,
-  startingPosition,
-  isMouseDown,
-}: any) => {
-  return (dispatch, getState) => {
-    let cursor
-    for (let i = 0; i < hotspots.length; i++) {
-      const hotspot = hotspots[i]
+export function resolveCursor(
+  hotspots: Hotspot[],
+  gamestates: Gamestates,
+  currentPosition: { top: number; left: number },
+  startingPosition: { top: number; left: number },
+  isMouseDown: boolean
+) {
+  let cursor
+  for (let i = 0; i < hotspots.length; i++) {
+    const hotspot = hotspots[i]
+    if (
+      isHotspotActive({
+        hotspot,
+        gamestates,
+      })
+    ) {
       if (
-        isHotspotActive({
-          hotspot,
-          gamestates: gamestateSelectors.forState(getState()),
-        })
+        hotspotRectMatchesPosition(currentPosition)(hotspot) &&
+        actionType.isChangeCursor(hotspot)
       ) {
-        if (
-          hotspotRectMatchesPosition(currentPosition)(hotspot) &&
-          actionType.isChangeCursor(hotspot)
-        ) {
-          const { param1, param2 } = hotspot
-          if (param1) {
-            const gamestate = gamestateSelectors
-              .forState(getState())
-              .byId(param1)
-            if (gamestate) {
-              cursor = gamestate.value + param2
-              break
-            }
+        const { param1, param2 } = hotspot
+        if (param1) {
+          const gamestate = gamestates.byId(param1)
+          if (gamestate) {
+            cursor = gamestate.value + param2
+            break
           }
-        } else if (
-          hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND &&
-          or(
-            hotspotRectMatchesPosition(currentPosition),
-            and(
-              hotspotRectMatchesPosition(startingPosition),
-              or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
-              or(
-                actionType.isRotate,
-                actionType.isHorizSlider,
-                actionType.isVertSlider,
-                actionType.isTwoAxisSlider,
-              ),
-            ),
-          )(hotspot)
-        ) {
-          if (hotspot.type >= 5 && hotspot.type <= 8) {
-            if (isMouseDown) {
-              cursor = CURSOR_IDS.CLOSED
-            } else if (!isMouseDown) {
-              cursor = CURSOR_IDS.OPEN
-            }
-          } else {
-            cursor = CURSOR_IDS.HAND
-          }
-          break
-        } else if (
-          hotspot.cursorShapeWhenActive !== 0 &&
-          hotspotRectMatchesPosition(currentPosition)(hotspot)
-        ) {
-          cursor = hotspot.cursorShapeWhenActive
-          break
         }
+      } else if (
+        hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND &&
+        or(
+          hotspotRectMatchesPosition(currentPosition),
+          and(
+            hotspotRectMatchesPosition(startingPosition),
+            or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
+            or(
+              actionType.isRotate,
+              actionType.isHorizSlider,
+              actionType.isVertSlider,
+              actionType.isTwoAxisSlider
+            )
+          )
+        )(hotspot)
+      ) {
+        if (hotspot.type >= 5 && hotspot.type <= 8) {
+          if (isMouseDown) {
+            cursor = CURSOR_IDS.CLOSED
+          } else if (!isMouseDown) {
+            cursor = CURSOR_IDS.OPEN
+          }
+        } else {
+          cursor = CURSOR_IDS.HAND
+        }
+        break
+      } else if (
+        hotspot.cursorShapeWhenActive !== 0 &&
+        hotspotRectMatchesPosition(currentPosition)(hotspot)
+      ) {
+        cursor = hotspot.cursorShapeWhenActive
+        break
       }
     }
+  }
 
-    if (!cursor) {
-      cursor = CURSOR_IDS.WHEEL
-    }
-    return cursor
+  if (!cursor) {
+    cursor = CURSOR_IDS.WHEEL
+  }
+  return cursor
+}
+
+export const resolveCursorAction: ActionCreator<ThunkAction<
+  number,
+  any,
+  any,
+  Action
+>> = ({ hotspots, currentPosition, startingPosition, isMouseDown }: any) => {
+  return (dispatch, getState) => {
+    const gamestates = gamestateSelectors.forState(getState())
+    return resolveCursor(
+      hotspots,
+      gamestates,
+      currentPosition,
+      startingPosition,
+      isMouseDown
+    )
   }
 }
 
+export interface EventOption {
+  currentPosition: {
+    top: number
+    left: number
+  }
+  startingPosition: {
+    top: number
+    left: number
+  }
+  hotspots: Hotspot[]
+  nowInHotspots: Hotspot[]
+  leavingHotspots: Hotspot[]
+  enteringHotspots: Hotspot[]
+  noInteractionHotspots: Hotspot[]
+  isClick: boolean
+  isMouseDown: boolean
+  wasMouseMoved: boolean
+  wasMouseUpped: boolean
+  wasMouseDowned: boolean
+  currentScene: number
+  handleHotspot: ActionCreator<
+    ThunkAction<Promise<boolean>, any, any, Action<any>>
+  >
+}
 export const handleEventFactory = () => {
   const self: any = function handleEvent({
     currentPosition,
@@ -111,16 +152,16 @@ export const handleEventFactory = () => {
     wasMouseUpped,
     wasMouseDowned,
     handleHotspot,
-  }: any) {
+  }: EventOption) {
     return async (dispatch: any, getState: any) => {
-      let alwaysExecuteHotspots = []
-      let mouseLeavingHotspots = []
-      let mouseEnteringHotspots = []
-      let mouseUpHotspots = []
-      let mouseDownHotspots = []
-      let mouseDragHotspots = []
-      let clickableHotspots = []
-      let mouseNoneHotspots = []
+      let alwaysExecuteHotspots: Hotspot[] = []
+      let mouseLeavingHotspots: Hotspot[] = []
+      let mouseEnteringHotspots: Hotspot[] = []
+      let mouseUpHotspots: Hotspot[] = []
+      let mouseDownHotspots: Hotspot[] = []
+      let mouseDragHotspots: Hotspot[] = []
+      let clickableHotspots: Hotspot[] = []
+      let mouseNoneHotspots: Hotspot[] = []
 
       alwaysExecuteHotspots = hotspots
         .filter(gesture.isAlways)
@@ -134,15 +175,15 @@ export const handleEventFactory = () => {
 
       if (wasMouseUpped) {
         mouseUpHotspots = nowInHotspots.filter(
-          and(hotspotRectMatchesPosition(startingPosition), gesture.isMouseUp),
+          and(hotspotRectMatchesPosition(startingPosition), gesture.isMouseUp)
         )
 
         if (isClick) {
           clickableHotspots = nowInHotspots.filter(
             and(
               hotspotRectMatchesPosition(startingPosition),
-              gesture.isMouseClick,
-            ),
+              gesture.isMouseClick
+            )
           )
         }
       }
@@ -156,9 +197,9 @@ export const handleEventFactory = () => {
               actionType.isRotate,
               actionType.isHorizSlider,
               actionType.isVertSlider,
-              actionType.isTwoAxisSlider,
-            ),
-          ),
+              actionType.isTwoAxisSlider
+            )
+          )
         )
       }
 
@@ -171,8 +212,8 @@ export const handleEventFactory = () => {
               actionType.isRotate,
               actionType.isHorizSlider,
               actionType.isVertSlider,
-              actionType.isTwoAxisSlider,
-            ),
+              actionType.isTwoAxisSlider
+            )
           )
           .forEach((hotspot: any) => {
             const { param1 } = hotspot
@@ -202,6 +243,7 @@ export const handleEventFactory = () => {
           self.lastWasMouseMoved !== wasMouseMoved)
       ) {
         logger.debug({
+          hotspots,
           currentPosition,
           startingPosition,
           nowInHotspots,
@@ -255,7 +297,7 @@ export const handleEventFactory = () => {
               startingPosition,
               isMouseDown,
               context: handlerContext,
-            }),
+            })
           )
           if (inform) {
             inform({
@@ -279,15 +321,6 @@ export const handleEventFactory = () => {
       await someSeries(mouseDownHotspots, handleIfActive(debugLogger))
       await forEachSeries(mouseNoneHotspots, handleIfActive(debugLogger))
 
-      const cursor = dispatch(
-        resolveCursor({
-          hotspots,
-          currentPosition,
-          startingPosition,
-          isMouseDown,
-        }),
-      )
-      await dispatch(gameActions.setCursor(cursor))
       // @ts-ignore
       if (nextSceneSpread) {
         await dispatch(sceneActions.goToScene(...nextSceneSpread))

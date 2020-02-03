@@ -1,10 +1,4 @@
-import React, {
-  useRef,
-  useEffect,
-  useMemo,
-  MouseEvent,
-  TouchEvent,
-} from 'react'
+import React, { useRef, PointerEvent } from 'react'
 import { useSelector } from 'react-redux'
 import useRaf from '@rooks/use-raf'
 import { selectors as gameSelectors } from 'morpheus/game'
@@ -17,96 +11,55 @@ interface CanvasProps {
   height: number
   top: number
   left: number
-  enteringRenderables: Renderable[]
-  stageRenderables: Renderable[]
-  exitingRenderables: Renderable[]
-  onMouseDown: (e: MouseEvent<HTMLCanvasElement>) => void
-  onMouseMove: (e: MouseEvent<HTMLCanvasElement>) => void
-  onMouseUp: (e: MouseEvent<HTMLCanvasElement>) => void
-  onTouchMove: (e: TouchEvent<HTMLCanvasElement>) => void
-  onTouchStart: (e: TouchEvent<HTMLCanvasElement>) => void
-  onTouchEnd: (e: TouchEvent<HTMLCanvasElement>) => void
-  onTouchCancel: (e: TouchEvent<HTMLCanvasElement>) => void
+  renderables: Renderable[]
+  onPointerDown?: (e: PointerEvent<HTMLCanvasElement>) => void
+  onPointerMove?: (e: PointerEvent<HTMLCanvasElement>) => void
+  onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
+  onPointerLeave?: (e: PointerEvent<HTMLCanvasElement>) => void
 }
 
 export function render(
   ctx: CanvasRenderingContext2D | null,
-  renderable: Renderable[],
-) {
-  if (ctx) {
-    for (let render of renderable) {
-      render(ctx)
-    }
-  }
-}
+  renderable: Renderable[]
+) {}
 
 const Canvas = ({
   height,
   width,
   top,
   left,
-  enteringRenderables: entering,
-  stageRenderables: onstage,
-  exitingRenderables: exiting,
-  onMouseDown,
-  onMouseMove,
-  onMouseUp,
-  onTouchMove,
-  onTouchStart,
-  onTouchEnd,
-  onTouchCancel,
+  renderables,
+  onPointerDown,
+  onPointerMove,
+  onPointerUp,
+  onPointerLeave,
 }: CanvasProps) => {
-  const cursor = useSelector(gameSelectors.cursorImg) as CanvasImageSource
-  const cursorPos = useSelector(inputSelectors.cursorPosition) as {
-    left: number
-    top: number
-  }
-  const cursorRenderable = useMemo(() => {
-    return (ctx: CanvasRenderingContext2D) => {
-      if (cursor) {
-        const screenPos = {
-          x: cursorPos.left - (cursor.width as number) / 2,
-          y: cursorPos.top - (cursor.height as number) / 2,
-        }
-        ctx.drawImage(
-          cursor,
-          0,
-          0,
-          cursor.width as number,
-          cursor.height as number,
-          screenPos.x,
-          screenPos.y,
-          cursor.width as number,
-          cursor.height as number,
-        )
-      }
-    }
-  }, [cursor, cursorPos])
   const canvasRef = useRef<HTMLCanvasElement>(null)
-  const allRenderables = useMemo(() => {
-    return [...exiting, ...entering, ...onstage, cursorRenderable]
-  }, [exiting, entering, onstage, cursorRenderable])
+
   useRaf(() => {
     if (canvasRef.current) {
       try {
-        render(canvasRef.current.getContext('2d'), allRenderables)
+        const ctx = canvasRef.current.getContext('2d')
+        if (ctx) {
+          ctx.clearRect(0, 0, width, height)
+          for (let render of renderables) {
+            render(ctx)
+          }
+        }
       } catch (e) {
         console.error('While running render loop', e)
       }
     }
-  }, !!(canvasRef.current && allRenderables.length))
+  }, !!(canvasRef.current && renderables.length))
   return (
     <canvas
       width={width}
       height={height}
       ref={canvasRef}
-      onMouseDown={onMouseDown}
-      onMouseMove={onMouseMove}
-      onMouseUp={onMouseUp}
-      onTouchStart={onTouchStart}
-      onTouchMove={onTouchMove}
-      onTouchEnd={onTouchEnd}
-      onTouchCancel={onTouchCancel}
+      onPointerUp={onPointerUp}
+      onPointerDown={onPointerDown}
+      onPointerMove={onPointerMove}
+      onPointerLeave={onPointerLeave}
       style={{
         cursor: 'none',
         width: `${width}px`,

@@ -9,6 +9,7 @@ import React, {
 } from 'react'
 import { getAssetUrl } from 'service/gamedb'
 import { MovieSpecialCast } from '../types'
+import { cast } from 'bluebird'
 
 type VideoEvent = (e: SyntheticEvent<HTMLVideoElement>) => void
 type VideoRef = (el: HTMLVideoElement | null) => void
@@ -20,15 +21,16 @@ export interface VideoController {
 }
 type VideoControllerRef = (a: VideoController) => void
 export type VideoCastEventCallback = (
-  ref: [HTMLVideoElement, MovieSpecialCast[]],
+  ref: [HTMLVideoElement, MovieSpecialCast[]]
 ) => void
 export type VideoCastRefCallback = (
-  ref: [VideoController, MovieSpecialCast[]],
+  ref: [VideoController, MovieSpecialCast[]]
 ) => void
 
 interface VidelElProps {
   url: string
   volume: number
+  casts: MovieSpecialCast[]
   looping: boolean
   onVideoRef: VideoControllerRef
   onVideoEnded: VideoEvent
@@ -39,6 +41,7 @@ const VideoEl = ({
   url,
   volume,
   looping,
+  casts,
   onVideoRef,
   onVideoEnded,
   onVideoCanPlayThrough,
@@ -48,7 +51,7 @@ const VideoEl = ({
   useEffect(() => {
     onVideoRef({
       el: videoRef.current,
-      castIds: [],
+      castIds: casts.map(c => c.castId),
       play() {
         if (videoRef.current) {
           videoRef.current.play()
@@ -104,6 +107,7 @@ interface MovieCastCollectionMap {
 interface VideoMovieCastCollection {
   url: string
   looping: boolean
+  casts: MovieSpecialCast[]
   onVideoEnded: VideoEvent
   onVideoCanPlaythrough: VideoEvent
   onVideoRef: VideoControllerRef
@@ -126,11 +130,12 @@ const Video = ({
             ref.push(curr)
             return memo
           },
-          {} as MovieCastCollectionMap,
-        ),
+          {} as MovieCastCollectionMap
+        )
       ).map(([url, movieCasts]) => {
         return {
           url,
+          casts: movieCasts,
           // autoplay: !!castRefs.find(({ autoplay }) => autoplay),
           looping: !!movieCasts.find(({ looping }) => looping),
           onVideoRef(ref) {
@@ -144,17 +149,25 @@ const Video = ({
           },
         } as VideoMovieCastCollection
       }),
-    [movieSpecialCasts],
+    [movieSpecialCasts]
   )
 
   return (
     <React.Fragment>
       {aggregatedCastRefs.map(
-        ({ url, looping, onVideoRef, onVideoCanPlaythrough, onVideoEnded }) => {
+        ({
+          casts,
+          url,
+          looping,
+          onVideoRef,
+          onVideoCanPlaythrough,
+          onVideoEnded,
+        }) => {
           return (
             <VideoEl
               key={url}
               url={url}
+              casts={casts}
               looping={looping}
               volume={volume}
               onVideoRef={onVideoRef}
@@ -162,7 +175,7 @@ const Video = ({
               onVideoCanPlayThrough={onVideoCanPlaythrough}
             />
           )
-        },
+        }
       )}
     </React.Fragment>
   )

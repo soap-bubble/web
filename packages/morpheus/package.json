@@ -72,6 +72,7 @@
     "@babel/preset-typescript": "^7.3.3",
     "@types/bluebird": "^3.5.27",
     "@types/browser-bunyan": "^0.4.5",
+    "@types/jest": "^25.1.1",
     "@types/local-storage": "^1.4.0",
     "@types/lodash": "^4.14.137",
     "@types/promise-queue": "^2.2.0",
@@ -133,7 +134,7 @@
     "sprintf": "^0.1.5",
     "style-loader": "^0.23.1",
     "ts-loader": "^6.0.4",
-    "typescript": "^3.5.3",
+    "typescript": "^3.7.5",
     "url-loader": "^1.1.2",
     "webpack": "^4.28.2",
     "webpack-cli": "^3.3.4",
@@ -166,13 +167,13 @@
     "graphology-layout": "^0.1.0",
     "graphology-layout-forceatlas2": "^0.2.1",
     "http-proxy-middleware": "^0.20.0",
-    "immutable": "https://registry.npmjs.org/immutable/-/immutable-3.8.1.tgz",
+    "immutable": "3",
     "keycode": "^2.1.9",
     "local-storage": "^1.4.2",
     "lodash": "^4.13.1",
     "mongoose": "^4.5.0",
     "promise-queue": "^2.2.5",
-    "prop-types": "https://registry.npmjs.org/prop-types/-/prop-types-15.6.0.tgz",
+    "prop-types": "^15.7.2",
     "query-string": "^6.8.3",
     "raf": "^3.2.0",
     "react": "^16.12.0",
@@ -193,8 +194,8 @@
     "sigma": "^2.0.0-alpha18",
     "socket.io": "^2.0.4",
     "socket.io-client": "^2.0.4",
-    "three": "^0.110.0",
+    "three": "^0.112.1",
     "ua-parser-js": "^0.7.18",
-    "uuid": "https://registry.npmjs.org/uuid/-/uuid-2.0.3.tgz"
+    "uuid": "^3.4.0"
   }
 }

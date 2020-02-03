@@ -54,7 +54,7 @@ function createCanvas({ width, height }: { width: number; height: number }) {
 }
 
 const loadedCursors = {} as { [key: number]: Promise<HTMLImageElement> }
-function promiseCursor(id: number) {
+export function promiseCursor(id: number) {
   const realId = id
   if (realId && !loadedCursors[realId]) {
     // @ts-ignore
@@ -96,7 +96,12 @@ export function setVolume(volume: any) {
   }
 }
 
-export const setCursor: ActionCreator<ThunkAction<Promise<any>, any, any, Action>> = (cursor) => {
+export const setCursor: ActionCreator<ThunkAction<
+  Promise<any>,
+  any,
+  any,
+  Action
+>> = cursor => {
   return (dispatch, getState) => {
     const currentCursor = gameSelectors.morpheusCursor(getState())
     if (cursor !== 0 && currentCursor !== cursor) {
@@ -108,27 +113,47 @@ export const setCursor: ActionCreator<ThunkAction<Promise<any>, any, any, Action
             cursor,
             cursorImg,
           },
-        }),
+        })
       )
     }
     return Promise.resolve()
   }
 }
 
-export const setPointerCursor: ActionCreator<ThunkAction<void, any, any, Action>> = () => {
+export const setPointerCursor: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = () => {
   return dispatch => dispatch(setCursor(10002))
 }
 
-export const setOpenHandCursor: ActionCreator<ThunkAction<void, any, any, Action>> = () => {
+export const setOpenHandCursor: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = () => {
   return dispatch => dispatch(setCursor(10008))
 }
 
-export const setCloseHandCursor: ActionCreator<ThunkAction<void, any, any, Action>> = () => {
+export const setCloseHandCursor: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = () => {
   return dispatch => dispatch(setCursor(10009))
 }
 
 // dispatch(inputActions.cursorSetPosition(screenPos));
-export const drawCursor: ActionCreator<ThunkAction<void, any, any, Action>> = () => {
+export const drawCursor: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = () => {
   return (dispatch, getState) => {
     const canvas = gameSelectors.canvas(getState())
     const cursor = gameSelectors.cursorImg(getState())
@@ -149,13 +174,18 @@ export const drawCursor: ActionCreator<ThunkAction<void, any, any, Action>> = ()
         screenPos.x,
         screenPos.y,
         cursor.width,
-        cursor.height,
+        cursor.height
       )
     }
   }
 }
 
-export const setCursorLocationFromPage: ActionCreator<ThunkAction<void, any, any, Action>> = ({ pageX, pageY }: any) => {
+export const setCursorLocationFromPage: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = ({ pageX, pageY }: any) => {
   return (dispatch, getState) => {
     const location = gameSelectors.location(getState())
     const top = pageY - location.y
@@ -164,7 +194,7 @@ export const setCursorLocationFromPage: ActionCreator<ThunkAction<void, any, any
       inputActions.cursorSetPosition({
         top,
         left,
-      }),
+      })
     )
   }
 }
@@ -317,23 +347,25 @@ export const loginEpic = createEpic(action$ =>
         firebase
           .auth()
           .signInWithPopup(new firebase.auth.GoogleAuthProvider())
-          .then(({ user }: any) => user),
-      ),
+          .then(({ user }: any) => user)
+      )
     ),
-    catchError((err: any) => of({
-      type: SAVE_ERROR,
-      payload: err,
-    })),
-    map(user => ({ type: LOGGED_IN, payload: user })),
-  ),
+    catchError((err: any) =>
+      of({
+        type: SAVE_ERROR,
+        payload: err,
+      })
+    ),
+    map(user => ({ type: LOGGED_IN, payload: user }))
+  )
 )
 
 export const logoutEpic = createEpic(action$ =>
   action$.pipe(
     filter(action => action.type === LOGOUT_START),
     mergeMap(() => from(firebase.auth().signOut())),
-    map(user => ({ type: LOGGED_IN, payload: user })),
-  ),
+    map(user => ({ type: LOGGED_IN, payload: user }))
+  )
 )
 
 export const newSaveGameEpic = createEpic((action$, state$) =>
@@ -341,27 +373,36 @@ export const newSaveGameEpic = createEpic((action$, state$) =>
     filter(({ type }) => type === CLOUD_SAVE_NEW),
     mergeMap(async () => {
       try {
-        const { uid } = firebase.auth().currentUser
-        const db = firebase.firestore()
-        const saveRef = db.collection('saves')
-        const saveData = {
-          gamestates: gamestateSelectors.gamestates(state$.value).toJS() || [],
-          currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
-          previousSceneId: sceneSelectors.previousSceneId(state$.value) || null,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-        }
+        const user = firebase.auth().currentUser
+        if (user) {
+          const { uid } = user
+          const db = firebase.firestore()
+          const saveRef = db.collection('saves')
+          const saveData = {
+            gamestates:
+              gamestateSelectors.gamestates(state$.value).toJS() || [],
+            currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
+            previousSceneId:
+              sceneSelectors.previousSceneId(state$.value) || null,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          }
 
-        const response = await saveRef.add({
-          ...saveData,
-          roles: {
-            [uid]: 'owner',
-          },
-        })
-        const { id } = response
+          const response = await saveRef.add({
+            ...saveData,
+            roles: {
+              [uid]: 'owner',
+            },
+          })
+          const { id } = response
+          return {
+            type: SET_SAVE_ID,
+            payload: id,
+          }
+        }
         return {
-          type: SET_SAVE_ID,
-          payload: id,
+          type: SAVE_ERROR,
+          payload: 'User not logged in',
         }
       } catch (err) {
         return {
@@ -369,8 +410,8 @@ export const newSaveGameEpic = createEpic((action$, state$) =>
           payload: err,
         }
       }
-    }),
-  ),
+    })
+  )
 )
 
 export const cloudSaveEpic = createEpic((action$, state$) =>
@@ -379,17 +420,15 @@ export const cloudSaveEpic = createEpic((action$, state$) =>
     mergeMap(async () => {
       try {
         const db = firebase.firestore()
-        const saveRef = db
-          .collection('saves')
-          .doc(gameSelectors.saveId(state$.value))
+        const id = gameSelectors.saveId(state$.value)
+        const saveRef = db.collection('saves').doc(id)
         const saveData = {
           gamestates: gamestateSelectors.gamestates(state$.value).toJS() || [],
           currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
           previousSceneId: sceneSelectors.previousSceneId(state$.value) || null,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
         }
-        const response = await saveRef.set(saveData, { merge: true })
-        const { id } = response
+        await saveRef.set(saveData, { merge: true })
         return {
           type: SET_SAVE_ID,
           payload: id,
@@ -400,8 +439,8 @@ export const cloudSaveEpic = createEpic((action$, state$) =>
           payload: err,
         }
       }
-    }),
-  ),
+    })
+  )
 )
 
 export const loadSavesEpic = createEpic((action$, state$) =>
@@ -409,21 +448,28 @@ export const loadSavesEpic = createEpic((action$, state$) =>
     filter(({ type }) => type === SAVE_LOAD),
     mergeMap(async () => {
       try {
-        const { uid } = firebase.auth().currentUser
-        const db = firebase.firestore()
-        const saveDocs = await db
-          .collection('saves')
-          .where(`roles.${uid}`, '==', 'owner')
-          .get()
+        const user = firebase.auth().currentUser
+        if (user) {
+          const { uid } = user
+          const db = firebase.firestore()
+          const saveDocs = await db
+            .collection('saves')
+            .where(`roles.${uid}`, '==', 'owner')
+            .get()
+          return {
+            type: SAVE_LOAD_SUCCESS,
+            payload: saveDocs.docs.map((doc: any) => {
+              const { updatedAt } = doc.data()
+              return {
+                saveId: doc.id,
+                timestamp: updatedAt.toDate(),
+              }
+            }),
+          }
+        }
         return {
-          type: SAVE_LOAD_SUCCESS,
-          payload: saveDocs.docs.map((doc: any) => {
-            const { updatedAt } = doc.data()
-            return {
-              saveId: doc.id,
-              timestamp: updatedAt.toDate(),
-            }
-          }),
+          type: SAVE_LOAD_ERROR,
+          payload: 'User not logged in',
         }
       } catch (err) {
         return {
@@ -431,8 +477,8 @@ export const loadSavesEpic = createEpic((action$, state$) =>
           payload: err,
         }
       }
-    }),
-  ),
+    })
+  )
 )
 
 export const loadGameEpic = createEpic((action$, state$) =>
@@ -445,15 +491,22 @@ export const loadGameEpic = createEpic((action$, state$) =>
           .collection('saves')
           .doc(saveId || gameSelectors.saveId(state$.value))
           .get()
-        const { currentSceneId, previousSceneId, gamestates } = saveDoc.data()
-        return of([
-          {
-            type: SET_SAVE_ID,
-            payload: saveDoc.id,
-          },
-          gamestateActions.inject(gamestates),
-          sceneActions.goToScene(currentSceneId, true, previousSceneId),
-        ])
+        const data = saveDoc.data()
+        if (data) {
+          const { currentSceneId, previousSceneId, gamestates } = data
+          return of([
+            {
+              type: SET_SAVE_ID,
+              payload: saveDoc.id,
+            },
+            gamestateActions.inject(gamestates),
+            sceneActions.goToScene(currentSceneId, true, previousSceneId),
+          ])
+        }
+        return of({
+          type: 'GAME_LOAD_ERROR',
+          payload: 'User not logged in',
+        })
       } catch (err) {
         return of({
           type: 'GAME_LOAD_ERROR',
@@ -461,16 +514,17 @@ export const loadGameEpic = createEpic((action$, state$) =>
         })
       }
     }),
-    mergeMap(from),
-  ),
+    mergeMap(from)
+  )
 )
 
 export const browserSaveEpic = createEpic((action$, store$) =>
-// @ts-ignore
-  action$.ofType(BROWSER_SAVE)
+  // @ts-ignore
+  action$
+    .ofType(BROWSER_SAVE)
     .forEach(() => {
       const pano = (castSelectors.forScene(
-        sceneSelectors.currentSceneData(store$.value),
+        sceneSelectors.currentSceneData(store$.value)
       ) as any).pano
       storage.set('save', {
         gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
@@ -480,19 +534,21 @@ export const browserSaveEpic = createEpic((action$, store$) =>
         rotation: (pano && pano.object3D.rotation) || null,
       })
     })
-    .catch((err: any) => of({
-      type: SAVE_ERROR,
-      payload: err,
-    })),
+    .catch((err: any) =>
+      of({
+        type: SAVE_ERROR,
+        payload: err,
+      })
+    )
 )
 
 export const localSaveEpic = createEpic((action$, store$) =>
-// @ts-ignore
+  // @ts-ignore
   action$
     .ofType(LOCAL_SAVE)
     .forEach(() => {
       const pano = (castSelectors.forScene(
-        sceneSelectors.currentSceneData(store$.value),
+        sceneSelectors.currentSceneData(store$.value)
       ) as any).pano
       const saveFile = {
         gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
@@ -503,7 +559,7 @@ export const localSaveEpic = createEpic((action$, store$) =>
       }
 
       const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(
-        JSON.stringify(saveFile),
+        JSON.stringify(saveFile)
       )}`
       const downloadAnchorNode = document.createElement('a')
       downloadAnchorNode.setAttribute('href', dataStr)
@@ -515,7 +571,7 @@ export const localSaveEpic = createEpic((action$, store$) =>
     .catch(err => ({
       type: SAVE_ERROR,
       payload: err,
-    })),
+    }))
 )
 
 export const localLoadEpic = createEpic((action$, store$) =>
@@ -528,15 +584,22 @@ export const localLoadEpic = createEpic((action$, store$) =>
         from([
           gamestateActions.inject(gamestates),
           sceneActions.goToScene(currentSceneId, true, previousSceneId),
-        ]),
+        ])
     )
-    .catch(err => of({
-      type: 'GAME_LOAD_ERROR',
-      payload: err,
-    })),
+    .catch(err =>
+      of({
+        type: 'GAME_LOAD_ERROR',
+        payload: err,
+      })
+    )
 )
 
-export const browserLoad: ActionCreator<ThunkAction<void, any, any, Action>> = () => {
+export const browserLoad: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = () => {
   return dispatch => {
     const payload = storage.get('save')
     dispatch({
@@ -547,7 +610,7 @@ export const browserLoad: ActionCreator<ThunkAction<void, any, any, Action>> = (
   }
 }
 
-export const browserLoadEpic = createEpic((action$) =>
+export const browserLoadEpic = createEpic(action$ =>
   action$
     .ofType(BROWSER_LOAD)
     .filter(({ payload: data }) => !!data)
@@ -561,14 +624,14 @@ export const browserLoadEpic = createEpic((action$) =>
             currentSceneId,
             true,
             previousSceneId,
-            rotation,
+            rotation
           ),
-        ]),
-    ),
+        ])
+    )
 )
 
 export const openSaveEpic = createEpic(action$ =>
   action$.ofType(CLOUD_SAVE_OPEN).map(() => ({
     type: SAVE_LOAD,
-  })),
+  }))
 )

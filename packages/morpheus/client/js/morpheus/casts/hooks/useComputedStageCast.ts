@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { get, uniqBy, flatten } from 'lodash'
+import { get, uniqBy, flatten, intersection } from 'lodash'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
 import { and, not } from 'utils/matchers'
 // @ts-ignore
@@ -156,7 +156,7 @@ function* generateMovieCastDrawOps({
   gamestates: Gamestates
 }) {
   const matchActiveImage = matchActiveCast(gamestates)
-  const matchActiveImages = and<CastSource<any, MovieCast>>(
+  const matchActiveImages = and<CastSource<VideoController, MovieCast>>(
     ([_, casts]) => !!casts.length,
     ([_, casts]) => !!casts.find(matchActiveImage)
   )
@@ -268,7 +268,7 @@ export default function useComputedStageCast(
   enteringScene: Scene | undefined,
   exitingScene: Scene | undefined,
   deps: any[]
-) {
+): [MovieCast[], MovieSpecialCast[], Renderable[]] {
   const cursorRenderable = useMemo(() => {
     return (ctx: CanvasRenderingContext2D) => {
       if (cursor.image) {
@@ -290,7 +290,9 @@ export default function useComputedStageCast(
       }
     }
   }, [cursor.image, cursor.left, cursor.top])
-  const result = useMemo<ComputedStageCast>(() => {
+  const [imageCasts, videoCasts, renderables] = useMemo<
+    ComputedStageCast
+  >(() => {
     const matchActive = matchActiveCast(gamestates)
     const matchSpecialMovies = and<MovieSpecialCast>(
       forMorpheusType('MovieSpecialCast'),
@@ -349,6 +351,7 @@ export default function useComputedStageCast(
       ],
       (cast: Cast) => cast.castId
     )
+    const movieSpecialCastIds = movieSpecialCasts.map(c => c.castId)
     let controlledCasts = uniqBy<ControlledMovieCast>(
       [
         ...enterActiveControlledCasts,
@@ -382,7 +385,11 @@ export default function useComputedStageCast(
         [
           ...generateMovieCastDrawOps({
             images,
-            activeMovieCasts: availableVideos,
+            activeMovieCasts: availableVideos.filter(([videoController]) =>
+              videoController.castIds.some(castId =>
+                movieSpecialCastIds.includes(castId)
+              )
+            ),
             width,
             height,
             gamestates,
@@ -399,15 +406,11 @@ export default function useComputedStageCast(
       ),
     ]
     const exitingRenderables = [] as Renderable[]
+    console.log(`Computed ${stageRenderables.length} renderables`)
     return [
       imageCasts,
       videoCasts,
-      [
-        ...enteringRenderables,
-        ...stageRenderables,
-        ...exitingRenderables,
-        cursorRenderable,
-      ],
+      [...enteringRenderables, ...stageRenderables, ...exitingRenderables],
     ] as ComputedStageCast
   }, [
     enteringScene,
@@ -416,9 +419,8 @@ export default function useComputedStageCast(
     gamestates,
     availableVideos,
     imagesLoaded,
-    cursorRenderable,
     ...deps,
   ])
 
-  return result
+  return [imageCasts, videoCasts, [...renderables, cursorRenderable]]
 }

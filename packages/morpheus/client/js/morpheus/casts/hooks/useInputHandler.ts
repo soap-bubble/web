@@ -6,9 +6,10 @@ import {
   useEffect,
   useReducer,
 } from 'react'
+import { useObservable } from 'rxjs-hooks'
 import { Raycaster, Object3D, Camera, Vector2 } from 'three'
 import { useDispatch } from 'react-redux'
-import { each, difference } from 'lodash'
+import { each, difference, isUndefined } from 'lodash'
 import {
   actions as castActions,
   selectors as castSelectors,
@@ -26,12 +27,22 @@ import Queue from 'promise-queue'
 import loggerFactory from 'utils/logger'
 import { screenToGame } from 'utils/coordinates'
 import { isHotspot } from 'morpheus/casts/matchers'
-import { Hotspot, Scene, Cast } from 'morpheus/casts/types'
-import { DST_RATIO, PANO_OFFSET, DST_WIDTH } from 'morpheus/constants'
-import { isPano } from '../matchers'
+import {
+  Hotspot,
+  Scene,
+  Cast,
+  MovieCast,
+  MovieSpecialCast,
+} from 'morpheus/casts/types'
+import { DST_RATIO, PANO_OFFSET, DST_WIDTH, GESTURES } from 'morpheus/constants'
+import { forMorpheusType } from '../matchers'
 import { and } from 'utils/matchers'
 import { Gamestates } from 'morpheus/gamestate/isActive'
 import { handleHotspot } from 'morpheus/gamestate/actions'
+import { Observable, Subscription } from 'rxjs'
+import { ThunkAction, ThunkDispatch } from 'redux-thunk'
+import { Action, AnyAction } from 'redux'
+import { goToScene } from 'morpheus/scene/actions'
 
 const logger = loggerFactory('flatspot')
 const mouseQueue = new Queue(1, 128)
@@ -53,6 +64,7 @@ type InputReturn = [
     onPointerCancelled: (e: PointerEvent) => void
   }
 ]
+export type DispatchEvent = ThunkAction<Promise<any>, any, any, Action>
 
 const EVENT_QUEUE_START_ACTION = 'EVENT_QUEUE_START_ACTION'
 const EVENT_QUEUE_FINISH_ACTION = 'EVENT_QUEUE_FINISH_ACTION'
@@ -60,16 +72,16 @@ const EVENT_QUEUE_PUSH_ACTION = 'EVENT_QUEUE_PUSH_ACTION'
 
 interface EventQueueStartAction {
   type: 'EVENT_QUEUE_START_ACTION'
-  payload: EventOption
+  payload: DispatchEvent
 }
 interface EventQueueFinishAction {
   type: 'EVENT_QUEUE_FINISH_ACTION'
-  payload: EventOption
+  payload: DispatchEvent
 }
 
 interface EventQueuePushAction {
   type: 'EVENT_QUEUE_PUSH_ACTION'
-  payload: EventOption
+  payload: DispatchEvent
 }
 type EventQueueActions =
   | EventQueueStartAction
@@ -77,15 +89,15 @@ type EventQueueActions =
   | EventQueuePushAction
 
 const eventQueueActionCreators = {
-  start: (payload: EventOption): EventQueueStartAction => ({
+  start: (payload: DispatchEvent): EventQueueStartAction => ({
     type: EVENT_QUEUE_START_ACTION,
     payload,
   }),
-  finish: (payload: EventOption): EventQueueFinishAction => ({
+  finish: (payload: DispatchEvent): EventQueueFinishAction => ({
     type: EVENT_QUEUE_FINISH_ACTION,
     payload,
   }),
-  push: (payload: EventOption): EventQueuePushAction => ({
+  push: (payload: DispatchEvent): EventQueuePushAction => ({
     type: EVENT_QUEUE_PUSH_ACTION,
     payload,
   }),
@@ -93,8 +105,8 @@ const eventQueueActionCreators = {
 
 function eventQueueReducer(
   state: {
-    executing: null | EventOption
-    queue: EventOption[]
+    executing: null | DispatchEvent
+    queue: DispatchEvent[]
   },
   action: EventQueueActions
 ) {
@@ -134,9 +146,13 @@ function eventQueueReducer(
   }
 }
 
+const isMovieSpecialCast = forMorpheusType('MovieSpecialCast')
+const isMovieCast = forMorpheusType('MovieCast')
+
 export default function(
   scene: Scene,
   gamestates: Gamestates,
+  movieCastEndObserver: Observable<MovieCast> | undefined | null,
   isPanoScene: boolean,
   camera: Camera | undefined,
   panoObject: Object3D | undefined,
@@ -147,7 +163,7 @@ export default function(
   screenWidth: number,
   screenHeight: number
 ): InputReturn {
-  const dispatch = useDispatch()
+  const dispatch = useDispatch<ThunkDispatch<any, any, AnyAction>>()
   const handleEvent = useMemo(handleEventFactory, [])
   const [eventQueue, eventQueueDispatch] = useReducer(eventQueueReducer, {
     executing: null,
@@ -181,6 +197,9 @@ export default function(
     [lastUpdate, screenTop, screenLeft]
   )
 
+  /*
+   * Determines the coordinates of the pointer in Morpheus game coordinates
+   */
   const raycaster = useMemo(() => new Raycaster(), [])
   const { top: gameTop, left: gameLeft } = useMemo(() => {
     if (isPanoScene && camera) {
@@ -210,9 +229,6 @@ export default function(
             } else if (left > 3600) {
               left -= 3600
             }
-            if (Date.now() % 15 === 0) {
-              console.log({ offsetX, rotX, top, left, x: uv.x, y: uv.y })
-            }
             return { top, left }
           }
         }
@@ -237,11 +253,17 @@ export default function(
     screenHeight,
   ])
 
+  /*
+   * The currently active hotspots of the scene
+   */
   const hotspots = useMemo(() => {
     const filter = and<Cast>(isHotspot, cast => isActive({ cast, gamestates }))
     return scene.casts.filter(filter) as Hotspot[]
-  }, [scene])
+  }, [scene, gamestates])
 
+  /*
+   * The Morpheus cursor type expressed as the original Morpheus cursor enum
+   */
   const cursorIndex = useMemo(() => {
     return resolveCursor(
       hotspots,
@@ -255,12 +277,18 @@ export default function(
     )
   }, [hotspots, gamestates, gameTop, gameLeft, clickStartPos, mouseDown])
 
-  useMemo(() => {
+  /*
+   * Loads the image for a cursor (or returns the cached copy)
+   */
+  useEffect(() => {
     if (cursorIndex !== 0) {
-      return promiseCursor(cursorIndex).then(cursorImg => setCursor(cursorImg))
+      promiseCursor(cursorIndex).then(cursorImg => setCursor(cursorImg))
     }
   }, [cursorIndex])
 
+  /*
+   * Various state effect updators
+   */
   useEffect(() => {
     let newMouseDown = mouseDown
     const isClick =
@@ -288,6 +316,9 @@ export default function(
     setMouseDown,
   ])
 
+  /*
+   * Generates new hotspot events for the dispatch queue
+   */
   useEffect(() => {
     const nowInHotspots: Hotspot[] = []
     each(hotspots, hotspot => {
@@ -327,128 +358,100 @@ export default function(
       currentScene: scene.sceneId,
       handleHotspot: gamestateActions.handleHotspot,
     }
-    // console.log('Queuing', eventOption)
-    eventQueueDispatch(eventQueueActionCreators.push(eventOption))
+    eventQueueDispatch(eventQueueActionCreators.push(handleEvent(eventOption)))
   }, [gameTop, gameLeft, lastUpdate, scene, mouseDown])
 
+  /*
+   * Handles hotspots in new scenes that need to be always activated
+   * As far as I can tell, the gesture types "Always" and "SceneEnter" can be
+   * activated at the same time which for here will when be a new scene is received
+   */
   useEffect(() => {
-    if (!eventQueue.executing && eventQueue.queue.length) {
-      const eventOption = eventQueue.queue[0]
-      // console.log('Starting', eventOption)
-      eventQueueDispatch(eventQueueActionCreators.start(eventOption))
-      dispatch(handleEvent(eventOption)).then(() => {
-        //console.log('Finishing', eventOption)
-        eventQueueDispatch(eventQueueActionCreators.finish(eventOption))
+    if (scene) {
+      const activatableNewHotspots = (scene.casts as Hotspot[]).filter(
+        and<Cast>(
+          isHotspot,
+          cast => isActive({ cast, gamestates }),
+          (({ gesture }: Hotspot) =>
+            GESTURES[gesture] === 'Always' ||
+            GESTURES[gesture] === 'SceneEnter') as (c: Cast) => boolean
+        )
+      )
+      for (const hotspot of activatableNewHotspots) {
+        eventQueueDispatch(
+          eventQueueActionCreators.push(handleHotspot({ hotspot }))
+        )
+      }
+    }
+  }, [scene])
+
+  /*
+   * Receives "end" events for MovieCasts (which can be either an image or a movie)
+   * and handles them. Contains various edge case logic from original Morpheus
+   */
+  useEffect(() => {
+    let subscription: Subscription
+    if (movieCastEndObserver) {
+      subscription = movieCastEndObserver.subscribe(movieCast => {
+        if (isMovieSpecialCast(movieCast)) {
+          const {
+            nextSceneId,
+            actionAtEnd,
+            angleAtEnd,
+            dissolveToNextScene,
+          } = movieCast as MovieSpecialCast
+          if (actionAtEnd > 0) {
+            eventQueueDispatch(
+              eventQueueActionCreators.push(
+                goToScene(nextSceneId, dissolveToNextScene)
+              )
+            )
+          } else {
+            let startAngle: number
+            if (
+              nextSceneId &&
+              scene &&
+              nextSceneId !== 0x3fffffff &&
+              nextSceneId !== scene.sceneId
+            ) {
+              if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
+                startAngle = angleAtEnd
+              }
+            }
+            eventQueueDispatch(
+              eventQueueActionCreators.push(
+                goToScene(nextSceneId, dissolveToNextScene)
+              )
+            )
+          }
+        }
       })
     }
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe()
+      }
+    }
+  }, [movieCastEndObserver, eventQueueDispatch, scene])
+
+  /*
+   * Empties the event dispatch queue
+   */
+  useEffect(() => {
+    if (!eventQueue.executing && eventQueue.queue.length) {
+      const dispatchEvent = eventQueue.queue[0]
+      eventQueueDispatch(eventQueueActionCreators.start(dispatchEvent))
+      dispatch(dispatchEvent).then(
+        () => {
+          eventQueueDispatch(eventQueueActionCreators.finish(dispatchEvent))
+        },
+        err => {
+          console.error('Error dispatching hotspot event', err)
+          eventQueueDispatch(eventQueueActionCreators.finish(dispatchEvent))
+        }
+      )
+    }
   }, [eventQueue])
-  // const store = storeFactory()
-  // const castSelectorForScene = castSelectors.forScene(scene)
-  // const castActionsForScene = castActions.forScene(scene)
-  // const handleEvent = handleEventFactory()
-
-  // let clickStartPos = { top: -1, left: -1 }
-  // let wasInHotspots: Hotspot[] = []
-  // let mouseDown = false
-  // let lastTouchPosition: { top: number; left: number }
-  // let lastMouseDown: number
-
-  // async function updateState({
-  //   clientX,
-  //   clientY,
-  // }: PointerEvent<HTMLCanvasElement>) {
-  //   // const state = store.getState()
-  //   // const currentScene = scene
-  //   // if (!document.hidden) {
-  //   //   const inputEnabled = inputSelectors.enabled(state)
-  //   //   if (!inputEnabled) {
-  //   //     return null
-  //   //   }
-
-  //   // }
-  //   // return null
-
-  //   const hotspots: Hotspot[] = (scene.casts as any[]).filter(isHotspot)
-
-  //   // Disable for new hook to work. TODO Figure out later;
-  //   // const isCurrent = sceneSelectors.currentSceneData(state) === scene
-  //   // const isExiting = castSelectorForScene.isExiting
-  //   // const acceptsMouseEvents = isCurrent && !isExiting
-  //   // if (!acceptsMouseEvents) {
-  //   //   return null
-  //   // }
-  //   const nowInHotspots: Hotspot[] = []
-  //   const left = clientX - screenLeft
-  //   const top = clientY - screenTop
-
-  //   const adjustedClickPos = screenToGame({
-  //     height: screenHeight,
-  //     width: screenWidth,
-  //     top,
-  //     left,
-  //   })
-
-  //   each(hotspots, hotspot => {
-  //     const { rectTop, rectBottom, rectLeft, rectRight } = hotspot
-  //     if (
-  //       (adjustedClickPos.top > rectTop &&
-  //         adjustedClickPos.top < rectBottom &&
-  //         adjustedClickPos.left > rectLeft &&
-  //         adjustedClickPos.left < rectRight) ||
-  //       (rectTop === 0 && rectLeft === 0 && rectRight === 0 && rectBottom === 0)
-  //     ) {
-  //       nowInHotspots.push(hotspot)
-  //     }
-  //   })
-
-  //   const leavingHotspots = difference(wasInHotspots, nowInHotspots)
-  //   const enteringHotspots = difference(nowInHotspots, wasInHotspots)
-  //   const noInteractionHotspots = difference(hotspots, nowInHotspots)
-  //   const isClick = wasMouseUpped && Date.now() - lastMouseDown < 800
-
-  //   if (wasMouseUpped) {
-  //     mouseDown = false
-  //   }
-
-  //   if (!mouseDown && wasMouseDowned) {
-  //     mouseDown = true
-  //     clickStartPos = adjustedClickPos
-  //     lastMouseDown = Date.now()
-  //   }
-  //   const isMouseDown = mouseDown
-  //   const eventOptions = {
-  //     currentPosition: adjustedClickPos,
-  //     startingPosition: clickStartPos,
-  //     hotspots,
-  //     nowInHotspots,
-  //     leavingHotspots,
-  //     enteringHotspots,
-  //     noInteractionHotspots,
-  //     isClick,
-  //     isMouseDown,
-  //     wasMouseMoved,
-  //     wasMouseUpped,
-  //     wasMouseDowned,
-  //     // currentScene: currentScene.sceneId,
-  //     handleHotspot: gamestateActions.handleHotspot,
-  //   }
-
-  //   if (wasMouseUpped) {
-  //     clickStartPos = { top: -1, left: -1 }
-  //   }
-
-  //   wasInHotspots = nowInHotspots
-  //   wasMouseMoved = false
-  //   wasMouseUpped = false
-  //   wasMouseDowned = false
-  //   lastTouchPosition = {
-  //     top: clientX,
-  //     left: clientY,
-  //   }
-  //   // await dispatch(handleEvent(eventOptions))
-  //   // await dispatch(inputActions.cursorSetPosition({ top, left }))
-  //   // await dispatch(castActionsForScene.update(eventOptions))
-  // }
 
   const onPointerUp = useCallback(
     function onMouseUp(event: PointerEvent) {

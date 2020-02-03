@@ -84,7 +84,7 @@ export interface MovieSpecialCast extends MovieCast {
   angleAtEnd: number
   audioOnly: boolean
   image: boolean
-  actionAtEnd: boolean
+  actionAtEnd: number
 }
 
 export type PanoCast = MovieCast

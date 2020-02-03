@@ -5,12 +5,13 @@ import WebGL from './WebGl'
 import useRaf from '@rooks/use-raf'
 import { Gamestates, isCastActive } from 'morpheus/gamestate/isActive'
 import { Scene, PanoCast, Cast, MovieCast } from '../types'
-import { and, Matcher } from 'utils/matchers'
+import { and, Matcher, not } from 'utils/matchers'
 import usePanoMomentum from '../hooks/panoMomentum'
-import useInputHandler from '../hooks/useInputHandler'
+import useInputHandler, { DispatchEvent } from '../hooks/useInputHandler'
 import { composePointer } from 'morpheus/hotspot/eventInterface'
 import { forMorpheusType, isPano } from '../matchers'
 import { Camera, Object3D, PerspectiveCamera } from 'three'
+import { Observable, Subscription } from 'rxjs'
 
 interface StageProps {
   dispatch: Dispatch
@@ -45,6 +46,9 @@ const Stage: FunctionComponent<StageProps> = ({
     return stageScenes[0] && isPano(stageScenes[0])
   }, [stageScenes[0]])
   const [camera, setCamera] = useState<Camera | undefined>()
+  const [specialMovieCast, setSpecialMovieCast] = useState<null | Observable<
+    MovieCast
+  >>()
   const [panoObject, setPanoObject] = useState<Object3D | undefined>()
 
   const [rotation, momentumPointerHandler] = usePanoMomentum(5, 100)
@@ -52,6 +56,7 @@ const Stage: FunctionComponent<StageProps> = ({
   const [cursor, hotspotPointerHandler] = useInputHandler(
     stageScenes[0],
     gamestates,
+    specialMovieCast,
     isPanoScene,
     camera,
     panoObject,
@@ -79,7 +84,7 @@ const Stage: FunctionComponent<StageProps> = ({
     const matchPanoCast = and<PanoCast>(isPanoCast, matchActive)
     const matchActiveNotPanoScene = and(
       (scene: Scene) => scene.casts.some(cast => matchActive(cast)),
-      (scene: Scene) => scene.casts.every(cast => !isPanoCast(cast))
+      not(isPano)
     )
     const matchActivePanoScene = (scene: Scene) =>
       scene.casts.some((cast: Cast) => matchPanoCast(cast as MovieCast))
@@ -114,6 +119,7 @@ const Stage: FunctionComponent<StageProps> = ({
       />
       <Special
         cursor={cursor}
+        setDoneObserver={setSpecialMovieCast}
         stageScenes={specialScenes}
         enteringScene={enteringScene}
         exitingScene={exitingScene}

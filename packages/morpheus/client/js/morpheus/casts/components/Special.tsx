@@ -1,4 +1,10 @@
-import React, { useMemo, useEffect, PointerEvent } from 'react'
+import React, {
+  useMemo,
+  useEffect,
+  PointerEvent,
+  useCallback,
+  useState,
+} from 'react'
 import { Dispatch } from 'redux'
 
 import { Gamestates, isActive } from 'morpheus/gamestate/isActive'
@@ -6,8 +12,13 @@ import Canvas from './Canvas'
 import Videos, { VideoController, VideoCastRefCallback } from './Videos'
 import Images from './Images'
 import useComputedStageCast from '../hooks/useComputedStageCast'
-import useCastRefNoticer from '../hooks/useCastRefNoticer'
+import useCastRefNoticer, { CastRef } from '../hooks/useCastRefNoticer'
 import { Scene, MovieCast, MovieSpecialCast, Cast } from '../types'
+import { isUndefined, uniq } from 'lodash'
+import { Observable, observable, Subscription, Subscriber } from 'rxjs'
+import { DispatchEvent } from '../hooks/useInputHandler'
+import { goToScene } from 'morpheus/scene/actions'
+import { share } from 'rxjs/operators'
 
 interface SpecialProps {
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
@@ -15,6 +26,7 @@ interface SpecialProps {
   onPointerMove?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerLeave?: (e: PointerEvent<HTMLCanvasElement>) => void
   stageScenes: Scene[]
+  setDoneObserver: (o: null | Observable<MovieCast>) => void
   cursor: { top: number; left: number; image: HTMLImageElement | undefined }
   enteringScene?: Scene
   exitingScene?: Scene
@@ -31,6 +43,7 @@ const Special = ({
   onPointerMove,
   onPointerUp,
   onPointerLeave,
+  setDoneObserver,
   cursor,
   width,
   volume,
@@ -42,11 +55,14 @@ const Special = ({
   exitingScene,
   stageScenes,
 }: SpecialProps) => {
+  const [eventSubscriber, setEventSubscriber] = useState<null | Subscriber<
+    MovieCast
+  >>()
   const [canPlayThroughVideos, onVideoCastCanPlayThrough] = useCastRefNoticer<
     HTMLVideoElement,
     MovieCast
   >()
-  const [endedVideos, onVideoCastEnded] = useCastRefNoticer<
+  const [endedVideos, onVideoCastEndedBare] = useCastRefNoticer<
     HTMLVideoElement,
     MovieCast
   >()
@@ -54,7 +70,7 @@ const Special = ({
     VideoController,
     MovieSpecialCast
   >()
-  const [imagesLoaded, onImageLoad] = useCastRefNoticer<
+  const [imagesLoaded, onImageLoadBare] = useCastRefNoticer<
     HTMLImageElement,
     MovieCast
   >()
@@ -62,6 +78,47 @@ const Special = ({
     HTMLImageElement,
     MovieCast
   >()
+  useEffect(() => {
+    const observable = new Observable<MovieCast>(subscriber => {
+      setEventSubscriber(subscriber)
+      return () => {
+        setEventSubscriber(null)
+      }
+    }).pipe(share())
+    setDoneObserver(observable)
+  }, [setEventSubscriber, setDoneObserver])
+
+  const onImageLoad = useCallback(
+    (ref: CastRef<HTMLImageElement, MovieCast>) => {
+      const [_, movieCasts] = ref
+      const casts = uniq(
+        movieCasts.concat(...(stageScenes.map(s => s.casts) as MovieCast[][]))
+      )
+      if (eventSubscriber) {
+        for (const cast of casts) {
+          eventSubscriber.next(cast)
+        }
+      }
+      onImageLoadBare(ref)
+    },
+    [onImageLoadBare]
+  )
+
+  const onVideoCastEnded = useCallback(
+    (ref: CastRef<HTMLVideoElement, MovieCast>) => {
+      const [_, movieCasts] = ref
+      const casts = uniq(
+        movieCasts.concat(...(stageScenes.map(s => s.casts) as MovieCast[][]))
+      )
+      if (eventSubscriber) {
+        for (const cast of casts) {
+          eventSubscriber.next(cast)
+        }
+      }
+      onVideoCastEndedBare(ref)
+    },
+    [onVideoCastEndedBare, eventSubscriber]
+  )
 
   const [imageCasts, videoCasts, renderables] = useComputedStageCast(
     gamestates,

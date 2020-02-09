@@ -147,7 +147,6 @@ function eventQueueReducer(
 }
 
 const isMovieSpecialCast = forMorpheusType('MovieSpecialCast')
-const isMovieCast = forMorpheusType('MovieCast')
 
 export default function(
   scene: Scene,
@@ -401,9 +400,10 @@ export default function(
             dissolveToNextScene,
           } = movieCast as MovieSpecialCast
           if (actionAtEnd > 0) {
+            logger.info({ cast: movieCast }, 'ActionAtEnd transition')
             eventQueueDispatch(
               eventQueueActionCreators.push(
-                goToScene(nextSceneId, dissolveToNextScene)
+                goToScene(actionAtEnd, dissolveToNextScene)
               )
             )
           } else {
@@ -417,12 +417,13 @@ export default function(
               if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
                 startAngle = angleAtEnd
               }
-            }
-            eventQueueDispatch(
-              eventQueueActionCreators.push(
-                goToScene(nextSceneId, dissolveToNextScene)
+              logger.info({ cast: movieCast }, 'nextSceneId transition')
+              eventQueueDispatch(
+                eventQueueActionCreators.push(
+                  goToScene(nextSceneId, dissolveToNextScene)
+                )
               )
-            )
+            }
           }
         }
       })

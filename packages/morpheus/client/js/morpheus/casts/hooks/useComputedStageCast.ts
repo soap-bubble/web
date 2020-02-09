@@ -406,7 +406,6 @@ export default function useComputedStageCast(
       ),
     ]
     const exitingRenderables = [] as Renderable[]
-    console.log(`Computed ${stageRenderables.length} renderables`)
     return [
       imageCasts,
       videoCasts,

@@ -139,6 +139,7 @@ export interface EventOption {
 }
 export const handleEventFactory = () => {
   const self: any = function handleEvent({
+    currentScene,
     currentPosition,
     startingPosition,
     hotspots,
@@ -243,6 +244,7 @@ export const handleEventFactory = () => {
           self.lastWasMouseMoved !== wasMouseMoved)
       ) {
         logger.debug({
+          currentScene,
           hotspots,
           currentPosition,
           startingPosition,

@@ -18,6 +18,7 @@ export interface VideoController {
   castIds: number[]
   play: () => void
   pause: () => void
+  end: () => void
 }
 type VideoControllerRef = (a: VideoController) => void
 export type VideoCastEventCallback = (
@@ -60,6 +61,12 @@ const VideoEl = ({
       pause() {
         if (videoRef.current) {
           videoRef.current.pause()
+        }
+      },
+      end() {
+        if (videoRef.current) {
+          videoRef.current.pause()
+          videoRef.current.currentTime = 0
         }
       },
     })

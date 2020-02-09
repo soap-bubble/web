@@ -19,6 +19,7 @@ import { Observable, observable, Subscription, Subscriber } from 'rxjs'
 import { DispatchEvent } from '../hooks/useInputHandler'
 import { goToScene } from 'morpheus/scene/actions'
 import { share } from 'rxjs/operators'
+import { and } from 'utils/matchers'
 
 interface SpecialProps {
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
@@ -137,10 +138,25 @@ const Special = ({
     console.log('stageScenes', stageScenes)
   }, [stageScenes])
 
+  /**
+   * Find all videos that need to be started and stopped
+   *
+   * To do so we need to look at each video and its casts. If the video is part
+   * of the uppermost stage scene, then it should play.  All other videos should
+   * end (pause and set currentTime to 0), unless they are also part of the
+   * uppermost stage scene
+   */
   useEffect(() => {
+    const activeAndCurrent = and(
+      (cast: Cast) =>
+        !!stageScenes.length && stageScenes[0].casts.includes(cast),
+      (cast: Cast) => isActive({ cast, gamestates })
+    )
     for (const [controller, casts] of availableVideos) {
-      if (casts.find(cast => isActive({ cast, gamestates }))) {
+      if (casts.find(activeAndCurrent)) {
         controller.play()
+      } else {
+        controller.end()
       }
     }
   }, [availableVideos])

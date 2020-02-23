@@ -1,15 +1,6 @@
-import React, {
-  useState,
-  useCallback,
-  useRef,
-  useReducer,
-  useEffect,
-  useMemo,
-  SyntheticEvent,
-} from 'react'
+import React, { useRef, useEffect, useMemo, SyntheticEvent } from 'react'
 import { getAssetUrl } from 'service/gamedb'
 import { MovieSpecialCast } from '../types'
-import { cast } from 'bluebird'
 
 type VideoEvent = (e: SyntheticEvent<HTMLVideoElement>) => void
 type VideoRef = (el: HTMLVideoElement | null) => void
@@ -28,7 +19,7 @@ export type VideoCastRefCallback = (
   ref: [VideoController, MovieSpecialCast[]]
 ) => void
 
-interface VidelElProps {
+interface VideoElProps {
   url: string
   volume: number
   casts: MovieSpecialCast[]
@@ -46,7 +37,7 @@ const VideoEl = ({
   onVideoRef,
   onVideoEnded,
   onVideoCanPlayThrough,
-}: VidelElProps) => {
+}: VideoElProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
 
   useEffect(() => {
@@ -66,7 +57,7 @@ const VideoEl = ({
       end() {
         if (videoRef.current) {
           videoRef.current.pause()
-          videoRef.current.currentTime = 0
+          // videoRef.current.currentTime = 0
         }
       },
     })
@@ -156,7 +147,12 @@ const Video = ({
           },
         } as VideoMovieCastCollection
       }),
-    [movieSpecialCasts]
+    [
+      movieSpecialCasts,
+      onVideoCastCanPlaythrough,
+      onVideoCastEnded,
+      onVideoCastRef,
+    ]
   )
 
   return (

@@ -146,10 +146,8 @@ const doSceneEntering: ActionCreator<ThunkAction<
   Action
 >> = scene => {
   return (dispatch, getState) => {
-    let oldScene
-    let currentScenes = sceneSelectors.currentScenesData(getState()) as List<
-      Scene
-    >
+    let oldScene: Scene | undefined = undefined
+    let currentScenes = sceneSelectors.currentScenesData(getState()) as Scene[]
     const previousScene = sceneSelectors.currentSceneData(getState())
     const currentScene = scene
 
@@ -158,16 +156,23 @@ const doSceneEntering: ActionCreator<ThunkAction<
       s => (s && s.sceneId) === scene.sceneId
     )
     if (existingScene) {
-      // Promote existing scene to top...
-      currentScenes = currentScenes.remove(currentScenes.indexOf(existingScene))
+      const existingSceneIndex = currentScenes.indexOf(existingScene)
+      if (existingSceneIndex !== 0) {
+        currentScenes = [
+          existingScene,
+          ...currentScenes.slice(existingSceneIndex),
+          ...currentScenes.slice(existingSceneIndex + 1),
+        ]
+      }
     } else if (
-      currentScenes.count() === CURRENT_SCENE_STACK_SIZE ||
-      (currentScenes.count() === 1 && currentScenes.first().sceneId === 100000)
+      currentScenes.length === CURRENT_SCENE_STACK_SIZE ||
+      (currentScenes.length === 1 && currentScenes[0].sceneId === 100000)
     ) {
-      oldScene = currentScenes.last()
-      currentScenes = currentScenes.pop()
+      oldScene = currentScenes[currentScenes.length - 1]
+      currentScenes = [scene, ...currentScenes.slice(0, -1)]
+    } else {
+      currentScenes = [scene, ...currentScenes]
     }
-    currentScenes = currentScenes.unshift(scene)
 
     dispatch({
       type: SCENE_DO_ENTERING,

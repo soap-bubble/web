@@ -6,6 +6,8 @@ enum VideoMedia {
   mp4,
   webm,
   png,
+  mp3,
+  ogg,
 }
 type VideoMediaStrings = keyof typeof VideoMedia
 

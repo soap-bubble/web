@@ -1,7 +1,7 @@
 import { useMemo } from 'react'
 import { get, uniqBy, flatten, intersection } from 'lodash'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
-import { and, not } from 'utils/matchers'
+import { and, not, or } from 'utils/matchers'
 // @ts-ignore
 import { resizeToScreen } from '../../../utils/resize'
 import { Renderable } from '../components/Canvas'
@@ -12,6 +12,9 @@ import {
   isMovie,
   isImage,
   isControlledCast,
+  isActiveSound,
+  isEmptySoundCast,
+  isAudio,
 } from '../matchers'
 import {
   Scene,
@@ -19,7 +22,9 @@ import {
   ControlledMovieCast,
   MovieSpecialCast,
   Cast,
+  SupportedSoundCasts,
 } from '../types'
+import { AudioController } from '../components/Sounds'
 
 type DrawSource = HTMLVideoElement | HTMLCanvasElement | HTMLImageElement
 
@@ -249,26 +254,46 @@ function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
   return (cast: T) => isCastActive({ cast, gamestates })
 }
 
-function matchCastIds<T extends Cast>(castIds: number[]) {
-  return ([_, casts]: CastSource<any, T>) =>
-    casts.find((cast: T) => castIds.includes(cast.castId))
-}
+type ComputedStageCast = [
+  MovieCast[],
+  MovieSpecialCast[],
+  SupportedSoundCasts[],
+  Renderable[]
+]
 
-type ComputedStageCast = [MovieCast[], MovieSpecialCast[], Renderable[]]
-// CastRef<HtmlImageElement, MovieCast>[]
 export default function useComputedStageCast(
   gamestates: Gamestates,
   width: number,
   height: number,
   imagesLoaded: ImageDrawable<MovieCast>[],
   availableVideos: VideoRef[],
-  cursor: { left: number; top: number; image: CanvasImageSource | undefined },
-  // controlledRefs: ImageDrawable<ControlledMovieCast>[],
+  cursor: {
+    left: number
+    top: number
+    image: CanvasImageSource | undefined
+  },
   stageScenes: Scene[],
   enteringScene: Scene | undefined,
   exitingScene: Scene | undefined,
   deps: any[]
-): [MovieCast[], MovieSpecialCast[], Renderable[]] {
+): ComputedStageCast {
+  const soundCasts = useMemo(() => {
+    if (stageScenes.length) {
+      return stageScenes[0].casts.filter(
+        or(
+          and(
+            or(
+              forMorpheusType('MovieSpecialCast'),
+              forMorpheusType('ControlledMovieCast')
+            ),
+            (cast: Cast) => isAudio(cast as MovieCast)
+          ),
+          forMorpheusType('SoundCast')
+        )
+      ) as SupportedSoundCasts[]
+    }
+    return []
+  }, [stageScenes])
   const cursorRenderable = useMemo(() => {
     return (ctx: CanvasRenderingContext2D) => {
       if (cursor.image) {
@@ -291,7 +316,7 @@ export default function useComputedStageCast(
     }
   }, [cursor.image, cursor.left, cursor.top])
   const [imageCasts, videoCasts, renderables] = useMemo<
-    ComputedStageCast
+    [MovieCast[], MovieSpecialCast[], Renderable[]]
   >(() => {
     const matchActive = matchActiveCast(gamestates)
     const matchSpecialMovies = and<MovieSpecialCast>(
@@ -410,7 +435,7 @@ export default function useComputedStageCast(
       imageCasts,
       videoCasts,
       [...enteringRenderables, ...stageRenderables, ...exitingRenderables],
-    ] as ComputedStageCast
+    ]
   }, [
     enteringScene,
     exitingScene,
@@ -421,5 +446,10 @@ export default function useComputedStageCast(
     ...deps,
   ])
 
-  return [imageCasts, videoCasts, [...renderables, cursorRenderable]]
+  return [
+    imageCasts,
+    videoCasts,
+    soundCasts,
+    [...renderables, cursorRenderable],
+  ]
 }

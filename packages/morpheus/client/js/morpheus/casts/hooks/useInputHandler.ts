@@ -33,6 +33,7 @@ import {
   Cast,
   MovieCast,
   MovieSpecialCast,
+  SupportedSoundCasts,
 } from 'morpheus/casts/types'
 import { DST_RATIO, PANO_OFFSET, DST_WIDTH, GESTURES } from 'morpheus/constants'
 import { forMorpheusType } from '../matchers'
@@ -151,7 +152,7 @@ const isMovieSpecialCast = forMorpheusType('MovieSpecialCast')
 export default function(
   scene: Scene,
   gamestates: Gamestates,
-  movieCastEndObserver: Observable<MovieCast> | undefined | null,
+  castEndObserver: Observable<SupportedSoundCasts> | undefined | null,
   isPanoScene: boolean,
   camera: Camera | undefined,
   panoObject: Object3D | undefined,
@@ -196,6 +197,32 @@ export default function(
     [lastUpdate, screenTop, screenLeft]
   )
 
+  /*
+   * Run all scene hotspots once
+   */
+  useEffect(() => {
+    if (scene) {
+      const eventOption: EventOption = {
+        currentScene: scene.sceneId,
+        currentPosition: { top: 1, left: 1 },
+        startingPosition: { top: 1, left: 1 },
+        hotspots,
+        nowInHotspots: [],
+        leavingHotspots: [],
+        enteringHotspots: [],
+        noInteractionHotspots: [],
+        isClick: false,
+        isMouseDown: false,
+        wasMouseMoved: false,
+        wasMouseUpped: false,
+        wasMouseDowned: false,
+        handleHotspot: gamestateActions.handleHotspot,
+      }
+      eventQueueDispatch(
+        eventQueueActionCreators.push(handleEvent(eventOption))
+      )
+    }
+  }, [scene])
   /*
    * Determines the coordinates of the pointer in Morpheus game coordinates
    */
@@ -390,9 +417,15 @@ export default function(
    */
   useEffect(() => {
     let subscription: Subscription
-    if (movieCastEndObserver) {
-      subscription = movieCastEndObserver.subscribe(movieCast => {
-        if (isMovieSpecialCast(movieCast)) {
+    if (castEndObserver) {
+      subscription = castEndObserver.subscribe(movieCast => {
+        logger.info({ cast: movieCast }, 'end observerer received cast')
+        if (
+          and(
+            (cast: Cast) => scene.casts.includes(cast),
+            isMovieSpecialCast
+          )(movieCast)
+        ) {
           const {
             nextSceneId,
             actionAtEnd,
@@ -400,7 +433,12 @@ export default function(
             dissolveToNextScene,
           } = movieCast as MovieSpecialCast
           if (actionAtEnd > 0) {
-            logger.info({ cast: movieCast }, 'ActionAtEnd transition')
+            logger.info(
+              {
+                cast: movieCast,
+              },
+              `ActionAtEnd ${scene.sceneId}`
+            )
             eventQueueDispatch(
               eventQueueActionCreators.push(
                 goToScene(actionAtEnd, dissolveToNextScene)
@@ -417,7 +455,12 @@ export default function(
               if (!isUndefined(angleAtEnd) && angleAtEnd !== -1) {
                 startAngle = angleAtEnd
               }
-              logger.info({ cast: movieCast }, 'nextSceneId transition')
+              logger.info(
+                {
+                  cast: movieCast,
+                },
+                `nextSceneId ${scene.sceneId}`
+              )
               eventQueueDispatch(
                 eventQueueActionCreators.push(
                   goToScene(nextSceneId, dissolveToNextScene)
@@ -433,7 +476,7 @@ export default function(
         subscription.unsubscribe()
       }
     }
-  }, [movieCastEndObserver, eventQueueDispatch, scene])
+  }, [castEndObserver, eventQueueDispatch, scene])
 
   /*
    * Empties the event dispatch queue

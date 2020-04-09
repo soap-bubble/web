@@ -20,7 +20,11 @@ export default function (config, twitchChat) {
       return message.channel.name === 'bot-admin' && message.content === 'ping';
     },
     action(message) {
-      message.reply('pong');
+      factory(async function channelAction(twitchChat) {
+        message.reply('pong');
+        twitchChat.say('pong');
+      })
+
     },
   };
 

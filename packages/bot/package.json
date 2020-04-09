@@ -23,6 +23,7 @@
   },
   "homepage": "https://github.com/soap-bubble/bot#readme",
   "dependencies": {
+    "@google-cloud/firestore": "^3.7.3",
     "async-retry": "^1.2.3",
     "axios": "^0.17.1",
     "bluebird": "^3.5.5",

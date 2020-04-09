@@ -1,27 +1,23 @@
 import axios from 'axios';
 import retry from 'async-retry';
 import qs from 'qs'
+import { Firestore } from '@google-cloud/Firestore'
 
 export function fetchBotProfileProvider(config, logger) {
-
-  return () => {
-    logger.info('Getting profile');
-    return retry(() => axios.get(`${config.authHost}/GetBotSettings`, {
-      params: {
-        token: config.get('auth.token', ''),
-      },
-    })
-      .then(({ data }) => {
-        return data;
-      }))
-  };
+  return async () => {
+    const db = new Firestore
+    const docRef = db.doc('bot/token')
+    const docSnap = await docRef.get()
+    return docSnap.data()
+  }
 }
 
-export function saveBotProflie(config) {
-  const query = qs.stringify({
-    token: config.get('auth.token', ''),
-  });
-  return (data) => axios.post(`${config.authHost}/SaveBotSettings?${query}`, {
-    data,
-  });
+export function saveBotProflie() {
+  return (data) => {
+    const db = new Firestore
+    const docRef = db.doc('bot/token')
+    docRef.set({
+      ...data
+    }, { merge: true })
+  }
 }

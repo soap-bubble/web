@@ -4,13 +4,6 @@ export default async function init(logger, profileProvider, provideTwitchUserTok
   const { twitchBotName } = await profileProvider();
   const defaultChannel = `#${twitchBotName}`;
   let client;
-  // client.on("chat", function (channel, userstate, message, self) {
-  //     // Don't listen to my own messages..
-  //     if (self) return;
-  //     logger.info(channel, message);
-  //     client.say(channel, `I can say that too ${message}`)
-  // });
-
 
   const api = {
     say(message) {
@@ -33,7 +26,13 @@ export default async function init(logger, profileProvider, provideTwitchUserTok
         channels: [defaultChannel],
       };
       client = new tmi.client(tmiOptions);
-
+      // client.on("chat", function (channel, userstate, message, self) {
+      //   // Don't listen to my own messages..
+      //   if (self) return;
+      //   logger.info(channel, message);
+      //   client.say(channel, `I can say that too ${message}`)
+      // });
+  
       try {
         await client.connect();
       } catch (err) {

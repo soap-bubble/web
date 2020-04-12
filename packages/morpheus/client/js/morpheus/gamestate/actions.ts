@@ -36,10 +36,17 @@ export function gameStateLoadComplete(responseData: any) {
   }
 }
 
-export const fetchInitial: ActionCreator<ThunkAction<void, any, any, Action>> = () => {
+export const fetchInitial: ActionCreator<ThunkAction<
+  void,
+  any,
+  any,
+  Action
+>> = () => {
   return dispatch =>
     fetchInitialGameState()
-      .then((responseData: any) => dispatch(gameStateLoadComplete(responseData)))
+      .then((responseData: any) =>
+        dispatch(gameStateLoadComplete(responseData))
+      )
       .catch((err: any) => dispatch({ payload: err, type: API_ERROR }))
 }
 
@@ -63,7 +70,12 @@ function nextSceneAngle(hotspot: MovieSpecialCast) {
   return startAngle
 }
 
-export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any, Action>> = ({
+export const handleHotspot: ActionCreator<ThunkAction<
+  Promise<boolean>,
+  any,
+  any,
+  Action
+>> = ({
   hotspot,
   currentPosition,
   startingPosition,
@@ -86,7 +98,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         }
         const currentSceneId = sceneSelectors.currentSceneId(getState())
         logger.info(
-          `From GoBack at ${currentSceneId} requesting next scene ${prevSceneId}`,
+          `From GoBack at ${currentSceneId} requesting next scene ${prevSceneId}`
         )
         context.nextSceneSpread = [prevSceneId]
         // await dispatch(sceneActions.goToScene(prevSceneId));
@@ -102,7 +114,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         if (nextSceneId) {
           const currentSceneId = sceneSelectors.currentSceneId(getState())
           logger.info(
-            `From DissolveTo at ${currentSceneId} requesting next scene ${nextSceneId}`,
+            `From DissolveTo at ${currentSceneId} requesting next scene ${nextSceneId}`
           )
           context.nextSceneSpread = [nextSceneId]
         }
@@ -120,7 +132,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
           }
           const currentSceneId = sceneSelectors.currentSceneId(getState())
           logger.info(
-            `From ChangeScene at ${currentSceneId} requesting next scene ${nextSceneId}`,
+            `From ChangeScene at ${currentSceneId} requesting next scene ${nextSceneId}`
           )
           context.nextSceneSpread = [nextSceneId, dissolveToNextScene]
           // await dispatch(sceneActions.goToScene(nextSceneId), dissolveToNextScene);
@@ -144,7 +156,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         const centerY = (rectBottom + rectTop) / 2
         let angle = Math.atan2(
           currentPosition.left - centerX,
-          centerY - currentPosition.top,
+          centerY - currentPosition.top
         )
         angle = (180 * angle) / Math.PI - param2
         while (angle < 0) {
@@ -162,6 +174,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
           const ratio = (context.ratio = angle / (param3 - param2))
           value = context.value = minValue + (maxValue - minValue) * ratio + 0.5
           context.param1 = param1
+          logger.info(`Rotate ${param1} gamestate to ${value}`)
           dispatch(updateGameState(param1, Math.floor(value)))
         }
         break
@@ -179,6 +192,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
             value = maxValue
           }
         }
+        logger.info(`Increment ${gamestateId} gamestate to ${value}`)
         dispatch(updateGameState(gamestateId, value))
         break
       }
@@ -195,12 +209,14 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
             value = minValue
           }
         }
+        logger.info(`Decrement ${gamestateId} gamestate to ${value}`)
         dispatch(updateGameState(gamestateId, value))
         break
       }
       case 'SetStateTo': {
         const { param1: gamestateId, param2: value } = hotspot
         if (gamestates.byId(gamestateId).value !== value) {
+          logger.info(`SetStateTo ${gamestateId} gamestate to ${value}`)
           dispatch(updateGameState(gamestateId, value))
         }
         break
@@ -209,6 +225,9 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         const { param1: id1, param2: id2 } = hotspot
         const { value: value1 } = gamestates.byId(id1)
         const { value: value2 } = gamestates.byId(id2)
+        logger.info(
+          `Exchange ${id1} gamestate with ${id2} (${value1} <=> ${value2})`
+        )
         dispatch(updateGameState(id2, value1))
         dispatch(updateGameState(id1, value2))
         break
@@ -219,6 +238,9 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         if (
           gamestates.byId(targetId).value !== gamestates.byId(sourceId).value
         ) {
+          logger.info(
+            `CopyState ${sourceId} gamestate to ${targetId} with value ${source}`
+          )
           dispatch(updateGameState(targetId, source))
         }
         break
@@ -250,7 +272,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         const verticalRatio = Math.floor(
           (maxVert - 1) *
             ((vertPos - hotspot.rectTop) /
-              (hotspot.rectBottom - hotspot.rectTop)),
+              (hotspot.rectBottom - hotspot.rectTop))
         )
         const horizontalRatio =
           maxHor *
@@ -260,6 +282,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         if (gs && maxVert && maxHor) {
           const value = Math.floor(maxVert * verticalRatio + horizontalRatio)
           if (gamestates.byId(hotspot.param1).value !== value) {
+            logger.info(`TwoAxisSlider ${hotspot.param1} gamestate to ${value}`)
             dispatch(updateGameState(hotspot.param1, value))
           }
         }
@@ -295,6 +318,7 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         }
         const value = Math.floor(vertValue)
         if (gamestates.byId(hotspot.param1).value !== value) {
+          logger.info(`VerticalSlider ${hotspot.param1} gamestate to ${value}`)
           dispatch(updateGameState(hotspot.param1, value))
         }
         break
@@ -329,11 +353,15 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
         }
         const value = Math.floor(horzValue)
         if (gamestates.byId(hotspot.param1).value !== value) {
+          logger.info(
+            `HorizontalSlider ${hotspot.param1} gamestate to ${value}`
+          )
           dispatch(updateGameState(hotspot.param1, value))
         }
         break
       }
       case 'NoAction': {
+        logger.info(`NoAction`)
         break
       }
 
@@ -350,7 +378,12 @@ export const handleHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any
   }
 }
 
-export const  handlePanoHotspot: ActionCreator<ThunkAction<Promise<boolean>, any, any, Action>> = ({
+export const handlePanoHotspot: ActionCreator<ThunkAction<
+  Promise<boolean>,
+  any,
+  any,
+  Action
+>> = ({
   hotspot,
   currentPosition,
   startingPosition,
@@ -367,7 +400,7 @@ export const  handlePanoHotspot: ActionCreator<ThunkAction<Promise<boolean>, any
       if (hotspot.param1) {
         await dispatch(castActions.forScene(currentScene).pano.sweepTo(hotspot))
         logger.info(
-          `From GoBack at ${currentScene.sceneId} requesting next scene ${hotspot.param1}`,
+          `From GoBack at ${currentScene.sceneId} requesting next scene ${hotspot.param1}`
         )
         context.nextSceneSpread = [hotspot.param1, false]
         // await dispatch(sceneActions.goToScene(hotspot.param1, false));
@@ -381,7 +414,7 @@ export const  handlePanoHotspot: ActionCreator<ThunkAction<Promise<boolean>, any
         startingPosition,
         isMouseDown,
         context,
-      }),
+      })
     )
   }
 }

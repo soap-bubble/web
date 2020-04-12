@@ -8,6 +8,13 @@ const presets = [
       useBuiltIns: "usage",
     },
   ],
+  [
+    "@babel/preset-typescript", 
+    {
+      isTSX: true,
+      allExtensions: true
+    }
+  ]
 ];
 
 module.exports = { presets };

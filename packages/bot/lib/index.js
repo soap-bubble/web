@@ -1,15 +1,16 @@
-import config from 'config';
-import bunyan from 'bunyan';
+import config from 'config'
+import bunyan from 'bunyan'
 
-import factory, { init, define } from './factory';
+import factory, { init, define } from './factory'
 
-import clientFactory from './client';
-import appFactory from './app';
-import socketFactory from './socket';
-import { fetchBotProfileProvider, saveBotProflie } from './profile';
-import twitchApiFactory from './twitchApi';
-import twitchChatFactory from './twitchChat';
-import obsClientFactory from './obsClient';
+import clientFactory from './client'
+import appFactory from './app'
+import socketFactory from './socket'
+import { fetchBotProfileProvider, saveBotProflie } from './profile'
+import twitchApiFactory from './twitchApi'
+import twitchChatFactory from './twitchChat'
+import obsClientFactory from './obsClient'
+import storageFactory from './storage'
 
 define({
   app: appFactory,
@@ -21,13 +22,15 @@ define({
   saveProfile: saveBotProflie,
   twitchApi: twitchApiFactory,
   twitchChat: twitchChatFactory,
-  obsClient: obsClientFactory
-});
+  obsClient: obsClientFactory,
+  bucketName: () => 'soapbubble-dev.appspot.com',
+  storage: storageFactory,
+})
 
-init();
+init()
 
 factory(function init(socket, logger, twitchChat) {
   socket.server.listen(config.port, () => {
-    logger.info(`App listening on port ${config.port}`);
-  });
+    logger.info(`App listening on port ${config.port}`)
+  })
 })

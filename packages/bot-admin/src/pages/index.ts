@@ -1,3 +1,3 @@
-import Resume from '@branes/www/containers/resume'
+import Resume from '@branes/www/containers/twitch'
 
 export default Resume

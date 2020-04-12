@@ -34,56 +34,61 @@ const Sun: FunctionComponent = () => {
     <>
       <animated.mesh position={mousePosition}>
         <sphereGeometry args={[6, 8, 8]} attach="geometry" />
-        <shaderMaterial ref={shaderMaterial} args={[coronaShader]} attach="material" uniforms-scale-value={4.0} />
+        <shaderMaterial
+          ref={shaderMaterial}
+          args={[coronaShader]}
+          attach="material"
+          uniforms-scale-value={4.0}
+        />
         <Flare
           position={mousePosition}
           elements={[
             {
               texture: flare1Texture,
               size: 64,
-              distance: 0
+              distance: 0,
             },
             {
               texture: flare1Texture,
               size: 64,
-              distance: 1.2
+              distance: 1.2,
             },
             {
               texture: flare2Texture,
               size: 38,
               distance: 0.2,
-              color: new Color(0x0000ff)
+              color: new Color(0x0000ff),
             },
             {
               texture: flare2Texture,
               size: 40,
               distance: 0.3,
-              color: new Color(0x000ff0)
+              color: new Color(0x000ff0),
             },
             {
               texture: flare2Texture,
               size: 44,
               distance: 0.4,
-              color: new Color(0x00ff00)
+              color: new Color(0x00ff00),
             },
             {
               texture: flare2Texture,
               size: 56,
               distance: 0.5,
-              color: new Color(0x0ff000)
+              color: new Color(0x0ff000),
             },
             {
               texture: flare2Texture,
               size: 69,
               distance: 0.7,
-              color: new Color(0x0ff000)
+              color: new Color(0x0ff000),
             },
             {
               texture: flare2Texture,
               size: 64,
               distance: 0.9,
-              color: new Color(0xff0000)
-            }
+              color: new Color(0xff0000),
+            },
           ]}
         />
         <Glow />

@@ -9,7 +9,7 @@
   },
   "scripts": {
     "test": "exit 0",
-    "build": "babel -d dist lib",
+    "build": "babel --extensions .ts,.tsx,.js -d dist lib",
     "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"nodemon dist/index.js --watch dist --watch config | bunyan\""
   },
   "repository": {
@@ -24,6 +24,7 @@
   "homepage": "https://github.com/soap-bubble/bot#readme",
   "dependencies": {
     "@google-cloud/firestore": "^3.7.3",
+    "@google-cloud/storage": "^4.7.0",
     "async-retry": "^1.2.3",
     "axios": "^0.17.1",
     "bluebird": "^3.5.5",
@@ -33,6 +34,7 @@
     "cors": "^2.8.4",
     "discord.js": "^11.3.0",
     "express": "^4.16.2",
+    "fast-crc32c": "^2.0.0",
     "obs-websocket-js": "^3.1.0",
     "qs": "^6.6.0",
     "reselect": "^3.0.1",
@@ -45,6 +47,8 @@
     "@babel/cli": "^7.2.0",
     "@babel/core": "^7.2.2",
     "@babel/preset-env": "^7.2.0",
+    "@babel/preset-typescript": "^7.9.0",
+    "@types/node": "^13.11.1",
     "concurrently": "^3.5.1",
     "nodemon": "^1.14.12"
   },

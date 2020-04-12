@@ -1,11 +1,17 @@
-import React, { FunctionComponent, useMemo, useEffect, MutableRefObject, useRef } from 'react'
+import React, {
+  FunctionComponent,
+  useMemo,
+  useEffect,
+  MutableRefObject,
+  useRef,
+} from 'react'
 import { animated } from 'react-spring/three.cjs'
 import { Lensflare, LensflareElement } from './lensFlareExample'
 import { Color, Texture, SpotLight } from 'three'
 import { extend } from 'react-three-fiber'
 
 extend({
-  Lensflare
+  Lensflare,
 })
 
 export interface FlareElement {
@@ -26,12 +32,19 @@ const LensFlare: FunctionComponent<{
       lensflareRef.current.elements = []
       elements.forEach(
         ({ color, distance, texture, size }) =>
-          lensflareRef.current && lensflareRef.current.addElement(new LensflareElement(texture, size, distance, color))
+          lensflareRef.current &&
+          lensflareRef.current.addElement(
+            new LensflareElement(texture, size, distance, color)
+          )
       )
     }
   }, [elements, lensflareRef.current])
   return (
-    <animated.spotLight ref={lightRef} position={position} args={[new Color(0xffffff), 4]}>
+    <animated.spotLight
+      ref={lightRef}
+      position={position}
+      args={[new Color(0xffffff), 4]}
+    >
       <lensflare ref={lensflareRef} />
     </animated.spotLight>
   )

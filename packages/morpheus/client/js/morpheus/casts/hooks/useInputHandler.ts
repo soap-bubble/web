@@ -70,6 +70,7 @@ export type DispatchEvent = ThunkAction<Promise<any>, any, any, Action>
 const EVENT_QUEUE_START_ACTION = 'EVENT_QUEUE_START_ACTION'
 const EVENT_QUEUE_FINISH_ACTION = 'EVENT_QUEUE_FINISH_ACTION'
 const EVENT_QUEUE_PUSH_ACTION = 'EVENT_QUEUE_PUSH_ACTION'
+const EVENT_QUEUE_FLUSH_ACTION = 'EVENT_QUEUE_FLUSH_ACTION'
 
 interface EventQueueStartAction {
   type: 'EVENT_QUEUE_START_ACTION'
@@ -84,10 +85,16 @@ interface EventQueuePushAction {
   type: 'EVENT_QUEUE_PUSH_ACTION'
   payload: DispatchEvent
 }
+
+interface EventQueueFlushAction {
+  type: 'EVENT_QUEUE_FLUSH_ACTION'
+}
+
 type EventQueueActions =
   | EventQueueStartAction
   | EventQueueFinishAction
   | EventQueuePushAction
+  | EventQueueFlushAction
 
 const eventQueueActionCreators = {
   start: (payload: DispatchEvent): EventQueueStartAction => ({
@@ -101,6 +108,9 @@ const eventQueueActionCreators = {
   push: (payload: DispatchEvent): EventQueuePushAction => ({
     type: EVENT_QUEUE_PUSH_ACTION,
     payload,
+  }),
+  flush: (): EventQueueFlushAction => ({
+    type: EVENT_QUEUE_FLUSH_ACTION,
   }),
 }
 
@@ -141,6 +151,11 @@ function eventQueueReducer(
       return {
         ...state,
         queue: [...state.queue, action.payload],
+      }
+    case EVENT_QUEUE_FLUSH_ACTION:
+      return {
+        ...state,
+        queue: state.executing ? [state.queue[0]] : [],
       }
     default:
       throw new Error()
@@ -196,6 +211,26 @@ export default function(
     }),
     [lastUpdate, screenTop, screenLeft]
   )
+
+  useEffect(() => {
+    setIsClick(false)
+    setMouseDown(false)
+    setClickStartPos({
+      top: 0,
+      left: 0,
+    })
+    setLastUpdatePosition({
+      clientX: 0,
+      clientY: 0,
+      wasPointerCancelled: false,
+      wasPointerDown: false,
+      wasPointerMoved: false,
+      wasPointerUpped: false,
+    })
+    return () => {
+      eventQueueDispatch(eventQueueActionCreators.flush())
+    }
+  }, [scene])
 
   /*
    * Run all scene hotspots once

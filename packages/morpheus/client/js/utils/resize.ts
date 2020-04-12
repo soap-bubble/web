@@ -1,3 +1,5 @@
+import { Cast, MovieSpecialCast } from 'morpheus/casts/types'
+
 export const ORIGINAL_HEIGHT = 400
 export const ORIGINAL_WIDTH = 640
 export const ORIGINAL_ASPECT_RATIO = ORIGINAL_WIDTH / ORIGINAL_HEIGHT
@@ -10,6 +12,14 @@ export function resizeToScreen({
   right,
   bottom,
   clip = false,
+}: {
+  width: number
+  height: number
+  top: number
+  left: number
+  right: number
+  bottom: number
+  clip?: boolean
 }) {
   if (width / height > ORIGINAL_ASPECT_RATIO) {
     const adjustedHeight = width / ORIGINAL_ASPECT_RATIO
@@ -73,7 +83,16 @@ export function resizeToScreen({
   }
 }
 
-export function generateMovieTransform({ cast, dimensions }) {
+export function generateMovieTransform({
+  cast,
+  dimensions,
+}: {
+  cast: MovieSpecialCast
+  dimensions: {
+    width: number
+    height: number
+  }
+}) {
   const { width, height } = dimensions
   const {
     scale,
@@ -90,9 +109,9 @@ export function generateMovieTransform({ cast, dimensions }) {
     height,
   })
   return {
-    left: x * scale,
-    top: y * scale,
-    width: sizeX * scale,
-    height: sizeY * scale,
+    left: x * (scale || 1),
+    top: y * (scale || 1),
+    width: sizeX * (scale || 1),
+    height: sizeY * (scale || 1),
   }
 }

@@ -1,5 +1,8 @@
-import { Storage, SaveOptions } from '@google-cloud/storage'
-import { createReadStream, ReadStream } from 'fs'
+import {
+  Storage,
+  SaveOptions,
+  CreateWriteStreamOptions,
+} from '@google-cloud/storage'
 
 export default async function(bucketName: string) {
   const storage = new Storage()

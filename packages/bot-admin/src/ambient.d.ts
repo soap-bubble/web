@@ -12,3 +12,8 @@ declare namespace JSX {
 }
 
 declare module 'react-countdown-clock'
+
+declare global {
+  import firebase from 'firebase'
+  export const firebase = firebase
+}

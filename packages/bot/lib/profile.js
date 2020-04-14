@@ -1,11 +1,11 @@
-import axios from 'axios';
-import retry from 'async-retry';
+import axios from 'axios'
+import retry from 'async-retry'
 import qs from 'qs'
-import { Firestore } from '@google-cloud/Firestore'
+import { Firestore } from '@google-cloud/firestore'
 
-export function fetchBotProfileProvider(config, logger) {
+export function fetchBotProfileProvider() {
   return async () => {
-    const db = new Firestore
+    const db = new Firestore()
     const docRef = db.doc('bot/token')
     const docSnap = await docRef.get()
     return docSnap.data()
@@ -13,11 +13,14 @@ export function fetchBotProfileProvider(config, logger) {
 }
 
 export function saveBotProflie() {
-  return (data) => {
-    const db = new Firestore
+  return data => {
+    const db = new Firestore()
     const docRef = db.doc('bot/token')
-    docRef.set({
-      ...data
-    }, { merge: true })
+    docRef.set(
+      {
+        ...data,
+      },
+      { merge: true }
+    )
   }
 }

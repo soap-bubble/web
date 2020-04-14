@@ -1,6 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { v4 as uuid } from 'uuid'
 import { Firestore } from '@google-cloud/firestore'
+import admin, { auth, firestore, credential, app } from 'firebase-admin'
 import axios from 'axios'
 import qs from 'qs'
 import {
@@ -8,9 +9,25 @@ import {
   secret as clientSecret,
   redirect_uri as callbackURL,
 } from './secrets'
+import { readFileSync } from 'fs'
+const serviceAccount = require('/home/user/soapbubble-dev-firebase-adminsdk-eptqi-2a6eaa2f23.json')
+
+const init = (() => {
+  let instance: app.App
+  return () => {
+    if (!instance) {
+      instance = admin.initializeApp({
+        credential: credential.cert(serviceAccount),
+        databaseURL: 'https://soapbubble-dev.firebaseio.com',
+      })
+    }
+    return instance
+  }
+})()
 
 export default async (req: IncomingMessage, res: ServerResponse) => {
-  const db = new Firestore()
+  const app = init()
+  const db = firestore()
   const docRef = db.doc('bot/token')
   if (req.url) {
     const { code } = qs.parse(req.url.split('?')[1])
@@ -24,29 +41,20 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
     const { status, data } = await axios.post(
       `https://id.twitch.tv/oauth2/token?${query}`
     )
-    console.log(data)
     if (status === 200) {
-      const profileResponse = await axios.get('https://api.twitch.tv/kraken', {
+      const {
+        data: { _id: uid },
+      } = await axios.get(`https://api.twitch.tv/kraken/user`, {
         headers: {
           Authorization: `OAuth ${data.access_token}`,
           Accept: 'application/vnd.twitchtv.v5+json',
         },
       })
-      const {
-        data: {
-          token: { user_id, user_name: twitchBotName },
-        },
-      } = profileResponse
+      const token = await auth().createCustomToken(uid)
 
-      await docRef.set({
-        twitchBotName,
-        twitchTokenAccess: data.access_token,
-        twitchTokenRefresh: data.refresh_token,
-        twitchTokenExpiresIn: data.expires_in,
-      })
-      res.statusCode = 200
-      res.setHeader('Content-Type', 'application/json')
-      return res.end('ok')
+      res.statusCode = 301
+      res.setHeader('Location', `/enter/${token}`)
+      return res.end()
     }
   }
   res.statusCode = 500

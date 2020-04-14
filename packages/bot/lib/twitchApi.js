@@ -326,7 +326,6 @@ function createApi(
                 'hub.mode': 'subscribe',
                 'hub.topic': topicUrl,
                 'hub.lease_seconds': 120,
-                // 'hub.secret': twitchSecret,
               },
               {
                 headers: await promiseNewAuthorizatedHeaders(),

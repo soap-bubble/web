@@ -7,6 +7,7 @@ const Page: NextPage = () => {
   const { replace, query } = useRouter()
   useEffect(() => {
     if (query && query.token) {
+      localStorage.setItem('token', query.token as string)
       // @ts-ignore
       firebase
         .auth()
@@ -26,8 +27,8 @@ const Page: NextPage = () => {
     <>
       <Head>
         <title>Resume</title>
-        <meta name="title" content="Resume" />
-        <meta name="description" content="The Resume of John Dean" />
+        <meta name="title" content="enter" />
+        <meta name="description" content="" />
         <script src="/__/firebase/7.14.0/firebase-app.js"></script>
         <script src="/__/firebase/7.14.0/firebase-auth.js"></script>
         <script src="/__/firebase/init.js"></script>

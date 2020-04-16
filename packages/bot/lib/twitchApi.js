@@ -21,6 +21,9 @@ define({
   twitchLogin(config) {
     return config.get('twitch.login')
   },
+  profileId(config) {
+    return config.get('profileId')
+  },
   twitchHooks(app, logger) {
     const topics = []
     logger.info('Creating webhook callback')

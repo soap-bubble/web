@@ -10,6 +10,7 @@
   "scripts": {
     "test": "exit 0",
     "build": "babel --extensions .ts,.tsx,.js -d dist lib",
+    "start": "node dist",
     "start:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"nodemon dist/index.js --watch dist --watch config | bunyan\""
   },
   "repository": {

@@ -1,7 +1,7 @@
 import React from 'react'
 import { NextPage } from 'next'
 import Head from 'next/head'
-import Content from './Content'
+import Content from './Content copy'
 
 const Page: NextPage = () => {
   return (

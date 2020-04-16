@@ -10,7 +10,7 @@ import {
   redirect_uri as callbackURL,
 } from './secrets'
 import { readFileSync } from 'fs'
-const serviceAccount = require('/home/user/soapbubble-dev-firebase-adminsdk-eptqi-2a6eaa2f23.json')
+const serviceAccount = require('/Users/johnh/soapbubble-dev-firebase-adminsdk-eptqi-117bf819c0.json')
 
 const init = (() => {
   let instance: app.App
@@ -28,7 +28,6 @@ const init = (() => {
 export default async (req: IncomingMessage, res: ServerResponse) => {
   const app = init()
   const db = firestore()
-  const docRef = db.doc('bot/token')
   if (req.url) {
     const { code } = qs.parse(req.url.split('?')[1])
     const query = qs.stringify({

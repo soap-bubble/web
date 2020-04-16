@@ -9,7 +9,10 @@ const Page: NextPage = () => {
       <Head>
         <title>Resume</title>
         <meta name="title" content="Home" />
-        <meta name="description" content="The Resume of John Dean" />
+        <meta name="description" content="" />
+        <script src="/__/firebase/7.14.0/firebase-app.js"></script>
+        <script src="/__/firebase/7.14.0/firebase-auth.js"></script>
+        <script src="/__/firebase/init.js"></script>
       </Head>
       <Content />
     </>

@@ -1,74 +1,79 @@
 import React, { FunctionComponent, useEffect, useState } from 'react'
-import { useTransition } from 'react-spring/three.cjs'
+import store from './store'
+import EmojiWall from './EmojiWall'
+import io from 'socket.io-client'
 import { easeCubicOut } from 'd3-ease'
-import Canvas from './Canvas'
-import Bounce from './BounceSpring'
-import { sample } from './store'
+import useTransitionList from '@branes/www/hooks/useTransitionList'
+import { useRouter } from 'next/router'
 const WIDTH = 1800
 const HEIGHT = 900
-const newQueue = () => {
-  const q: [number, number, number][] = []
-  for (let i = 0; i <= 15; i++) {
-    q.push([
-      sample(),
-      Math.floor(Math.random() * WIDTH) - 900,
-      Math.floor(Math.random() * HEIGHT) - 450,
-    ])
-  }
-  return q
-}
-let defaultQueue = newQueue()
 
 const Content: FunctionComponent = () => {
-  const [count, setCount] = useState(0)
-  const [index, setIndex] = useState(0)
-  const [items, setItems] = useState<[number, number, number][]>([])
-  const [queue, setQueue] = useState<[number, number, number][]>(defaultQueue)
-  useEffect(() => {
-    const cancel = setTimeout(() => {
-      if (count + index < queue.length) {
-        let newCount: number = count,
-          newIndex: number = index
-        if (count < 5) {
-          newCount++
-          setCount(newCount)
-        } else {
-          newIndex++
-          setIndex(newIndex)
-        }
-        setItems(queue.slice(newIndex, newIndex + newCount))
-      } else if (count > 0) {
-        const newIndex = index + 1
-        setIndex(newIndex)
-        const newCount = count - 1
-        setCount(newCount)
-        setItems(queue.slice(newIndex, newIndex + newCount))
-      } else {
-        setIndex(0)
-        setCount(0)
-        setItems([])
-        setQueue(newQueue())
-      }
-    }, 125)
-    return () => clearTimeout(cancel)
-  }, [index, count])
-  const transitions = useTransition(
-    items,
-    ([id, x, y]: any) => `${id}:${x}:${y}`,
-    {
-      from: { opacity: 0, scale: [25, 25, 1] },
-      enter: [{ opacity: 1, scale: [150, 150, 1] }],
-      leave: [{ opacity: 0, scale: [100, 100, 1] }],
-      config: { duration: 750, easing: easeCubicOut },
-    }
-  )
+  const [items1, push1] = useTransitionList<[number, number, number]>(750)
+  const [items2, push2] = useTransitionList<[number, number, number]>(1500)
+  const [items3, push3] = useTransitionList<[number, number, number]>(1500)
+  const { query } = useRouter()
 
-  const contents = transitions.map(
-    ({ item: [id, x, y], key, props: { opacity, scale } }: any) => (
-      <Bounce key={key} id={id} x={x} y={y} opacity={opacity} scale={scale} />
-    )
+  useEffect(() => {
+    if (query.profileId) {
+      const socket = io(`http://localhost:5666`)
+      socket.on('emoji', ({ id }: { id: number }) => {
+        const { innerWidth: width, innerHeight: height } = window
+        ;[push1, push2, push3][Math.floor(Math.random() * 3)]([
+          id,
+          Math.floor(Math.random() * width) - width / 2,
+          Math.floor(Math.random() * height) - height / 2,
+        ])
+      })
+
+      socket.on('connect', () => {
+        console.log('conntected')
+        console.log(io)
+        // const response = io.join(`/${query.profileId}`)
+        // console.log(response)
+        socket.emit('init', { profileId: query.profileId })
+      })
+      return () => {
+        socket.disconnect()
+      }
+    }
+  }, [query.profileId])
+
+  return (
+    <>
+      <EmojiWall
+        items={items1}
+        transition={{
+          from: { alpha: 0, scale: [25, 25, 1] },
+          enter: [{ alpha: 1, scale: [150, 150, 1] }],
+          leave: [{ alpha: 0, scale: [100, 100, 1] }],
+          config: { duration: 750, easing: easeCubicOut },
+        }}
+      />
+      <EmojiWall
+        items={items2}
+        transition={{
+          from: { alpha: 0, scale: [25, 25, 1], rotation: [0, 0, 0] },
+          enter: [
+            { alpha: 1, scale: [150, 150, 1], rotation: [0, 0, 2 * Math.PI] },
+          ],
+          leave: [{ alpha: 0, scale: [5, 5, 1] }],
+          config: { duration: 1500, easing: easeCubicOut },
+        }}
+      />
+      <EmojiWall
+        items={items3}
+        transition={{
+          from: { alpha: 0, scale: [25, 25, 1], rotation: [0, 0, 0] },
+          enter: [
+            { alpha: 1, scale: [150, 150, 1], rotation: [2 * Math.PI, 0, 0] },
+          ],
+          leave: [{ alpha: 0, scale: [5, 5, 1] }],
+          config: { duration: 1500, easing: easeCubicOut },
+        }}
+      />
+    </>
   )
-  return <Canvas>{contents}</Canvas>
 }
 
 export default Content

@@ -2,7 +2,7 @@ FROM node:12
 ARG DEPLOYMENT
 ENV DEPLOYMENT ${DEPLOYMENT:-local}
 WORKDIR /app
-COPY package.json yarn.lock ./
+COPY package.json ./
 RUN yarn
 COPY . ./
 RUN yarn build

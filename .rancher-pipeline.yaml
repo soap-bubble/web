@@ -1,21 +1,5 @@
 # example
 stages:
-  - name: install bot deps
-    when:
-      branch: twitch
-      event: [ pull ]
-    steps:
-    - runScriptConfig:
-        image: node:12
-        shellScript: yarn
-  - name: build bot deps
-    when:
-      branch: twitch
-      event: [ pull ]
-    steps:
-    - runScriptConfig:
-        image: node:12
-        shellScript: cd packages/bot; yarn build
   - name: build image
     steps:
     - publishImageConfig:

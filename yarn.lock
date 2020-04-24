@@ -21204,10 +21204,10 @@ react-three-fiber@^3.0.13:
     scheduler "0.17.0"
     tiny-emitter "^2.1.0"
 
-react-three-fiber@^4.0.27:
-  version "4.0.27"
-  resolved "https://registry.yarnpkg.com/react-three-fiber/-/react-three-fiber-4.0.27.tgz#92ef0745dd437552009f98bf0ce0e5fe8532c17a"
-  integrity sha512-tvuvFX7vCJN8pgwj6FijdjSXp4AVDR6+AUf7rqg0rWcIMmwr/ztk9mRolum1oPD8Zt6X0Btelo4mFxpOSMMi+Q==
+react-three-fiber@^4.0.28:
+  version "4.0.28"
+  resolved "https://registry.yarnpkg.com/react-three-fiber/-/react-three-fiber-4.0.28.tgz#3f93f726378c0c1eba0a044f304e72af8275e236"
+  integrity sha512-5vWXy6c76okJk1XZd4vhOIAEDKtICcH+eSf1zH/Ztae6/NM8Sz36cg7MhUDqvqRxYLoxtztxtZts0/J2zzM2lw==
   dependencies:
     "@babel/runtime" "^7.9.2"
     "@juggle/resize-observer" "^3.1.3"

@@ -1,0 +1,30 @@
+# example
+stages:
+  - name: install bot deps
+    when:
+      branch: twitch
+      event: [ pull ]
+    steps:
+    - runScriptConfig:
+        image: node:12
+        shellScript: yarn
+  - name: build bot deps
+    when:
+      branch: twitch
+      event: [ pull ]
+    steps:
+    - runScriptConfig:
+        image: node:12
+        shellScript: cd packages/bot; yarn build
+  - name: build image
+    steps:
+    - publishImageConfig:
+        dockerfilePath: Dockerfile
+        buildContext: packages/bot
+        tag: soapbubble/bot
+# branch conditions for the pipeline
+branch:
+  include: [ twitch ]
+  exclude: [ dev ]
+# timeout in minutes
+timeout: 30

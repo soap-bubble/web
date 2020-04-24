@@ -3,8 +3,8 @@ stages:
   - name: build image
     steps:
     - publishImageConfig:
-        dockerfilePath: Dockerfile
-        buildContext: packages/bot
+        dockerfilePath: ./packages/bot/Dockerfile
+        buildContext: ./packages/bot
         tag: soapbubble/bot
 # branch conditions for the pipeline
 branch:

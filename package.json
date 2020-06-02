@@ -11,7 +11,13 @@
       "**/electron-compile/**",
       "**/electon-forge",
       "**/electron-forge/**, **/electron-prebuilt-compile",
-      "**/electron-prebuilt-compile/**"
+      "**/electron-prebuilt-compile/**",
+      "**/react0three-fiber",
+      "**/react0three-fiber/**",
+      "**/react-use-measurer",
+      "**/react-use-measurer/**",
+      "**/@juggle/resize-observer",
+      "**/@juggle/resize-observer/**"
     ]
   },
   "devDependencies": {

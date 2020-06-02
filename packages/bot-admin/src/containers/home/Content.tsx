@@ -16,7 +16,7 @@ const Content: FunctionComponent = () => {
   }, [])
   const onTwitchAuth = useCallback(
     () =>
-      (document.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=sprlzg25iypn1s4id029ib17lscmq0&redirect_uri=http://localhost:3080/api/twitchAuth&response_type=code&scope=user_read`),
+      (document.location.href = `https://id.twitch.tv/oauth2/authorize?client_id=${process.env.BOT_ADMIN_TWITCH_CLIENT_ID}&redirect_uri=${process.env.BOT_ADMIN_TWITCH_REDIRECT}&response_type=code&scope=user_read`),
     []
   )
 

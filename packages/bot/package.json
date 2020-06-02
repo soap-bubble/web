@@ -4,9 +4,6 @@
   "description": "Morpheus bot",
   "main": "dist/index.js",
   "private": true,
-  "publishConfig": {
-    "access": "private"
-  },
   "scripts": {
     "test": "exit 0",
     "build": "babel --extensions .ts,.tsx,.js -d dist lib",
@@ -29,7 +26,7 @@
     "async-retry": "^1.2.3",
     "axios": "^0.17.1",
     "bluebird": "^3.5.5",
-    "bufferutil": "^3.0.3",
+    "bufferutil": "^4.0.1",
     "bunyan": "^1.8.12",
     "config": "^1.29.4",
     "cors": "^2.8.4",

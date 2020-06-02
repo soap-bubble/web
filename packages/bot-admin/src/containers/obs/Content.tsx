@@ -1,8 +1,10 @@
 import React, { FunctionComponent, useEffect, useState } from 'react'
-import { sample } from './store'
+import store from './store'
 import EmojiWall from './EmojiWall'
+import io from 'socket.io-client'
 import { easeCubicOut } from 'd3-ease'
 import useTransitionList from '@branes/www/hooks/useTransitionList'
+import { useRouter } from 'next/router'
 const WIDTH = 1800
 const HEIGHT = 900
 
@@ -10,17 +12,34 @@ const Content: FunctionComponent = () => {
   const [items1, push1] = useTransitionList<[number, number, number]>(750)
   const [items2, push2] = useTransitionList<[number, number, number]>(1500)
   const [items3, push3] = useTransitionList<[number, number, number]>(1500)
+  const { query } = useRouter()
 
   useEffect(() => {
-    const cancel = setInterval(() => {
-      ;[push1, push2, push3][Math.floor(Math.random() * 3)]([
-        sample(),
-        Math.floor(Math.random() * WIDTH) - 900,
-        Math.floor(Math.random() * HEIGHT) - 450,
-      ])
-    }, 50)
-    return () => clearInterval(cancel)
-  }, [push1, push2, push3])
+    if (query.profileId) {
+      const socket = io({
+        path: '/bot/socketio/',
+      })
+      socket.on('emoji', ({ id }: { id: number }) => {
+        const { innerWidth: width, innerHeight: height } = window
+        ;[push1, push2, push3][Math.floor(Math.random() * 3)]([
+          id,
+          Math.floor(Math.random() * width) - width / 2,
+          Math.floor(Math.random() * height) - height / 2,
+        ])
+      })
+
+      socket.on('connect', () => {
+        console.log('conntected')
+        console.log(io)
+        // const response = io.join(`/${query.profileId}`)
+        // console.log(response)
+        socket.emit('init', { profileId: query.profileId })
+      })
+      return () => {
+        socket.disconnect()
+      }
+    }
+  }, [query.profileId])
 
   return (
     <>

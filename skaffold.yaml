@@ -1,0 +1,51 @@
+apiVersion: skaffold/v2beta4
+kind: Config
+metadata:
+  name: web
+build:
+  artifacts: 
+    - image: null
+deploy:
+  kubectl:
+    manifests: 
+      - dev.null
+profiles:
+  - name: local-config
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: add
+        path: /deploy/kubectl/manifests/-
+        value: deployment/local/*.yaml
+  - name: bot-admin-local
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: add
+        path: /build/artifacts/-
+        value:
+          image: bot-admin
+          context: packages\bot-admin
+      - op: add
+        path: /deploy/kubectl/manifests/-
+        value: packages/bot-admin/manifest/k8s-local.yaml
+  - name: bot-local
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: add
+        path: /build/artifacts/-
+        value:
+          image: bot
+          context: packages\bot
+      - op: add
+        path: /deploy/kubectl/manifests/-
+        value: packages/bot/manifest/k8s-local.yaml
+  - name: cleanup
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: remove
+        path: /deploy/kubectl/manifests/0
+      - op: remove
+        path: /build/artifacts/0

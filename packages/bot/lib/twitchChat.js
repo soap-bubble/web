@@ -17,6 +17,8 @@ export default async function init(
     },
     async connect() {
       const commandPrefix = '!'
+      const token = await provideTwitchUserToken()
+      console.log(token)
       const tmiOptions = {
         options: {
           clientId: twitchClientId,
@@ -27,7 +29,7 @@ export default async function init(
         },
         identity: {
           username: twitchUserName,
-          password: `oauth:${await provideTwitchUserToken()}`,
+          password: `oauth:${token}`,
         },
         channels: [twitchUserName],
       }

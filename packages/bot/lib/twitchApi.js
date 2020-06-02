@@ -97,11 +97,12 @@ define({
     let twitchTokenAccess
     let twitchTokenRefresh
     let twitchTokenExpiresIn
-    //
-    // logger.info({
-    //   twitchTokenAccess,
-    //   twitchTokenRefresh,
-    // });
+
+    logger.info({
+      twitchTokenAccess,
+      twitchTokenRefresh,
+      twitchTokenExpiresIn,
+    })
     let isExpired
     let isExpiredTimeoutId
     async function refresh() {

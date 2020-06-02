@@ -8,15 +8,20 @@ export function fetchBotProfileProvider(profileId) {
     const db = new Firestore()
     const docRef = db.doc(`bot/${profileId}`)
     const docSnap = await docRef.get()
-    return docSnap.data()
+    const ret = docSnap.data()
+    console.log('fetchBotProfileProvider', ret)
+    return ret
   }
 }
 
 export function saveBotProflie(profileId) {
-  return data => {
+  return async  => {
     const db = new Firestore()
-    const docRef = db.doc(`bot/${profileId}`)
-    docRef.set(
+    const docRef = db.doc(`bot/${profileId}`);
+
+    console.log('saveBotProfile', data);
+
+    await docRef.set(
       {
         ...data,
       },

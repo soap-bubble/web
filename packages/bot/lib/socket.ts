@@ -8,12 +8,15 @@ const logger = bunyan.createLogger({ name: 'soapbubble-bot-socket' })
 
 export default async function(app: Express, profileId: string) {
   const server = new Server(app)
-  const io = socketio(server)
+  const io = socketio(server, {
+    path: '/bot/socketio',
+  })
 
   logger.info('Socket server starting')
-  // io.set('origins', config.origins);
+
   io.origins(((origin: any, callback: any) => {
-    if (origin !== config.get('origins') && origin !== '*') {
+    logger.info('origin', origin)
+    if (origin !== config.get('origins') && config.get('origins') !== '*') {
       return callback('origin not allowed', false)
     }
     callback(null, true)
@@ -31,7 +34,7 @@ export default async function(app: Express, profileId: string) {
       socket.join(profileId)
     })
   })
-
+  logger.info('io cors', (io.origins as any)())
   return {
     server,
     io,

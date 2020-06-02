@@ -1,41 +1,56 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bot-admin
+  name: bot
 spec:
   selector:
     matchLabels:
-      app: bot-admin
+      app: bot
   template:
     metadata:
       labels:
-        app: bot-admin
+        app: bot
     spec:
       containers:
-        - name: bot-admin
-          image: bot-admin
+        - name: bot
+          image: bot
           env:
-            - name: PORT
-              value: '80'
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /opt/secrets/service-account.json
-            - name: BOT_ADMIN_SOCKETIO
-              value: ws://192.168.99.100/bot/
-            - name: BOT_ADMIN_TWITCH_CLIENT_ID
+            - name: BOT_ORIGIN
+              value: '*'
+            - name: BOT_PROFILE_ID
+              valueFrom:
+                configMapKeyRef:
+                  key: BOT_PROFILE_ID
+                  name: bot-secrets
+            - name: BOT_DISCORD_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  key: token
+                  name: discord-secrets
+            - name: BOT_TWITCH_CLIENT_ID
               valueFrom:
                 configMapKeyRef:
                   key: client
                   name: twitch-secrets
-            - name: BOT_ADMIN_TWITCH_SECRET
+            - name: BOT_TWITCH_CLIENT_SECRET
               valueFrom:
                 configMapKeyRef:
                   key: secret
                   name: twitch-secrets
-            - name: BOT_ADMIN_TWITCH_REDIRECT
+            - name: BOT_TWITCH_WEBHOOK
               valueFrom:
                 configMapKeyRef:
-                  key: redirect
+                  key: BOT_TWITCH_WEBHOOK
+                  name: bot-secrets
+            - name: BOT_TWITCH_SECRET
+              valueFrom:
+                configMapKeyRef:
+                  key: secret
                   name: twitch-secrets
+            - name: BOT_PORT
+              value: '80'
           ports:
             - containerPort: 80
           volumeMounts:
@@ -53,15 +68,13 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: bot-admin
-  name: bot-admin
+    app: bot
+  name: bot
 spec:
-  externalTrafficPolicy: Cluster
   ports:
     - port: 80
       protocol: TCP
       targetPort: 80
   selector:
-    app: bot-admin
-  sessionAffinity: None
+    app: bot
   type: NodePort

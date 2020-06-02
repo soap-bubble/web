@@ -1,3 +1,12 @@
-export const client = 'sprlzg25iypn1s4id029ib17lscmq0'
-export const secret = 'zu62qjqib1awuaw5q1f9a3413d93vs'
-export const redirect_uri = 'http://localhost:3080/api/twitchCallback'
+import { credential as credentialFactory } from 'firebase-admin'
+
+function getFromEnv(name: string) {
+  if (!process.env[name]) {
+    throw new Error(`Must define ENV['${name}']`)
+  }
+  return process.env[name] as string
+}
+
+export const client = getFromEnv('BOT_ADMIN_TWITCH_CLIENT_ID')
+export const secret = getFromEnv('BOT_ADMIN_TWITCH_SECRET')
+export const redirect_uri = getFromEnv('BOT_ADMIN_TWITCH_REDIRECT')

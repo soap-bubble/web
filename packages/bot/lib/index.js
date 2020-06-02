@@ -11,6 +11,7 @@ import twitchApiFactory from './twitchApi'
 import twitchChatFactory from './twitchChat'
 import obsClientFactory from './obsClient'
 import storageFactory from './storage'
+import routes from './routes'
 
 define({
   app: appFactory,
@@ -25,11 +26,12 @@ define({
   obsClient: obsClientFactory,
   bucketName: () => 'soapbubble-dev.appspot.com',
   storage: storageFactory,
+  routes,
 })
 
 init()
 
-factory(function init(socket, logger, twitchChat) {
+factory(function init(socket, logger, twitchChat, routes) {
   socket.server.listen(config.port, () => {
     logger.info(`App listening on port ${config.port}`)
   })

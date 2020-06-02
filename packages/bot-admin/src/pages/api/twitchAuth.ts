@@ -1,7 +1,7 @@
 import { IncomingMessage, ServerResponse } from 'http'
 import { v4 as uuid } from 'uuid'
 import { Firestore } from '@google-cloud/firestore'
-import admin, { auth, firestore, credential, app } from 'firebase-admin'
+import { initializeApp, auth, credential, firestore, app } from 'firebase-admin'
 import axios from 'axios'
 import qs from 'qs'
 import {
@@ -9,15 +9,13 @@ import {
   secret as clientSecret,
   redirect_uri as callbackURL,
 } from './secrets'
-import { readFileSync } from 'fs'
-const serviceAccount = require('/Users/johnh/soapbubble-dev-firebase-adminsdk-eptqi-117bf819c0.json')
 
 const init = (() => {
   let instance: app.App
   return () => {
     if (!instance) {
-      instance = admin.initializeApp({
-        credential: credential.cert(serviceAccount),
+      instance = initializeApp({
+        credential: credential.applicationDefault(),
         databaseURL: 'https://soapbubble-dev.firebaseio.com',
       })
     }

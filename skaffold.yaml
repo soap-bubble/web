@@ -6,8 +6,8 @@ build:
   artifacts: 
     - image: null
 deploy:
-  kubectl:
-    manifests: 
+  kustomize:
+    paths: 
       - dev.null
 profiles:
   - name: local-config
@@ -15,8 +15,8 @@ profiles:
       - kubeContext: minikube
     patches:
       - op: add
-        path: /deploy/kubectl/manifests/-
-        value: deployment/local/*.yaml
+        path: /deploy/kustomize/paths/-
+        value: deployment/local
   - name: bot-admin-local
     activation:
       - kubeContext: minikube
@@ -26,9 +26,6 @@ profiles:
         value:
           image: bot-admin
           context: packages\bot-admin
-      - op: add
-        path: /deploy/kubectl/manifests/-
-        value: packages/bot-admin/manifest/k8s-local.yaml
   - name: bot-local
     activation:
       - kubeContext: minikube
@@ -38,14 +35,11 @@ profiles:
         value:
           image: bot
           context: packages\bot
-      - op: add
-        path: /deploy/kubectl/manifests/-
-        value: packages/bot/manifest/k8s-local.yaml
   - name: cleanup
     activation:
       - kubeContext: minikube
     patches:
       - op: remove
-        path: /deploy/kubectl/manifests/0
+        path: /deploy/kustomize/paths/0
       - op: remove
         path: /build/artifacts/0

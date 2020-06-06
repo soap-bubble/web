@@ -6,7 +6,11 @@ import factory, { init, define } from './factory'
 import clientFactory from './client'
 import appFactory from './app'
 import socketFactory from './socket'
-import { fetchBotProfileProvider, saveBotProflie } from './profile'
+import {
+  fetchBotProfileProvider,
+  saveBotProfile,
+  onProfileChange,
+} from './profile'
 import twitchApiFactory from './twitchApi'
 import twitchChatFactory from './twitchChat'
 import obsClientFactory from './obsClient'
@@ -20,7 +24,8 @@ define({
   config: () => config,
   logger: () => bunyan.createLogger({ name: 'morpheus-bot' }),
   profileProvider: fetchBotProfileProvider,
-  saveProfile: saveBotProflie,
+  onProfileChange,
+  saveProfile: saveBotProfile,
   twitchApi: twitchApiFactory,
   twitchChat: twitchChatFactory,
   obsClient: obsClientFactory,

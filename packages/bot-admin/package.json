@@ -9,7 +9,7 @@
     "dev": "next -p 3081",
     "build": "next build",
     "now-build": "next build",
-    "start": "cat $BOT_ADMIN_SERVICE_ACCOUNT && yarn build && next start -p $PORT",
+    "start": "yarn build && next start -p $PORT",
     "test": "jest test src",
     "start:firebase": "firebase serve -p 3000"
   },

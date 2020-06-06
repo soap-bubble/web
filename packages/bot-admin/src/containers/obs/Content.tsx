@@ -16,9 +16,7 @@ const Content: FunctionComponent = () => {
 
   useEffect(() => {
     if (query.profileId) {
-      const socket = io({
-        path: '/bot/socketio/',
-      })
+      const socket = io()
       socket.on('emoji', ({ id }: { id: number }) => {
         const { innerWidth: width, innerHeight: height } = window
         ;[push1, push2, push3][Math.floor(Math.random() * 3)]([

@@ -42,6 +42,14 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
         .where('twitchId', '==', user_id)
         .get()
 
+      console.log({
+        twitchId: user_id,
+        twitchUserName,
+        twitchTokenAccess: data.access_token,
+        twitchTokenRefresh: data.refresh_token,
+        twitchTokenExpiresIn: data.expires_in,
+      })
+      console.log(data)
       let profileId: string
       if (snapshot.empty) {
         const docRef = await collectionRef.add({

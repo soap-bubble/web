@@ -14,12 +14,20 @@ export function fetchBotProfileProvider(profileId) {
   }
 }
 
-export function saveBotProflie(profileId) {
-  return async  => {
+export function onProfileChange(profileId) {
+  return callback => {
     const db = new Firestore()
-    const docRef = db.doc(`bot/${profileId}`);
+    const docRef = db.doc(`bot/${profileId}`)
+    docRef.onSnapshot(callback)
+  }
+}
 
-    console.log('saveBotProfile', data);
+export function saveBotProfile(profileId) {
+  return async data => {
+    const db = new Firestore()
+    const docRef = db.doc(`bot/${profileId}`)
+
+    console.log('saveBotProfile', data)
 
     await docRef.set(
       {

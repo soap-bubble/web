@@ -6,7 +6,8 @@ export default async function init(
   profileProvider,
   provideTwitchUserToken,
   twitchClientId,
-  socket
+  socket,
+  onProfileChange
 ) {
   const { twitchUserName } = await profileProvider()
   let client
@@ -18,13 +19,14 @@ export default async function init(
     async connect() {
       const commandPrefix = '!'
       const token = await provideTwitchUserToken()
-      console.log(token)
+      console.log(twitchUserName, token)
       const tmiOptions = {
         options: {
           clientId: twitchClientId,
           debug: true,
         },
         connection: {
+          secure: true,
           reconnect: true,
         },
         identity: {
@@ -34,6 +36,10 @@ export default async function init(
         channels: [twitchUserName],
       }
       client = new tmi.client(tmiOptions)
+
+      onProfileChange(change => {
+        console.log('Change type:', change.type)
+      })
 
       client.on('message', (channel, tags, message, self) => {
         const foundEmojis = data.filter(emoji => {
@@ -49,7 +55,7 @@ export default async function init(
       try {
         await client.connect()
       } catch (err) {
-        logger.warn('Failed to connecto to twitch chat')
+        logger.warn('Failed to connect to twitch chat')
       }
     },
   }

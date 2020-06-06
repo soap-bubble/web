@@ -48,20 +48,3 @@ spec:
               - key: service.json
                 path: service-account.json
             secretName: google-secrets
----
-apiVersion: v1
-kind: Service
-metadata:
-  labels:
-    app: bot-admin
-  name: bot-admin
-spec:
-  externalTrafficPolicy: Cluster
-  ports:
-    - port: 80
-      protocol: TCP
-      targetPort: 80
-  selector:
-    app: bot-admin
-  sessionAffinity: None
-  type: NodePort

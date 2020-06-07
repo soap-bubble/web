@@ -6,9 +6,6 @@ stages:
       runScriptConfig:
         image: soapbubble/aws-cloud-build
 
-    - name: "Apply"
-      applyYamlConfig:
-        path: ./deployment.yaml
 # branch conditions for the pipeline
 branch:
   include: [ twitch ]

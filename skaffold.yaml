@@ -15,9 +15,9 @@ profiles:
       - env: DEPLOYMENT=soapbubble
     build:
       artifacts:
-        - image: bot-admin
+        - image: soapbubble/bot-admin
           context: packages/bot-admin
-        - image: bot
+        - image: soapbubble/bot
           context: packages/bot
     deploy:
       kustomize:

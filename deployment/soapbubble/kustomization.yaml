@@ -3,4 +3,5 @@ resources:
   - ../../packages/bot-admin/manifest/soapbubble
   - ../../packages/bot/manifest/soapbubble
   - ingress-service.yaml
+patchesStrategicMerge:
   - deployment.yaml

@@ -1,12 +1,6 @@
 # example
 stages:
-  - name: build
-    steps:
-    - env:
-        DEPLOYMENT: soapbubble
-      runScriptConfig:
-        image: "soapbubble/aws-cloud-build"
-        shellScript: "bash -c \"skaffold build > deployment.yaml\""
+
   - name: apply
     steps:
     - applyYamlConfig:

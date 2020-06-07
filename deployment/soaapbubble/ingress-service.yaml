@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-service
+  annotations:
+    rancher.io/globalDNS.hostname: "twitch.soapbubble.online"
+spec:
+  rules:
+    - host: twitch.soapbubble.online
+      http:
+        paths:
+          - path: /socket.io
+            backend:
+              serviceName: bot
+              servicePort: 80
+          - path: /bot
+            backend:
+              serviceName: bot
+              servicePort: 80
+          - path: /
+            backend:
+              serviceName: bot-admin
+              servicePort: 80

@@ -1,0 +1,12 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-admin
+spec:
+  template:
+    spec:
+      containers:
+      - name: bot-admin
+        env:
+        - name: BOT_ADMIN_SOCKETIO
+          value: ws://192.168.99.100/bot/

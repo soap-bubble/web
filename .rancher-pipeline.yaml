@@ -3,9 +3,14 @@ stages:
   - name: build image
     steps:
     - name: "Build"
+      env:
+        DEPLOYMENT: soapbubble
       runScriptConfig:
         image: soapbubble/aws-cloud-build
-
+        shellScript: skaffold build > deployment.yaml
+    - name: "Apply"
+      applyYamlConfig:
+        path: ./deployment.yaml
 # branch conditions for the pipeline
 branch:
   include: [ twitch ]

@@ -1,15 +1,15 @@
 # example
 stages:
-  - name: build image
+  - name: build
     steps:
-    - name: "Build"
-      env:
+    - env:
         DEPLOYMENT: soapbubble
       runScriptConfig:
         image: "soapbubble/aws-cloud-build"
         shellScript: "bash -c \"skaffold build > deployment.yaml\""
-    - name: "Apply"
-      applyYamlConfig:
+  - name: apply
+    steps:
+    - applyYamlConfig:
         path: "./deployment.yaml"
 # branch conditions for the pipeline
 branch:

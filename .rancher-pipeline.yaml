@@ -5,9 +5,7 @@ stages:
     - name: "Build"
       runScriptConfig:
         image: soapbubble/aws-cloud-build
-        env:
-          DEPLOYMENT: soapbubble
-        shellScript: skaffold build > deployment.yaml
+
     - name: "Apply"
       applyYamlConfig:
         path: ./deployment.yaml

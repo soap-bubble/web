@@ -10,6 +10,19 @@ deploy:
     paths: 
       - dev.null
 profiles:
+  - name: soapbubble
+    activation:
+      - env: DEPLOYMENT=soapbubble
+    build:
+      artifacts:
+        - image: bot-admin
+          context: packages/bot-admin
+        - image: bot
+          context: packages/bot
+    deploy:
+      kustomize:
+        paths:
+          - deployment/soapbubble
   - name: local-config
     activation:
       - kubeContext: minikube
@@ -25,7 +38,7 @@ profiles:
         path: /build/artifacts/-
         value:
           image: bot-admin
-          context: packages\bot-admin
+          context: packages/bot-admin
   - name: bot-local
     activation:
       - kubeContext: minikube

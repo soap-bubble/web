@@ -2,10 +2,14 @@
 stages:
   - name: build image
     steps:
-    - publishImageConfig:
-        dockerfilePath: ./packages/bot/Dockerfile
-        buildContext: ./packages/bot
-        tag: soapbubble/bot
+    - runScriptConfig:
+        image: soapbubble/aws-cloud-build
+        env:
+          DEPLOYMENT: soapbubble
+        shellScript: |
+          skaffold build > deployment.yaml
+    - applyYamlConfig:
+        path: ./deployment.yaml
 # branch conditions for the pipeline
 branch:
   include: [ twitch ]

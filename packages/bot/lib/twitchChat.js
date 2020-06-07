@@ -37,8 +37,14 @@ export default async function init(
       }
       client = new tmi.client(tmiOptions)
 
-      onProfileChange(change => {
-        console.log('Change type:', change.type)
+      onProfileChange(async change => {
+        try {
+          await client.disconnect()
+        } catch (e) {
+          // ignore
+        } finally {
+          await client.connect()
+        }
       })
 
       client.on('message', (channel, tags, message, self) => {
@@ -51,12 +57,6 @@ export default async function init(
           socket.sawEmoji(emoji.id)
         }
       })
-
-      try {
-        await client.connect()
-      } catch (err) {
-        logger.warn('Failed to connect to twitch chat')
-      }
     },
   }
 

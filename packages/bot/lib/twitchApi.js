@@ -18,8 +18,8 @@ define({
   twitchSecret(config) {
     return config.get('twitch.secret')
   },
-  twitchLogin(config) {
-    return config.get('twitch.login')
+  async twitchLogin(profileProvider) {
+    return (await profileProvider()).twitchUserName
   },
   profileId(config) {
     return config.get('profileId')
@@ -122,7 +122,7 @@ define({
           }
         )
       } catch (err) {
-        logger.error('Failed to refresh twitch token')
+        logger.error('Failed to refresh twitch token', err)
         return {
           access_token: null,
           refresh_token: null,
@@ -188,7 +188,7 @@ define({
         }
       }
       if (isExpired) {
-        logger.info('Token is expired... refreshing')
+        logger.info('Token is expired... refreshing', isExpired)
         const {
           access_token: newAccessToken,
           refresh_token: newRefreshToken,
@@ -196,12 +196,12 @@ define({
         if (newAccessToken && newRefreshToken) {
           twitchTokenAccess = newAccessToken
           twitchTokenRefresh = newRefreshToken
+          logger.info('Update token on auth server')
+          await saveProfile({
+            twitchTokenAccess,
+            twitchTokenRefresh,
+          })
         }
-        logger.info('Update token on auth server')
-        await saveProfile({
-          twitchTokenAccess,
-          twitchTokenRefresh,
-        })
         if (isExpiredTimeoutId) {
           clearTimeout(isExpiredTimeoutId)
         }

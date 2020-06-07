@@ -38,7 +38,7 @@
     "reselect": "^3.0.1",
     "service-builder": "^1.1.1",
     "socket.io": "^2.0.4",
-    "tmi.js": "git+https://git@github.com/tmijs/tmi.js.git",
+    "tmi.js": "^1.5.0",
     "uuid": "^3.2.1"
   },
   "devDependencies": {

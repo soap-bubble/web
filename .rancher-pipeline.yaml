@@ -6,7 +6,7 @@ stages:
         DEPLOYMENT: soapbubble
       runScriptConfig:
         image: "soapbubble/aws-cloud-build"
-        shellScript: "skaffold render"
+        shellScript: "kubectl cluster-info"
           
 
 # branch conditions for the pipeline

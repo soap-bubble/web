@@ -6,7 +6,8 @@ stages:
         DEPLOYMENT: soapbubble
       runScriptConfig:
         image: "soapbubble/aws-cloud-build"
-        shellScript: "echo hello"
+        shellScript: |
+          bash -c "skaffold build > deployment.yaml"
 
 # branch conditions for the pipeline
 branch:

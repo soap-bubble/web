@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot
+spec:
+  template:
+    spec:
+      containers:
+        - name: bot
+          env:
+            - name: BOT_PROFILE_ID
+              valueFrom:
+                secretKeyRef:
+                  key: BOT_PROFILE_ID
+                  name: bot-secrets
+            - name: BOT_DISCORD_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: token
+                  name: discord-secrets
+            - name: BOT_TWITCH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client
+                  name: twitch-secrets
+            - name: BOT_TWITCH_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: secret
+                  name: twitch-secrets
+            - name: BOT_TWITCH_WEBHOOK
+              valueFrom:
+                secretKeyRef:
+                  key: BOT_TWITCH_WEBHOOK
+                  name: bot-secrets
+            - name: BOT_TWITCH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: secret
+                  name: twitch-secrets

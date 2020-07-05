@@ -1,0 +1,25 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-admin
+spec:
+  template:
+    spec:
+      containers:
+        - name: bot-admin
+          env:
+            - name: BOT_ADMIN_TWITCH_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  key: client
+                  name: twitch-secrets
+            - name: BOT_ADMIN_TWITCH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  key: secret
+                  name: twitch-secrets
+            - name: BOT_ADMIN_TWITCH_REDIRECT
+              valueFrom:
+                secretKeyRef:
+                  key: redirect
+                  name: twitch-secrets

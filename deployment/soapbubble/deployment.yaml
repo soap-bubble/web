@@ -10,7 +10,7 @@ spec:
         image: soapbubble/bot-admin
         env:
         - name: BOT_ADMIN_SOCKETIO
-          value: ws://192.168.99.100/bot/
+          value: ws://192.168.99.101/bot/
 ---
 apiVersion: apps/v1
 kind: Deployment

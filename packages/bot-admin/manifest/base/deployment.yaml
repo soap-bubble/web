@@ -19,23 +19,6 @@ spec:
               value: '80'
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: /opt/secrets/service-account.json
-            - name: BOT_ADMIN_SOCKETIO
-              value: ws://192.168.99.100/bot/
-            - name: BOT_ADMIN_TWITCH_CLIENT_ID
-              valueFrom:
-                configMapKeyRef:
-                  key: client
-                  name: twitch-secrets
-            - name: BOT_ADMIN_TWITCH_SECRET
-              valueFrom:
-                configMapKeyRef:
-                  key: secret
-                  name: twitch-secrets
-            - name: BOT_ADMIN_TWITCH_REDIRECT
-              valueFrom:
-                configMapKeyRef:
-                  key: redirect
-                  name: twitch-secrets
           ports:
             - containerPort: 80
           volumeMounts:

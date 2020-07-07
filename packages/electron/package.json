@@ -30,7 +30,7 @@
     "@babel/preset-env": "^7.4.5",
     "concurrently": "^3.6.1",
     "cross-env": "^5.2.0",
-    "electron": "^5.0.6"
+    "electron": "^7.2.4"
   },
   "dependencies": {
     "@babel/cli": "^7.4.4",

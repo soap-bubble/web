@@ -1,5 +1,4 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { v4 as uuid } from 'uuid'
 import { Firestore } from '@google-cloud/firestore'
 import axios from 'axios'
 import qs from 'qs'
@@ -25,6 +24,7 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
       `https://id.twitch.tv/oauth2/token?${query}`
     )
     if (status === 200) {
+      const expiresAt = Date.now() + data.expires_in * 1000
       const profileResponse = await axios.get('https://api.twitch.tv/kraken', {
         headers: {
           Authorization: `OAuth ${data.access_token}`,
@@ -48,6 +48,7 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
         twitchTokenAccess: data.access_token,
         twitchTokenRefresh: data.refresh_token,
         twitchTokenExpiresIn: data.expires_in,
+        twitchTokenExpiresAt: expiresAt,
       })
       console.log(data)
       let profileId: string
@@ -58,6 +59,7 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
           twitchTokenAccess: data.access_token,
           twitchTokenRefresh: data.refresh_token,
           twitchTokenExpiresIn: data.expires_in,
+          twitchTokenExpiresAt: expiresAt,
         })
         profileId = docRef.id
       } else {
@@ -69,6 +71,7 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
             twitchTokenAccess: data.access_token,
             twitchTokenRefresh: data.refresh_token,
             twitchTokenExpiresIn: data.expires_in,
+            twitchTokenExpiresAt: expiresAt,
           },
           {
             merge: true,

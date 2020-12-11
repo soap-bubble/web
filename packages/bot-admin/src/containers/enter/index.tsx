@@ -8,8 +8,7 @@ const Page: NextPage = () => {
   useEffect(() => {
     if (query && query.token) {
       localStorage.setItem('token', query.token as string)
-      // @ts-ignore
-      firebase
+      global.firebase
         .auth()
         .signInWithCustomToken(query.token as string)
         .then(response => {

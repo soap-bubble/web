@@ -8,8 +8,8 @@ import appFactory from './app'
 import socketFactory from './socket'
 import {
   fetchBotProfileProvider,
-  saveBotProfile,
   onProfileChange,
+  saveBotProfile,
 } from './profile'
 import twitchApiFactory from './twitchApi'
 import twitchChatFactory from './twitchChat'

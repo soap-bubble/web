@@ -12,8 +12,10 @@
       "**/electon-forge",
       "**/electron-forge/**, **/electron-prebuilt-compile",
       "**/electron-prebuilt-compile/**",
-      "**/react0three-fiber",
-      "**/react0three-fiber/**",
+      "**/react-three-fiber",
+      "**/react-three-fiber/**",
+      "**/react-spring",
+      "**/react-spring/**",
       "**/react-use-measurer",
       "**/react-use-measurer/**",
       "**/@juggle/resize-observer",
@@ -24,10 +26,11 @@
     "axios": "^0.18.0",
     "cross-env": "^5.2.0",
     "cross-spawn": "^5.1.0",
+    "firebase": "^8.1.2",
+    "firebase-tools": "^7.3.1",
     "lerna": "^3.13.4",
     "minimist": "^1.2.0",
-    "spawn-sync": "^1.0.15",
-    "firebase-tools": "^7.3.1"
+    "spawn-sync": "^1.0.15"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",

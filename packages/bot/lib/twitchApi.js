@@ -97,14 +97,10 @@ define({
     let twitchTokenAccess
     let twitchTokenRefresh
     let twitchTokenExpiresIn
-
-    logger.info({
-      twitchTokenAccess,
-      twitchTokenRefresh,
-      twitchTokenExpiresIn,
-    })
+    let twitchTokenExpiresAt
     let isExpired
     let isExpiredTimeoutId
+
     async function refresh() {
       logger.info('Refreshing token')
       const query = qs.stringify({
@@ -162,22 +158,25 @@ define({
         logger.info('Token is expired because of timeout')
         isExpired = true
         isExpiredTimeoutId = null
-      }, Math.max(0, twitchTokenExpiresIn * 1000 - 60000))
+      }, Math.max(0, twitchTokenExpiresAt - 60000 - Date.now()))
     }
 
     async function provideTwitchUserToken() {
-      logger.info('provideTwitchUserToken')
       if (!twitchTokenAccess) {
         const profile = await profileProvider()
         twitchTokenAccess = profile.twitchTokenAccess
         twitchTokenRefresh = profile.twitchTokenRefresh
         twitchTokenExpiresIn = profile.twitchTokenExpiresIn
+        twitchTokenExpiresAt = profile.twitchTokenExpiresAt
       }
       if (typeof isExpired === 'undefined') {
         try {
+          const response = await tokenStatus()
           const {
-            data: { valid },
-          } = await tokenStatus()
+            data: {
+              token: { valid },
+            },
+          } = response
           isExpired = !valid
           if (valid) {
             setExpireTimeout()
@@ -188,7 +187,7 @@ define({
         }
       }
       if (isExpired) {
-        logger.info('Token is expired... refreshing', isExpired)
+        logger.info('Token is expired... refreshing')
         const {
           access_token: newAccessToken,
           refresh_token: newRefreshToken,
@@ -238,7 +237,6 @@ function bearer(token) {
 function createApi(
   twitchClientId,
   twitchWebhookEndpoint,
-  twitchSecret,
   twitchLogin,
   logger,
   provideTwitchUserToken,
@@ -272,13 +270,13 @@ function createApi(
     let count = 0
     do {
       try {
-        logger.info('attemptWithRefreh DO...WHILE start')
+        logger.trace('attemptWithRefreh DO...WHILE start')
         const result = await func()
         authorized = true
-        logger.info('attemptWithRefreh DO...WHILE done')
+        logger.trace('attemptWithRefreh DO...WHILE done')
         return result
       } catch (err) {
-        logger.info('attemptWithRefreh DO...WHILE err')
+        logger.trace('attemptWithRefreh DO...WHILE err')
         if (
           err.response &&
           err.response.status === 401 &&
@@ -300,21 +298,21 @@ function createApi(
       const userId = await api.getMyUserId()
       const topic = twitchApiNew(`users/follows?first=1&to_id=${userId}`)
       logger.info(`listenForFollow:${topic}`)
-      twitchHooks.listen('follow', response => logger.info(topic, response))
+      twitchHooks.listen('follow', (response) => logger.info(topic, response))
       await api.subscribe('follow', topic)
     },
     async listenForStreamChanges() {
       const userId = await api.getMyUserId()
       const topic = twitchApiNew(`streams?user_id=${userId}`)
       logger.info(`listenForStreamChanges:${topic}`)
-      twitchHooks.listen('stream', response => logger.info(topic, response))
+      twitchHooks.listen('stream', (response) => logger.info(topic, response))
       await api.subscribe('stream', topic)
     },
     async listenForUserChanges() {
       const userId = await api.getMyUserId()
       const topic = twitchApiNew(`users?id=${userId}`)
       logger.info(`listenForUserChanges:${topic}`)
-      twitchHooks.listen('user', response => logger.info(topic, response))
+      twitchHooks.listen('user', (response) => logger.info(topic, response))
       await api.subscribe('user', topic)
     },
     async subscribe(topicName, topicUrl) {
@@ -348,7 +346,7 @@ function createApi(
     },
     async unsubscribe(topics) {
       await Promise.all(
-        topics.map(async topic => {
+        topics.map(async (topic) => {
           logger.info(`unsubscribe ${topic}`)
           const { data } = await attemptWithRefreh(
             async () =>
@@ -547,7 +545,7 @@ function createApi(
           differs = nextPage.cursor !== (pagination && pagination.cursor)
           if (differs) {
             tags.push(
-              ...data.filter(tag => {
+              ...data.filter((tag) => {
                 const name = tag.localization_names['en-us']
                 return findTags.includes(name) && !tags.includes(name)
               })
@@ -561,7 +559,7 @@ function createApi(
         logger.error(message, err)
         logger.info(
           tags
-            .map(tag => `${tag.tag_id} (${tag.localization_names['en-us']})`)
+            .map((tag) => `${tag.tag_id} (${tag.localization_names['en-us']})`)
             .join(', ')
         )
         return {

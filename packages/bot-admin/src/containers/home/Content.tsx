@@ -5,8 +5,8 @@ const Content: FunctionComponent = () => {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (typeof token === 'string') {
-      // @ts-ignore
-      firebase
+      global.firebase
+        .app()
         .auth()
         .signInWithCustomToken(token)
         .then(({ user }) => {

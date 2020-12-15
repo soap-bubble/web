@@ -9,7 +9,8 @@
     "dev": "next -p 3081",
     "build": "next build",
     "now-build": "next build",
-    "start": "yarn build && next start -p $PORT",
+    "start": "next start -p $PORT",
+    "start:dev": "next dev -p $PORT",
     "test": "jest test src",
     "start:firebase": "firebase serve -p 3000"
   },

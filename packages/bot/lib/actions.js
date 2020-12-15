@@ -1,26 +1,25 @@
 import bunyan from 'bunyan'
-import factory from './factory'
 import { createSelector } from 'reselect'
 
 const logger = bunyan.createLogger({ name: 'soapbubble-bot-actions' })
 
-const notBotSelector = (message) => !message.author.bot
-const contentSelector = (message) => message.content
-const contentIncludes = (text) => (message) => message.content.includes(text)
-const numberFromContent = createSelector(contentSelector, (content) => {
+const notBotSelector = message => !message.author.bot
+const contentSelector = message => message.content
+const contentIncludes = text => message => message.content.includes(text)
+const numberFromContent = createSelector(contentSelector, content => {
   const num = content.match(/[0-9]+/)
   if (num) return Number(num[0])
   return -1
 })
 
-const numbersFromContent = createSelector(contentSelector, (content) => {
+const numbersFromContent = createSelector(contentSelector, content => {
   const num = content.match(/[0-9]+/g)
-  if (num) return num.map((n) => Number(n))
+  if (num) return num.map(n => Number(n))
   return []
 })
 
-const line = (num) =>
-  createSelector(contentSelector, (content) => content.split('\n')[num])
+const line = num =>
+  createSelector(contentSelector, content => content.split('\n')[num])
 
 export const hotspotLook = {
   selector: createSelector(
@@ -157,7 +156,7 @@ export const pingPong = {
   },
 }
 
-export default function (socket) {
+export default function(socket) {
   return (message, cb) => {
     logger.info(message)
     ;[

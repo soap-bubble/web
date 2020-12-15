@@ -1,6 +1,6 @@
 import Discord from 'discord.js'
-import factory from './factory'
-import twitchTags from './twitchTags'
+import factory from './factory.js'
+import twitchTags from './twitch/tags.js'
 import { createSelector } from 'reselect'
 
 export default function(config, twitchChat) {

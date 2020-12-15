@@ -12,6 +12,7 @@ const Stage: FunctionComponent = ({ children }) => {
         position: 'absolute',
         top: 0,
         left: 0,
+        overflow: 'hidden',
       }}
       onCreated={({ gl }) => {
         gl.setClearColor(new Color('#000000'), 0)

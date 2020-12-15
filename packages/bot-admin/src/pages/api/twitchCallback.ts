@@ -7,9 +7,10 @@ import {
   secret as clientSecret,
   redirect_uri as callbackURL,
 } from './secrets'
+import serviceKey from '../../utils/googleServiceKey'
 
 export default async (req: IncomingMessage, res: ServerResponse) => {
-  const db = new Firestore()
+  const db = new Firestore(serviceKey)
 
   if (req.url) {
     const { code } = qs.parse(req.url.split('?')[1])
@@ -24,7 +25,7 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
       `https://id.twitch.tv/oauth2/token?${query}`
     )
     if (status === 200) {
-      const expiresAt = Date.now() + data.expires_in * 1000
+      const expiresAt = new Date(Date.now() + data.expires_in * 1000)
       const profileResponse = await axios.get('https://api.twitch.tv/kraken', {
         headers: {
           Authorization: `OAuth ${data.access_token}`,

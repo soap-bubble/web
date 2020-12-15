@@ -1,20 +1,20 @@
 const presets = [
   [
-    "@babel/env",
+    '@babel/env',
     {
       targets: {
         node: true,
       },
-      useBuiltIns: "usage",
+      corejs: 3,
+      useBuiltIns: 'usage',
     },
   ],
   [
-    "@babel/preset-typescript", 
+    '@babel/preset-typescript',
     {
-      isTSX: true,
-      allExtensions: true
-    }
-  ]
-];
+      allExtensions: true,
+    },
+  ],
+]
 
-module.exports = { presets };
+module.exports = { presets }

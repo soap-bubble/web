@@ -3,9 +3,10 @@ import {
   SaveOptions,
   CreateWriteStreamOptions,
 } from '@google-cloud/storage'
+import { ThenArg } from './utils'
 
-export default async function(bucketName: string) {
-  const storage = new Storage()
+const func = async function(bucketName: string, googleServiceKey: any) {
+  const storage = new Storage(googleServiceKey)
 
   const bucket = storage.bucket(bucketName)
   return {
@@ -33,3 +34,6 @@ export default async function(bucketName: string) {
     },
   }
 }
+
+export default func
+export type GoogleStorage = ThenArg<ReturnType<typeof func>>

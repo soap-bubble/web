@@ -3,6 +3,9 @@ kind: Config
 metadata:
   name: web
 build:
+  local:
+    push: false
+    useDockerCLI: true
   artifacts: 
     - image: null
 deploy:
@@ -39,6 +42,8 @@ profiles:
         value:
           image: bot-admin
           context: packages/bot-admin
+          docker:
+            dockerFile: Dockerfile.dev
   - name: bot-local
     activation:
       - kubeContext: minikube
@@ -47,7 +52,7 @@ profiles:
         path: /build/artifacts/-
         value:
           image: bot
-          context: packages\bot
+          context: packages/bot
   - name: cleanup
     activation:
       - kubeContext: minikube

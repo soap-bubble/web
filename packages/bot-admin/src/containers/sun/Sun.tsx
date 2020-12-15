@@ -7,8 +7,8 @@ import useMouseSpring from './useMouseSpring'
 import Glow from './Glow'
 import Flare from './LensFlare'
 
-const flare1Url = '/ssr/sun/lens_flares_1.png'
-const flare2Url = '/ssr/sun/lens_flares_2.png'
+const flare1Url = '/sun/lens_flares_1.png'
+const flare2Url = '/sun/lens_flares_2.png'
 const Sun: FunctionComponent = () => {
   const shaderMaterial = useRef<ShaderMaterial>()
   const flare1Texture = useMemo(() => {

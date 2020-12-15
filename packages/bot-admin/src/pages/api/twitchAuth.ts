@@ -9,13 +9,16 @@ import {
   secret as clientSecret,
   redirect_uri as callbackURL,
 } from './secrets'
+import { credentials } from '../../utils/googleServiceKey'
 
 const init = (() => {
   let instance: app.App
   return () => {
     if (!instance) {
       instance = initializeApp({
-        credential: credential.applicationDefault(),
+        credential: credentials
+          ? credential.cert(credentials)
+          : credential.applicationDefault(),
         databaseURL: 'https://soapbubble-dev.firebaseio.com',
       })
     }

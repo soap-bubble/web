@@ -12,7 +12,7 @@ const logger = bunyan.createLogger({ name: 'soapbubble-bot-socket' })
 export default async function(
   app,
   morpheus,
-  profileProvider,
+  provideProfile,
   twitchChat,
   provideTwitchUserToken
 ) {
@@ -21,7 +21,7 @@ export default async function(
   let gameSocket
   const server = Server(app)
   const io = socketio(server)
-  const { letsPlayChannel } = await profileProvider()
+  const { letsPlayChannel } = await provideProfile()
 
   logger.info('Socket server starting')
   // io.set('origins', config.origins);

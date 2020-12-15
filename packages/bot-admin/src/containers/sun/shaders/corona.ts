@@ -5,7 +5,7 @@ const shader: ShaderMaterialParameters = {
   uniforms: {
     scale: { value: 0.1 }, //  will set later
     temp: { value: 3050 },
-    time: { value: 0 }
+    time: { value: 0 },
   },
   transparent: true,
   depthWrite: false,
@@ -190,7 +190,7 @@ void main() {
   sPos = position;
   gl_Position = projectionMatrix * (modelViewMatrix * vec4(0.0, 0.0, 0.0, 1.0) + vec4(position.x, position.y, 0.0, 0.0));
 }
-`
+`,
 }
 
 export default shader

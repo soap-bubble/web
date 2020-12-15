@@ -1,12 +1,7 @@
 {
   "compilerOptions": {
-    "target": "es5",
-    "baseUrl": ".",
-    "paths": {
-      "@branes/www/*": ["./src/*"],
-      "*": ["__INVALID__/*"]
-    },
-    "lib": ["dom", "dom.iterable", "esnext"],
+    "target": "ESNext",
+    "lib": ["esnext"],
     "allowJs": true,
     "esModuleInterop": true,
     "allowSyntheticDefaultImports": true,
@@ -20,6 +15,6 @@
     "skipLibCheck": true,
     "noEmit": true
   },
-  "include": ["./src"],
+  "include": ["./lib"],
   "exclude": ["node_modules"]
 }

@@ -3,7 +3,7 @@ import { TextureLoader, ShaderMaterial } from 'three'
 import glowShader from './shaders/glow'
 import { useFrame } from 'react-three-fiber'
 
-const glowUrl = '/ssr/sun/star_glow.png'
+const glowUrl = '/sun/star_glow.png'
 
 const Glow: FunctionComponent = () => {
   const texture = useMemo(() => {
@@ -21,7 +21,12 @@ const Glow: FunctionComponent = () => {
   return (
     <mesh position={[0, 0, 0]}>
       <planeBufferGeometry attach="geometry" args={[15, 15, 1, 1]} />
-      <shaderMaterial ref={shaderMaterial} attach="material" args={[glowShader]} uniforms-texture-value={texture} />
+      <shaderMaterial
+        ref={shaderMaterial}
+        attach="material"
+        args={[glowShader]}
+        uniforms-texture-value={texture}
+      />
     </mesh>
   )
 }

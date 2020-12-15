@@ -5,3 +5,4 @@ node_modules
 SECRETS.md
 serviceAccount.json
 deployment/local
+.env

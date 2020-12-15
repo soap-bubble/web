@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "bot-backend.fullname" . }}
+  labels:
+    {{- include "bot-backend.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: {{ .Values.services.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "bot-backend.selectorLabels" . | nindent 4 }}

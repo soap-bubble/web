@@ -29,13 +29,18 @@ spec:
                 configMapKeyRef:
                   key: secret
                   name: twitch-secrets
-            - name: BOT_TWITCH_WEBHOOK
-              valueFrom:
-                configMapKeyRef:
-                  key: BOT_TWITCH_WEBHOOK
-                  name: bot-secrets
             - name: BOT_TWITCH_SECRET
               valueFrom:
                 configMapKeyRef:
                   key: secret
+                  name: twitch-secrets
+            - name: BOT_TWITCH_SAVE_CHANNEL_NAMES
+              valueFrom:
+                configMapKeyRef:
+                  key: saveChannelNames
+                  name: twitch-secrets
+            - name: BOT_TWITCH_WEBHOOK
+              valueFrom:
+                configMapKeyRef:
+                  key: webhook
                   name: twitch-secrets

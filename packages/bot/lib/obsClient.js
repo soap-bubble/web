@@ -1,5 +1,5 @@
 import OBSWebsocket from 'obs-websocket-js'
-import factory, { define } from './factory'
+import factory, { define } from './factory.js'
 import bunyan from 'bunyan'
 
 const logger = bunyan.createLogger({ name: 'bot-obs' })
@@ -8,7 +8,7 @@ define({
   obsConfig(config) {
     return config.obs
   },
-  obs: async (obsConfig) => {
+  obs: async obsConfig => {
     logger.info('Connecting to OBS')
     const obs = new OBSWebsocket()
     if (obsConfig.enabled) {

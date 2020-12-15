@@ -9,6 +9,10 @@ module.exports = {
     clientSecret: 'BOT_TWITCH_CLIENT_SECRET',
     webhook: 'BOT_TWITCH_WEBHOOK',
     secret: 'BOT_TWITCH_SECRET',
+    saveChannelNames: {
+      __name: 'BOT_TWITCH_SAVE_CHANNEL_NAMES',
+      __format: 'json',
+    },
   },
   port: 'BOT_PORT',
 }

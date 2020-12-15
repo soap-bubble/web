@@ -10,7 +10,8 @@
       "**/electron-compile",
       "**/electron-compile/**",
       "**/electon-forge",
-      "**/electron-forge/**, **/electron-prebuilt-compile",
+      "**/electron-forge/**",
+      "**/electron-prebuilt-compile",
       "**/electron-prebuilt-compile/**",
       "**/react-three-fiber",
       "**/react-three-fiber/**",
@@ -19,7 +20,11 @@
       "**/react-use-measurer",
       "**/react-use-measurer/**",
       "**/@juggle/resize-observer",
-      "**/@juggle/resize-observer/**"
+      "**/@juggle/resize-observer/**",
+      "**/@types/react-native",
+      "**/@types/react-native/**",
+      "**/@types/styled-components",
+      "**/@types/styled-components/**"
     ]
   },
   "devDependencies": {

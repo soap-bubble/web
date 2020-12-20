@@ -14,6 +14,8 @@ bot-backend:
       value: berglas://soapbubble-dev-secrets/twitch_client
     - name: BOT_TWITCH_SECRET
       value: berglas://soapbubble-dev-secrets/twitch_secret
+    - name: BOT_ORIGIN
+      value: twitch.soapbubble.online
   webhook: https://twitch.soapbubble.online/bot/api/hook
   command: 
     - bash 
@@ -60,10 +62,10 @@ bot-backend:
   resources:
     limits:
       cpu: 250m
-      memory: 512Mi
+      memory: 666Mi
     requests:
       cpu: 250m
-      memory: 512Mi
+      memory: 666Mi
 
   volumeMounts:
     - name: gcp-serviceaccount
@@ -96,10 +98,10 @@ bot-webapp:
   resources:
     limits:
       cpu: 250m
-      memory: 512Mi
+      memory: 256Mi
     requests:
       cpu: 250m
-      memory: 512Mi
+      memory: 256Mi
   imagePullSecrets:
     - name: "soapbubble-dev"
   ingress:

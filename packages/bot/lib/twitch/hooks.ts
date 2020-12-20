@@ -99,16 +99,6 @@ const definition = {
           return res.status(400).send('Unable to verify signature')
         }
         const currentSubscription = await provideSubscription(subscription.id)
-        if (
-          currentSubscription &&
-          currentSubscription.lastMessageId === messageId
-        ) {
-          logger.info('Duplicate request received from twitch. Ignoring', {
-            body: req.body,
-          })
-          return res.status(200).send('echo.....')
-        }
-
         await saveSubscription({
           ...subscription,
           lastMessageId: messageId.toString(),
@@ -117,7 +107,17 @@ const definition = {
           subscription.status === 'webhook_callback_verification_pending' &&
           challenge
         ) {
+          logger.info('Responding with twitch eventSub challenge')
           return res.status(200).send(challenge)
+        }
+        if (
+          currentSubscription &&
+          currentSubscription.lastMessageId === messageId
+        ) {
+          logger.info('Duplicate request received from twitch. Ignoring', {
+            body: req.body,
+          })
+          return res.status(200).send('echo.....')
         }
         if (
           currentSubscription?.status ===

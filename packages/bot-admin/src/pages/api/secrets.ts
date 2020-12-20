@@ -1,5 +1,3 @@
-import { credential as credentialFactory } from 'firebase-admin'
-
 function getFromEnv(name: string) {
   if (!process.env[name]) {
     throw new Error(`Must define ENV['${name}']`)

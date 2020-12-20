@@ -5,7 +5,6 @@ import {
   attemptWithRefreh,
   twitchApiNew,
   twitchApiV5,
-  oauth,
   newAuthorizatedHeaders,
   v5AuthorizatedHeaders,
   clientHeaders,
@@ -26,7 +25,7 @@ const definition = {
     return config.get('twitch.clientID')
   },
   twitchClientSecret(config: IConfig) {
-    return config.get('twitch.clientSecret')
+    return config.get('twitch.secret')
   },
   async twitchLogin(provideProfile: ProvideProfile) {
     const profile = await provideProfile()

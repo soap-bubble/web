@@ -13,6 +13,7 @@ metadata:
     {{- include "bot-backend.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
+    nginx.org/websocket-services: "{{ $fullName }}"
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:

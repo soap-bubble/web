@@ -29,7 +29,7 @@ spec:
           command: 
             {{- toYaml .Values.command | nindent 12 }}
           env:
-            - name: PORT
+            - name: BOT_PORT
               value: '80'
             - name: BOT_TWITCH_SAVE_CHANNEL_NAMES
               valueFrom:
@@ -48,14 +48,14 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-          # livenessProbe:
-          #   httpGet:
-          #     path: /bot/ping
-          #     port: http
-          # readinessProbe:
-          #   httpGet:
-          #     path: /bot/ping
-          #     port: http
+          livenessProbe:
+            httpGet:
+              path: /bot/ping
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /bot/ping
+              port: http
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}

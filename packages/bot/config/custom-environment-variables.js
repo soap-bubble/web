@@ -6,9 +6,8 @@ module.exports = {
   },
   twitch: {
     clientID: 'BOT_TWITCH_CLIENT_ID',
-    clientSecret: 'BOT_TWITCH_CLIENT_SECRET',
-    webhook: 'BOT_TWITCH_WEBHOOK',
     secret: 'BOT_TWITCH_SECRET',
+    webhook: 'BOT_TWITCH_WEBHOOK',
     saveChannelNames: {
       __name: 'BOT_TWITCH_SAVE_CHANNEL_NAMES',
       __format: 'json',

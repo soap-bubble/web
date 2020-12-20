@@ -14,6 +14,13 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
 
   if (req.url) {
     const { code } = qs.parse(req.url.split('?')[1])
+    console.log({
+      client_id: clientID,
+      client_secret: clientSecret,
+      code,
+      grant_type: 'authorization_code',
+      redirect_uri: callbackURL,
+    })
     const query = qs.stringify({
       client_id: clientID,
       client_secret: clientSecret,
@@ -86,6 +93,6 @@ export default async (req: IncomingMessage, res: ServerResponse) => {
     }
   }
   res.statusCode = 500
-  res.setHeader('Content-Type', 'application/json')
+  // res.setHeader('Content-Type', 'application/json')
   return res.end('no ok')
 }

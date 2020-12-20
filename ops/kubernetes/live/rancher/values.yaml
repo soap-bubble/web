@@ -4,30 +4,37 @@ bot-backend:
       value: cluster
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /secret/key.json
-    - name: ROOT_SERVICE_ACCOUNT
-      value: berglas://soapbubble-dev-secrets/google_application_credentials
+    - name: GOOGLE_SERVICE_ACCOUNT
+      value: berglas://soapbubble-dev-secrets/google_application_credentials?destination=/googleKey
     - name: BOT_PROFILE_ID
       value: berglas://soapbubble-dev-secrets/twitch_profile_id
     - name: BOT_DISCORD_TOKEN
       value: berglas://soapbubble-dev-secrets/discord_token
     - name: BOT_TWITCH_CLIENT_ID
       value: berglas://soapbubble-dev-secrets/twitch_client
-    - name: BOT_TWITCH_CLIENT_SECRET
-      value: berglas://soapbubble-dev-secrets/twitch_client_secret
     - name: BOT_TWITCH_SECRET
       value: berglas://soapbubble-dev-secrets/twitch_secret
   webhook: https://twitch.soapbubble.online/bot/api/hook
   command: 
     - bash 
     - -c 
-    - "GOOGLE_APPLICATION_CREDENTIALS=${ROOT_SERVICE_ACCOUNT} yarn start"
+    - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
   saveChannelNames:
-    - captemulation
-    - chocotaco
-    - shroud
-    - day9tv
-    - glermz
-    - halifax
+    - "captemulation"
+    - "sweet_anita"
+    - "feliciaday"
+    - "auronplay"
+    - "ninja"
+    - "cohhcarnage"
+    - "gmhikaru"
+    - "rhovious"
+    - "swagger"
+    - "jacksepticeye"
+    - "chocotaco"
+    - "shroud"
+    - "day9tv"
+    - "glermz"
+    - "halifax"
   image:
     repository: us.gcr.io/soapbubble-dev/bot-backend
   imagePullSecrets:
@@ -41,11 +48,10 @@ bot-backend:
       nginx.ingress.kubernetes.io/proxy-read-timeout: '3600'
       nginx.ingress.kubernetes.io/proxy-send-timeout: '3600'
       nginx.ingress.kubernetes.io/affinity: cookie
-      nginx.org/websocket-services: "bot-backend"
     hosts:
       - host: twitch.soapbubble.online
         paths:
-          - "/api"
+          - "/bot"
           - "/socket.io"
     tls:
       - secretName: twitch-tls
@@ -72,24 +78,28 @@ bot-webapp:
   redirect: https://twitch.soapbubble.online/api/twitchCallback
   image:
     repository: us.gcr.io/soapbubble-dev/bot-webapp
+  command: 
+    - bash 
+    - -c 
+    - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
   env:
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /secret/key.json
-    - name: ROOT_SERVICE_ACCOUNT
-      value: berglas://soapbubble-dev-secrets/333333333333
+    - name: GOOGLE_SERVICE_ACCOUNT
+      value: berglas://soapbubble-dev-secrets/google_application_credentials?destination=/googleKey
     - name: BOT_ADMIN_SOCKETIO
       value: ws://twitch.soapbubble.online/bot/
     - name: BOT_ADMIN_TWITCH_CLIENT_ID
       value: berglas://soapbubble-dev-secrets/twitch_client
     - name: BOT_ADMIN_TWITCH_SECRET
-      value: berglas://soapbubble-dev-secrets/twitch_client_secret
+      value: berglas://soapbubble-dev-secrets/twitch_secret
   resources:
     limits:
       cpu: 250m
       memory: 512Mi
     requests:
       cpu: 250m
-      memory: 512i
+      memory: 512Mi
   imagePullSecrets:
     - name: "soapbubble-dev"
   ingress:

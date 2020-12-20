@@ -17,6 +17,10 @@ bot-backend:
     - name: BOT_TWITCH_SECRET
       value: berglas://soapbubble-dev-secrets/twitch_secret
   webhook: https://twitch.soapbubble.online/bot/api/hook
+  command: 
+    - bash 
+    - -c 
+    - "GOOGLE_APPLICATION_CREDENTIALS=${ROOT_SERVICE_ACCOUNT} yarn start"
   saveChannelNames:
     - captemulation
     - chocotaco
@@ -72,7 +76,7 @@ bot-webapp:
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /secret/key.json
     - name: ROOT_SERVICE_ACCOUNT
-      value: berglas://soapbubble-dev-secrets/google_application_credentials
+      value: berglas://soapbubble-dev-secrets/333333333333
     - name: BOT_ADMIN_SOCKETIO
       value: ws://twitch.soapbubble.online/bot/
     - name: BOT_ADMIN_TWITCH_CLIENT_ID

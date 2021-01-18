@@ -8,6 +8,6 @@ node_modules/
 
 morpheus.map.json
 
-serviceAccount.json
+serviceAccount*.json
 
 .env

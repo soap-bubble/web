@@ -10,7 +10,7 @@ import Canvas from './Canvas'
 import Videos, { VideoController } from './Videos'
 import Sounds, { AudioController } from './Sounds'
 import Images from './Images'
-import useComputedStageCast from '../hooks/useComputedStageCast'
+import useComputedStageCast from '../hooks/useRenderables'
 import useCastRefNoticer, { CastRef } from '../hooks/useCastRefNoticer'
 import loggerFactory from 'utils/logger'
 import {
@@ -208,14 +208,13 @@ const Special = ({
    * be allowed to finish naturally
    */
   useEffect(() => {
-    const activeAndCurrentAndNotLooping = and(
+    const activeAndCurrent = and(
       (cast: Cast) =>
         !!stageScenes.length && stageScenes[0].casts.includes(cast),
-      (cast: Cast) => (cast as MovieSpecialCast).looping,
       (cast: Cast) => isActive({ cast, gamestates })
     )
     for (const [controller, casts] of availableSounds) {
-      if (casts.find(activeAndCurrentAndNotLooping)) {
+      if (casts.find(activeAndCurrent)) {
         logger.info({ casts }, `Playing ${controller.url}`)
         controller.play()
       } else {

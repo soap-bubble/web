@@ -1,6 +1,6 @@
-import logger from './logger'
+import logger from '../../logger'
 import { firestore } from 'firebase-admin'
-import schedule from './utils/schedule'
+import schedule from '../../utils/schedule'
 import {
   badDeck1,
   badHarem,
@@ -13,7 +13,7 @@ import {
 
 type BatchOp = (batch: FirebaseFirestore.WriteBatch) => void
 
-export default async function update() {
+export async function up() {
   try {
     const db = firestore()
     const scenesRef = db.collection('scenes')
@@ -252,4 +252,8 @@ export default async function update() {
   } catch (error) {
     console.error(error)
   }
+}
+
+export async function down() {
+  throw new Error("Not implemented. Reload from original converter data")
 }

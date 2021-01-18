@@ -23,9 +23,24 @@ import {
   generateRenderables,
   generateMovieCastDrawOps,
   generateControlledRenderables,
+  generateMovieCastRenderables,
 } from './transforms'
 import { flatten, uniqBy } from 'lodash'
+import loggerFactory from 'utils/logger'
+import { render } from 'utils/render'
 
+const logger = loggerFactory('cast:hooks:useRenderables')
+function describeRenderables(renderables: Renderable[]) {
+  const describaleRenderables = renderables.filter(
+    r => !!r.description
+  ) as Required<Renderable>[]
+  return (
+    describaleRenderables.length &&
+    describaleRenderables
+      .map((r, index) => `${index}: ${r.description()}`)
+      .join('\n')
+  )
+}
 export default function useRenderables(
   gamestates: Gamestates,
   width: number,
@@ -59,52 +74,58 @@ export default function useRenderables(
     }
     return []
   }, [stageScenes])
-  const cursorRenderable = useMemo(() => {
-    return (ctx: CanvasRenderingContext2D) => {
-      if (cursor.image) {
-        const screenPos = {
-          x: cursor.left - (cursor.image.width as number) / 2,
-          y: cursor.top - (cursor.image.height as number) / 2,
-        }
+  const cursorRenderable = useMemo<Renderable>(() => {
+    if (cursor.image) {
+      const image: CanvasImageSource = cursor.image
+      const screenPos = {
+        x: cursor.left - (image.width as number) / 2,
+        y: cursor.top - (image.height as number) / 2,
+      }
+      const renderable: Renderable = (ctx: CanvasRenderingContext2D) => {
         ctx.drawImage(
-          cursor.image,
+          image,
           0,
           0,
-          cursor.image.width as number,
-          cursor.image.height as number,
+          image.width as number,
+          image.height as number,
           screenPos.x,
           screenPos.y,
-          cursor.image.width as number,
-          cursor.image.height as number
+          image.width as number,
+          image.height as number
         )
       }
+
+      renderable.description = () =>
+        `cursor.x: ${screenPos.x} cursor.y: ${screenPos.y}`
+      return renderable
     }
+    return () => {}
   }, [cursor.image, cursor.left, cursor.top])
   const [imageCasts, videoCasts, renderables] = useMemo<
     [MovieCast[], MovieSpecialCast[], Renderable[]]
-  >(() => {
+  >((): [MovieCast[], MovieSpecialCast[], Renderable[]] => {
     const matchActive = matchActiveCast(gamestates)
     const matchSpecialMovies = and<MovieSpecialCast>(
       forMorpheusType('MovieSpecialCast'),
       matchActive
     )
     const enteringActiveMovieCasts: MovieSpecialCast[] = enteringScene
-      ? (enteringScene.casts.filter(
-          matchSpecialMovies as Matcher<Cast>
-        ) as MovieSpecialCast[])
+      ? (enteringScene.casts.filter(matchSpecialMovies as Matcher<
+          Cast
+        >) as MovieSpecialCast[])
       : []
     const exitingActiveMovieCasts: MovieSpecialCast[] = exitingScene
-      ? (exitingScene.casts.filter(
-          matchSpecialMovies as Matcher<Cast>
-        ) as MovieSpecialCast[])
+      ? (exitingScene.casts.filter(matchSpecialMovies as Matcher<
+          Cast
+        >) as MovieSpecialCast[])
       : []
 
     const stageActiveMovieCasts = flatten<MovieSpecialCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(
-            matchSpecialMovies as Matcher<Cast>
-          ) as MovieSpecialCast[]
+          scene.casts.filter(matchSpecialMovies as Matcher<
+            Cast
+          >) as MovieSpecialCast[]
       )
     )
 
@@ -113,23 +134,23 @@ export default function useRenderables(
       matchActive
     )
     const enterActiveControlledCasts: ControlledMovieCast[] = enteringScene
-      ? (enteringScene.casts.filter(
-          matchControlledMovies as Matcher<Cast>
-        ) as ControlledMovieCast[])
+      ? (enteringScene.casts.filter(matchControlledMovies as Matcher<
+          Cast
+        >) as ControlledMovieCast[])
       : []
 
     const exitingActiveControlledCasts: ControlledMovieCast[] = exitingScene
-      ? (exitingScene.casts.filter(
-          matchControlledMovies as Matcher<Cast>
-        ) as ControlledMovieCast[])
+      ? (exitingScene.casts.filter(matchControlledMovies as Matcher<
+          Cast
+        >) as ControlledMovieCast[])
       : []
 
     const stageActiveControlledCasts = flatten<ControlledMovieCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(
-            matchControlledMovies as Matcher<Cast>
-          ) as ControlledMovieCast[]
+          scene.casts.filter(matchControlledMovies as Matcher<
+            Cast
+          >) as ControlledMovieCast[]
       )
     )
 
@@ -155,47 +176,57 @@ export default function useRenderables(
     ) as MovieCast[]).concat(controlledCasts)
     const videoCasts = movieSpecialCasts.filter(isMovie)
     const enteringRenderables = [] as Renderable[]
-    const images = movieSpecialCasts.reduce((memo, curr) => {
-      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
-      if (loaded) {
-        memo.push(loaded)
-      }
-      return memo
-    }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<MovieSpecialCast>[]
+    const images = movieSpecialCasts.reduce(
+      (memo, curr) => {
+        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+        if (loaded) {
+          memo.push(loaded)
+        }
+        return memo
+      },
+      [] as ImageDrawable<MovieCast>[]
+    ) as ImageDrawable<MovieSpecialCast>[]
 
-    const controlledCastsDrawable = controlledCasts.reduce((memo, curr) => {
-      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
-      if (loaded) {
-        memo.push(loaded)
-      }
-      return memo
-    }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<ControlledMovieCast>[]
+    const controlledCastsDrawable = controlledCasts.reduce(
+      (memo, curr) => {
+        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+        if (loaded) {
+          memo.push(loaded)
+        }
+        return memo
+      },
+      [] as ImageDrawable<MovieCast>[]
+    ) as ImageDrawable<ControlledMovieCast>[]
     const stageRenderables = [
-      ...generateRenderables(
-        [
-          ...generateMovieCastDrawOps({
-            images,
-            activeMovieCasts: availableVideos.filter(([videoController]) =>
-              videoController.castIds.some(castId =>
-                movieSpecialCastIds.includes(castId)
-              )
-            ),
-            width,
-            height,
-            gamestates,
-          }),
-        ],
-        [
-          ...generateControlledRenderables({
-            controlledCasts: controlledCastsDrawable,
-            width,
-            height,
-            gamestates,
-          }),
-        ]
-      ),
+      ...generateRenderables([
+        ...generateMovieCastRenderables({
+          images,
+          activeMovieCasts: availableVideos.filter(([videoController]) =>
+            videoController.castIds.some(castId =>
+              movieSpecialCastIds.includes(castId)
+            )
+          ),
+          width,
+          height,
+          gamestates,
+        }),
+        ...generateControlledRenderables({
+          controlledCasts: controlledCastsDrawable,
+          width,
+          height,
+          gamestates,
+        }),
+      ]),
     ]
     const exitingRenderables = [] as Renderable[]
+
+    logger.info({
+      imageCasts,
+      videoCasts,
+      enteringRenderables: describeRenderables(enteringRenderables),
+      stageRenderables: describeRenderables(stageRenderables),
+      exitingRenderables: describeRenderables(exitingRenderables),
+    })
     return [
       imageCasts,
       videoCasts,

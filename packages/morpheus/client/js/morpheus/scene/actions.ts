@@ -25,12 +25,9 @@ const logger = loggerFactory('scene:actions')
 export const events = new Events()
 export const sceneLoadQueue = createSceneQueue()
 
-export const sceneLoadComplete: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = (responseData: any) => {
+export const sceneLoadComplete: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = (responseData: any) => {
   return (dispatch: Dispatch) => {
     logger.info(responseData)
     dispatch({
@@ -52,12 +49,9 @@ export const sceneLoadStarted: ActionCreator<Action> = (
   }
 }
 
-export const fetch: ActionCreator<ThunkAction<
-  Promise<Scene | null>,
-  any,
-  any,
-  Action
->> = (sceneId: number) => {
+export const fetch: ActionCreator<
+  ThunkAction<Promise<Scene | null>, any, any, Action>
+> = (sceneId: number) => {
   return async (dispatch: Dispatch) => {
     const db = firebase.firestore()
     const sceneDoc = await db
@@ -109,12 +103,9 @@ export const fetch: ActionCreator<ThunkAction<
   }
 }
 
-export const fetchScene: ActionCreator<ThunkAction<
-  Promise<Scene | null>,
-  any,
-  any,
-  Action
->> = (id: string) => {
+export const fetchScene: ActionCreator<
+  ThunkAction<Promise<Scene | null>, any, any, Action>
+> = (id: string) => {
   logger.info('fetchScene', id)
   return async dispatch => {
     const sceneData = await dispatch(fetch(Number(id)))
@@ -139,12 +130,9 @@ export const setNextStartAngle: ActionCreator<Action> = angle => {
 
 const CURRENT_SCENE_STACK_SIZE = 6
 
-const doSceneEntering: ActionCreator<ThunkAction<
-  Scene | undefined,
-  any,
-  any,
-  Action
->> = scene => {
+const doSceneEntering: ActionCreator<
+  ThunkAction<Scene | undefined, any, any, Action>
+> = scene => {
   return (dispatch, getState) => {
     let oldScene: Scene | undefined = undefined
     let currentScenes = sceneSelectors.currentScenesData(getState()) as Scene[]
@@ -187,12 +175,9 @@ const doSceneEntering: ActionCreator<ThunkAction<
   }
 }
 
-export const runScene: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = scene => {
+export const runScene: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = scene => {
   return async (dispatch, getState) => {
     logger.info('runScene', scene.sceneId)
     let userIncontrol = false
@@ -235,12 +220,9 @@ export const runScene: ActionCreator<ThunkAction<
   }
 }
 
-export const startAtScene: ActionCreator<ThunkAction<
-  Promise<void>,
-  any,
-  any,
-  Action
->> = id => {
+export const startAtScene: ActionCreator<
+  ThunkAction<Promise<void>, any, any, Action>
+> = id => {
   return dispatch =>
     dispatch(fetchScene(id))
       .then(scene => dispatch(runScene(scene)))
@@ -254,12 +236,9 @@ export const startAtScene: ActionCreator<ThunkAction<
 }
 
 let isTransitioning = false
-export const goToScene: ActionCreator<ThunkAction<
-  Promise<void>,
-  any,
-  any,
-  Action
->> = (id: string, dissolve: boolean) => {
+export const goToScene: ActionCreator<
+  ThunkAction<Promise<void>, any, any, Action>
+> = (id: string, dissolve: boolean) => {
   return (dispatch, getState) => {
     logger.info('goToScene:queue', id)
     let currentSceneData = sceneSelectors.currentSceneData(getState())
@@ -282,7 +261,10 @@ export const goToScene: ActionCreator<ThunkAction<
 
           function doSceneTransition() {
             isTransitioning = true
-            logger.info('goToScene:exiting', id)
+            logger.info(
+              'goToScene:exiting',
+              currentSceneData && currentSceneData.sceneId
+            )
             dispatch({
               type: SCENE_DO_EXITING,
               payload: {

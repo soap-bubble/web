@@ -41,7 +41,7 @@
     "font-awesome": "https://registry.npmjs.org/font-awesome/-/font-awesome-4.7.0.tgz",
     "fs-extra": "^2.0.0",
     "google-auth-library": "^0.11.0",
-    "lodash": "^4.17.4",
+    "lodash": "^4.17.21",
     "npm-run-all": "^4.0.0",
     "prop-types": "^15.6.0",
     "react": "^16.8.6",

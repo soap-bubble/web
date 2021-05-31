@@ -98,3 +98,10 @@ export interface Scene {
   palette: number
   casts: Cast[]
 }
+export interface SceneWithRefs {
+  sceneId: number
+  cdFlags: number
+  sceneType: number
+  palette: number
+  casts: (Cast | { ref: number })[]
+}

@@ -2,48 +2,17 @@ import { credential, initializeApp } from 'firebase-admin'
 import { config, https } from 'firebase-functions'
 import fetchScene from './scene'
 import fetchGamestates from './gamestates'
-import primeDb from './prime'
-import copyDb from './copy'
 import logger from './logger'
 
 if (process.env.NODE_ENV === 'development') {
   const serviceAccount = require('../serviceAccount.json')
   initializeApp({
     credential: credential.cert(serviceAccount),
-    databaseURL: 'https://soapbubble.firebaseio.com',
+    databaseURL: 'https://soapbubble-dev.firebaseio.com',
   })
 } else {
   initializeApp(config().firebase)
 }
-
-export const prime =
-  process.env.NODE_ENV === 'development'
-    ? https.onRequest(async (req, res) => {
-        logger.info("let's go")
-        try {
-          const items = JSON.parse(req.body.toString('utf8'))
-          await primeDb(items)
-          res.status(200).send('OK')
-        } catch (error) {
-          logger.error(error)
-          res.status(500).send(error)
-        }
-      })
-    : null
-
-export const copy =
-  process.env.NODE_ENV === 'development'
-    ? https.onRequest(async (req, res) => {
-        logger.info("let's go")
-        try {
-          await copyDb()
-          res.status(200).send('OK')
-        } catch (error) {
-          logger.error(error)
-          res.status(500).send(error)
-        }
-      })
-    : null
 
 export const scene = https.onRequest(async (req, res) => {
   try {

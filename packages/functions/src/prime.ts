@@ -1,11 +1,15 @@
-import { firestore } from 'firebase-admin'
+import { credential, firestore, initializeApp } from 'firebase-admin'
+
 import schedule from './utils/schedule'
 import logger from './logger'
 import { Scene, Cast, Gamestate } from './types'
+import { argv } from 'process'
+import { readFileSync } from 'fs'
+import { resolve, join } from 'path'
 
 type BatchOp = [(batch: FirebaseFirestore.WriteBatch, data: any) => void, any]
 
-export default async function(items: any[]) {
+export default async function prime(items: any[]) {
   if (!Array.isArray(items)) {
     throw new Error("I don't parse single objects for some reason")
   }
@@ -39,7 +43,7 @@ export default async function(items: any[]) {
       {
         maxDelay: 500,
         maxSize: 500,
-      },
+      }
     )
 
     const allScenes = (await scenesRef.get()).docs.map(d => d.data())
@@ -62,7 +66,7 @@ export default async function(items: any[]) {
                 batch.set(ref, data)
               },
               scene,
-            ]),
+            ])
           )
           logger.info('Adding scene')
         }
@@ -76,7 +80,7 @@ export default async function(items: any[]) {
                 batch.set(ref, data)
               },
               gamestate,
-            ]),
+            ])
           )
           logger.info('Adding gs')
         }
@@ -93,7 +97,7 @@ export default async function(items: any[]) {
                 ...cast,
                 __t: type,
               },
-            ]),
+            ])
           )
           logger.info('Adding cast')
         }
@@ -104,4 +108,36 @@ export default async function(items: any[]) {
   } catch (error) {
     logger.error('Failure to prime DB', error)
   }
+}
+
+if (argv[1] === __filename) {
+  const databaseURL = (() => {
+    switch (argv[2]) {
+      case 'production':
+      case 'prod':
+      case 'p':
+        return 'https://soapbubble.firebaseio.com'
+      case 'development':
+      case 'dev':
+      case 'd':
+        return 'https://soapbubble-dev.firebaseio.com'
+      default:
+        console.error('Add environment')
+        process.exit(1)
+        return ''
+    }
+  })()
+
+  const serviceAccount = JSON.parse(
+    readFileSync(resolve(join(__dirname, '../serviceAccount.json')), 'utf8')
+  )
+  initializeApp({
+    credential: credential.cert(serviceAccount),
+    databaseURL,
+  })
+
+  const items = JSON.parse(
+    readFileSync(resolve(join(__dirname, '../morpheus.map.json')), 'utf8')
+  )
+  prime(items)
 }

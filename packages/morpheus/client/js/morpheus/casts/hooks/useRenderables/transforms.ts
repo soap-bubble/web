@@ -20,6 +20,7 @@ import {
   Cast,
 } from 'morpheus/casts/types'
 import { VideoController } from 'morpheus/casts/components/Videos'
+import { render } from 'utils/render'
 
 export function calculateControlledFrameOperation({
   cast,
@@ -46,7 +47,7 @@ export function calculateControlledFrameOperation({
     sizeY: height,
   }
 
-  return (context: CanvasRenderingContext2D) => {
+  const renderable: Renderable = (context: CanvasRenderingContext2D) => {
     if (
       typeof controlledMovieCallbacks[0].currentValue === 'undefined' ||
       frames <= 1
@@ -83,6 +84,9 @@ export function calculateControlledFrameOperation({
       rect.sizeY
     )
   }
+  renderable.description = () =>
+    `cast: ${cast.castId} src: ${cast.fileName} gamestateId: ${gameStateId} value: ${value}`
+  return renderable
 }
 
 export function matchActiveCast<T extends Cast>(
@@ -99,7 +103,7 @@ export function calculateImageOperation({
   cast: MovieCast
   img: DrawSource
   rect: Rect
-}): DrawOperation {
+}): Renderable {
   const { scale = 1, width, height } = cast
 
   const source = {
@@ -109,7 +113,7 @@ export function calculateImageOperation({
     sizeY: height,
   }
 
-  return [
+  const drawOperation: DrawOperation = [
     img,
     source.x,
     source.y,
@@ -120,6 +124,70 @@ export function calculateImageOperation({
     rect.sizeX * scale,
     rect.sizeY * scale,
   ]
+  const renderable: Renderable = ctx => ctx.drawImage(...drawOperation)
+  renderable.description = () =>
+    `cast: ${cast.castId} src: ${cast.fileName} src.x: ${source.x} src.y ${source.y} src.width ${source.sizeX} src.height ${source.sizeY} dest.x ${rect.x} dest.y ${rect.y} width: ${rect.sizeX} height ${rect.sizeY}`
+  return renderable
+}
+
+export function* generateMovieCastRenderables({
+  images,
+  activeMovieCasts,
+  width,
+  height,
+  gamestates,
+}: {
+  images: ImageRef[]
+  activeMovieCasts: VideoRef[]
+  width: number
+  height: number
+  gamestates: Gamestates
+}) {
+  const matchActiveImage = matchActiveCast(gamestates)
+  const matchActiveImages = and<CastSource<VideoController, MovieCast>>(
+    ([_, casts]) => !!casts.length,
+    ([_, casts]) => !!casts.find(matchActiveImage)
+  )
+  for (let image of images) {
+    const [img, casts] = image
+    for (const cast of casts) {
+      const { location } = cast
+      yield calculateImageOperation({
+        cast,
+        img,
+        rect: resizeToScreen({
+          left: location.x,
+          top: location.y,
+          right: location.x + cast.width,
+          bottom: location.y + cast.height,
+          width,
+          height,
+        }),
+      })
+    }
+  }
+  for (let movieRef of activeMovieCasts) {
+    const [img, casts] = movieRef
+    if (img && casts.length && matchActiveImages(movieRef)) {
+      for (const cast of casts) {
+        const { location } = cast
+        if (img.el) {
+          yield calculateImageOperation({
+            cast,
+            img: img.el,
+            rect: resizeToScreen({
+              left: location.x,
+              top: location.y,
+              right: location.x + cast.width,
+              bottom: location.y + cast.height,
+              width,
+              height,
+            }),
+          })
+        }
+      }
+    }
+  }
 }
 
 export function* generateMovieCastDrawOps({
@@ -193,38 +261,41 @@ export function generateControlledRenderables({
   height: number
   gamestates: Gamestates
 }): Renderable[] {
-  return controlledCasts.reduce((memo, [img, casts]) => {
-    for (const cast of casts) {
-      const location = cast.location || cast.controlledLocation
-      memo.push(
-        calculateControlledFrameOperation({
-          cast,
-          img,
-          gamestates,
-          rect: resizeToScreen({
-            left: location.x,
-            top: location.y,
-            right: location.x + cast.width,
-            bottom: location.y + cast.height,
-            width,
-            height,
-          }),
-        })
-      )
-    }
-    return memo
-  }, [] as Renderable[])
+  return controlledCasts.reduce(
+    (memo, [img, casts]) => {
+      for (const cast of casts) {
+        const location = cast.location || cast.controlledLocation
+        memo.push(
+          calculateControlledFrameOperation({
+            cast,
+            img,
+            gamestates,
+            rect: resizeToScreen({
+              left: location.x,
+              top: location.y,
+              right: location.x + cast.width,
+              bottom: location.y + cast.height,
+              width,
+              height,
+            }),
+          })
+        )
+      }
+      return memo
+    },
+    [] as Renderable[]
+  )
 }
 
 export function* generateRenderables(
-  ops: DrawOperation[],
   renderables: Renderable[]
-) {
-  for (let op of ops) {
-    yield (ctx: CanvasRenderingContext2D) => ctx.drawImage(...op)
-  }
+): Generator<Renderable, void, unknown> {
   for (let renderable of renderables) {
-    yield (ctx: CanvasRenderingContext2D) => renderable(ctx)
+    const r: Renderable = (ctx: CanvasRenderingContext2D) => renderable(ctx)
+    if (renderable.description) {
+      r.description = renderable.description
+    }
+    yield r
   }
 }
 
@@ -237,24 +308,20 @@ export function computerRenderables(
   height: number
 ) {
   return [
-    ...generateRenderables(
-      [
-        ...generateMovieCastDrawOps({
-          images,
-          activeMovieCasts,
-          width,
-          height,
-          gamestates,
-        }),
-      ],
-      [
-        ...generateControlledRenderables({
-          controlledCasts,
-          width,
-          height,
-          gamestates,
-        }),
-      ]
-    ),
+    ...generateRenderables([
+      ...generateMovieCastRenderables({
+        images,
+        activeMovieCasts,
+        width,
+        height,
+        gamestates,
+      }),
+      ...generateControlledRenderables({
+        controlledCasts,
+        width,
+        height,
+        gamestates,
+      }),
+    ]),
   ]
 }

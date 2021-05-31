@@ -4,7 +4,10 @@ import useRaf from '@rooks/use-raf'
 import { selectors as gameSelectors } from 'morpheus/game'
 import { selectors as inputSelectors } from 'morpheus/input'
 
-export type Renderable = (ctx: CanvasRenderingContext2D) => void
+export interface Renderable { 
+  (ctx: CanvasRenderingContext2D): void
+  description?(): string; 
+}
 
 interface CanvasProps {
   width: number

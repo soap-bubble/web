@@ -48,6 +48,7 @@ const AudioEl = ({
       play() {
         if (audioRef.current) {
           audioRef.current.play()
+          audioRef.current.setAttribute('data-played', '1')
         }
       },
       pause() {

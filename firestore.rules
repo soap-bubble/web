@@ -1,0 +1,31 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+  	match /scenes/{sceneId} {
+    	allow read: if true;
+    }
+    match /casts/{castId} {
+    	allow read: if true;
+    }
+    match /saves/{saveId} {
+      function getRole(rsc) {
+        return rsc.data.roles[request.auth.uid];
+      }
+
+      function isOneOfRoles(rsc, array) {
+        return isSignedIn() && (getRole(rsc) in array);
+      }
+
+      function isValidNewSave() {
+        return resource == null
+          && request.resource.data.roles[request.auth.uid] == 'owner';
+      }
+
+      allow write: if isValidNewSave() || isOneOfRoles(resource, ['owner'])
+      allow read: if isOneOfRoles(resource, ['owner'])
+    }
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

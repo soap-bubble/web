@@ -12,10 +12,14 @@ function immutableConverter(state) {
     return value;
   });
 }
-
+//  && (action.type === 'GAMESTATE_UPDATE' || action.type.indexOf('CAST') === 0)
 export default createLogger({
+  // @ts-ignore
   stateTransformer: immutableConverter,
+  // @ts-ignore
   actionTransformer: immutableConverter,
+  // @ts-ignore
   errorTransformer: immutableConverter,
-  predicate: (getState, action) => action && action.logging !== false,
+  // @ts-ignore
+  predicate: (getState, action) => false, // action && action.logging !== false,
 });

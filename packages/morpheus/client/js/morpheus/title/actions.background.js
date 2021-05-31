@@ -3,16 +3,9 @@ import {
   PlaneGeometry,
   ShaderMaterial,
   TextureLoader,
-  Raycaster,
   Vector2,
 } from 'three';
-import {
-  selectors as gameSelectors,
-} from 'morpheus/game';
-import {
-  Tween,
-  Easing,
-} from 'tween';
+import Tween  from '@tweenjs/tween.js';
 import { getAssetUrl } from 'service/gamedb';
 import renderEvents from 'utils/render';
 
@@ -83,14 +76,14 @@ export default function factory() {
             .to({
               freq: 0.01,
             }, 6000)
-            .easing(Easing.Quadratic.Out)
+            .easing(Tween.Easing.Quadratic.Out)
             .start();
         }
         const fadeTween = new Tween(v)
           .to({
             fade: 1.0,
           }, 2000)
-          .easing(Easing.Sinusoidal.In);
+          .easing(Tween.Easing.Sinusoidal.In);
 
         fadeTween.start();
         const startTime = Date.now();

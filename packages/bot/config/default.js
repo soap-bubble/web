@@ -1,6 +1,7 @@
 module.exports = {
   authHost: 'http://localhost:4000/auth',
   origins: 'http://localhost:8050',
+  profileId: '',
   auth: {
     token: '',
   },
@@ -9,7 +10,7 @@ module.exports = {
     address: 'localhost:4444',
     profile: 'Morpheus',
     scenes: {
-      start: 'Morpheus Fullscreen'
-    }
+      start: 'Morpheus Fullscreen',
+    },
   },
-};
+}

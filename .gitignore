@@ -5,3 +5,6 @@ node_modules
 SECRETS.md
 .terraform
 .terraform.lock.hcl
+serviceAccount.json
+deployment/local
+.env

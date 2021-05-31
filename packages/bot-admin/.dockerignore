@@ -1,0 +1,6 @@
+.next
+node_modules
+*.test.*
+manifest
+getContentfulEnvironment.js
+src/emojis/data.json

@@ -1,0 +1,9 @@
+dependencies:
+- name: bot-webapp
+  repository: file://../../charts/internal/bot-webapp/0.0.1
+  version: 0.0.1
+- name: bot-backend
+  repository: file://../../charts/internal/bot-backend/0.0.1
+  version: 0.0.1
+digest: sha256:badbbc822687bd985ff56be20d4aeae294bfa267e87727b3e20f8d77af4b3ac0
+generated: "2020-12-13T14:01:18.095770013-06:00"

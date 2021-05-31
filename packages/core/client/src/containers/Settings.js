@@ -1,53 +1,40 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import { Button } from 'react-bootstrap';
-import config from '../config';
-import {
-  login,
-} from '../modules/soapbubble';
-
-const {
-  selectors: loginSelectors,
-  actions: loginActions,
-} = login;
+import React from 'react'
+import { connect } from 'react-redux'
+import { Button } from 'react-bootstrap'
 
 class Settings extends React.Component {
   render() {
-    const { isLoggedIn, onSignOut } = this.props;
+    const { isLoggedIn, onSignOut } = this.props
     if (isLoggedIn) {
-      return (<div
-        className="container"
-      >
-        <div className="centered">
-          <Button onClick={onSignOut}>
-            Sign out
-          </Button>
+      return (
+        <div className="container">
+          <div className="centered">
+            <Button onClick={onSignOut}>Sign out</Button>
+          </div>
         </div>
-      </div>);
+      )
     }
-    return null;
+    return null
   }
 }
 
 function mapStateToProps(state) {
-  const isLoggedIn = loginSelectors.isLoggedIn(state);
-  return {
-    isLoggedIn,
-  };
+  return {}
 }
 
 function mapDispatchToProps(dispatch) {
   return {
     onSignOut() {
-      dispatch(loginActions.logout())
-        .then(dispatch({
+      dispatch(loginActions.logout()).then(
+        dispatch({
           type: 'route/EXAMPLES',
-        }));
+        }),
+      )
     },
-  };
+  }
 }
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(Settings);
+)(Settings)

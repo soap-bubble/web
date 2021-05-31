@@ -10,10 +10,7 @@ import {
 import {
   selectors as gameSelectors,
 } from 'morpheus/game';
-import {
-  Tween,
-  Easing,
-} from 'tween';
+import Tween from '@tweenjs/tween.js';
 import renderEvents from 'utils/render';
 
 import {
@@ -155,7 +152,7 @@ export default function factory() {
             .to({
               x: -0.75,
             }, SLIDE_IN_TIME)
-            .easing(Easing.Exponential.InOut)
+            .easing(Tween.Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.newButton = false;
             }),
@@ -164,7 +161,7 @@ export default function factory() {
             .to({
               x: 0.75,
             }, SLIDE_IN_TIME)
-            .easing(Easing.Exponential.InOut)
+            .easing(Tween.Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.settingsButton = false;
             }),
@@ -173,7 +170,7 @@ export default function factory() {
             .to({
               x: 0.75,
             }, SLIDE_IN_TIME)
-            .easing(Easing.Exponential.InOut)
+            .easing(Tween.Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.exitButton = false;
             }),
@@ -182,7 +179,7 @@ export default function factory() {
             .to({
               x: -0.75,
             }, SLIDE_IN_TIME)
-            .easing(Easing.Exponential.InOut)
+            .easing(Tween.Easing.Exponential.InOut)
             .onComplete(() => {
               slideIn.contButton = false;
             }),

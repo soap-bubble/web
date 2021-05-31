@@ -1,48 +1,53 @@
-import React from 'react';
-import { connect } from 'react-redux';
-import {
-  login,
-} from '../modules/soapbubble';
+import React, { useCallback } from 'react'
+import { connect } from 'react-redux'
+import Button from '@material-ui/core/Button'
 
-const {
-  selectors: loginSelectors,
-  Google: GoogleLogin,
-} = login;
-
-class Login extends React.Component {
-  render() {
-    const { isLoggedIn, handleLoggedIn } = this.props;
-    if (!isLoggedIn) {
-      return (<div
-        className="container"
-      >
-        <div className="centered">
-          <GoogleLogin onLogin={handleLoggedIn} />
-        </div>
-      </div>);
+const Login = ({ onLogin }) => {
+  const doLogin = useCallback(async () => {
+    try {
+      const result = await firebase
+        .auth()
+        .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+      // This gives you a Google Access Token. You can use it to access the Google API.
+      const credential = result && result.credential
+      // The signed-in user info.
+      const user = result.user
+      if (user && credential) {
+        onLogin(user, credential)
+      }
+    } catch (error) {
+      // Handle Errors here.
+      const errorCode = error.code
+      const errorMessage = error.message
+      // The email of the user's account used.
+      const email = error.email
+      // The firebase.auth.AuthCredential type that was used.
+      const credential = error.credential
+      console.error(errorCode, errorMessage, email, credential)
     }
-    return null;
-  }
+  }, [onLogin])
+  return (
+    <Button onClick={doLogin} color="inherit">
+      Login
+    </Button>
+  )
 }
 
-function mapStateToProps(state) {
-  const isLoggedIn = loginSelectors.isLoggedIn(state);
-  return {
-    isLoggedIn,
-  };
+function mapStateToProps() {
+  return {}
 }
 
 function mapDispatchToProps(dispatch) {
   return {
-    handleLoggedIn() {
+    onLogin() {
       dispatch({
         type: 'route/EXAMPLES',
-      });
+      })
     },
-  };
+  }
 }
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps,
-)(Login);
+)(Login)

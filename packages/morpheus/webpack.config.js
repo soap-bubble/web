@@ -1,64 +1,74 @@
-const webpack = require('webpack');
-const styleLoaders = require('@soapbubble/style').loaders;
-const path = require('path');
-const HtmlWebpackPlugin = require('html-webpack-plugin');
-const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const config = require('config');
+process.env.NODE_CONFIG_DIR = `${__dirname}/config`
+const webpack = require('webpack')
+const styleLoaders = require('@soapbubble/style').loaders
+const path = require('path')
+const HtmlWebpackPlugin = require('html-webpack-plugin')
+const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const config = require('config')
 
-const dirJs = path.resolve(__dirname, 'client/js');
-const dirParent = path.resolve(__dirname, '../');
+const dirJs = path.resolve(__dirname, 'client/js')
+const dirParent = path.resolve(__dirname, '../')
 const dirSharedComponents = [
   path.join(dirParent, 'components', 'src'),
   path.join(dirParent, 'style'),
-];
+]
 
 // cheap-module-eval-source-map
-module.exports = (env) => {
+module.exports = env => {
   const outputPath = (() => {
     if (env.cordova) {
-      return path.resolve(__dirname, '../cordova/www');
+      return path.resolve(__dirname, '../cordova/www')
+    } else if (env.electron) {
+      return path.resolve(__dirname, '../electron/dist')
+    } else if (env.firebase) {
+      return path.resolve(__dirname, '../../public/morpheus')
     }
-    if (env.electron) {
-      return path.resolve(__dirname, '../electron2/dist');
-    }
-    return path.resolve(__dirname, 'public');
-  })();
+    return path.resolve(__dirname, 'public')
+  })()
 
-  let publicPath = '';
+  let publicPath = ''
   const htmlTemplate = (() => {
     if (env.cordova) {
-      return 'cordova.ejs';
+      return 'cordova.ejs'
     }
     if (env.electron) {
-      return 'electron.ejs';
+      return 'electron.ejs'
     }
-    return 'index.ejs';
-  })();
-  let htmlFilename = 'index.html';
-  const isProduction = env.production || env.staging;
-  const jsName = isProduction ? '[name].[hash].js' : '[name].js';
-  const appConfig = {};
+    return 'index.ejs'
+  })()
+  let htmlFilename = 'index.html'
+  const isProduction = env.production || env.staging
+  const jsName = isProduction ? '[name].[hash].js' : '[name].js'
+  const appConfig = {}
 
-  if ((env.production || env.cordova || env.electron) && !env.debug) {
+  if (env.firebase) {
+    Object.assign(appConfig, {
+      assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
+      apiHost: '/api',
+      authHost: 'https://soapbubble.web.app/auth',
+      botHost: 'https://soapbubble.web.app/bot',
+    })
+  } else if ((env.production || env.cordova || env.electron) && !env.debug) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://soapbubble.online/morpheus',
       authHost: 'https://soapbubble.online/auth',
       botHost: 'https://soapbubble.online/bot',
-    });
+    })
     if (env.production && !(env.cordova || env.electron)) {
-      publicPath = '/morpheus/';
-      htmlFilename = 'index-production.html';
+      publicPath = '/morpheus/'
+      htmlFilename = 'index-production.html'
     }
   } else if (env.staging) {
     Object.assign(appConfig, {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://staging.soapbubble.online/morpheus',
       authHost: 'https://staging.soapbubble.online/auth',
-    });
+    })
     if (!(env.cordova || env.electron)) {
-      publicPath = '/morpheus/';
-      htmlFilename = 'index-staging.html';
+      publicPath = '/morpheus/'
+      htmlFilename = 'index-staging.html'
     }
   }
   if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
@@ -66,44 +76,46 @@ module.exports = (env) => {
       assetHost: 'https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev',
       apiHost: 'https://dev.soapbubble.online/morpheus',
       authHost: 'https://dev.soapbubble.online/auth',
-    });
+    })
     if (!(env.cordova || env.electron)) {
-      publicPath = '/morpheus/';
+      publicPath = '/morpheus/'
     }
   } else if (env.development) {
     Object.assign(appConfig, {
       assetHost: 'http://localhost:8050',
-      apiHost: 'http://localhost:8050',
+      apiHost: '/api',
       authHost: 'http://localhost:4000',
-    });
+    })
   }
 
-  const target = env.electron ? 'electron-renderer' : 'web';
-  const mainFields = ['esnext', 'browser', 'module', 'main'];
+  const target = env.electron ? 'electron-renderer' : 'web'
+  const mainFields = ['esnext', 'browser', 'module', 'main']
 
-  let nodeEnv = 'development';
+  let nodeEnv = 'development'
   if (isProduction) {
-    nodeEnv = 'production';
+    nodeEnv = 'production'
   }
 
   const webpackDefineConfig = {
     'process.env.NODE_ENV': JSON.stringify(nodeEnv),
     'process.env.AUTOSTART': JSON.stringify(env.electron || env.cordova),
     config: JSON.stringify(appConfig),
-  };
+  }
 
-  const devToolOptions = {};
+  const devToolOptions = {}
 
   if (env.development && !env.cordova) {
-    devToolOptions.filename = '[file].map';
+    devToolOptions.filename = '[file].map'
     if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
       // devToolOptions.publicPath = 'https://dev.soapbubble.online/morpheus/';
     }
   }
 
-  const externals = {};
+  const externals = {
+    greenworks: 'require("greenworks")',
+  }
   if (!env.electron) {
-    externals.electron = '_';
+    externals.electron = '_'
   }
 
   let webpackConfig = {
@@ -137,7 +149,7 @@ module.exports = (env) => {
         'redux-promise',
         'redux-thunk',
         'reselect',
-        'tween',
+        '@tweenjs/tween.js',
         'three',
         'ua-parser-js',
       ],
@@ -149,21 +161,32 @@ module.exports = (env) => {
       publicPath,
     },
     resolve: {
-      extensions: ['.js', '.jsx', '.json'],
+      extensions: ['.js', '.jsx', '.json', '.ts', '.tsx'],
       mainFields,
+      alias: {
+        service: path.resolve(__dirname, 'client/js/service'),
+        morpheus: path.resolve(__dirname, 'client/js/morpheus'),
+        utils: path.resolve(__dirname, 'client/js/utils'),
+        soapbubble: path.resolve(__dirname, 'client/js/soapbubble'),
+      },
     },
     module: {
       rules: styleLoaders(env).concat([
         {
           test: /\.jsx?$/,
           include: [/node_modules\/@soapbubble/, /node_modules\/generic-pool/],
-          exclude: [/@soapbubble\/.*\/node_modules/, /generic-pool\/node_modules/],
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              rootMode: 'upward-optional',
+          exclude: [
+            /@soapbubble\/.*\/node_modules/,
+            /generic-pool\/node_modules/,
+          ],
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                rootMode: 'upward-optional',
+              },
             },
-          }],
+          ],
         },
         {
           test: /\.jsx?$/,
@@ -172,14 +195,25 @@ module.exports = (env) => {
           use: ['babel-loader'],
         },
         {
+          test: /\.tsx?$/,
+          exclude: [/node_modules/],
+          use: [
+            {
+              loader: 'ts-loader',
+            },
+          ],
+        },
+        {
           test: /\.jsx?$/,
           exclude: [/node_modules/],
-          use: [{
-            loader: 'babel-loader',
-            options: {
-              rootMode: 'upward-optional',
+          use: [
+            {
+              loader: 'babel-loader',
+              options: {
+                rootMode: 'upward-optional',
+              },
             },
-          }],
+          ],
         },
         {
           test: /\.png$/,
@@ -203,7 +237,10 @@ module.exports = (env) => {
         },
         {
           test: /\.css$/,
-          include: [/@soapbubble\/style\/dist\/soapbubble.css/, /packages\/style\/dist\/soapbubble.css/],
+          include: [
+            /@soapbubble\/style\/dist\/soapbubble.css/,
+            /packages\/style\/dist\/soapbubble.css/,
+          ],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -219,7 +256,10 @@ module.exports = (env) => {
         {
           test: /\.css$/,
           include: [/@soapbubble/].concat(dirSharedComponents),
-          exclude: [/@soapbubble\/style\/dist\/soapbubble.css/, /packages\/style\/dist\/soapbubble.css/],
+          exclude: [
+            /@soapbubble\/style\/dist\/soapbubble.css/,
+            /packages\/style\/dist\/soapbubble.css/,
+          ],
           use: [
             {
               loader: MiniCssExtractPlugin.loader,
@@ -238,6 +278,7 @@ module.exports = (env) => {
       ]),
     },
     plugins: [
+      new CleanWebpackPlugin(),
       new MiniCssExtractPlugin({
         filename: '[id].[contenthash].css',
         disable: !isProduction,
@@ -250,45 +291,10 @@ module.exports = (env) => {
         chunks: ['vendor', 'app'],
       }),
       new webpack.DefinePlugin(webpackDefineConfig),
-    ].concat(env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : []),
-  };
-  if (env.electron) {
-    const {
-      output,
-    } = webpackConfig;
-
-    // convert to an array to also build service worker
-    webpackConfig = [
-      webpackConfig,
-      {
-        target,
-        devtool: false,
-        output,
-        entry: {
-          sw: './client/js/sw.js',
-        },
-        resolve: {
-          extensions: ['.js', '.json'],
-          mainFields,
-        },
-        module: {
-          rules: styleLoaders(env).concat([
-            {
-              test: /\.js?$/,
-              include: dirSharedComponents.concat([
-                dirJs,
-              ]),
-              exclude: [/node_modules/],
-              use: ['babel-loader'],
-            },
-          ]),
-        },
-        plugins: [
-          new webpack.DefinePlugin(webpackDefineConfig),
-        ],
-      },
-    ];
+    ].concat(
+      env.development ? new webpack.SourceMapDevToolPlugin(devToolOptions) : []
+    ),
   }
 
-  return webpackConfig;
-};
+  return webpackConfig
+}

@@ -6,7 +6,7 @@ import {
   selectors as inputSelectors,
 } from 'morpheus/input';
 import raf from 'raf';
-import storeFactory from 'store';
+import storeFactory from '../../store';
 
 export default function ({ dispatch, scene }) {
   const store = storeFactory();

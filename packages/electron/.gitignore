@@ -1,8 +1,4 @@
 node_modules
-build
-cache
+out
 dist
-npm-debug.log
-.cache
-
-out/
+build

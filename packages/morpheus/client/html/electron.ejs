@@ -2,11 +2,30 @@
 <html>
   <head>
     <title><%= htmlWebpackPlugin.options.title %></title>
-    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1">
+    <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1" />
     <script src="https://apis.google.com/js/platform.js" async defer></script>
   </head>
 
   <body style="margin: 0px">
-    <div id=root></div>
+    <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/6.6.1/firebase-storage.js"></script>
+
+    <script>
+      // Your web app's Firebase configuration
+      var firebaseConfig = {
+        apiKey: 'AIzaSyBqBCDGshTp3uKhVOSvwUkvEeX3Ui8xdsU',
+        authDomain: 'soapbubble.firebaseapp.com',
+        databaseURL: 'https://soapbubble.firebaseio.com',
+        projectId: 'soapbubble',
+        storageBucket: 'soapbubble.appspot.com',
+        messagingSenderId: '342061559353',
+        appId: '1:342061559353:web:60dac45c09cb0e92a267e8',
+      }
+      // Initialize Firebase
+      firebase.initializeApp(firebaseConfig)
+    </script>
+    <div id="root"></div>
   </body>
 </html>

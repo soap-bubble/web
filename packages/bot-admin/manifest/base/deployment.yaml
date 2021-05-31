@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bot-admin
+spec:
+  selector:
+    matchLabels:
+      app: bot-admin
+  template:
+    metadata:
+      labels:
+        app: bot-admin
+    spec:
+      containers:
+        - name: bot-admin
+          image: bot-admin
+          env:
+            - name: PORT
+              value: '80'
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: /opt/secrets/service-account.json
+          ports:
+            - containerPort: 80
+          volumeMounts:
+            - mountPath: /opt/secrets
+              name: secrets
+      volumes:
+        - name: secrets
+          secret:
+            items:
+              - key: service.json
+                path: service-account.json
+            secretName: google-secrets

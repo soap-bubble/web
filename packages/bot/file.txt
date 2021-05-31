@@ -1,0 +1,12 @@
+{
+    "type": "channel.follow",
+    "version": "1",
+    "condition": {
+        "broadcaster_user_id": "12826"
+    },
+    "transport": {
+        "method": "webhook",
+        "callback": "https://example.com/webhooks/callback",
+        "secret": "s3cRe7"
+    }
+}

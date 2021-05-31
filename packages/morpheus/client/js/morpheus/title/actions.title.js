@@ -5,10 +5,7 @@ import {
   TextureLoader,
   Vector2,
 } from 'three';
-import {
-  Tween,
-  Easing,
-} from 'tween';
+import Tween from '@tweenjs/tween.js';
 import renderEvents from 'utils/render';
 import {
   getAssetUrl,
@@ -84,14 +81,14 @@ export default function factory() {
             .to({
               freq: 0.001,
             }, 7000)
-            .easing(Easing.Exponential.Out)
+            .easing(Tween.Easing.Exponential.Out)
             .start();
         }
         const opacityTween = new Tween(v)
           .to({
             opacity: 1,
           }, 7000)
-          .easing(Easing.Sinusoidal.In);
+          .easing(Tween.Easing.Sinusoidal.In);
 
         opacityTween.start();
 

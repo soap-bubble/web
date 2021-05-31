@@ -1,0 +1,63 @@
+steps:
+  - id: berglas
+    name: us-docker.pkg.dev/berglas/berglas/berglas
+    env:
+    - KUBECONFIG=berglas://${PROJECT_ID}-secrets/kubeconfig?destination=/secrets/kubeconfig
+    args: ["exec", "--", "/bin/sh"]
+    volumes:
+    - name: secrets
+      path: /secrets
+  - id: 'build bot webapp'
+    name: gcr.io/cloud-builders/docker
+    dir: packages/bot-admin
+    args: 
+      - 'build'
+      - '-t'
+      - 'us.gcr.io/$PROJECT_ID/bot-webapp:${SHORT_SHA}'
+      - '.'
+  - id: 'build bot backend'
+    name: gcr.io/cloud-builders/docker
+    dir: packages/bot
+    args: 
+      - 'build'
+      - '-t'
+      - 'us.gcr.io/$PROJECT_ID/bot-backend:${SHORT_SHA}'
+      - '.'
+  - id: 'push - webapp'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us.gcr.io/$PROJECT_ID/bot-webapp:${SHORT_SHA}']
+  - id: 'push - backend'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us.gcr.io/$PROJECT_ID/bot-backend:${SHORT_SHA}']
+  - id: 'helm dep up'
+    name: 'gcr.io/$PROJECT_ID/helm'
+    env:
+      - SKIP_CLUSTER_CONFIG=true
+      - KUBECONFIG=/secrets/kubeconfig
+    dir: 'ops/kubernetes/live/rancher'
+    args: 
+      - 'dep'
+      - 'up'
+    volumes:
+      - name: secrets
+        path: /secrets
+  - id: 'release'
+    name: 'gcr.io/$PROJECT_ID/helm'
+    env:
+      - SKIP_CLUSTER_CONFIG=true
+      - KUBECONFIG=/secrets/kubeconfig
+    dir: 'ops/kubernetes/live/rancher'
+    args: 
+      - 'upgrade'
+      - '--install'
+      - '--namespace'
+      - 'soapbubble'
+      - '--set'
+      - 'bot-webapp.image.tag=${SHORT_SHA},bot-backend.image.tag=${SHORT_SHA}'
+      - 'twitch'
+      - '.'    
+    volumes:
+      - name: secrets
+        path: /secrets
+timeout: 900s
+tags: ['www']

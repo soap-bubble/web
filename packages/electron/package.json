@@ -1,78 +1,84 @@
 {
-  "name": "Morpheus",
-  "version": "1.13.0",
-  "description": "A minimal Electron application",
-  "private": true,
-  "main": "dist/main.js",
+  "name": "morpheus-electron",
+  "productName": "Morpheus",
+  "version": "1.14.0",
+  "description": "My Electron application description",
+  "main": "lib/main.js",
   "scripts": {
     "start": "electron-forge start",
-    "start:watch": "cross-env NODE_ENV=development electromon .",
-    "build": "babel src -d dist",
-    "build:watch": "npm run build -- --watch",
-    "start:local:dev": "npm run build && concurrently --kill-others \"npm run build -- --watch --skip-initial-build\" \"npm run start:watch\"",
     "package": "electron-forge package",
-    "make": "electron-forge make"
+    "make": "electron-forge make",
+    "publish": "electron-forge publish",
+    "build": "babel src -d lib",
+    "lint": "echo \"No linting configured\""
   },
-  "repository": "https://github.com/electron/electron-quick-start",
-  "keywords": [
-    "Electron",
-    "quick",
-    "start",
-    "tutorial",
-    "demo"
-  ],
-  "author": "Soapbubble Productions",
+  "keywords": [],
+  "author": "johnh",
   "license": "MIT",
-  "devDependencies": {
-    "@babel/cli": "^7.4.4",
-    "@babel/core": "^7.4.5",
-    "@babel/plugin-proposal-object-rest-spread": "^7.4.4",
-    "@babel/preset-env": "^7.4.5",
-    "concurrently": "^3.6.1",
-    "cross-env": "^5.2.0",
-    "electron": "^5.0.6"
-  },
-  "dependencies": {
-    "@babel/cli": "^7.4.4",
-    "mkdirp": "^0.5.1",
-    "path-to-regexp": "^2.2.1",
-    "regenerator-runtime": "^0.12.0",
-    "request": "^2.87.0"
-  },
   "config": {
     "forge": {
-      "make_targets": {
-        "win32": [
-          "squirrel"
-        ],
-        "darwin": [
-          "zip"
-        ],
-        "linux": [
-          "deb",
-          "rpm"
-        ]
+      "packagerConfig": {
+        "icon": "res/icon.icns"
       },
-      "electronPackagerConfig": {
-        "packageManager": "yarn",
-        "icon": "res/icon.ico"
-      },
-      "electronWinstallerConfig": {
-        "name": "Morpheus",
-        "author": "Soapbubble Productions",
-        "iconUrl": "https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev/icon.ico",
-        "loadingGif": "res/globe.gif"
-      },
-      "electronInstallerDebian": {},
-      "electronInstallerRedhat": {},
-      "github_repository": {
-        "owner": "",
-        "name": ""
-      },
-      "windowsStoreConfig": {
-        "packageName": "",
-        "name": "Morpheus"
-      }
+      "makers": [
+        {
+          "name": "@electron-forge/maker-squirrel",
+          "config": {
+            "name": "Morpheus",
+            "author": "Soapbubble Productions",
+            "iconUrl": "https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev/icon.ico",
+            "loadingGif": "res/globe.gif"
+          }
+        },
+        {
+          "name": "@electron-forge/maker-zip",
+          "platforms": [
+            "darwin"
+          ]
+        },
+        {
+          "name": "@electron-forge/maker-deb",
+          "config": {
+            "options": {
+              "maintainer": "John Dean",
+              "productName": "Morpheus",
+              "homepage": "https://soapbubble.online",
+              "icon": "res/icon96.png",
+              "description": "Where dreams never die",
+              "productDescription": "Soap Bubble Productions Morpheus point-n-click adventure"
+            }
+          }
+        },
+        {
+          "name": "@electron-forge/maker-rpm",
+          "config": {
+            "options": {
+              "maintainer": "John Dean",
+              "productName": "Morpheus",
+              "homepage": "https://soapbubble.online",
+              "icon": "res/icon96.png",
+              "description": "Where dreams never die",
+              "productDescription": "Soap Bubble Productions Morpheus point-n-click adventure"
+            }
+          }
+        }
+      ]
     }
+  },
+  "dependencies": {
+    "@babel/runtime": "^7.5.4",
+    "electron-squirrel-startup": "^1.0.0"
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.5.0",
+    "@babel/core": "^7.5.4",
+    "@babel/plugin-proposal-object-rest-spread": "^7.5.4",
+    "@babel/preset-env": "^7.5.4",
+    "@electron-forge/cli": "6.0.0-beta.33",
+    "@electron-forge/maker-deb": "6.0.0-beta.33",
+    "@electron-forge/maker-rpm": "6.0.0-beta.33",
+    "@electron-forge/maker-squirrel": "6.0.0-beta.33",
+    "@electron-forge/maker-zip": "6.0.0-beta.33",
+    "electron": "5.0.6"
   }
 }

@@ -1,0 +1,63 @@
+apiVersion: skaffold/v2beta4
+kind: Config
+metadata:
+  name: web
+build:
+  local:
+    push: false
+    useDockerCLI: true
+  artifacts: 
+    - image: null
+deploy:
+  kustomize:
+    paths: 
+      - dev.null
+profiles:
+  - name: soapbubble
+    activation:
+      - env: DEPLOYMENT=soapbubble
+    build:
+      artifacts:
+        - image: soapbubble/bot-admin
+          context: packages/bot-admin
+        - image: soapbubble/bot
+          context: packages/bot
+    deploy:
+      kustomize:
+        paths:
+          - deployment/soapbubble
+  - name: local-config
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: add
+        path: /deploy/kustomize/paths/-
+        value: deployment/local
+  - name: bot-admin-local
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: add
+        path: /build/artifacts/-
+        value:
+          image: bot-admin
+          context: packages/bot-admin
+          docker:
+            dockerFile: Dockerfile.dev
+  - name: bot-local
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: add
+        path: /build/artifacts/-
+        value:
+          image: bot
+          context: packages/bot
+  - name: cleanup
+    activation:
+      - kubeContext: minikube
+    patches:
+      - op: remove
+        path: /deploy/kustomize/paths/0
+      - op: remove
+        path: /build/artifacts/0

@@ -1,9 +1,0 @@
-export const INIT = 'LOGIN_INIT';
-export const START = 'LOGIN_START';
-export const LOGIN = 'LOGIN';
-export const LOGOUT = 'LOGOUT';
-export const SUCCESS = 'LOGIN_SUCCESS';
-export const FAILURE = 'LOGIN_FAILURE';
-export const GOOGLE_API_LOGGED_IN = 'LOGIN_GOOGLE_API_LOGGED_IN';
-export const GOOGLE_API_ERROR = 'LOGIN_GOOGLE_API_ERROR';
-export const GOOGLE_API_INIT = 'LOGIN_GOOGLE_API_INIT';

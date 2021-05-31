@@ -274,7 +274,7 @@ const definition = {
         client.connect()
       },
     }
-
+    logger.info('Finished creating twitch chat logger')
     return api
   },
 }

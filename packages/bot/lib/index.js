@@ -30,8 +30,9 @@ define({
 
 init()
 
-factory(function init(socket, logger, twitchChat, routes) {
+factory(function initApp(logger, socket, routes) {
   socket.server.listen(config.port, () => {
     logger.info(`App listening on port ${config.port}`)
   })
 })
+factory(function init(twitchChat) {})

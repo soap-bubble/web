@@ -1,0 +1,32 @@
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: gcloud-dns
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${LETSENCRYPT_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-prod
+    solvers:
+    - dns01:
+        cloudDNS:
+          project: ${GCP_PROJECT_ID}
+          serviceAccountSecretRef:
+            name: clouddns-dns01-solver-svc-acct
+            key: key.json
+---
+apiVersion: cert-manager.io/v1
+kind: ClusterIssuer
+metadata:
+  name: http01
+spec:
+  acme:
+    server: https://acme-v02.api.letsencrypt.org/directory
+    email: ${LETSENCRYPT_EMAIL}
+    privateKeySecretRef:
+      name: letsencrypt-prod-2
+    solvers:
+    - http01:
+        ingress:
+          class: nginx

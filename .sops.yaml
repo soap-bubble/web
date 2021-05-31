@@ -1,0 +1,2 @@
+creation_rules:
+  - gcp_kms: 'projects/soapbubble-dev/locations/global/keyRings/sops/cryptoKeys/sops-key'

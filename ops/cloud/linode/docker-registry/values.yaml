@@ -1,0 +1,15 @@
+persistence:
+  enabled: true
+  storageClass: linode-block-storage
+  size: 60Gi
+ingress:
+  enabled: true
+  annotations:
+    cert-manager.io/cluster-issuer: gcloud-dns
+    nginx.ingress.kubernetes.io/proxy-body-size: 30720m
+  tls: 
+    - hosts:
+      - docker.soapbubble.online
+      secretName: online-soapbubble-docker-tls
+  hosts:
+    - docker.soapbubble.online

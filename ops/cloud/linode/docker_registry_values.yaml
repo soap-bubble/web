@@ -1,0 +1,21 @@
+ingress:
+  enabled: true
+  hosts:
+    - docker.soapbubble.online
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/proxy-body-size: "30720m"
+  tls:
+    - secretName: soapbubble-online-docker-tls
+      hosts:
+        - docker.soapbubble.online
+storage: filesystem
+persistence:
+  enabled: true
+  size: 60Gi
+  storageClass: linode-block-storage
+
+image:
+  repository: soapbubble/registry
+  tag: dev

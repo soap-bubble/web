@@ -1,0 +1,20 @@
+apiVersion: networking.k8s.io/v1beta1 # for versions before 1.14 use extensions/v1beta1
+kind: Ingress
+metadata:
+  name: example-ingress
+  namespace: helloworld
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+spec:
+  rules:
+  - host: hello.soapbubble.online
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web
+          servicePort: 8080
+  tls:
+  - hosts:
+    - hello.soapbubble.online
+    secretName: online-soapbubble-hello-tls

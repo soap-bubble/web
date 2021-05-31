@@ -51,7 +51,7 @@ steps:
       - 'upgrade'
       - '--install'
       - '--namespace'
-      - 'soapbubble'
+      - 'twitch'
       - '--set'
       - 'bot-webapp.image.tag=${SHORT_SHA},bot-backend.image.tag=${SHORT_SHA}'
       - 'twitch'

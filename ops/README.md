@@ -4,7 +4,7 @@
 Before running any commands from this README, first set the project id
 
 ```bash
-export PROJECT_ID=google-cloud-project-id
+export PROJECT_ID=$(gcloud config get-value project)
 ```
 
 ## Load cluster with GCP service account

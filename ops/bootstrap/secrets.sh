@@ -4,7 +4,7 @@ set -o allexport; source $1; set +o allexport
 
 PROJECT_ID=$2
 BUCKET_ID=$PROJECT_ID-secrets
-SECRETS=( twitch_client twitch_secret twitch_profile_id discord_token)
+SECRETS=( kubeconfig twitch_client twitch_secret twitch_profile_id discord_token)
 
 for secret in "${SECRETS[@]}"
 do

@@ -81,7 +81,7 @@ echo "Installing prometheus stack"
 cd prometheus
 helm3 repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm3 repo add stable https://charts.helm.sh/stable
-helm3 upgrade --create-namespace --install --namespace metrics --values values.yaml prometheus ../../../charts/external/kube-prometheus-stack/0.0.1
+helm3 upgrade --create-namespace --install --namespace metrics --values values.yaml prometheus ../../../kubernetes/charts/external/kube-prometheus-stack/0.0.1
 cd ..
 
 # Put at the end because of needing to wait for some cert-manager stuff to be ready...

@@ -34,7 +34,7 @@ steps:
     env:
       - SKIP_CLUSTER_CONFIG=true
       - KUBECONFIG=/secrets/kubeconfig
-    dir: 'ops/kubernetes/live/rancher'
+    dir: 'ops/kubernetes/live/linode'
     args: 
       - 'dep'
       - 'up'
@@ -46,7 +46,7 @@ steps:
     env:
       - SKIP_CLUSTER_CONFIG=true
       - KUBECONFIG=/secrets/kubeconfig
-    dir: 'ops/kubernetes/live/rancher'
+    dir: 'ops/kubernetes/live/linode'
     args: 
       - 'upgrade'
       - '--install'

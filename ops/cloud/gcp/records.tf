@@ -1,4 +1,13 @@
 
+
+resource "google_dns_record_set" "twitch_soapbubble" {
+  provider = google-beta
+  managed_zone = module.cloud-dns.name
+  name = "twitch.soapbubble.online."
+  type = "A"
+  rrdatas = [var.ingress-ip]
+  ttl          = 86400
+}
 resource "google_dns_record_set" "docker_soapbubble" {
   provider = google-beta
   managed_zone = module.cloud-dns.name

@@ -55,16 +55,6 @@ module "cloud-dns" {
       records = [
         "mail-soapbubble-online.dkim2._domainkey.firebasemail.com."
       ]
-    },
-    {
-      name = "twitch"
-      type = "A"
-      ttl = 3600
-      records = [
-        "216.230.232.24",
-        "216.230.232.53",
-        "216.230.232.54",
-      ]
     }
   ]
 }

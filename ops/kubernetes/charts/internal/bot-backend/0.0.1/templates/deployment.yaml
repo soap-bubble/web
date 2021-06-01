@@ -22,30 +22,11 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      initContainers:
-      - command:
-        - sh
-        - -c
-        - cp /bin/berglas /berglas/bin/
-        image: gcr.io/berglas/berglas:latest
-        imagePullPolicy: IfNotPresent
-        name: copy-berglas-bin
-        resources: {}
-        terminationMessagePath: /dev/termination-log
-        terminationMessagePolicy: File
-        volumeMounts:
-        - mountPath: /berglas/bin/
-          name: berglas-bin
       containers:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command:
-            - /berglas/bin/berglas
-          args:
-            - exec
-            - --local
-            - --
             {{- toYaml .Values.command | nindent 12 }}
           env:
             - name: BOT_PORT
@@ -86,9 +67,6 @@ spec:
           {{- with .Values.volumeMounts }}
           volumeMounts:
             {{- toYaml . | nindent 12}}
-            - mountPath: /berglas/bin/
-              name: berglas-bin
-              readOnly: true
           {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -105,7 +83,4 @@ spec:
       {{- with .Values.volumes }}
       volumes:
         {{- toYaml . | nindent 8 }}
-        - emptyDir:
-            medium: Memory
-          name: berglas-bin
       {{- end }}

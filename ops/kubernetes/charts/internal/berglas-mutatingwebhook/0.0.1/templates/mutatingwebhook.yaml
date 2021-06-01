@@ -1,0 +1,26 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: MutatingWebhookConfiguration
+metadata:
+  name: {{ include "berglas-mutatingwebhook.fullname" . }}
+  labels:
+    app: {{ include "berglas-mutatingwebhook.fullname" . }}
+    kind: mutator
+  annotations:
+    cert-manager.io/inject-ca-from: {{ .Release.Namespace }}/{{ include "berglas-mutatingwebhook.fullname" . }}
+webhooks:
+- name: berglas-webhook.cloud.google.com
+  admissionReviewVersions:
+    - v1beta1
+  sideEffects: None
+  failurePolicy: Ignore
+  clientConfig:
+    service:
+      namespace: {{ .Release.Namespace }}
+      name: {{ include "berglas-mutatingwebhook.fullname" . }}
+      path: /mutate
+      port: 443
+  rules:
+  - operations: ["CREATE"]
+    apiGroups: [""]
+    apiVersions: ["v1"]
+    resources: ["pods"]

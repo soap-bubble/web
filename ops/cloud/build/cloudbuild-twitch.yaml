@@ -46,7 +46,7 @@ steps:
     env:
       - SKIP_CLUSTER_CONFIG=true
       - KUBECONFIG=/secrets/kubeconfig
-    dir: 'ops/kubernetes/live/linode'
+    dir: 'ops/kubernetes/live/linode/twitch'
     args: 
       - 'upgrade'
       - '--install'

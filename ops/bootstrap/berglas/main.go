@@ -1,10 +1,13 @@
-package foo
+package main
 
 import (
 	"context"
 	"fmt"
+	"html"
+	"log"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/GoogleCloudPlatform/berglas/pkg/berglas"
 	kwhhttp "github.com/slok/kubewebhook/pkg/http"
@@ -13,6 +16,10 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
+
+func handleRoot(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "hello %q", html.EscapeString(r.URL.Path))
+}
 
 const (
 	// berglasContainer is the default berglas container from which to pull the
@@ -168,5 +175,20 @@ func webhookHandler() http.Handler {
 	return whhandler
 }
 
-// F is the exported webhook for the function to bind.
-var F = webhookHandler().ServeHTTP
+func main() {
+
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", handleRoot)
+	mux.HandleFunc("/mutate", webhookHandler().ServeHTTP)
+
+	s := &http.Server{
+		Addr:           ":443",
+		Handler:        mux,
+		ReadTimeout:    10 * time.Second,
+		WriteTimeout:   10 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1048576
+	}
+
+	log.Fatal(s.ListenAndServeTLS("/etc/webhook/certs/tls.crt", "/etc/webhook/certs/tls.key"))
+}

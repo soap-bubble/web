@@ -1,0 +1,4 @@
+image:
+  repository: us.gcr.io/soapbubble-dev/berglas-mutatingwebhook
+imagePullSecrets:
+  - name: "soapbubble-dev"

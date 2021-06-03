@@ -104,16 +104,14 @@ bot-webapp:
     - name: "soapbubble-dev"
   ingress:
     annotations:
-      cert-manager.io/cluster-issuer: letsencrypt-production
-      rancher.io/globalDNS.hostname: "twitch.soapbubble.online"
+      cert-manager.io/cluster-issuer: letsencrypt-prod
       kubernetes.io/ingress.class: nginx
-      kubernetes.io/tls-acme: "true"
     hosts:
       - host: twitch.soapbubble.online
         paths:
           - "/"
     tls:
-      - secretName: twitch-tls
+      - secretName: twitch-tls-webapp
         hosts:
           - twitch.soapbubble.online
   volumeMounts:

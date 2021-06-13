@@ -1,0 +1,11 @@
+FROM node:14
+ARG DEPLOYMENT
+ENV DEPLOYMENT ${DEPLOYMENT:-local}
+WORKDIR /app
+COPY package.json yarn.lock ./
+RUN yarn
+COPY . ./
+ENV PORT=80
+EXPOSE 80
+
+CMD yarn start:dev

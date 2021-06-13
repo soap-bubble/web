@@ -1,0 +1,10 @@
+.modalBorder {
+  position: absolute;
+  border-radius: 10px;
+  padding: 20px;
+  background-color: #444;
+  width: 20em;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

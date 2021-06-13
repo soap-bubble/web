@@ -1,0 +1,43 @@
+steps:
+  - id: berglas
+    name: us-docker.pkg.dev/berglas/berglas/berglas
+    env:
+    - KUBECONFIG=berglas://${PROJECT_ID}-secrets/kubeconfig?destination=/secrets/kubeconfig
+    args: ["exec", "--", "/bin/sh"]
+    volumes:
+    - name: secrets
+      path: /secrets
+  - id: 'build bot webapp'
+    name: gcr.io/cloud-builders/docker
+    dir: www
+    args: 
+      - 'build'
+      - '-t'
+      - 'us.gcr.io/$PROJECT_ID/www:${SHORT_SHA}'
+      - '.'
+  - id: 'push - www'
+    name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'us.gcr.io/$PROJECT_ID/www:${SHORT_SHA}']
+  - id: 'release'
+    name: 'gcr.io/$PROJECT_ID/helm'
+    env:
+      - SKIP_CLUSTER_CONFIG=true
+      - KUBECONFIG=/secrets/kubeconfig
+    dir: 'ops/kubernetes/live/linode/www'
+    args: 
+      - 'upgrade'
+      - '--install'
+      - '--create-namespace'
+      - '--namespace'
+      - 'morpheus'
+      - '--set'
+      - 'image.tag=${SHORT_SHA}'
+      - '--values'
+      - 'values.yaml'
+      - 'www'
+      - '../../charts/internal/www/0.0.1'    
+    volumes:
+      - name: secrets
+        path: /secrets
+timeout: 900s
+tags: ['www']

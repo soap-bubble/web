@@ -1,0 +1,46 @@
+image:
+  repository: us.gcr.io/soapbubble-dev/bot-webapp
+command: 
+  - bash 
+  - -c 
+  - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
+env:
+  - name: GOOGLE_APPLICATION_CREDENTIALS
+    value: /secret/key.json
+  - name: GOOGLE_SERVICE_ACCOUNT
+    value: berglas://soapbubble-dev-secrets/google_application_credentials?destination=/googleKey
+  - name: OGMETA_URL
+    value: https://next.soapbubble.online
+  - name: WWW_HOST
+    value: https://next.soapbubble.online
+  - name: ASSET_HOST
+    value: https://s3-us-west-2.amazonaws.com/soapbubble-morpheus-dev
+resources:
+  limits:
+    cpu: 250m
+    memory: 256Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+imagePullSecrets:
+  - name: "soapbubble-dev"
+ingress:
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: twitch.soapbubble.online
+      paths:
+        - "/"
+  tls:
+    - secretName: twitch-tls-webapp
+      hosts:
+        - twitch.soapbubble.online
+volumeMounts:
+  - name: gcp-serviceaccount
+    mountPath: "/secret"
+    readOnly: true
+volumes:
+  - name: gcp-serviceaccount
+    secret:
+      secretName: gcp-serviceaccount

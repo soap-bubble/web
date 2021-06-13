@@ -36,3 +36,6 @@ yarn-error.log*
 # Morpheus files
 morpheus.map.json
 public/GameDB
+
+soapbubble-*
+morpheus.map.json

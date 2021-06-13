@@ -9,6 +9,8 @@ steps:
       path: /secrets
   - id: 'build bot webapp'
     name: gcr.io/cloud-builders/docker
+    env:
+     - GOOGLE_APPLICATION_DEFAULT=berglas://${PROJECT_ID}-secrets/firebase-admin-sdk?destination=/secrets/firebase-admin-sdk-key
     dir: www
     args: 
       - 'build'

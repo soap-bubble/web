@@ -2,20 +2,20 @@ steps:
   - id: berglas
     name: us-docker.pkg.dev/berglas/berglas/berglas
     env:
-    - KUBECONFIG=berglas://${PROJECT_ID}-secrets/kubeconfig?destination=/secrets/kubeconfig
+      - KUBECONFIG=berglas://${PROJECT_ID}-secrets/kubeconfig?destination=/secrets/kubeconfig
     args: ["exec", "--", "/bin/sh"]
     volumes:
     - name: secrets
       path: /secrets
   - id: 'build bot webapp'
     name: gcr.io/cloud-builders/docker
-    env:
-     - GOOGLE_APPLICATION_DEFAULT=berglas://${PROJECT_ID}-secrets/firebase-admin-sdk?destination=/secrets/firebase-admin-sdk-key
     dir: www
     args: 
       - 'build'
       - '-t'
       - 'us.gcr.io/$PROJECT_ID/www:${SHORT_SHA}'
+      - '--build-arg=OG_META=https://next.soapbubble.online'
+      - '--build-arg=GOOGLE_APPLICATION_CREDENTIALS=${_FIREBASE_KEY'
       - '.'
   - id: 'push - www'
     name: 'gcr.io/cloud-builders/docker'

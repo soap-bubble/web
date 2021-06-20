@@ -11,7 +11,7 @@ COPY package.json yarn.lock ./
 RUN yarn
 COPY . ./
 RUN echo -n ${GOOGLE_APPLICATION_CREDENTIALS}
-RUN echo -n ${GOOGLE_APPLICATION_CREDENTIALS} > key.json && GOOGLE_APPLICATION_CREDENTIALS=key.json yarn build && rm key.json
+RUN echo -n ${GOOGLE_APPLICATION_CREDENTIALS} | base64 --decode > key.json && GOOGLE_APPLICATION_CREDENTIALS=key.json yarn build && rm key.json
 ENV PORT=80
 EXPOSE 80
 CMD yarn start

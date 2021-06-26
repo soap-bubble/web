@@ -15,7 +15,7 @@ steps:
       - '-t'
       - 'us.gcr.io/$PROJECT_ID/www:${SHORT_SHA}'
       - '--build-arg=OG_META=https://next.soapbubble.online'
-      - '--build-arg=GOOGLE_APPLICATION_CREDENTIALS=${_FIREBASE_KEY'
+      - '--build-arg=GOOGLE_APPLICATION_CREDENTIALS=${_FIREBASE_KEY}'
       - '.'
   - id: 'push - www'
     name: 'gcr.io/cloud-builders/docker'

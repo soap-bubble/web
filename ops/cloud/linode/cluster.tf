@@ -6,6 +6,6 @@ resource "linode_lke_cluster" "test_soapbubble_dev_cluster" {
 
     pool {
         type  = "g6-standard-2"
-        count = 2
+        count = 3
     }
 }

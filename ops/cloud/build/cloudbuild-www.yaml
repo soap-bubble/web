@@ -37,7 +37,7 @@ steps:
       - '--values'
       - 'values.yaml'
       - 'www'
-      - '../../charts/internal/www/0.0.1'    
+      - '../../../charts/internal/www/0.0.1'    
     volumes:
       - name: secrets
         path: /secrets

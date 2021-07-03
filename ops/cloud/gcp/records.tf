@@ -24,3 +24,11 @@ resource "google_dns_record_set" "hello_soapbubble" {
   rrdatas = [var.ingress-ip]
   ttl          = 86400
 }
+resource "google_dns_record_set" "urbit_soapbubble" {
+  provider = google-beta
+  managed_zone = module.cloud-dns.name
+  name = "mordev.soapbubble.online."
+  type = "A"
+  rrdatas = [var.ingress-ip]
+  ttl          = 86400
+}

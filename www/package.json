@@ -23,7 +23,7 @@
     "keycode": "^2.2.0",
     "local-storage": "^2.0.0",
     "lodash": "^4.17.21",
-    "next": "^10.2.4-canary.15",
+    "next": "^11.1.1",
     "promise-queue": "^2.2.5",
     "puppeteer": "^10.0.0",
     "query-string": "^7.0.0",

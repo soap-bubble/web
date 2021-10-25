@@ -1,0 +1,88 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-view
+rules:
+- apiGroups: [""]
+  resources: ["nodes"]
+  verbs: ["get", "watch", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: metrics-view
+  namespace: metrics
+rules:
+  - apiGroups: [""]
+    resources: ["services", "services/portforward"]
+    verbs: ["get", "list", "create"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: formclank-admin
+  namespace: formclank
+rules:
+  - apiGroups: [""]
+    resources: ["*"]
+    verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: formclank-admin
+  namespace: formclank
+subjects:
+- kind: User
+  apiGroup: ""
+  name: "system:serviceaccount:formclank:formclank-admin"
+  apiGroup: ""
+roleRef:
+  kind: Role 
+  name: formclank-admin
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: metrics-view
+  namespace: formclank
+subjects:
+- kind: User
+  apiGroup: ""
+  name: "system:serviceaccount:formclank:formclank-admin"
+roleRef:
+  kind: Role 
+  name: metrics-view
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: formclank-node-view
+  namespace: formclank
+subjects:
+- kind: User
+  name: "system:serviceaccount:formclank:formclank-admin"
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole 
+  name: node-view 
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: formclank-admin
+  namespace: formclank
+secrets:
+  - name: formclank-admin-secret
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: formclank-admin-secret
+  namespace: formclank
+  annotations:
+    kubernetes.io/service-account.name: formclank-admin
+type: kubernetes.io/service-account-token

@@ -86,3 +86,6 @@ cd ..
 
 # Put at the end because of needing to wait for some cert-manager stuff to be ready...
 envsubst '$$LETSENCRYPT_EMAIL $$GCP_PROJECT_ID' < cert-manager/ClusterIssuer.yaml | kubectl apply -f -
+
+# Install user accounts + RBAC
+kubectl apply -f rbac/rbac.yaml

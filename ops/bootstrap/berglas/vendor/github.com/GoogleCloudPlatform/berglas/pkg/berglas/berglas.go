@@ -29,7 +29,6 @@ import (
 	kms "cloud.google.com/go/kms/apiv1"
 	secretmanager "cloud.google.com/go/secretmanager/apiv1"
 	"cloud.google.com/go/storage"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/golang/protobuf/ptypes/timestamp"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -41,7 +40,7 @@ const (
 	// Name, Version, ProjectURL, and UserAgent are used to uniquely identify this
 	// package in logs and other binaries.
 	Name       = "berglas"
-	Version    = "0.5.3"
+	Version    = "0.6.2"
 	ProjectURL = "https://github.com/GoogleCloudPlatform/berglas"
 	UserAgent  = Name + "/" + Version + " (+" + ProjectURL + ")"
 )
@@ -141,6 +140,11 @@ type Secret struct {
 
 	// KMSKey is the key used to encrypt the secret key. Cloud Storage only.
 	KMSKey string
+
+	// Locations is the list of custom locations the secret is replicated to.
+	// This is set to nil if the secret is automatically replicated instead.
+	// Secret Manager only.
+	Locations []string
 }
 
 // secretFromAttrs constructs a secret from the given object attributes and
@@ -158,8 +162,10 @@ func secretFromAttrs(bucket string, attrs *storage.ObjectAttrs, plaintext []byte
 }
 
 func timestampToTime(ts *timestamp.Timestamp) time.Time {
-	t, _ := ptypes.Timestamp(ts)
-	return t
+	if ts == nil || !ts.IsValid() {
+		return time.Unix(0, 0).UTC()
+	}
+	return ts.AsTime().UTC()
 }
 
 // kmsKeyIncludesVersion returns true if the given KMS key reference includes

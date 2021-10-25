@@ -28,13 +28,13 @@ ingress:
   annotations:
     cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
-    - host: twitch.soapbubble.online
+    - host: next.soapbubble.online
       paths:
         - "/"
   tls:
-    - secretName: twitch-tls-webapp
+    - secretName: next-tls-webapp
       hosts:
-        - twitch.soapbubble.online
+        - next.soapbubble.online
 volumeMounts:
   - name: gcp-serviceaccount
     mountPath: "/secret"

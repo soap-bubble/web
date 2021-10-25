@@ -9,12 +9,11 @@ import (
 	"net"
 	"net/http"
 	"os"
-	"os/signal"
 	"sync"
-	"syscall"
 	"time"
 
 	"github.com/GoogleCloudPlatform/berglas/pkg/berglas"
+	"github.com/fsnotify/fsnotify"
 	kwhhttp "github.com/slok/kubewebhook/pkg/http"
 	kwhlog "github.com/slok/kubewebhook/pkg/log"
 	kwhmutating "github.com/slok/kubewebhook/pkg/webhook/mutating"
@@ -189,26 +188,44 @@ type keypairReloader struct {
 	keyPath  string
 }
 
-func NewKeypairReloader(certPath, keyPath string) (*keypairReloader, error) {
+func NewKeypairReloader(watchPath, certPath, keyPath string) (*keypairReloader, error) {
 	result := &keypairReloader{
 		certPath: certPath,
 		keyPath:  keyPath,
 	}
-	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	// creates a new file watcher
+	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		return nil, err
+		fmt.Println("ERROR", err)
 	}
-	result.cert = &cert
+	defer watcher.Close()
+
+	//
+	done := make(chan bool)
+
+	//
 	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGHUP)
-		for range c {
-			log.Printf("Received SIGHUP, reloading TLS certificate and key from %q and %q", certPath, keyPath)
-			if err := result.maybeReload(); err != nil {
-				log.Printf("Keeping old TLS certificate because the new one could not be loaded: %v", err)
+		for {
+			select {
+			// watch for events
+			case event := <-watcher.Events:
+				fmt.Printf("EVENT! %#v\n", event)
+				if err := result.maybeReload(); err != nil {
+					log.Printf("Keeping old TLS certificate because the new one could not be loaded: %v", err)
+				}
+
+				// watch for errors
+			case err := <-watcher.Errors:
+				fmt.Println("ERROR", err)
 			}
 		}
 	}()
+
+	if err := watcher.Add(watchPath); err != nil {
+		fmt.Println("ERROR", err)
+	}
+
+	<-done
 	return result, nil
 }
 
@@ -256,7 +273,7 @@ func main() {
 	// Manually create the net.TCPListener so that joinMaster() does not run
 	// into connection refused errors (the master will try to contact the
 	// node before acknowledging the join).
-	kpr, err := NewKeypairReloader("/etc/webhook/certs/tls.crt", "/etc/webhook/certs/tls.key")
+	kpr, err := NewKeypairReloader("/etc/webhook/certs", "/etc/webhook/certs/tls.crt", "/etc/webhook/certs/tls.key")
 	if err != nil {
 		log.Fatal(err)
 	}

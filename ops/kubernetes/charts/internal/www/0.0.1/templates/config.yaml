@@ -1,6 +1,0 @@
-apiVersion: v1
-data:
-  redirect: {{ .Values.redirect }}
-kind: ConfigMap
-metadata:
-  name: {{ include "webapp.fullname" . }}-config

@@ -36,11 +36,6 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"           
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              valueFrom:
-                secretKeyRef:
-                  key: GOOGLE_APPLICATION_CREDENTIALS
-                  name: {{ include "webapp.fullname" . }}-secret
           {{- with .Values.env }}
             {{- toYaml . | nindent 12 }}  
           {{- end }}

@@ -1,5 +1,5 @@
 image:
-  repository: us.gcr.io/soapbubble-dev/bot-webapp
+  repository: us.gcr.io/soapbubble-dev/www
 command: 
   - bash 
   - -c 

@@ -42,7 +42,7 @@ const (
 var binInitContainer = corev1.Container{
 	Name:            "copy-berglas-bin",
 	Image:           berglasContainer,
-	ImagePullPolicy: corev1.PullIfNotPresent,
+	ImagePullPolicy: corev1.PullAlways,
 	Command: []string{"sh", "-c",
 		fmt.Sprintf("cp /bin/berglas %s", binVolumeMountPath)},
 	VolumeMounts: []corev1.VolumeMount{

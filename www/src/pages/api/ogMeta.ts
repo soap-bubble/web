@@ -3,13 +3,15 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { scene } = req.query;
-  const renderUrl = `${process.env.OGMETA_URL}/render/${scene}/`;
+  const renderUrl = `${process.env.WWW_HOST}/render/${scene}/`;
 
   try {
     const browser = await puppeteer.launch();
     const page = await browser.newPage();
-    await page.goto(renderUrl, {});
-    await new Promise((resolve) => setTimeout(resolve, 5000));
+    await page.goto(renderUrl, {
+      waitUntil: 'networkidle0'
+    });
+    // await new Promise((resolve) => setTimeout(resolve, 5000));
     const JPEG = await page.screenshot({
       fullPage: true,
     });

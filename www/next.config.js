@@ -15,6 +15,7 @@ module.exports = (phase, { defaultConfig }) => {
     return {
       ...defaultConfig,
       env: {
+        
         WWW_HOST: 'http://localhost:3000',
         ...defaultEnv
       }

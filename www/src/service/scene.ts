@@ -1,4 +1,3 @@
-import axios from 'axios';
 import { Scene, UnresolvedScene, Cast } from 'morpheus/casts/types';
 import createLogger from 'utils/logger';
 

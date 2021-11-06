@@ -5,13 +5,13 @@ import useInitialGamestates from '../hooks/useInitialGamestate';
 
 import { Scene } from 'morpheus/casts/types';
 
-type ILocalProps = { scene: Scene };
+type ILocalProps = { scene?: Scene };
 
 const Render: FC<ILocalProps> = ({ scene }) => {
   const gamestates = useInitialGamestates();
   const stageScenes = useMemo(() => (scene ? [scene] : []), [scene]);
   const onSettled = useCallback(() => console.log('settled'), []);
-  return (
+  return scene ? (
     <>
       <Head>
         <meta
@@ -38,7 +38,7 @@ const Render: FC<ILocalProps> = ({ scene }) => {
         settled={onSettled}
       />
     </>
-  );
+  ) : null;
 };
 
 export default Render;

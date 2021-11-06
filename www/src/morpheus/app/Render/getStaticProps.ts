@@ -6,7 +6,7 @@ import { fetch } from 'service/scene';
 export const getStaticProps: GetStaticProps<
   { scene: Scene },
   { scene: string | string[] }
-> = async (context) => {
+> = async context => {
   const { params } = context;
   if (!params) {
     throw new Error('F');
@@ -16,15 +16,13 @@ export const getStaticProps: GetStaticProps<
   const sceneId = Array.isArray(sceneIdFromQuery)
     ? Number(sceneIdFromQuery[0])
     : Number(sceneIdFromQuery) || 2000;
-
   const scene = await fetch(sceneId, firebaseAdmin.firestore());
-
   if (!scene) {
     throw new Error('F');
   }
   return {
     props: {
-      scene,
-    },
+      scene
+    }
   };
 };

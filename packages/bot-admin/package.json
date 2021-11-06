@@ -18,7 +18,7 @@
     "@google-cloud/firestore": "^3.7.3",
     "@material-ui/core": "^4.9.10",
     "@types/http-proxy": "^1.17.4",
-    "axios": "^0.19.2",
+    "axios": "^0.21.2",
     "classnames": "^2.2.6",
     "core-js": "^3.6.4",
     "d3-ease": "^1.0.6",

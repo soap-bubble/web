@@ -15,9 +15,9 @@ const definition = {
 
     io.origins(((origin: any, callback: any) => {
       logger.info('origin', origin, config.get('origins'))
-      if (origin !== config.get('origins') && config.get('origins') !== '*') {
-        return callback('origin not allowed', false)
-      }
+      // if (origin !== config.get('origins') && config.get('origins') !== '*') {
+      //   return callback('origin not allowed', false)
+      // }
 
       callback(null, true)
     }) as any)

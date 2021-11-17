@@ -4,8 +4,8 @@ bot-backend:
       value: cluster
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /secret/key.json
-    - name: ROOT_SERVICE_ACCOUNT
-      value: berglas://soapbubble-dev-secrets/google_application_credentials
+    - name: APP_SERVICE_ACCOUNT
+      value: berglas://soapbubble-dev-secrets/google_application_credentials?destination=/googleKey
     - name: BOT_PROFILE_ID
       value: berglas://soapbubble-dev-secrets/twitch_profile_id
     - name: BOT_DISCORD_TOKEN
@@ -20,7 +20,7 @@ bot-backend:
   command: 
     - bash 
     - -c 
-    - "yarn start"
+    - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
   saveChannelNames: []
     # - "captemulation"
     # - "sweet_anita"

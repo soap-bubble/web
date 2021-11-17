@@ -41,16 +41,18 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: 80
+              containerPort: 3000
               protocol: TCP
           livenessProbe:
             httpGet:
               path: /
-              port: http
+              port: 3000
+            initialDelaySeconds: 5
           readinessProbe:
             httpGet:
               path: /
-              port: http
+              port: 3000
+            initialDelaySeconds: 5          
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           {{- with .Values.volumeMounts }}

@@ -1,3 +1,3 @@
-import Profile from '@branes/www/containers/sun'
+import Profile from 'bot-admin/containers/sun'
 
 export default Profile

@@ -1,7 +1,7 @@
 import React, { FunctionComponent } from 'react'
 import { Color } from 'three'
 import { Canvas } from 'react-three-fiber'
-import canUseDom from '@branes/www/utils/canUseDom'
+import canUseDom from 'bot-admin/utils/canUseDom'
 
 const Stage: FunctionComponent = ({ children }) => {
   return (

@@ -1,21 +1,14 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-// @ts-ignore
-import { SelectionList } from '@soapbubble/components';
-import './SaveList.scss';
+import React from 'react'
+import PropTypes from 'prop-types'
+import './SaveList.css'
 
-const SaveList = ({
-  loading,
-  delegate,
-  rows,
-  onSelect,
-}: any) => {
+const SaveList = ({ loading, delegate, rows, onSelect }: any) => {
   if (loading) {
     return (
       <div className="saveListModal">
         <span className="loadingSpinner" />
       </div>
-    );
+    )
   }
   // if (error) {
   //   return (
@@ -26,26 +19,26 @@ const SaveList = ({
   // }
   return (
     <div className="saveListModal">
-      <SelectionList
+      {/* <SelectionList
         delegate={delegate}
         rows={rows}
         onSelect={onSelect}
-      />
+      /> */}
     </div>
-  );
-};
+  )
+}
 
 SaveList.propTypes = {
   loading: PropTypes.bool.isRequired,
   delegate: PropTypes.func,
   rows: PropTypes.number,
   onSelect: PropTypes.func,
-};
+}
 
 SaveList.defaultProps = {
   delegate: () => null,
   rows: 0,
   onSelect: () => {},
-};
+}
 
-export default SaveList;
+export default SaveList

@@ -4,8 +4,8 @@ bot-backend:
       value: cluster
     - name: GOOGLE_APPLICATION_CREDENTIALS
       value: /secret/key.json
-    - name: GOOGLE_SERVICE_ACCOUNT
-      value: berglas://soapbubble-dev-secrets/google_application_credentials?destination=/googleKey
+    - name: ROOT_SERVICE_ACCOUNT
+      value: berglas://soapbubble-dev-secrets/google_application_credentials
     - name: BOT_PROFILE_ID
       value: berglas://soapbubble-dev-secrets/twitch_profile_id
     - name: BOT_DISCORD_TOKEN
@@ -20,23 +20,23 @@ bot-backend:
   command: 
     - bash 
     - -c 
-    - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
-  saveChannelNames:
-    - "captemulation"
-    - "sweet_anita"
-    - "feliciaday"
-    - "auronplay"
-    - "ninja"
-    - "cohhcarnage"
-    - "gmhikaru"
-    - "rhovious"
-    - "swagger"
-    - "jacksepticeye"
-    - "chocotaco"
-    - "shroud"
-    - "day9tv"
-    - "glermz"
-    - "halifax"
+    - "yarn start"
+  saveChannelNames: []
+    # - "captemulation"
+    # - "sweet_anita"
+    # - "feliciaday"
+    # - "auronplay"
+    # - "ninja"
+    # - "cohhcarnage"
+    # - "gmhikaru"
+    # - "rhovious"
+    # - "swagger"
+    # - "jacksepticeye"
+    # - "chocotaco"
+    # - "shroud"
+    # - "day9tv"
+    # - "glermz"
+    # - "halifax"
   image:
     repository: us.gcr.io/soapbubble-dev/bot-backend
   imagePullSecrets:

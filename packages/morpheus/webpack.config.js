@@ -5,6 +5,7 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
+const { DuplicatesPlugin } = require('inspectpack/plugin')
 const config = require('config')
 
 const dirJs = path.resolve(__dirname, 'client/js')
@@ -70,6 +71,12 @@ module.exports = env => {
       publicPath = '/morpheus/'
       htmlFilename = 'index-staging.html'
     }
+    new DuplicatesPlugin({
+      // Emit compilation warning or error? (Default: `false`)
+      emitErrors: false,
+      // Display full duplicates information? (Default: `false`)
+      verbose: false,
+    })
   }
   if (env.localSSL || process.env.SOAPBUBBLE_LOCAL_SSL) {
     Object.assign(appConfig, {
@@ -126,7 +133,6 @@ module.exports = env => {
       app: './client/js/app.jsx',
       browser: './client/js/browser.js',
       vendor: [
-        '@soapbubble/style/dist/soapbubble.css',
         'babel-polyfill',
         'axios',
         'bluebird',
@@ -235,24 +241,7 @@ module.exports = env => {
             },
           },
         },
-        {
-          test: /\.css$/,
-          include: [
-            /@soapbubble\/style\/dist\/soapbubble.css/,
-            /packages\/style\/dist\/soapbubble.css/,
-          ],
-          use: [
-            {
-              loader: MiniCssExtractPlugin.loader,
-            },
-            {
-              loader: 'css-loader',
-            },
-            {
-              loader: 'postcss-loader',
-            },
-          ],
-        },
+
         {
           test: /\.css$/,
           include: [/@soapbubble/].concat(dirSharedComponents),
@@ -279,10 +268,19 @@ module.exports = env => {
     },
     plugins: [
       new CleanWebpackPlugin(),
-      new MiniCssExtractPlugin({
-        filename: '[id].[contenthash].css',
-        disable: !isProduction,
+      new DuplicatesPlugin({
+        // Emit compilation warning or error? (Default: `false`)
+        emitErrors: true,
+        // Display full duplicates information? (Default: `false`)
+        verbose: true,
       }),
+      ...(isProduction
+        ? [
+            new MiniCssExtractPlugin({
+              filename: '[id].[contenthash].css',
+            }),
+          ]
+        : []),
       new HtmlWebpackPlugin({
         title: 'Morpheus',
         filename: htmlFilename,

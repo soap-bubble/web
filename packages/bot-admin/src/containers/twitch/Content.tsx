@@ -1,4 +1,4 @@
-import useTwitchConfig from '@branes/www/hooks/useTwitchConfig'
+import useTwitchConfig from 'bot-admin/hooks/useTwitchConfig'
 import React, { FunctionComponent, useCallback } from 'react'
 import TwitchAuth from './TwitchAuth'
 

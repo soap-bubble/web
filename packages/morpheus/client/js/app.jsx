@@ -24,12 +24,14 @@ import {
   selectors as gamestateSelectors,
 } from 'morpheus/gamestate'
 import { data as titleSceneData, actions as titleActions } from 'morpheus/title'
-import { bySceneId } from 'service/scene'
 import { Game, actions as gameActions } from 'morpheus/game'
 import socketPromise from 'utils/socket'
 import storeFactory from './store'
-import '../css/main.scss'
+import '../css/main.css'
 
+
+window.React2 = require('react');
+console.log('If false then react is broken:', window.React1 === window.React2);
 const qp = qs.parse(location.search)
 const store = storeFactory()
 
@@ -71,13 +73,14 @@ window.onload = async () => {
     // await store.dispatch(gamestateActions.fetchInitial())
     const root = document.getElementById('root')
     window.addEventListener('resize', resizeToWindow)
-    render(
+    setTimeout(() => render(
       <Provider store={store}>
         {/* <NewGame sceneData={sceneData} /> */}
         <Game className="game" />
       </Provider>,
       root,
-    )
+    ))
+    
   }
 
   if (qp.channel) {
@@ -127,15 +130,16 @@ window.onload = async () => {
       }
     }
   }
-  firebase.auth().onAuthStateChanged(
-    once(async user => {
-      store.dispatch(gameActions.loggedIn(user))
+  
+  firebase.default.auth().onAuthStateChanged(
+    once(async (user) => {
+      store.dispatch(gameActions.loggedIn(user));
       init()
     }),
   )
 }
 
-if (window.hasOwnProperty('cordova')) {
+if (Object.prototype.hasOwnProperty.call(window, 'cordova')) {
   document.addEventListener('pause', () => {
     const scenes = sceneSelectors.loadedScenes(store.getState())
 

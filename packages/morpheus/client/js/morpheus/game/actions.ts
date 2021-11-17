@@ -2,6 +2,7 @@ import { from, of } from 'rxjs'
 import { map, mergeMap, filter, catchError } from 'rxjs/operators'
 import storage from 'local-storage'
 import createEpic from 'utils/createEpic'
+
 import {
   actions as sceneActions,
   selectors as sceneSelectors,
@@ -344,9 +345,9 @@ export const loginEpic = createEpic(action$ =>
     filter(action => action.type === LOGIN_START),
     mergeMap(() =>
       from(
-        firebase
+        firebase.default
           .auth()
-          .signInWithPopup(new firebase.auth.GoogleAuthProvider())
+          .signInWithPopup(new firebase.default.auth.GoogleAuthProvider())
           .then(({ user }: any) => user)
       )
     ),
@@ -363,7 +364,7 @@ export const loginEpic = createEpic(action$ =>
 export const logoutEpic = createEpic(action$ =>
   action$.pipe(
     filter(action => action.type === LOGOUT_START),
-    mergeMap(() => from(firebase.auth().signOut())),
+    mergeMap(() => from(firebase.default.auth().signOut())),
     map(user => ({ type: LOGGED_IN, payload: user }))
   )
 )
@@ -373,10 +374,10 @@ export const newSaveGameEpic = createEpic((action$, state$) =>
     filter(({ type }) => type === CLOUD_SAVE_NEW),
     mergeMap(async () => {
       try {
-        const user = firebase.auth().currentUser
+        const user = firebase.default.auth().currentUser
         if (user) {
           const { uid } = user
-          const db = firebase.firestore()
+          const db = firebase.default.firestore()
           const saveRef = db.collection('saves')
           const saveData = {
             gamestates:
@@ -384,8 +385,8 @@ export const newSaveGameEpic = createEpic((action$, state$) =>
             currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
             previousSceneId:
               sceneSelectors.previousSceneId(state$.value) || null,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+            createdAt: firebase.default.firestore.FieldValue.serverTimestamp(),
+            updatedAt: firebase.default.firestore.FieldValue.serverTimestamp(),
           }
 
           const response = await saveRef.add({
@@ -419,14 +420,14 @@ export const cloudSaveEpic = createEpic((action$, state$) =>
     filter(({ type }) => type === CLOUD_SAVE),
     mergeMap(async () => {
       try {
-        const db = firebase.firestore()
+        const db = firebase.default.firestore()
         const id = gameSelectors.saveId(state$.value)
         const saveRef = db.collection('saves').doc(id)
         const saveData = {
           gamestates: gamestateSelectors.gamestates(state$.value).toJS() || [],
           currentSceneId: sceneSelectors.currentSceneId(state$.value) || null,
           previousSceneId: sceneSelectors.previousSceneId(state$.value) || null,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+          updatedAt: firebase.default.firestore.FieldValue.serverTimestamp(),
         }
         await saveRef.set(saveData, { merge: true })
         return {
@@ -448,10 +449,10 @@ export const loadSavesEpic = createEpic((action$, state$) =>
     filter(({ type }) => type === SAVE_LOAD),
     mergeMap(async () => {
       try {
-        const user = firebase.auth().currentUser
+        const user = firebase.default.auth().currentUser
         if (user) {
           const { uid } = user
-          const db = firebase.firestore()
+          const db = firebase.default.firestore()
           const saveDocs = await db
             .collection('saves')
             .where(`roles.${uid}`, '==', 'owner')
@@ -486,7 +487,7 @@ export const loadGameEpic = createEpic((action$, state$) =>
     filter(({ type }) => type === CLOUD_LOAD),
     mergeMap(async ({ payload: saveId }) => {
       try {
-        const db = firebase.firestore()
+        const db = firebase.default.firestore()
         const saveDoc = await db
           .collection('saves')
           .doc(saveId || gameSelectors.saveId(state$.value))

@@ -6,7 +6,7 @@ import { getStaticProps as a } from 'morpheus/app/Render/getStaticProps';
 
 export async function getStaticPaths() {
   return {
-    paths: scenes.map(scene => `/render/{scene}`),
+    paths: scenes.map(scene => `/render/${scene}`),
     fallback: true
   };
 }

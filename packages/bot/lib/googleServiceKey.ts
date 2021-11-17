@@ -9,6 +9,7 @@ if (
   !process.env.GOOGLE_APPLICATION_CREDENTIALS &&
   process.env.ROOT_SERVICE_ACCOUNT
 ) {
+  console.log(process.env.ROOT_SERVICE_ACCOUNT)
   try {
     const { project_id: projectId, client_email, private_key } = JSON.parse(
       process.env.DEPLOYMENT === 'cluster'

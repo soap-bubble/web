@@ -43,7 +43,7 @@ if (Number.isNaN(migrationIndex)) {
 }
 
 const serviceAccount = JSON.parse(
-  readFileSync(resolve(join(__dirname, '../serviceAccount.json')), 'utf8')
+  readFileSync(resolve(join(__dirname, '../../serviceAccount.json')), 'utf8')
 )
 initializeApp({
   credential: credential.cert(serviceAccount),

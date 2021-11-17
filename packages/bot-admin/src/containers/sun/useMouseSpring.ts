@@ -4,7 +4,7 @@ import { useThree } from 'react-three-fiber'
 import {
   visibleWidthAtZDepth,
   visibleHeightAtZDepth,
-} from '@branes/www/webgl/transforms'
+} from 'bot-admin/webgl/transforms'
 import { PerspectiveCamera } from 'three'
 
 export default (start: [number, number, number]) => {

@@ -1,7 +1,5 @@
 import { IncomingMessage, ServerResponse } from 'http'
-import { v4 as uuid } from 'uuid'
-import { Firestore } from '@google-cloud/firestore'
-import { initializeApp, auth, credential, firestore, app } from 'firebase-admin'
+import { initializeApp, auth, credential, app } from 'firebase-admin'
 import axios from 'axios'
 import qs from 'qs'
 import {
@@ -27,8 +25,7 @@ const init = (() => {
 })()
 
 export default async (req: IncomingMessage, res: ServerResponse) => {
-  const app = init()
-  const db = firestore()
+  init()
   if (req.url) {
     const { code } = qs.parse(req.url.split('?')[1])
     const query = qs.stringify({

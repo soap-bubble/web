@@ -1,5 +1,5 @@
 import { DoubleSide } from 'three'
-import { Shader } from '@branes/www/webgl/types'
+import { Shader } from 'bot-admin/webgl/types'
 
 const beacon: Shader = {
   uniforms: {
@@ -7,7 +7,7 @@ const beacon: Shader = {
     border: { value: 0.05 },
     outterRadius: { value: 0.4 },
     color: { value: [0.0, 0.48, 1.0, 0.75] },
-    center: { value: [0.5, 0.5] }
+    center: { value: [0.5, 0.5] },
   },
   side: DoubleSide,
   transparent: true,
@@ -41,7 +41,7 @@ const beacon: Shader = {
     
       gl_FragColor = mix(color, bkg_color,t);
     }
-`
+`,
 }
 
 export default beacon

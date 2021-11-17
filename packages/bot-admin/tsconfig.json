@@ -3,7 +3,7 @@
     "target": "es5",
     "baseUrl": ".",
     "paths": {
-      "@branes/www/*": ["./src/*"],
+      "bot-admin/*": ["./src/*"],
       "*": ["__INVALID__/*"]
     },
     "lib": ["dom", "dom.iterable", "esnext"],

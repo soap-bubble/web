@@ -1,3 +1,3 @@
-import Page from '@branes/www/containers/home'
+import Page from 'bot-admin/containers/home'
 
 export default Page

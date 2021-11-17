@@ -1,3 +1,3 @@
-import Twitch from '@branes/www/containers/twitch'
+import Twitch from 'bot-admin/containers/twitch'
 
 export default Twitch

@@ -3,7 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
   const { scene } = req.query;
-  const renderUrl = `${process.env.WWW_HOST}/render/${scene}/`;
+  const renderUrl = `http://localhost:3000/render/${scene}/`;
 
   try {
     const browser = await puppeteer.launch();

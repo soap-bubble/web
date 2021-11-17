@@ -13,10 +13,11 @@
     "prime": "ts-node src/prime.ts"
   },
   "engines": {
-    "node": "12"
+    "node": "16"
   },
   "main": "lib/index.js",
   "dependencies": {
+    "@google-cloud/firestore": "^4.12.2",
     "bottleneck": "^2.19.5",
     "firebase-admin": "^9.4.2",
     "firebase-functions": "^3.13.1",
@@ -30,6 +31,8 @@
     "@types/minimist": "^1.2.1",
     "@types/node-cleanup": "^2.1.1",
     "@types/ramda": "^0.26.21",
+    "@types/socket.io-parser": "^3.0.0",
+    "@types/vfile-message": "^2.0.0",
     "minimist": "^1.2.5",
     "ts-node": "^9.1.1",
     "tslint": "^5.12.0",

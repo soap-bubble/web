@@ -6,7 +6,6 @@ import React, {
   FunctionComponent,
   useCallback,
 } from 'react'
-import { createPortal } from 'react-dom'
 import { Dispatch } from 'redux'
 import { cloneDeep, map } from 'lodash'
 import { Canvas, PointerEvent, useThree, useFrame } from 'react-three-fiber'

@@ -16,7 +16,7 @@
       "module-resolver",
       {
         "alias": {
-          "@branes/www": "./src"
+          "bot-admin": "./src"
         }
       }
     ]

@@ -5,8 +5,7 @@ import * as gameSelectors from '../selectors'
 import { cloudLoad } from '../actions'
 import { closeSave } from '../commands'
 
-import './MenuList.scss'
-
+import './MenuList.css'
 
 function mapStateToProps(state: any) {
   const savesAreLoading = gameSelectors.savesAreLoading(state)
@@ -39,7 +38,4 @@ function mapDispatchToPros(dispatch: Dispatch) {
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToPros,
-)(SaveList)
+export default connect(mapStateToProps, mapDispatchToPros)(SaveList)

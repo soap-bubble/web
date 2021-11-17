@@ -2,7 +2,7 @@ import * as fs from 'fs'
 
 const opts: {
   projectId?: string
-  credentials?: { client_email: string; provate_key: string }
+  credentials?: { client_email: string; private_key: string }
 } = {}
 
 if (
@@ -30,7 +30,7 @@ export const credentials = opts.projectId
   ? {
       projectId: opts.projectId,
       clientEmail: opts.credentials?.client_email,
-      privateKey: opts.credentials?.provate_key,
+      privateKey: opts.credentials?.private_key,
     }
   : undefined
 export default opts

@@ -1,4 +1,4 @@
-import emojiDataRow from '@branes/www/emojis/core.json'
+import emojiDataRow from 'bot-admin/emojis/core.json'
 
 interface Emoji {
   id: number

@@ -32,6 +32,14 @@ resource "google_dns_record_set" "urbit_soapbubble" {
   rrdatas = [var.ingress-ip]
   ttl          = 86400
 }
+resource "google_dns_record_set" "urbit_moon_1_soapbubble" {
+  provider = google-beta
+  managed_zone = module.cloud-dns.name
+  name = "larnev-hobled-lidled-mordev.soapbubble.online."
+  type = "A"
+  rrdatas = [var.ingress-ip]
+  ttl          = 86400
+}
 resource "google_dns_record_set" "next_soapbubble" {
   provider = google-beta
   managed_zone = module.cloud-dns.name

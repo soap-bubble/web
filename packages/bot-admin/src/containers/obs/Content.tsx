@@ -8,7 +8,7 @@ import React, {
 import EmojiWall from './EmojiWall'
 import io from 'socket.io-client'
 import { easeCubicOut } from 'd3-ease'
-import useTransitionList from '@branes/www/hooks/useTransitionList'
+import useTransitionList from 'bot-admin/hooks/useTransitionList'
 import { useRouter } from 'next/router'
 import queue from './queue'
 const WIDTH = 1800

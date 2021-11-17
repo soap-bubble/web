@@ -3,14 +3,12 @@ image:
 command: 
   - bash 
   - -c 
-  - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
+  - "echo \"$GOOGLE_SERVICE_ACCOUNT\" > ~/googleKey && GOOGLE_APPLICATION_CREDENTIALS=~/googleKey yarn start"
 env:
   - name: GOOGLE_APPLICATION_CREDENTIALS
     value: /secret/key.json
   - name: GOOGLE_SERVICE_ACCOUNT
-    value: berglas://soapbubble-dev-secrets/google_application_credentials?destination=/googleKey
-  - name: OGMETA_URL
-    value: https://next.soapbubble.online
+    value: berglas://soapbubble-dev-secrets/www-google-key
   - name: WWW_HOST
     value: https://next.soapbubble.online
   - name: ASSET_HOST
@@ -18,10 +16,10 @@ env:
 resources:
   limits:
     cpu: 250m
-    memory: 256Mi
+    memory: 1256Mi
   requests:
     cpu: 250m
-    memory: 256Mi
+    memory: 1256Mi
 imagePullSecrets:
   - name: "soapbubble-dev"
 ingress:

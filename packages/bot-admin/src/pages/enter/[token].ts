@@ -1,3 +1,3 @@
-import Enter from '@branes/www/containers/enter'
+import Enter from 'bot-admin/containers/enter'
 
 export default Enter

@@ -110,22 +110,22 @@ export default function useRenderables(
       matchActive
     )
     const enteringActiveMovieCasts: MovieSpecialCast[] = enteringScene
-      ? (enteringScene.casts.filter(matchSpecialMovies as Matcher<
-          Cast
-        >) as MovieSpecialCast[])
+      ? (enteringScene.casts.filter(
+          matchSpecialMovies as Matcher<Cast>
+        ) as MovieSpecialCast[])
       : []
     const exitingActiveMovieCasts: MovieSpecialCast[] = exitingScene
-      ? (exitingScene.casts.filter(matchSpecialMovies as Matcher<
-          Cast
-        >) as MovieSpecialCast[])
+      ? (exitingScene.casts.filter(
+          matchSpecialMovies as Matcher<Cast>
+        ) as MovieSpecialCast[])
       : []
 
     const stageActiveMovieCasts = flatten<MovieSpecialCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(matchSpecialMovies as Matcher<
-            Cast
-          >) as MovieSpecialCast[]
+          scene.casts.filter(
+            matchSpecialMovies as Matcher<Cast>
+          ) as MovieSpecialCast[]
       )
     )
 
@@ -134,23 +134,23 @@ export default function useRenderables(
       matchActive
     )
     const enterActiveControlledCasts: ControlledMovieCast[] = enteringScene
-      ? (enteringScene.casts.filter(matchControlledMovies as Matcher<
-          Cast
-        >) as ControlledMovieCast[])
+      ? (enteringScene.casts.filter(
+          matchControlledMovies as Matcher<Cast>
+        ) as ControlledMovieCast[])
       : []
 
     const exitingActiveControlledCasts: ControlledMovieCast[] = exitingScene
-      ? (exitingScene.casts.filter(matchControlledMovies as Matcher<
-          Cast
-        >) as ControlledMovieCast[])
+      ? (exitingScene.casts.filter(
+          matchControlledMovies as Matcher<Cast>
+        ) as ControlledMovieCast[])
       : []
 
     const stageActiveControlledCasts = flatten<ControlledMovieCast>(
       stageScenes.map(
         scene =>
-          scene.casts.filter(matchControlledMovies as Matcher<
-            Cast
-          >) as ControlledMovieCast[]
+          scene.casts.filter(
+            matchControlledMovies as Matcher<Cast>
+          ) as ControlledMovieCast[]
       )
     )
 
@@ -176,27 +176,21 @@ export default function useRenderables(
     ) as MovieCast[]).concat(controlledCasts)
     const videoCasts = movieSpecialCasts.filter(isMovie)
     const enteringRenderables = [] as Renderable[]
-    const images = movieSpecialCasts.reduce(
-      (memo, curr) => {
-        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
-        if (loaded) {
-          memo.push(loaded)
-        }
-        return memo
-      },
-      [] as ImageDrawable<MovieCast>[]
-    ) as ImageDrawable<MovieSpecialCast>[]
+    const images = movieSpecialCasts.reduce((memo, curr) => {
+      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+      if (loaded) {
+        memo.push(loaded)
+      }
+      return memo
+    }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<MovieSpecialCast>[]
 
-    const controlledCastsDrawable = controlledCasts.reduce(
-      (memo, curr) => {
-        const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
-        if (loaded) {
-          memo.push(loaded)
-        }
-        return memo
-      },
-      [] as ImageDrawable<MovieCast>[]
-    ) as ImageDrawable<ControlledMovieCast>[]
+    const controlledCastsDrawable = controlledCasts.reduce((memo, curr) => {
+      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+      if (loaded) {
+        memo.push(loaded)
+      }
+      return memo
+    }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<ControlledMovieCast>[]
     const stageRenderables = [
       ...generateRenderables([
         ...generateMovieCastRenderables({
@@ -220,13 +214,13 @@ export default function useRenderables(
     ]
     const exitingRenderables = [] as Renderable[]
 
-    logger.info({
-      imageCasts,
-      videoCasts,
-      enteringRenderables: describeRenderables(enteringRenderables),
-      stageRenderables: describeRenderables(stageRenderables),
-      exitingRenderables: describeRenderables(exitingRenderables),
-    })
+    // logger.info({
+    //   imageCasts,
+    //   videoCasts,
+    //   enteringRenderables: describeRenderables(enteringRenderables),
+    //   stageRenderables: describeRenderables(stageRenderables),
+    //   exitingRenderables: describeRenderables(exitingRenderables),
+    // })
     return [
       imageCasts,
       videoCasts,

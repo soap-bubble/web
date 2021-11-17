@@ -243,26 +243,26 @@ export const handleEventFactory = () => {
           self.lastWasMouseUpped !== wasMouseUpped ||
           self.lastWasMouseMoved !== wasMouseMoved)
       ) {
-        logger.debug({
-          currentScene,
-          hotspots,
-          currentPosition,
-          startingPosition,
-          nowInHotspots,
-          alwaysExecuteHotspots,
-          mouseLeavingHotspots,
-          mouseEnteringHotspots,
-          mouseUpHotspots,
-          mouseDownHotspots,
-          mouseDragHotspots,
-          clickableHotspots,
-          mouseNoneHotspots,
-          isClick,
-          isMouseDown,
-          wasMouseMoved,
-          wasMouseDowned,
-          wasMouseUpped,
-        })
+        // logger.debug({
+        //   currentScene,
+        //   hotspots,
+        //   currentPosition,
+        //   startingPosition,
+        //   nowInHotspots,
+        //   alwaysExecuteHotspots,
+        //   mouseLeavingHotspots,
+        //   mouseEnteringHotspots,
+        //   mouseUpHotspots,
+        //   mouseDownHotspots,
+        //   mouseDragHotspots,
+        //   clickableHotspots,
+        //   mouseNoneHotspots,
+        //   isClick,
+        //   isMouseDown,
+        //   wasMouseMoved,
+        //   wasMouseDowned,
+        //   wasMouseUpped,
+        // })
       }
 
       self.alwaysExecuteHotspots = alwaysExecuteHotspots

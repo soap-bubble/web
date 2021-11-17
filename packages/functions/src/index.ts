@@ -1,45 +1,52 @@
-import { credential, initializeApp } from 'firebase-admin'
-import { config, https } from 'firebase-functions'
-import fetchScene from './scene'
-import fetchGamestates from './gamestates'
-import logger from './logger'
+import { credential, initializeApp } from "firebase-admin";
+import { config, https } from "firebase-functions";
+import fetchScene from "./scene";
+import fetchGamestates from "./gamestates";
+import logger from "./logger";
 
-if (process.env.NODE_ENV === 'development') {
-  const serviceAccount = require('../serviceAccount.json')
+if (process.env.NODE_ENV === "development") {
+  const serviceAccount = require("../../serviceAccount.json");
   initializeApp({
     credential: credential.cert(serviceAccount),
-    databaseURL: 'https://soapbubble-dev.firebaseio.com',
-  })
+    databaseURL: "https://soapbubble-dev.firebaseio.com",
+  });
 } else {
-  initializeApp(config().firebase)
+  initializeApp(config().firebase);
 }
 
 export const scene = https.onRequest(async (req, res) => {
   try {
-    const sceneId = Number(req.query.id)
+    const sceneId = Number(req.query.id);
     if (sceneId) {
-      const scene = await fetchScene(sceneId)
+      const scene = await fetchScene(sceneId);
       if (scene) {
-        return res.status(200).send(scene)
+        res.status(200).send(scene);
+        return;
       }
-      return res.status(404).send('NOT FOUND')
+      res.status(404).send("NOT FOUND");
+      return;
     }
-    return res.status(400).send('ERROR')
+    res.status(400).send("ERROR");
+    return;
   } catch (error) {
-    logger.error(`Scene error`, error)
-    return res.status(500).send('ERROR')
+    logger.error(`Scene error`, error);
+    res.status(500).send("ERROR");
+    return;
   }
-})
+});
 
 export const gamestates = https.onRequest(async (req, res) => {
   try {
-    const gamestates = await fetchGamestates()
+    const gamestates = await fetchGamestates();
     if (gamestates) {
-      return res.status(200).send(gamestates)
+      res.status(200).send(gamestates);
+      return;
     }
-    return res.status(404).send('NOT FOUND')
+    res.status(404).send("NOT FOUND");
+    return;
   } catch (error) {
-    logger.error('Gamestate error', error)
-    return res.status(500).send('ERROR')
+    logger.error("Gamestate error", error);
+    res.status(500).send("ERROR");
+    return;
   }
-})
+});

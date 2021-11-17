@@ -1,6 +1,6 @@
 import React from 'react';
 import MenuList from '../containers/MenuList';
-import './Modal.scss';
+import './Modal.css';
 
 const Modal = () => (
   <div className="container">

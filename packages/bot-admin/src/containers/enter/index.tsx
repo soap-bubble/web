@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import firebase from 'firebase'
 import { NextPage } from 'next'
 import Head from 'next/head'
 import { useRouter } from 'next/router'
@@ -8,7 +9,7 @@ const Page: NextPage = () => {
   useEffect(() => {
     if (query && query.token) {
       localStorage.setItem('token', query.token as string)
-      global.firebase
+      firebase
         .auth()
         .signInWithCustomToken(query.token as string)
         .then(response => {

@@ -1,5 +1,6 @@
 import useTwitchConfig from 'bot-admin/hooks/useTwitchConfig'
 import React, { FunctionComponent, useCallback, useEffect } from 'react'
+import firebase from 'firebase'
 import TwitchAuth from './TwitchAuth'
 
 const Content: FunctionComponent = () => {
@@ -7,7 +8,7 @@ const Content: FunctionComponent = () => {
   useEffect(() => {
     const token = localStorage.getItem('token')
     if (typeof token === 'string') {
-      global.firebase
+      firebase
         .app()
         .auth()
         .signInWithCustomToken(token)

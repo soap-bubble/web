@@ -251,7 +251,8 @@ const definition = {
             username: twitchUserName,
             password: `oauth:${token}`,
           },
-          channels: activeChannels.map(({ channel: name }) => name),
+          channels: ['captemulation'],
+          // channels: activeChannels.map(({ channel: name }) => name),
         }
         client = tmi.client(tmiOptions)
 

@@ -21,8 +21,8 @@ bot-backend:
     - bash 
     - -c 
     - "GOOGLE_APPLICATION_CREDENTIALS=/googleKey yarn start"
-  saveChannelNames: []
-    # - "captemulation"
+  saveChannelNames: 
+    - "captemulation"
     # - "sweet_anita"
     # - "feliciaday"
     # - "auronplay"

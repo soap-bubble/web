@@ -1,7 +1,0 @@
-.next
-node_modules
-*.test.*
-public/GameDB
-Dockerfile
-Dockerfile.dev
-.env.local

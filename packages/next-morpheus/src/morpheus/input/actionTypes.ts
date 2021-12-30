@@ -1,0 +1,5 @@
+export const DISABLE_CONTROL = 'INPUT_DISABLE_CONTROL';
+export const ENABLE_CONTROL = 'INPUT_ENABLE_CONTROL';
+export const KEY_UP = 'INPUT_KEY_UP';
+export const KEY_DOWN = 'INPUT_KEY_DOWN';
+export const CURSOR_SET_POS = 'INPUT_CURSOR_SET_POS';

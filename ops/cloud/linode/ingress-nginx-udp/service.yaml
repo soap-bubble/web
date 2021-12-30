@@ -1,0 +1,17 @@
+    apiVersion: v1
+    kind: Service
+    metadata:
+      name: ingress-nginx-udp-controller
+      namespace: ingress-nginx
+    spec:
+      type: LoadBalancer
+      externalTrafficPolicy: Local
+      ports:
+        - name: udp
+          port: 8333
+          protocol: UDP
+          targetPort: 8333
+      selector:
+        app.kubernetes.io/name: ingress-nginx
+        app.kubernetes.io/instance: ingress-nginx
+        app.kubernetes.io/component: udp-controller

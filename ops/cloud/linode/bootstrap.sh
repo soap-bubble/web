@@ -12,16 +12,19 @@ rm kubeconfig new_config
 
 # Install ingress nginx controller for ingress
 echo "Installing ingress-nginx"
-helm3 repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
 kubectl create ns ingress-nginx &> /dev/null || true
-helm3 upgrade --install ingress-nginx ingress-nginx/ingress-nginx --wait --set controller.publishService.enabled=true --namespace ingress-nginx
+helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx --wait --set controller.publishService.enabled=true --namespace ingress-nginx
+
+# Install another ingress nginx controller and load balancer for UDP (bitcoin node)
+# kubectl apply -f ingress-nginx-udp
 
 # # Install Cert Manager for Let's Encrypt certs
 echo "Installing cert manager"
 cd cert-manager
 kubectl create ns cert-manager &> /dev/null || true
-helm3 repo add jetstack https://charts.jetstack.io
-helm3 upgrade --install cert-manager jetstack/cert-manager --version v1.3.1 --namespace cert-manager --set installCRDs=true
+helm repo add jetstack https://charts.jetstack.io
+helm upgrade --install cert-manager jetstack/cert-manager --version v1.3.1 --namespace cert-manager --set installCRDs=true
 cd ..
 
 # Create a dummy deploy to create an ingress and get an external IP
@@ -64,8 +67,8 @@ cd ../linode
 echo "Installing docker registry"
 cd docker-registry
 kubectl create ns docker-registry &> /dev/null || true
-helm3 repo add twuni https://helm.twun.io 
-helm3 upgrade --install docker-registry twuni/docker-registry --values values.yaml --namespace docker-registry \
+helm repo add twuni https://helm.twun.io 
+helm upgrade --install docker-registry twuni/docker-registry --values values.yaml --namespace docker-registry \
   --set secrets.htpasswd=$REGISTRY_HTPASSWD \
   --set secrets.haSharedSecret=$REGISTRY_HASHAREDSECRET
 kubectl create ns soapbubble &> /dev/null || true
@@ -79,9 +82,9 @@ cd ..
 # Install kube-prometheus-stack
 echo "Installing prometheus stack"
 cd prometheus
-helm3 repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm3 repo add stable https://charts.helm.sh/stable
-helm3 upgrade --create-namespace --install --namespace metrics --values values.yaml prometheus ../../../kubernetes/charts/external/kube-prometheus-stack/0.0.1
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo add stable https://charts.helm.sh/stable
+helm upgrade --create-namespace --install --namespace metrics --values values.yaml prometheus ../../../kubernetes/charts/external/kube-prometheus-stack/0.0.1
 cd ..
 
 # Put at the end because of needing to wait for some cert-manager stuff to be ready...

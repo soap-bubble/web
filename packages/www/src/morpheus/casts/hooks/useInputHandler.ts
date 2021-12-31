@@ -353,7 +353,7 @@ export default function UseInputHandler(
   useEffect(() => {
     let newMouseDown = mouseDown
     const isClick =
-      lastUpdate.wasPointerUpped && Date.now() - lastMouseDown < 800
+      lastUpdate.wasPointerUpped && (Date.now() - lastMouseDown < 400)
     if (lastUpdate.wasPointerUpped) {
       newMouseDown = false
     }
@@ -369,6 +369,8 @@ export default function UseInputHandler(
     setMouseDown(newMouseDown)
     setIsClick(isClick)
   }, [
+    mouseDown,
+    lastMouseDown,
     lastUpdate,
     gameTop,
     gameLeft,

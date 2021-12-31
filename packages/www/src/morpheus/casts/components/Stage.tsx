@@ -12,6 +12,7 @@ import { composePointer } from 'morpheus/hotspot/eventInterface';
 import { forMorpheusType, isPano } from '../matchers';
 import { Camera, Object3D, PerspectiveCamera } from 'three';
 import { Observable, Subscription } from 'rxjs';
+import useSize from 'morpheus/app/hooks/useSize';
 
 interface StageProps {
   dispatch: Dispatch;
@@ -37,15 +38,17 @@ const Stage: FunctionComponent<StageProps> = ({
   exitingScene,
   gamestates,
   volume,
-  top,
-  left,
-  width,
-  height,
 }) => {
   useEffect(() => {
     console.log('Stage', { enteringScene, stageScenes, exitingScene })
   }, [enteringScene, stageScenes, exitingScene])
 
+  const {
+    width,
+    height,
+    x: left,
+    y: top,
+  } = useSize()
   const isPanoScene = useMemo(() => {
     return stageScenes[0] && isPano(stageScenes[0]);
   }, [stageScenes[0]]);

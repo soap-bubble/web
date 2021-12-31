@@ -135,10 +135,10 @@ function reducer(state: State, action: Actions): State {
         transitioning: false,
         entered: false,
         scenes: [
+          action.payload,
           ...state.scenes.filter(
             ({ sceneId }) => sceneId !== action.payload.sceneId,
           ),
-          action.payload,
         ],
       };
     case LOADED:
@@ -149,6 +149,7 @@ function reducer(state: State, action: Actions): State {
         loading: false,
         transitioning: true,
         entered: false,
+        scenes: [action.payload, ...state.scenes],
       };
     case ENTERED:
       return {
@@ -160,13 +161,13 @@ function reducer(state: State, action: Actions): State {
         entered: true,
       };
     case CULL:
-      // Remove the scene and all other scenes before the payload from the scene list
+      // Remove the scene and all other scenes after the payload from the scene list
       const culledScenes: Scene[] = [];
       let culled = false;
       for (const scene of state.scenes) {
         if (scene.sceneId === action.payload.sceneId) {
           culled = true;
-        } else if (culled) {
+        } else if (!culled) {
           culledScenes.push(scene);
         }
       }

@@ -25,6 +25,7 @@ import { and } from 'utils/matchers';
 import { PANO_OFFSET, PANO_CANVAS_WIDTH } from '../../constants';
 import useCastRefNoticer, { CastRef } from '../hooks/useCastRefNoticer';
 import { VideoController } from './Videos';
+import useSize from 'morpheus/app/hooks/useSize';
 
 enum SceneType {
   VIDEO,
@@ -66,10 +67,6 @@ interface GlStageProps {
   setPanoObject?: (o: Object3D | undefined) => void;
   rotation: { x: number; y: number; offsetX: number };
   volume: number;
-  top: number;
-  left: number;
-  width: number;
-  height: number;
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
@@ -77,11 +74,7 @@ function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
 }
 
 const WebGlScene = ({
-  width,
   volume,
-  height,
-  top,
-  left,
   rotation,
   gamestates,
   setCamera,
@@ -184,7 +177,12 @@ const WebGl: FunctionComponent<GlStageProps> = (props) => {
     VideoController,
     PanoAnim
   >()
-
+  const {
+    width,
+    height,
+    x: left,
+    y: top,
+  } = useSize()
   return (
     <Canvas
       camera={{
@@ -197,10 +195,10 @@ const WebGl: FunctionComponent<GlStageProps> = (props) => {
       style={{
         cursor: 'none',
         position: 'absolute',
-        width: `${props.width}px`,
-        height: `${props.height}px`,
-        left: `${props.left}px`,
-        top: `${props.top}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        left: `${left}px`,
+        top: `${top}px`,
       }}
     >
       <WebGlScene {...props} />

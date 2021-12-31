@@ -50,7 +50,7 @@ function createObject({ uniforms, position, aspectRatio }) {
   return obj;
 }
 
-export default function factory({ canvas: sourceCanvas }) {
+export default function factory({ canvas: sourceCanvas, fetchScene }) {
   return (dispatch, getState) => {
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
@@ -192,6 +192,7 @@ export default function factory({ canvas: sourceCanvas }) {
           window.document.removeEventListener("touchmove", handleTouchMove);
           window.document.removeEventListener("touchend", handleMouseUp);
           dispatch(titleDone());
+          fetchScene(2000)
         };
 
         video.addEventListener("ended", function videoEnded() {

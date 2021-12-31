@@ -1,9 +1,8 @@
-import { Raycaster, Scene } from "three";
+import { Scene } from "three";
 import { createCamera, positionCamera, createRenderer } from "utils/three";
 import renderEvents from "utils/render";
 import { actions as sceneActions } from "morpheus/scene";
 import { actions as gameActions } from "morpheus/game";
-import { titleDimensions } from "./selectors";
 import titleActionsFactory from "./actions.title";
 import buttonActionsFactory from "./actions.buttons";
 import lightActionsFactory from "./actions.lights";
@@ -48,7 +47,7 @@ export function done() {
   };
 }
 
-export function canvasCreated(canvas, width, height, sizeStream) {
+export function canvasCreated(canvas, width, height, sizeStream, fetchScene) {
   return async (dispatch, getState) => {
     if (canvas) {
       const titleActions = dispatch(titleActionsFactory());
@@ -58,6 +57,7 @@ export function canvasCreated(canvas, width, height, sizeStream) {
       const introActions = dispatch(
         introFactory({
           canvas,
+          fetchScene
         })
       );
       const camera = createCamera({ width, height });
@@ -156,8 +156,5 @@ export function canvasCreated(canvas, width, height, sizeStream) {
 export function titleDone() {
   return (dispatch) => {
     dispatch(done());
-    dispatch(sceneActions.startAtScene(2000)).then(() => {
-      dispatch(done());
-    });
   };
 }

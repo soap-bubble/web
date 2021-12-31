@@ -39,7 +39,7 @@ export const sceneLoadComplete: ActionCreator<
 
 export const sceneLoadStarted: ActionCreator<Action> = (
   id: string,
-  fetchPromise: Promise<any>
+  fetchPromise: Promise<any>,
 ) => {
   logger.info('sceneLoadStarted', id);
   return {
@@ -52,16 +52,17 @@ export const sceneLoadStarted: ActionCreator<Action> = (
 export const fetch: ActionCreator<
   ThunkAction<Promise<Scene | null>, any, any, Action>
 > = (sceneId: number) => {
-  return async (dispatch: Dispatch) => {
-    const scene = await serviceFetchScene(sceneId);
-    if (scene) {
-      // scene.casts = menuDecorator(scene.casts)
-      dispatch({
-        type: SCENE_LOAD_COMPLETE,
-        payload: scene,
-      });
-      return scene;
-    }
+  return (dispatch: Dispatch) => {
+    throw new Error('Use the new hook!');
+    // const scene = await serviceFetchScene(sceneId);
+    // if (scene) {
+    //   // scene.casts = menuDecorator(scene.casts)
+    //   dispatch({
+    //     type: SCENE_LOAD_COMPLETE,
+    //     payload: scene,
+    //   });
+    //   return scene;
+    // }
     return null;
   };
 };
@@ -70,6 +71,7 @@ export const fetchScene: ActionCreator<
   ThunkAction<Promise<Scene | null>, any, any, Action>
 > = (id: string) => {
   logger.info('fetchScene', id);
+  throw new Error('Use the new hook!');
   return async (dispatch) => {
     const sceneData = await dispatch(fetch(Number(id)));
     dispatch(sceneLoadComplete(sceneData));
@@ -104,7 +106,7 @@ const doSceneEntering: ActionCreator<
 
     // Check if scene is already in scene stack
     const existingScene = currentScenes.find(
-      (s) => (s && s.sceneId) === scene.sceneId
+      (s) => (s && s.sceneId) === scene.sceneId,
     );
     if (existingScene) {
       const existingSceneIndex = currentScenes.indexOf(existingScene);
@@ -146,11 +148,11 @@ export const runScene: ActionCreator<
     let userIncontrol = false;
     try {
       let currentScenes = sceneSelectors.currentScenesData(
-        getState()
+        getState(),
       ) as Scene[];
       // Check if scene is already in scene stack
       const existingScene = currentScenes.find(
-        (s) => s.sceneId === scene.sceneId
+        (s) => s.sceneId === scene.sceneId,
       );
 
       if (!existingScene) {
@@ -211,7 +213,7 @@ export const goToScene: ActionCreator<
       (currentSceneData && currentSceneData.sceneId === id)
     ) {
       logger.warn(
-        `goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`
+        `goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`,
       );
       return Promise.resolve(currentSceneData);
     }
@@ -227,7 +229,7 @@ export const goToScene: ActionCreator<
             isTransitioning = true;
             logger.info(
               'goToScene:exiting',
-              currentSceneData && currentSceneData.sceneId
+              currentSceneData && currentSceneData.sceneId,
             );
             dispatch({
               type: SCENE_DO_EXITING,
@@ -254,7 +256,7 @@ export const goToScene: ActionCreator<
             (currentSceneData && currentSceneData.sceneId === id)
           ) {
             logger.warn(
-              `goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`
+              `goToScene:isTransitioning=${isTransitioning}:currentSceneData:${currentSceneData.sceneId}`,
             );
             return Promise.resolve(currentSceneData);
           }

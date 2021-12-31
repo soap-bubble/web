@@ -52,7 +52,7 @@ const Game: FC<{
   }
   let content = null;
   if (scenes.length) {
-    if (scenes[0].sceneId === 1) {
+    if (scenes.length === 1 && scenes[0].sceneId === 1) {
       content = <Main />;
     } else {
       content = <Stage stageScenes={scenes} />;

@@ -42,6 +42,10 @@ const Stage: FunctionComponent<StageProps> = ({
   width,
   height,
 }) => {
+  useEffect(() => {
+    console.log('Stage', { enteringScene, stageScenes, exitingScene })
+  }, [enteringScene, stageScenes, exitingScene])
+
   const isPanoScene = useMemo(() => {
     return stageScenes[0] && isPano(stageScenes[0]);
   }, [stageScenes[0]]);

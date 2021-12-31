@@ -9,7 +9,7 @@ import {
 import { useObservable } from 'rxjs-hooks'
 import { Raycaster, Object3D, Camera, Vector2 } from 'three'
 import { useDispatch } from 'react-redux'
-import { each, difference, isUndefined } from 'lodash'
+import { each, difference, isUndefined, noConflict } from 'lodash'
 import {
   actions as castActions,
   selectors as castSelectors,
@@ -422,7 +422,7 @@ export default function UseInputHandler(
       handleHotspot: gamestateActions.handleHotspot,
     }
     eventQueueDispatch(eventQueueActionCreators.push(handleEvent(eventOption)))
-  }, [gameTop, gameLeft, lastUpdate, scene, mouseDown])
+  }, [gameTop, gameLeft, lastUpdate, scene, mouseDown, hotspots, gamestateActions])
 
   /*
    * Handles hotspots in new scenes that need to be always activated

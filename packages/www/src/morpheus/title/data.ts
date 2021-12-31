@@ -1,3 +1,5 @@
+import { Scene } from 'morpheus/casts/types';
+
 export default {
   casts: [
     {
@@ -35,4 +37,6 @@ export default {
   ],
   sceneId: 1,
   sceneType: 8,
-};
+  cdFlags: 0,
+  palette: 0,
+} as Scene;

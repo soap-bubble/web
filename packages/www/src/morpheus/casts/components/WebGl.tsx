@@ -179,7 +179,7 @@ const WebGlScene = ({
 };
 
 const WebGl: FunctionComponent<GlStageProps> = (props) => {
-  const { enteringScene, stageScenes } = props
+  const { enteringScene, stageScenes, exitingScene } = props
   const [availableVideos, onVideoCastRef] = useCastRefNoticer<
     VideoController,
     PanoAnim

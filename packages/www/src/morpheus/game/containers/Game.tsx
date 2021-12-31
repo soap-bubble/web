@@ -7,10 +7,12 @@ import Settings from "./Settings";
 import SaveList from "./SaveList";
 import { Scene } from "morpheus/casts/types";
 import { Main } from "morpheus/title";
+import Stage from "morpheus/casts/containers/Stage";
+import useBootMorpheus from "morpheus/app/hooks/useBootMorpheus";
+import useScene from "morpheus/app/hooks/useScene";
 
 function mapStateToProps(state: any) {
   return {
-    stageScenes: sceneSelectors.currentScenesData(state),
     style: gameSelectors.style(state),
     menuOpen: gameSelectors.menuOpened(state),
     settingsOpen: gameSelectors.settingsOpened(state),
@@ -22,27 +24,22 @@ const Game: FC<{
   id: string;
   className?: string;
   style: CSSProperties;
-  stageScenes: Scene[];
   menuOpen: boolean;
   settingsOpen: boolean;
   saveOpen: boolean;
-}> = ({
-  id,
-  className,
-  style,
-  stageScenes,
-  menuOpen,
-  settingsOpen,
-  saveOpen,
-}: {
-  id: string;
-  className?: string;
-  style: CSSProperties;
-  stageScenes: Scene[];
-  menuOpen: boolean;
-  settingsOpen: boolean;
-  saveOpen: boolean;
-}) => {
+}> = (props) => {
+  const {
+    id,
+    className,
+    style,
+    menuOpen,
+    settingsOpen,
+    saveOpen,
+  } = props
+
+  useBootMorpheus();
+  const { scenes } = useScene()
+  
   const menu = [];
   if (menuOpen) {
     menu.push(<Menu />);
@@ -54,11 +51,11 @@ const Game: FC<{
     menu.push(<SaveList />);
   }
   let content = null;
-  if (stageScenes.length) {
-    if (stageScenes[0].sceneId === 1) {
+  if (scenes.length) {
+    if (scenes[0].sceneId === 1) {
       content = <Main />;
     } else {
-      content = <NewGame stageScenes={stageScenes} />;
+      content = <Stage stageScenes={scenes} />;
     }
   }
   return (

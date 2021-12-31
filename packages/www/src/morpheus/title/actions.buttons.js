@@ -76,7 +76,7 @@ function createButton({ map, bumpMap, uniforms, position }) {
   });
 }
 
-export default function factory() {
+export default function factory(sizeSubject, w, h) {
   return (dispatch, getState) => {
     const raycaster = new Raycaster();
     let cleanUp = () => {};
@@ -86,6 +86,12 @@ export default function factory() {
       exitButton: null,
       contButton: null,
     };
+    let width = w
+    let height = h
+    sizeSubject.subscribe(({ width: w, height: h }) => {
+      width = w
+      height = h
+    })
     const textures = {};
     const selfie = {
       start({ camera, buttonCallback }) {
@@ -202,7 +208,6 @@ export default function factory() {
         }
 
         function hitCheck(object3D) {
-          const { width, height } = titleDimensions(getState());
           // Convert mouse coordinates to x, y clamped between -1 and 1.  Also invert y
           const y = ((height - currentClientY) / height) * 2 - 1;
           const x = ((currentClientX - width) / width) * 2 + 1;
@@ -220,7 +225,7 @@ export default function factory() {
 
         function mouseMoveHandlerForButton(name) {
           const button = objects[name];
-          if (!slideIn[name] && hitCheck(button)) {
+          if (!slideIn[name] && hitCheck(button, width, height)) {
             mouseIn[name] = true;
           } else {
             mouseIn[name] = false;
@@ -229,7 +234,7 @@ export default function factory() {
 
         function mouseDownHandlerForButton(name) {
           const button = objects[name];
-          if (!slideIn[name] && hitCheck(button)) {
+          if (!slideIn[name] && hitCheck(button, width, height)) {
             clickIn[name] = true;
             mouseIn[name] = true;
           } else {
@@ -239,7 +244,7 @@ export default function factory() {
 
         function mouseUpHandlerForButton(name) {
           const button = objects[name];
-          const intersection = hitCheck(button);
+          const intersection = hitCheck(button, width, height);
           if (!slideIn[name] && intersection) {
             if (clickIn[name]) {
               if (buttonActions[name]) {

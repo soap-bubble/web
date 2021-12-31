@@ -48,11 +48,11 @@ export function done() {
   };
 }
 
-export function canvasCreated(canvas) {
+export function canvasCreated(canvas, width, height, sizeStream) {
   return async (dispatch, getState) => {
     if (canvas) {
       const titleActions = dispatch(titleActionsFactory());
-      const buttonsActions = dispatch(buttonActionsFactory());
+      const buttonsActions = dispatch(buttonActionsFactory(sizeStream, width, height));
       const lightsActions = dispatch(lightActionsFactory());
       const backgroundActions = dispatch(backgroundFactory());
       const introActions = dispatch(
@@ -60,13 +60,6 @@ export function canvasCreated(canvas) {
           canvas,
         })
       );
-      dispatch(
-        gameActions.resize({
-          width: window.innerWidth,
-          height: window.innerHeight,
-        })
-      );
-      const { width, height } = titleDimensions(getState());
       const camera = createCamera({ width, height });
       const renderer = createRenderer({
         canvas,
@@ -141,10 +134,12 @@ export function canvasCreated(canvas) {
       lightsActions.start();
       backgroundActions.start();
 
-      const dimensions = titleDimensions(getState());
-      renderer.setSize(dimensions.width, dimensions.height);
-      camera.aspect = dimensions.width / dimensions.height;
-      camera.updateProjectionMatrix();
+
+      sizeStream.subscribe(({ width, height }) => {
+        renderer.setSize(width, height);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      })
 
       dispatch({
         type: SET_RENDER_ELEMENTS,

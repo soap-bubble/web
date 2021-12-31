@@ -5,7 +5,6 @@ import {
 import {
   isLeaving,
   isDone,
-  titleStyle,
 } from '../selectors';
 import Main from '../components/Main';
 
@@ -13,7 +12,6 @@ function mapStateToProps(state) {
   return {
     leaving: isLeaving(state),
     done: isDone(state),
-    style: titleStyle(state),
     volume: gameSelectors.htmlVolume(state),
   };
 }

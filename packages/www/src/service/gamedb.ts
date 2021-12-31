@@ -1,5 +1,5 @@
-import { endsWith } from "lodash";
-import { isIOS } from "../utils/isSafari";
+import { endsWith } from 'lodash';
+import { isIOS } from '../utils/isSafari';
 export const url = process.env.ASSET_HOST;
 
 enum VideoMedia {
@@ -8,14 +8,15 @@ enum VideoMedia {
   png,
   mp3,
   ogg,
+  aac,
 }
 type VideoMediaStrings = keyof typeof VideoMedia;
 
 export function getAssetUrl(assetPath: string, type?: VideoMediaStrings) {
-  const path = assetPath.replace("deck", "Deck");
+  const path = assetPath.replace('deck', 'Deck');
   return `${url}/${path}${
-    type && !endsWith(assetPath, type) ? `.${type}` : ""
-  }`.replace("#", "%23");
+    type && !endsWith(assetPath, type) ? `.${type}` : ''
+  }`.replace('#', '%23');
 }
 
 export function getPanoAnimUrl(assetPath: string) {

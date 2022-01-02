@@ -14,7 +14,7 @@
     "@reduxjs/toolkit": "^1.7.1",
     "@rooks/use-raf": "^4.11.2",
     "@tweenjs/tween.js": "^18.6.4",
-    "axios": "^0.21.1",
+    "axios": "^0.21.2",
     "bluebird": "^3.7.2",
     "browser-bunyan": "^1.6.3",
     "firebase": "^8.6.3",

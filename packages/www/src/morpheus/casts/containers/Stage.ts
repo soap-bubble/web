@@ -5,12 +5,7 @@ import { selectors as gamestateSelectors } from 'morpheus/gamestate';
 import { Gamestates } from 'morpheus/gamestate/isActive';
 import Stage from '../components/Stage';
 
-interface StateProps {
-  volume: number;
-  gamestates: Gamestates;
-}
-
-export default connect<StateProps>((state) => ({
+export default connect((state) => ({
   volume: gameSelectors.htmlVolume(state),
   gamestates: gamestateSelectors.forState(state),
 }))(Stage);

@@ -21,10 +21,6 @@ interface StageProps {
   exitingScene?: Scene;
   gamestates: Gamestates;
   volume: number;
-  top: number;
-  left: number;
-  width: number;
-  height: number;
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {

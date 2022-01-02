@@ -13,14 +13,20 @@ export function inputHandler({
   down,
   up,
 }: {
-  key?: string
-  keys?: string[],
-  down?: (a: any, b: any) => any,
-  up?: (a: any, b: any) => any
+  key?: string;
+  keys?: string[];
+  down?: (a: any, b: any) => any;
+  up?: (a: any, b: any) => any;
 }) {
-  function addKey(k: string, h: { up?: (a: any, b: any) => any; down?: (a: any, b: any) => any}) {
+  function addKey(
+    k: string,
+    h: { up?: (a: any, b: any) => any; down?: (a: any, b: any) => any },
+  ) {
     if (!inputObservables[k]) {
-      inputObservables[k] = [] as { up?: (a: any, b: any) => any; down?: (a: any, b: any) => any}[];
+      inputObservables[k] = [] as {
+        up?: (a: any, b: any) => any;
+        down?: (a: any, b: any) => any;
+      }[];
     }
     inputObservables[k].push(h);
   }
@@ -31,10 +37,12 @@ export function inputHandler({
     });
   }
   if (keys) {
-    keys.forEach(k => addKey(k, {
-      down,
-      up,
-    }));
+    keys.forEach((k) =>
+      addKey(k, {
+        down,
+        up,
+      }),
+    );
   }
 }
 
@@ -55,19 +63,24 @@ export function keyUp(keyCode: string) {
 export function disableControl() {
   return {
     type: DISABLE_CONTROL,
+    payload: undefined,
   };
 }
 
 export function enableControl() {
   return {
     type: ENABLE_CONTROL,
+    payload: undefined,
   };
 }
 
 export function cursorSetPosition({
   top,
   left,
-}: { top: number; left: number}) {
+}: {
+  top: number;
+  left: number;
+}) {
   return {
     type: CURSOR_SET_POS,
     payload: {

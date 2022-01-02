@@ -5,7 +5,20 @@ import { fetch } from 'service/scene';
 import { Scene } from '../../casts/types';
 import createContext from 'utils/createContext';
 
-const FETCHING = 'fetching';
+/*
+ * Manages the fetching of, entering and exiting of scenes.
+ *
+ * The flow of scenes is from an initial unknown state to the loading of the first scene.
+ * Loading additional scenes is an asynchronous process whereby first scene exits, which
+ * could involve an animation, and then the next scene is loaded. After a scene is loaded, there
+ * is a secondary process whereby all assets for the sceen are also loaded and then the scene
+ * can be entered, which again could involve an animation.
+ *
+ */
+
+const EXITING = 'exiting';
+const EXITED = 'exited';
+const FETCH = 'fetch';
 const ERRORED = 'errored';
 const LOADING = 'loading';
 const LOADED = 'loaded';
@@ -13,13 +26,33 @@ const ENTERED = 'enetered';
 const CULL = 'cull';
 
 interface FetchAction {
-  type: typeof FETCHING;
+  type: typeof FETCH;
   payload: number;
 }
 function fetchActionCreator(sceneId: number): FetchAction {
   return {
-    type: FETCHING,
+    type: FETCH,
     payload: sceneId,
+  };
+}
+
+interface ExitingAction {
+  type: typeof EXITING;
+}
+function exitingActionCreator(): ExitingAction {
+  return {
+    type: EXITING,
+  };
+}
+
+interface ExitedAction {
+  type: typeof EXITED;
+  payload: Scene;
+}
+function exitedActionCreator(scene: Scene): ExitedAction {
+  return {
+    type: EXITED,
+    payload: scene,
   };
 }
 
@@ -80,85 +113,87 @@ function cullActionCreator(scene: Scene): CullAction {
 
 type Actions =
   | FetchAction
+  | ExitingAction
+  | ExitedAction
   | ErroredAction
   | LoadingAction
   | LoadedAction
   | EnteredAction
   | CullAction;
 
+enum Status {
+  UNKNOWN,
+  EXITING,
+  EXITED,
+  ERRORED,
+  LOADING,
+  LOADED,
+  ENTERED,
+}
+
 interface State {
-  fetching: boolean;
   fetchingScene: number | null;
   error: Error | null;
-  loading: boolean;
-  transitioning: boolean;
-  entered: boolean;
+  isFetching: boolean;
+  status: Status;
   scenes: Scene[];
 }
 const initialState: State = {
-  fetching: false,
   fetchingScene: null,
+  isFetching: false,
   error: null,
-  loading: false,
-  transitioning: false,
-  entered: false,
+  status: Status.UNKNOWN,
   scenes: [],
 };
 
 function reducer(state: State, action: Actions): State {
   switch (action.type) {
-    case FETCHING:
+    case FETCH:
       return {
         ...state,
-        fetching: true,
         fetchingScene: action.payload,
-        loading: false,
-        transitioning: false,
-        entered: false,
+        isFetching: true,
+        error: null,
+      };
+    case EXITING:
+      return {
+        ...state,
+        error: null,
+        status: Status.EXITING,
+      };
+    case EXITED:
+      return {
+        ...state,
+        status: Status.EXITED,
       };
     case ERRORED:
       return {
         ...state,
-        fetching: false,
         fetchingScene: null,
         error: action.payload,
-        loading: false,
-        transitioning: false,
-        entered: false,
+        status: Status.ERRORED,
       };
     case LOADING:
       return {
         ...state,
-        fetching: false,
         fetchingScene: null,
-        loading: true,
-        transitioning: false,
-        entered: false,
         scenes: [
           action.payload,
           ...state.scenes.filter(
             ({ sceneId }) => sceneId !== action.payload.sceneId,
           ),
         ],
+        status: Status.LOADING,
       };
     case LOADED:
       return {
         ...state,
-        fetching: false,
-        fetchingScene: null,
-        loading: false,
-        transitioning: true,
-        entered: false,
-        scenes: [action.payload, ...state.scenes],
+        status: Status.LOADED,
       };
     case ENTERED:
       return {
         ...state,
-        fetching: false,
-        fetchingScene: null,
-        loading: false,
-        transitioning: false,
-        entered: true,
+        status: Status.ENTERED,
       };
     case CULL:
       // Remove the scene and all other scenes after the payload from the scene list
@@ -191,49 +226,67 @@ export default function useScene() {
   const [state, dispatch] = useContext(getContext());
 
   // Fetch scene when requested
-  useEffect(() => {
-    if (state.fetching && state.fetchingScene !== null) {
-      let wasCancelled = false;
-      fetch(state.fetchingScene).then(
-        (scene) => {
-          if (!wasCancelled) {
-            if (scene) {
-              dispatch(loadedActionCreator(scene));
-            } else {
-              dispatch(erroredActionCreator(new Error('Scene not found')));
-            }
-          }
-        },
-        (err) => {
-          if (!wasCancelled) {
-            dispatch(erroredActionCreator(err));
-          }
-        },
-      );
-      return () => {
-        wasCancelled = true;
-      };
-    }
-  }, [state.fetching, state.fetchingScene]);
+  // useEffect(() => {
+  //   if (!state.isFetching && state.fetchingScene !== null) {
+  //     let wasCancelled = false;
+  //     fetch(state.fetchingScene).then(
+  //       (scene) => {
+  //         if (!wasCancelled) {
+  //           if (scene) {
+  //             dispatch(loadingActionCreator(scene));
+  //           } else {
+  //             dispatch(erroredActionCreator(new Error('Scene not found')));
+  //           }
+  //         }
+  //       },
+  //       (err) => {
+  //         if (!wasCancelled) {
+  //           dispatch(erroredActionCreator(err));
+  //         }
+  //       },
+  //     );
+  //     return () => {
+  //       wasCancelled = true;
+  //     };
+  //   }
+  // }, [state.status, state.fetchingScene]);
 
+  // // If the scene is exiting and a fetchScene is defined, then fetch it if needed
+  // useEffect(() => {
+  //   if (state.status === Status.EXITING && state.fetchingScene !== null) {
+  //     dispatch(fetchActionCreator(state.fetchingScene));
+  //   }
+  // }, [state.status]);
+
+  // If a scene has exited and the next scene has been fetched, then
   return useMemo(
     () => ({
       ...state,
       fetch(sceneId: number) {
-        dispatch(fetchActionCreator(sceneId));
+        if (
+          // Safetly valve for now.... only allow fetch when stable
+          state.status !== Status.ENTERED &&
+          state.scenes.find(({ sceneId }) => sceneId === sceneId) === undefined
+        ) {
+          dispatch(fetchActionCreator(sceneId));
+        }
       },
-      run(scene: Scene) {
-        dispatch(loadingActionCreator(scene));
+      exiting() {
+        dispatch(exitingActionCreator());
+      },
+      exited(scene: Scene) {
+        dispatch(exitedActionCreator(scene));
       },
       loaded(scene: Scene) {
         dispatch(loadedActionCreator(scene));
       },
-      transitioned(scene: Scene) {
+      entered(scene: Scene) {
         dispatch(enteredActionCreator(scene));
       },
       cull(scene: Scene) {
         dispatch(cullActionCreator(scene));
       },
+      status: state.status,
     }),
     [state, dispatch],
   );

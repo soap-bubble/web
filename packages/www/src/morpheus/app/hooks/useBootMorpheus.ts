@@ -14,13 +14,10 @@ import keycode from 'keycode';
 import { actions as gameActions } from 'morpheus/game';
 import useQueryParams from 'hooks/useQueryParams';
 import { useSelector } from 'react-redux';
-import useSize from './useSize';
-import useScene from './useScene';
 
 export default function useBootMorpheus() {
   const dispatch = useThunkDispatch();
   const qp = useQueryParams();
-  const { fetch, run } = useScene();
   useEffect(() => {
     let wasCancelled = false;
     dispatch(gameActions.setCursor(10000));
@@ -34,11 +31,12 @@ export default function useBootMorpheus() {
       }
       if (!qp.reload && qp.scene) {
         if (Number.isFinite(qp.scene)) {
-          fetch(Number(qp.scene));
+          // fetch(Number(qp.scene));
         }
       }
       if (!qp.scene && !savedGame) {
-        run(titleSceneData);
+        // Inject title scene and run
+        dispatch(sceneActions.init(titleSceneData));
         titleActions.start();
       }
     });

@@ -1,4 +1,4 @@
-import { connect } from "react-redux";
+import { connect, useSelector } from "react-redux";
 import React, { CSSProperties, FC, useMemo } from "react";
 import { NewGame, selectors as gameSelectors } from "morpheus/game";
 import { selectors as sceneSelectors } from "morpheus/scene";
@@ -38,7 +38,7 @@ const Game: FC<{
   } = props
 
   useBootMorpheus();
-  const { scenes } = useScene()
+  const scenes = useSelector(sceneSelectors.currentScenesData);
   
   const menu = [];
   if (menuOpen) {

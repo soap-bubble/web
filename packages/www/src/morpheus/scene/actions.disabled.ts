@@ -205,6 +205,7 @@ let isTransitioning = false;
 export const goToScene: ActionCreator<
   ThunkAction<Promise<void>, any, any, Action>
 > = (id: string, dissolve: boolean) => {
+  throw new Error('Use the new hook!');
   return (dispatch, getState) => {
     logger.info('goToScene:queue', id);
     let currentSceneData = sceneSelectors.currentSceneData(getState());

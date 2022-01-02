@@ -142,18 +142,18 @@ window.onload = async () => {
 }
 
 if (Object.prototype.hasOwnProperty.call(window, 'cordova')) {
-  document.addEventListener('pause', () => {
-    const scenes = sceneSelectors.loadedScenes(store.getState())
+  // document.addEventListener('pause', () => {
+  //   const scenes = sceneSelectors.loadedScenes(store.getState())
 
-    scenes.forEach(scene => {
-      store.dispatch(castActions.lifecycle.doPause(scene))
-    })
-  })
-  document.addEventListener('resume', () => {
-    const scenes = sceneSelectors.loadedScenes(store.getState())
+  //   scenes.forEach(scene => {
+  //     store.dispatch(castActions.lifecycle.doPause(scene))
+  //   })
+  // })
+  // document.addEventListener('resume', () => {
+  //   const scenes = sceneSelectors.loadedScenes(store.getState())
 
-    scenes.forEach(scene => {
-      store.dispatch(castActions.lifecycle.doResume(scene))
-    })
-  })
+  //   scenes.forEach(scene => {
+  //     store.dispatch(castActions.lifecycle.doResume(scene))
+  //   })
+  // })
 }

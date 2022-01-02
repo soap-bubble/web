@@ -1,9 +1,7 @@
-import * as selectors from './selectors'
-import reducer from './reducer'
-import * as actions from './actions'
-import * as matchers from './matchers'
-import './epics'
-import { Scene } from 'morpheus/casts/types'
+import * as matchers from './matchers';
+import './epics';
+import { Scene } from 'morpheus/casts/types';
+export { actions, reducer, selectors } from './ducks';
 
 export const SCENE_TYPE_LIST = {
   1: 'panorama',
@@ -14,13 +12,13 @@ export const SCENE_TYPE_LIST = {
   6: 'credits',
   7: 'finalCredits',
   8: 'title',
-}
+};
 
 export function getSceneType(sceneData: Scene) {
-  if (!sceneData) return 'none'
+  if (!sceneData) return 'none';
 
-  const sceneType = sceneData.sceneType
-  return (SCENE_TYPE_LIST as { [key: number]: string })[sceneType]
+  const sceneType = sceneData.sceneType;
+  return (SCENE_TYPE_LIST as { [key: number]: string })[sceneType];
 }
 
-export { selectors, reducer, actions, matchers }
+export { matchers };

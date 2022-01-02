@@ -129,6 +129,9 @@ export default function factory() {
         });
         yield object3D;
       },
+      hide() {
+        object3D.removeFromParent();
+      }
     };
     return selfie;
   };

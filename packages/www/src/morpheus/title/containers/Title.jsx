@@ -12,8 +12,8 @@ function mapStateToProps(state, { opacity }) {
 
 function mapDispatchToProps(dispatch) {
   return {
-    canvasCreated(canvas, width, height, stream, fetchStream) {
-      dispatch(canvasCreated(canvas, width, height, stream, fetchStream));
+    canvasCreated(canvas, width, height, stream) {
+      dispatch(canvasCreated(canvas, width, height, stream));
     },
   };
 }

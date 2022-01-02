@@ -10,6 +10,9 @@ import {
 import { selectors as gameSelectors } from "morpheus/game";
 import { Tween, Easing } from "@tweenjs/tween.js";
 import { getAssetUrl } from "service/gamedb";
+import { 
+  actions as sceneActions
+} from 'morpheus/scene'
 import renderEvents from "utils/render";
 import { createVideo } from "utils/video";
 import { titleDone } from "./actions";
@@ -50,7 +53,7 @@ function createObject({ uniforms, position, aspectRatio }) {
   return obj;
 }
 
-export default function factory({ canvas: sourceCanvas, fetchScene }) {
+export default function factory({ canvas: sourceCanvas, hideRest }) {
   return (dispatch, getState) => {
     const canvas = document.createElement("canvas");
     canvas.width = 1024;
@@ -118,6 +121,8 @@ export default function factory({ canvas: sourceCanvas, fetchScene }) {
             uniforms.freq.value = value;
           },
         };
+        hideRest();
+        video.play();
         let rippleTween = new Tween(v)
           .to(
             {
@@ -127,7 +132,6 @@ export default function factory({ canvas: sourceCanvas, fetchScene }) {
           )
           .easing(Easing.Exponential.Out)
           .onComplete(() => {
-            video.play();
             rippleTween = new Tween(v)
               .to(
                 {
@@ -150,7 +154,6 @@ export default function factory({ canvas: sourceCanvas, fetchScene }) {
 
         rippleTween.start();
         dissolveTween.start();
-
         const startTime = Date.now();
         renderEvents.onRender(() => {
           uniforms.time.value = (Date.now() - startTime) / 1000;
@@ -184,6 +187,10 @@ export default function factory({ canvas: sourceCanvas, fetchScene }) {
           touchEvent.stopPropagation();
         }
 
+        function videoEnded() {
+          video.removeEventListener("ended", videoEnded);
+          allDone();
+        }
         allDone = () => {
           video.pause();
           window.document.removeEventListener("mousedown", handleMouseDown);
@@ -191,14 +198,15 @@ export default function factory({ canvas: sourceCanvas, fetchScene }) {
           window.document.removeEventListener("touchstart", handleTouchStart);
           window.document.removeEventListener("touchmove", handleTouchMove);
           window.document.removeEventListener("touchend", handleMouseUp);
+          video.removeEventListener("ended", videoEnded);
           dispatch(titleDone());
-          fetchScene(2000)
+          dispatch(sceneActions.nextScene({
+            sceneId: 2000
+          }))
+          dispatch(sceneActions.go());
         };
 
-        video.addEventListener("ended", function videoEnded() {
-          video.removeEventListener("ended", videoEnded);
-          allDone();
-        });
+        video.addEventListener("ended", videoEnded);
 
         window.document.addEventListener("mousedown", handleMouseDown);
         window.document.addEventListener("mouseup", handleMouseUp);

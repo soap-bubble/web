@@ -26,6 +26,8 @@ import { PANO_OFFSET, PANO_CANVAS_WIDTH } from '../../constants';
 import useCastRefNoticer, { CastRef } from '../hooks/useCastRefNoticer';
 import { VideoController } from './Videos';
 import useSize from 'morpheus/app/hooks/useSize';
+import { useDispatch } from 'react-redux';
+import { actions as sceneActions } from 'morpheus/scene';
 
 enum SceneType {
   VIDEO,
@@ -103,10 +105,12 @@ const WebGlScene = ({
   const panoUrl = onStagePano && getAssetUrl(onStagePano.fileName, 'png');
   const textureLoader = useMemo(() => new TextureLoader(), []);
   const [texImage, setTexImage] = useState<HTMLImageElement>();
+  const dispatch = useDispatch();
   useEffect(() => {
     if (panoUrl) {
       const tex = textureLoader.load(panoUrl, (t) => {
         setTexImage(t.image);
+        dispatch(sceneActions.assetsLoaded())
       });
       if (tex) {
         tex.flipY = false;

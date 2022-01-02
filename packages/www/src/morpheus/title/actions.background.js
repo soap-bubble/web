@@ -135,6 +135,9 @@ export default function factory() {
         });
         yield backgroundPlane;
       },
+      hide() {
+        backgroundPlane.removeFromParent();
+      }
     };
     return selfie;
   };

@@ -47,7 +47,7 @@ export function done() {
   };
 }
 
-export function canvasCreated(canvas, width, height, sizeStream, fetchScene) {
+export function canvasCreated(canvas, width, height, sizeStream) {
   return async (dispatch, getState) => {
     if (canvas) {
       const titleActions = dispatch(titleActionsFactory());
@@ -57,8 +57,14 @@ export function canvasCreated(canvas, width, height, sizeStream, fetchScene) {
       const introActions = dispatch(
         introFactory({
           canvas,
-          fetchScene
-        })
+          hideRest() {
+            titleActions.hide();
+            buttonsActions.hide();
+            lightsActions.hide();
+            backgroundActions.hide();
+          }
+        }),
+        
       );
       const camera = createCamera({ width, height });
       const renderer = createRenderer({
@@ -139,15 +145,6 @@ export function canvasCreated(canvas, width, height, sizeStream, fetchScene) {
         renderer.setSize(width, height);
         camera.aspect = width / height;
         camera.updateProjectionMatrix();
-      })
-
-      dispatch({
-        type: SET_RENDER_ELEMENTS,
-        payload: {
-          camera,
-          renderer,
-          canvas,
-        },
       });
     }
   };

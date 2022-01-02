@@ -29,6 +29,9 @@ export default function factory() {
         spotLight.shadow.bias = -0.005;
         yield spotLight;
       },
+      hide() {
+        spotLight.removeFromParent()
+      }
     };
     return selfie;
   };

@@ -399,6 +399,11 @@ export default function factory(sizeSubject, w, h) {
       stop() {
         cleanUp();
       },
+      hide() {
+        for (let button of Object.values(objects)) {
+          button.removeFromParent();
+        }
+      }
     };
     return selfie;
   };

@@ -7,7 +7,7 @@ import useScene from 'morpheus/app/hooks/useScene';
 
 interface IProps {
   opacity: number;
-  canvasCreated: (el: HTMLCanvasElement, width: number, height: number, stream: Observable<ResizeRequest>, fetchScene: (sceneId: number) => void) => void;
+  canvasCreated: (el: HTMLCanvasElement, width: number, height: number, stream: Observable<ResizeRequest>) => void;
 }
 
 const Title: FC<IProps> = ({
@@ -15,12 +15,12 @@ const Title: FC<IProps> = ({
   canvasCreated,
 }) => {
   const { width, height, stream } = useSize()
-  const { fetch: fetchScene } = useScene()
+  
   const canvasRef: MutableRefObject<HTMLCanvasElement | undefined> = useRef<HTMLCanvasElement>();
   const onCanvasCreated = useCallback((el: HTMLCanvasElement) => {
     if (!canvasRef.current) {
       canvasRef.current = el
-      canvasCreated(el, width, height, stream, fetchScene);
+      canvasCreated(el, width, height, stream);
     }
   }, [canvasRef.current, width, height, canvasCreated]);
 

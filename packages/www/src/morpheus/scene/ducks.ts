@@ -20,6 +20,8 @@ import {
   concat,
   map,
   tap,
+  from,
+  catchError,
 } from 'rxjs';
 import createEpic from 'utils/createEpic';
 import { actions as inputActions } from 'morpheus/input';
@@ -216,44 +218,52 @@ createEpic<AnySceneAction, AnySceneAction, { scene: State }>(
             | DisableInputControlAction
             | FetchAction
             | FetchedAction
+            | FetchErrorAction
             | WaitingOnAssetsLoadingAction
           > = of(inputActions.disableControl(), slice.actions.exiting());
           if (!existsInCache) {
+            const promiseScene = fetchScene(nextSceneId).then((scene) => {
+              if (!scene) {
+                throw new Error('Scene not found');
+              }
+              return scene;
+            });
             actions = concat(
               actions,
               of(
                 slice.actions.fetch({
                   sceneId: nextSceneId,
-                  promiseScene: fetchScene(nextSceneId).then((scene) => {
-                    if (!scene) {
-                      throw new Error('Scene not found');
-                    }
-                    return scene;
-                  }),
+                  promiseScene,
                 }),
               ),
-            ).pipe(
-              withLatestFrom(state$),
-              mergeMap(([_, state]) => {
-                return action$.pipe(
-                  ofType<
-                    AnySceneAction,
-                    typeof slice.actions.fetchSuccess.type,
-                    FetchedAction
-                  >(slice.actions.fetchSuccess.type),
-                  filter(
-                    ({ payload }) =>
-                      payload.sceneId === selectNextSceneId(state),
-                  ),
-                  map(() => slice.actions.waitingOnAssetsLoading()),
-                );
-              }),
+              from(promiseScene).pipe(
+                map((scene) => slice.actions.fetchSuccess(scene)),
+                catchError(() => of(slice.actions.fetchError(nextSceneId))),
+              ),
+              action$.pipe(
+                withLatestFrom(state$),
+                mergeMap(([_, state]) => {
+                  return action$.pipe(
+                    ofType<
+                      AnySceneAction,
+                      typeof slice.actions.fetchSuccess.type,
+                      FetchedAction
+                    >(slice.actions.fetchSuccess.type),
+                    filter(
+                      ({ payload }) =>
+                        payload.sceneId === selectNextSceneId(state),
+                    ),
+                    map(() => slice.actions.waitingOnAssetsLoading()),
+                  );
+                }),
+              ),
             );
           }
           return actions;
         }
         return [];
       }),
+
       // Maybe this should just be component state?
       // mergeMap(() =>
       //   action$.pipe(

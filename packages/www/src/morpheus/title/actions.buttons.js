@@ -54,9 +54,9 @@ function createButton({ map, bumpMap, uniforms, position }) {
         },
         !window.hasOwnProperty("cordova")
           ? {
-              bumpMap,
-              bumpScale: 0.1,
-            }
+            bumpMap,
+            bumpScale: 0.1,
+          }
           : {}
       )
     );
@@ -79,7 +79,7 @@ function createButton({ map, bumpMap, uniforms, position }) {
 export default function factory(sizeSubject, w, h) {
   return (dispatch, getState) => {
     const raycaster = new Raycaster();
-    let cleanUp = () => {};
+    let cleanUp = () => { };
     const objects = {
       newButton: null,
       settingsButton: null,
@@ -88,9 +88,13 @@ export default function factory(sizeSubject, w, h) {
     };
     let width = w
     let height = h
-    sizeSubject.subscribe(({ width: w, height: h }) => {
+    let left = 0
+    let top = 0
+    sizeSubject.subscribe(({ width: w, height: h, x, y }) => {
       width = w
       height = h
+      left = x
+      top = y
     })
     const textures = {};
     const selfie = {
@@ -202,9 +206,8 @@ export default function factory(sizeSubject, w, h) {
         setTimeout(() => slideInTween.contButton.start(), WAIT_TIME);
 
         function updatePositionForEvent(e) {
-          const location = gameSelectors.location(getState());
-          currentClientX = e.clientX - location.x;
-          currentClientY = e.clientY - location.y;
+          currentClientX = e.clientX - left;
+          currentClientY = e.clientY - top;
         }
 
         function hitCheck(object3D) {
@@ -216,10 +219,10 @@ export default function factory(sizeSubject, w, h) {
           const isInstersected = !!intersects.length;
           return isInstersected
             ? {
-                screen: { x, y },
-                camera,
-                ...intersects[0],
-              }
+              screen: { x, y },
+              camera,
+              ...intersects[0],
+            }
             : null;
         }
 

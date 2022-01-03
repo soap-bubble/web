@@ -22,6 +22,7 @@ import {
   tap,
   from,
   catchError,
+  concatMap,
 } from 'rxjs';
 import createEpic from 'utils/createEpic';
 import { actions as inputActions } from 'morpheus/input';
@@ -240,25 +241,16 @@ createEpic<AnySceneAction, AnySceneAction, { scene: State }>(
                 map((scene) => slice.actions.fetchSuccess(scene)),
                 catchError(() => of(slice.actions.fetchError(nextSceneId))),
               ),
-              action$.pipe(
-                withLatestFrom(state$),
-                mergeMap(([_, state]) => {
-                  return action$.pipe(
-                    ofType<
-                      AnySceneAction,
-                      typeof slice.actions.fetchSuccess.type,
-                      FetchedAction
-                    >(slice.actions.fetchSuccess.type),
-                    filter(
-                      ({ payload }) =>
-                        payload.sceneId === selectNextSceneId(state),
-                    ),
-                    map(() => slice.actions.waitingOnAssetsLoading()),
-                  );
-                }),
-              ),
+              of(slice.actions.waitingOnAssetsLoading()),
+            );
+          } else {
+            // Even if scene has already been fetched, we might need to wait for assets to load
+            actions = concat(
+              actions,
+              of(slice.actions.waitingOnAssetsLoading()),
             );
           }
+
           return actions;
         }
         return [];

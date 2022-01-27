@@ -18027,15 +18027,10 @@ thenify-all@^1.0.0:
   dependencies:
     any-promise "^1.0.0"
 
-three@^0.115.0:
-  version "0.115.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.115.0.tgz#540d800c381b9da2334c024f0fbe4d23f84eb05e"
-  integrity sha512-mAV2Ky3RdcbdSbR9capI+tKLvRldWYxd4151PZTT/o7+U2jh9Is3a4KmnYwzyUAhB2ZA3pXSgCd2DOY4Tj5kow==
-
-three@^0.129.0:
-  version "0.129.0"
-  resolved "https://registry.yarnpkg.com/three/-/three-0.129.0.tgz#f5e530bbc96eac5d5b4749cb5da886ef0d42f554"
-  integrity sha512-wiWio1yVRg2Oj6WEWsTHQo5eSzYpEwSBtPSi3OofNpvFbf26HFfb9kw4FZJNjII4qxzp0b1xLB11+tKkBGB1ZA==
+three@^0.137.0:
+  version "0.137.0"
+  resolved "https://registry.yarnpkg.com/three/-/three-0.137.0.tgz#0ebd6ba66637a332c31f234bcdd35aeec071a6e3"
+  integrity sha512-rzSDhia6cU35UCy6y+zEEws6vSgytfHqFMSaBvUcySgzwvDO6vETyswtSNi/+aVqJw8WLMwyT1mlQQ1T/dxxOA==
 
 throat@^4.0.0:
   version "4.1.0"

@@ -35,7 +35,7 @@
     "rxjs-hooks": "^0.7.0",
     "socket.io-client": "^2.3.0",
     "styled-components": "^5.0.1",
-    "three": "^0.115.0",
+    "three": "^0.137.0",
     "uuid": "^7.0.3"
   },
   "devDependencies": {

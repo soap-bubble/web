@@ -13,7 +13,7 @@
     "prime": "ts-node src/prime.ts"
   },
   "engines": {
-    "node": "16"
+    "node": ">22.0.0"
   },
   "main": "lib/index.js",
   "dependencies": {

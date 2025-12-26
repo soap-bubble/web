@@ -1,11 +1,19 @@
-// Preload in front so it can play with cast state
-exports.preload = require('./preload');
-exports.hotspot = require('./hotspot');
-exports.pano = require('./pano');
-exports.controlledMovie = require('./controlledMovie');
-exports.special = require('./special');
-exports.sound = require('./sound');
+import * as preload from './preload'
+import * as hotspot from './hotspot'
+import * as pano from './pano'
+import * as controlledMovie from './controlledMovie'
+import * as special from './special'
+import * as sound from './sound'
 
-exports.default = function NotImplemented() {
-  throw new NotImplemented();
-};
+export const modulesMap = {
+  preload,
+  hotspot,
+  pano,
+  controlledMovie,
+  special,
+  sound,
+}
+
+export { preload, hotspot, pano, controlledMovie, special, sound }
+
+export default modulesMap

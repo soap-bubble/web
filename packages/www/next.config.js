@@ -1,3 +1,4 @@
+const path = require("path");
 const { NODE_ENV } = process.env;
 
 const prod = NODE_ENV === "production";
@@ -18,4 +19,12 @@ const env = prod || !offline ? {
 
 module.exports = {
   env,
+  webpack(config) {
+    const distRoot = path.resolve(__dirname, "../morpheus/dist/morpheus");
+    config.resolve.alias = config.resolve.alias || {};
+    config.resolve.alias["morpheus"] = path.join(distRoot, "index.js");
+    config.resolve.alias["morpheus$"] = path.join(distRoot, "index.js");
+    config.resolve.alias["morpheus/"] = `${distRoot}/`;
+    return config;
+  },
 };

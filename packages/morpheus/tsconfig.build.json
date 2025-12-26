@@ -1,0 +1,23 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": "./client/js",
+    "outDir": "./dist",
+    "declaration": false,
+    "emitDeclarationOnly": false,
+    "allowJs": true,
+    "noEmit": false,
+    "sourceMap": true,
+    "jsx": "react-jsx",
+    "module": "ESNext",
+    "moduleResolution": "Bundler"
+  },
+  "include": [
+    "client/js/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
+

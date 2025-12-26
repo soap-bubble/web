@@ -1,6 +1,7 @@
 # Runtime directories
 public
 lib
+dist
 
 # configuration
 config/local.js

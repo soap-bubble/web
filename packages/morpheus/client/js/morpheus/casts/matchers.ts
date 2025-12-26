@@ -1,4 +1,4 @@
-import { Matcher, and, not } from '../../utils/matchers'
+import { Matcher, and, or, not } from '../../utils/matchers'
 import {
   Cast,
   ControlledMovieCast,
@@ -75,4 +75,4 @@ export function isEmptySoundCast({
   )
 }
 
-export { Matcher }
+export { Matcher, and, or, not }

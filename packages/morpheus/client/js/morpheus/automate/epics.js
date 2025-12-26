@@ -11,7 +11,6 @@ import {
   actions as gamestateActions,
 } from 'morpheus/gamestate'
 import { selectors as gameSelectors } from 'morpheus/game'
-import { special as flatspot } from 'morpheus/hotspot'
 import { handleEventFactory } from 'morpheus/input'
 import { gameToScreen } from 'utils/coordinates'
 import { hotspotRectMatchesPosition } from 'morpheus/hotspot/matchers'

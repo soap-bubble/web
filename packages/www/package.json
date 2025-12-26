@@ -10,6 +10,7 @@
     "ts:watch": "yarn ts --watch"
   },
   "dependencies": {
+    "@soapbubble/morpheus-client": "link:../morpheus",
     "@react-three/fiber": "^6.2.2",
     "@reduxjs/toolkit": "^1.7.1",
     "@rooks/use-raf": "^4.11.2",

@@ -16,7 +16,6 @@ import {
 } from '../actions'
 import { closeMenu, openSettings } from '../commands'
 
-import './MenuList.css'
 import { ThunkDispatch } from 'redux-thunk'
 
 function mapStateToProps(state: any) {

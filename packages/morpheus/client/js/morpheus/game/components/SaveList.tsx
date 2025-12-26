@@ -1,11 +1,34 @@
-import React from 'react'
+import React, { FunctionComponent } from 'react'
 import PropTypes from 'prop-types'
-import './SaveList.css'
 
-const SaveList = ({ loading, delegate, rows, onSelect }: any) => {
+const saveListModalStyle: React.CSSProperties = {
+  textAlign: 'center',
+  position: 'absolute',
+  borderRadius: 10,
+  padding: 20,
+  backgroundColor: '#444',
+  width: '20em',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+}
+
+type SaveListProps = {
+  loading: boolean
+  delegate?: () => void
+  rows?: number
+  onSelect?: () => void
+}
+
+const SaveList: FunctionComponent<SaveListProps> = ({
+  loading,
+  delegate,
+  rows,
+  onSelect,
+}) => {
   if (loading) {
     return (
-      <div className="saveListModal">
+      <div style={saveListModalStyle}>
         <span className="loadingSpinner" />
       </div>
     )
@@ -17,15 +40,7 @@ const SaveList = ({ loading, delegate, rows, onSelect }: any) => {
   //     </div>
   //   );
   // }
-  return (
-    <div className="saveListModal">
-      {/* <SelectionList
-        delegate={delegate}
-        rows={rows}
-        onSelect={onSelect}
-      /> */}
-    </div>
-  )
+  return <div style={saveListModalStyle} />
 }
 
 SaveList.propTypes = {

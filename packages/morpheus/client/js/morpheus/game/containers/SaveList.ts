@@ -5,8 +5,6 @@ import * as gameSelectors from '../selectors'
 import { cloudLoad } from '../actions'
 import { closeSave } from '../commands'
 
-import './MenuList.css'
-
 function mapStateToProps(state: any) {
   const savesAreLoading = gameSelectors.savesAreLoading(state)
   if (savesAreLoading) {

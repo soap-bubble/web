@@ -19,8 +19,9 @@ export function render() {
         onRenders.forEach((r) => r());
         onAfters.forEach((r) => r());
       }
-    } catch (err) {
-      logger.error(err);
+    } catch (err: unknown) {
+      const errorToLog = err instanceof Error ? err : new Error(String(err));
+      logger.error(errorToLog);
     } finally {
       if (isActive) {
         raf(render);

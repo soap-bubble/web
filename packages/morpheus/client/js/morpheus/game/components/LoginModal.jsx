@@ -1,20 +1,31 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import Login from './Login'
-import './LoginModal.css'
 
-const Login = ({ onLogin }) => (
-  <div className="loginModal">
+const loginModalStyle = {
+  position: 'absolute',
+  borderRadius: 10,
+  padding: 20,
+  backgroundColor: '#444',
+  width: '20em',
+  height: '10em',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+}
+
+const LoginModal = ({ onLogin }) => (
+  <div style={loginModalStyle}>
     <Login onLogin={onLogin} />
   </div>
 )
 
-Login.propTypes = {
+LoginModal.propTypes = {
   onLogin: PropTypes.func,
 }
 
-Login.defaultProps = {
+LoginModal.defaultProps = {
   onLogin: () => {},
 }
 
-export default Login
+export default LoginModal

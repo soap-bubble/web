@@ -29,19 +29,28 @@
     "firebase-tools": "^7.3.1",
     "lerna": "^3.13.4",
     "minimist": "^1.2.0",
-    "spawn-sync": "^1.0.15"
+    "spawn-sync": "^1.0.15",
+    "turbo": "^2.7.2"
   },
   "scripts": {
     "bootstrap": "lerna bootstrap",
-    "test": "lerna run --scope=@soapbubble/morpheus test",
+    "test": "lerna run --scope=@soapbubble/morpheus-client test",
     "build:production": "lerna exec npm run build:production",
-    "build:electron": "lerna run --scope @soapbubble/morpheus build:client:electron:production && lerna run --scope Morpheus make && lerna run --scope Morpheus package",
-    "build:android": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:android",
-    "build:ios": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus build:client:cordova:production && lerna run --scope MorpheusMobile build:ios",
+    "build:electron": "lerna run --scope @soapbubble/morpheus-client build:client:electron:production && lerna run --scope Morpheus make && lerna run --scope Morpheus package",
+    "build:android": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus-client build:client:cordova:production && lerna run --scope MorpheusMobile build:android",
+    "build:ios": "lerna run --scope @soapbubble/style build && lerna run --scope @soapbubble/components build && lerna run --scope @soapbubble/morpheus-client build:client:cordova:production && lerna run --scope MorpheusMobile build:ios",
     "start:dev": "lerna exec npm run start:dev --parallel --no-bail",
     "start:dev:ssl": "cross-env SOAPBUBBLE_LOCAL_SSL=true npm run start:dev",
     "release": "node ./scripts/release",
-    "docker": "node ./scripts/docker"
+    "docker": "node ./scripts/docker",
+    "dev": "turbo run dev --parallel",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck"
   },
-  "dependencies": {}
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "dependencies": {},
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

@@ -1,5 +1,5 @@
 import { useMemo, PointerEvent as ReactPointerEvent } from 'react'
-import { PointerEvent as RTFPointerEvent } from 'react-three-fiber'
+import { PointerEvent as RTFPointerEvent } from '@react-three/fiber'
 
 type SupportRTFPointerEvent<T> = ReactPointerEvent<T>
 type PointerEventKeys =

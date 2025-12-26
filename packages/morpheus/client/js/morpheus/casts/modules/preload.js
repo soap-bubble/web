@@ -1,6 +1,5 @@
 import memoize from 'utils/memoize'
 import { createSelector } from 'reselect'
-import { selectors as panoSelectors } from 'morpheus/casts/modules/pano'
 import { lifecycle } from 'morpheus/casts/actions'
 import { actions as sceneActions } from 'morpheus/scene'
 import { isActive, selectors as gamestateSelectors } from 'morpheus/gamestate'

@@ -29,9 +29,6 @@ import socketPromise from 'utils/socket'
 import storeFactory from './store'
 import '../css/main.css'
 
-
-window.React2 = require('react');
-console.log('If false then react is broken:', window.React1 === window.React2);
 const qp = qs.parse(location.search)
 const store = storeFactory()
 
@@ -40,7 +37,7 @@ function resizeToWindow() {
     gameActions.resize({
       width: window.innerWidth,
       height: window.innerHeight,
-    }),
+    })
   )
 }
 
@@ -50,7 +47,7 @@ window.onload = async () => {
       gameActions.resize({
         width: window.innerWidth,
         height: window.innerHeight,
-      }),
+      })
     )
     //store.dispatch(gameActions.createUIOverlay())
     store.dispatch(gameActions.setCursor(10000))
@@ -73,14 +70,15 @@ window.onload = async () => {
     // await store.dispatch(gamestateActions.fetchInitial())
     const root = document.getElementById('root')
     window.addEventListener('resize', resizeToWindow)
-    setTimeout(() => render(
-      <Provider store={store}>
-        {/* <NewGame sceneData={sceneData} /> */}
-        <Game className="game" />
-      </Provider>,
-      root,
-    ))
-    
+    setTimeout(() =>
+      render(
+        <Provider store={store}>
+          {/* <NewGame sceneData={sceneData} /> */}
+          <Game className="game" />
+        </Provider>,
+        root
+      )
+    )
   }
 
   if (qp.channel) {
@@ -130,12 +128,12 @@ window.onload = async () => {
       }
     }
   }
-  
+
   firebase.default.auth().onAuthStateChanged(
-    once(async (user) => {
-      store.dispatch(gameActions.loggedIn(user));
+    once(async user => {
+      store.dispatch(gameActions.loggedIn(user))
       init()
-    }),
+    })
   )
 }
 

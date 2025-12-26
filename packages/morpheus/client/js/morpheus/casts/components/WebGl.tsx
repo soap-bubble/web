@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 import { Dispatch } from 'redux'
 import { cloneDeep, map } from 'lodash'
-import { Canvas, PointerEvent, useThree, useFrame } from 'react-three-fiber'
+import { Canvas, PointerEvent, useThree, useFrame } from '@react-three/fiber'
 import {
   BufferAttribute,
   CylinderBufferGeometry,

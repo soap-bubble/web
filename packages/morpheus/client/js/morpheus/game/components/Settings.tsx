@@ -2,7 +2,25 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import VolumeSlider from '../containers/VolumeSlider'
-import './Settings.css'
+
+const settingsModalStyle: React.CSSProperties = {
+  position: 'absolute',
+  borderRadius: 10,
+  padding: 20,
+  backgroundColor: '#444',
+  width: '20em',
+  height: '10em',
+  top: '50%',
+  left: '50%',
+  transform: 'translate(-50%, -50%)',
+}
+
+const settingsCloseButtonStyle: React.CSSProperties = {
+  cursor: 'pointer',
+  userSelect: 'none',
+  fontWeight: 'bold',
+  fontSize: 22,
+}
 
 const Settings = ({
   onClose,
@@ -11,8 +29,8 @@ const Settings = ({
   onClose: () => void
   onFullscreen: () => void
 }) => (
-  <div className="settingsModal">
-    <span className="pull-right settingsCloseButton">
+  <div style={settingsModalStyle}>
+    <span className="pull-right" style={settingsCloseButtonStyle}>
       <button
         onClick={onClose}
         type="button"

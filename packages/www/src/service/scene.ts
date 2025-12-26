@@ -5,6 +5,7 @@ import { firebaseClient, isFirebaseLoaded } from 'service/firebase';
 import morpheusMapUnknown from './morpheusMap';
 
 const morpheusMap = morpheusMapUnknown as unknown as any[];
+type SceneCastWithRef = Cast & { ref?: { castId: number } };
 const logger = createLogger('service:scene');
 
 export async function fetch(sceneId: number): Promise<Scene | undefined> {
@@ -19,9 +20,9 @@ export async function fetch(sceneId: number): Promise<Scene | undefined> {
     if (!scene) {
       return undefined;
     }
-    const needToLoadCasts = scene.casts.filter((cast: any) => !!cast.ref) as {
-      ref: { castId: string };
-    }[];
+    const needToLoadCasts = scene.casts.filter(
+      (cast): cast is SceneCastWithRef => Boolean((cast as SceneCastWithRef).ref)
+    );
 
     if (needToLoadCasts.length) {
       logger.info(`Normalizing scene: ${sceneId}`);
@@ -35,11 +36,10 @@ export async function fetch(sceneId: number): Promise<Scene | undefined> {
           return castDoc.docs[0].data();
         })
       );
-      const casts = scene.casts.map((cast) => {
-        if ((cast as { ref: { castId: string } }).ref) {
+      const casts = scene.casts.map((cast: SceneCastWithRef) => {
+        if (cast.ref) {
           return loadedCasts.find(
-            ({ castId }: any) =>
-              castId === (cast as { ref: { castId: string } }).ref.castId
+            ({ castId }: any) => castId === Number(cast.ref?.castId)
           );
         }
         return cast;
@@ -57,9 +57,9 @@ export async function fetch(sceneId: number): Promise<Scene | undefined> {
         __t: foundScene.type,
       };
       const resolveCastIds = scene.casts
-        .filter((c) => c.ref?.castId)
-        .map((r) => r.ref.castId);
-      const resolvedCasts: { [key: number]: Cast } = {};
+        .filter((c: SceneCastWithRef) => c.ref?.castId)
+        .map((r: SceneCastWithRef) => Number(r.ref?.castId));
+      const resolvedCasts: Record<number, Cast> = {};
       let found = 0;
       for (let gameObject of morpheusMap) {
         if (resolveCastIds.includes(gameObject.data?.castId)) {
@@ -75,9 +75,9 @@ export async function fetch(sceneId: number): Promise<Scene | undefined> {
           break;
         }
       }
-      scene.casts = scene.casts.map((c) => {
+      scene.casts = scene.casts.map((c: SceneCastWithRef) => {
         if (c.ref) {
-          return resolvedCasts[c.ref.castId];
+          return resolvedCasts[Number(c.ref.castId)];
         }
         return c;
       });

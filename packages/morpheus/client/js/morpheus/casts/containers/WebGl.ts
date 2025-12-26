@@ -1,10 +1,6 @@
 import { connect } from 'react-redux'
 
-import {
-  selectors as gameSelectors,
-  // @ts-ignore
-} from 'morpheus/game'
-// @ts-ignore
+import { selectors as gameSelectors } from 'morpheus/game'
 import { selectors as gamestateSelectors } from 'morpheus/gamestate'
 import { Gamestates } from 'morpheus/gamestate/isActive'
 import WebGl from '../components/WebGl'

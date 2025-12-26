@@ -1,6 +1,7 @@
 import { endsWith } from 'lodash'
 import { isIOS } from '../utils/isSafari'
-export const url = config.assetHost
+
+let baseUrl = ''
 
 enum VideoMedia {
   mp4,
@@ -11,9 +12,13 @@ enum VideoMedia {
 }
 type VideoMediaStrings = keyof typeof VideoMedia
 
+export function setBaseUrl(url: string) {
+  baseUrl = url
+}
+
 export function getAssetUrl(assetPath: string, type?: VideoMediaStrings) {
   const path = assetPath.replace('deck', 'Deck')
-  return `${url}/${path}${
+  return `${baseUrl}/${path}${
     type && !endsWith(assetPath, type) ? `.${type}` : ''
   }`.replace('#', '%23')
 }

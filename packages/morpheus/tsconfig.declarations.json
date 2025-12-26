@@ -5,9 +5,13 @@
     "emitDeclarationOnly": true,
     "outDir": "./dist",
     "rootDir": "./client/js",
-    "allowJs": false,
+    "allowJs": true,
     "checkJs": false,
-    "noEmit": false
+    "strict": false,
+    "noImplicitAny": false,
+    "noEmit": false,
+    "noEmitOnError": false,
+    "skipLibCheck": true
   },
   "include": [
     "client/js/**/*"

@@ -10,10 +10,10 @@
     "ts:watch": "yarn ts --watch"
   },
   "dependencies": {
-    "@soapbubble/morpheus-client": "link:../morpheus",
     "@react-three/fiber": "^6.2.2",
     "@reduxjs/toolkit": "^1.7.1",
     "@rooks/use-raf": "^4.11.2",
+    "@soapbubble/morpheus-client": "link:../morpheus",
     "@tweenjs/tween.js": "^18.6.4",
     "axios": "^0.21.1",
     "bluebird": "^3.7.2",
@@ -51,6 +51,6 @@
     "@types/ua-parser-js": "^0.7.36",
     "@types/w3c-generic-sensor": "^1.0.3",
     "prettier": "^2.5.1",
-    "typescript": "^4.3.2"
+    "typescript": "5"
   }
 }

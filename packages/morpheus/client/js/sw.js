@@ -1,16 +1,18 @@
+let baseUrl = ''
+
 self.addEventListener('install', event => {
   event.waitUntil(
     caches
       .open('v1')
       .then(cache =>
         cache.addAll([
-          `${config.assetHost}/GameDB/Deck1/introMOV.webm`,
-          `${config.assetHost}/GameDB/OAsounds/claireSRMSC.mp3`,
-          `${config.assetHost}/GameDB/All/morpheus-background.jpg`,
-          `${config.assetHost}/GameDB/All/morpheus-title.png`,
-          `${config.assetHost}/gamestate`,
-        ]),
-      ),
+          `${baseUrl}/GameDB/Deck1/introMOV.webm`,
+          `${baseUrl}/GameDB/OAsounds/claireSRMSC.mp3`,
+          `${baseUrl}/GameDB/All/morpheus-background.jpg`,
+          `${baseUrl}/GameDB/All/morpheus-title.png`,
+          `${baseUrl}/gamestate`,
+        ])
+      )
   )
 })
 
@@ -29,7 +31,7 @@ self.addEventListener('fetch', event => {
           // and serve second one
           const responseClone = serverResponse.clone()
 
-          if (event.request.indexOf(config.assetHost) !== -1) {
+          if (event.request.indexOf(baseUrl) !== -1) {
             caches.open('v1').then(cache => {
               cache.put(event.request, responseClone)
             })
@@ -37,6 +39,6 @@ self.addEventListener('fetch', event => {
           return serverResponse
         })
         .catch(error => console.error(error))
-    }),
+    })
   )
 })

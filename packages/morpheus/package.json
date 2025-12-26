@@ -7,9 +7,16 @@
   "browserslist": "last 2 Chrome versions",
   "main": "./dist/morpheus/index.js",
   "module": "./dist/morpheus/index.js",
+  "types": "./dist/morpheus/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/morpheus/index.d.ts",
+      "import": "./dist/morpheus/index.js"
+    }
+  },
   "scripts": {
     "dev": "node ./scripts/clean-dist.mjs && node ./scripts/copy-static.mjs && node ./scripts/build-esm.mjs --watch",
-    "build": "node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && node ./scripts/copy-static.mjs",
+    "build": "node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && tsc -p tsconfig.declarations.json && node ./scripts/copy-static.mjs",
     "typecheck": "tsc --noEmit",
     "lint": "eslint client config server",
     "test": "jest client",

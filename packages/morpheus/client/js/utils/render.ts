@@ -1,61 +1,65 @@
-import raf from 'raf';
-import loggerFactory from 'utils/logger';
-import Tween from '@tweenjs/tween.js';
+import raf from 'raf'
+import loggerFactory from 'utils/logger'
+import Tween from '@tweenjs/tween.js'
 
-const logger = loggerFactory(__filename);
+const logger = loggerFactory(__filename)
 
-let onBefores: (() => any)[] = [];
-let onRenders: (() => any)[] = [];
-let onAfters: (() => any)[] = [];
-let onDestroy: (() => any)[] = [];
-let isActive = false;
+let onBefores: (() => any)[] = []
+let onRenders: (() => any)[] = []
+let onAfters: (() => any)[] = []
+let onDestroy: (() => any)[] = []
+let isActive = false
 
 export function render() {
   if (isActive) {
-    Tween.update();
+    Tween.update()
     try {
       if (!document.hidden) {
-        onBefores.forEach(r => r());
-        onRenders.forEach(r => r());
-        onAfters.forEach(r => r());
+        onBefores.forEach(r => r())
+        onRenders.forEach(r => r())
+        onAfters.forEach(r => r())
       }
     } catch (err) {
-      logger.error(err);
+      if (err instanceof Error) {
+        logger.error(err)
+      } else {
+        logger.error(new Error(String(err)))
+      }
     } finally {
       if (isActive) {
-        raf(render);
+        raf(render)
       }
     }
   }
 }
 
 export function reset() {
-  onBefores = [];
-  onRenders = [];
-  onAfters = [];
-  isActive = false;
-  onDestroy.forEach(r => r());
-  onDestroy = [];
+  onBefores = []
+  onRenders = []
+  onAfters = []
+  isActive = false
+  onDestroy.forEach(r => r())
+  onDestroy = []
 }
 
 const renderEvents = {
   onDestroy(handler: () => any) {
-    onDestroy.push(handler);
+    onDestroy.push(handler)
   },
   onBefore(handler: () => any) {
-    onBefores.push(handler);
+    onBefores.push(handler)
   },
   onAfter(handler: () => any) {
-    onAfters.push(handler);
+    onAfters.push(handler)
   },
   onRender(handler: () => any) {
-    onRenders.push(handler);
+    onRenders.push(handler)
     if (!isActive) {
-      isActive = true;
-      raf(render);
+      isActive = true
+      raf(render)
     }
   },
   reset,
-};
+}
 
-export default renderEvents;
+export default renderEvents

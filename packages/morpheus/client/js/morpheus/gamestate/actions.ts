@@ -367,7 +367,7 @@ export const handleHotspot: ActionCreator<ThunkAction<
 
       default: {
         const script = scripts(type)
-        if (script) {
+        if (script && script.execute) {
           dispatch(script.execute(hotspot, gamestates, isMouseDown))
           break
         }

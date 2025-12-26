@@ -75,4 +75,4 @@ export function isEmptySoundCast({
   )
 }
 
-export { Matcher, and, or, not }
+export { type Matcher, and, or, not }

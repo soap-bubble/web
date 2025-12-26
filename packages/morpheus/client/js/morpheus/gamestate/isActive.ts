@@ -4,7 +4,7 @@ import { Cast, Comparator, Gamestate, Hotspot } from '../casts/types'
 import { TEST_TYPES } from '../constants'
 
 export interface Gamestates {
-  byId(id: number): Gamestate
+  byId(id: number | null): Gamestate
 }
 
 function doCompare({
@@ -15,6 +15,9 @@ function doCompare({
   gamestates: Gamestates
 }) {
   const gs = gamestates.byId(gameStateId)
+  if (!gs) {
+    throw new Error(`Gamestate with id ${gameStateId} not found`)
+  }
   const gsValue = gs && gs.value
   switch (TEST_TYPES[testType]) {
     case 'EqualTo':
@@ -66,7 +69,7 @@ export function isHotspotActive({
 }) {
   let result = true
   const script = scripts(cast.type)
-  if (script) {
+  if (script && script.enabled) {
     result = script.enabled(cast, gamestates)
   }
   return result
@@ -82,7 +85,7 @@ export function isActive({
   let result
   // @ts-ignore eventually stop using this catchall
   const script = scripts(cast.type)
-  if (script) {
+  if (script && script.enabled) {
     result = script.enabled(cast, gamestates)
   } else {
     result = isCastActive({ cast, gamestates })

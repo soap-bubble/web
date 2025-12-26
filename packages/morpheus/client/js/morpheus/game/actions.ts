@@ -1,5 +1,5 @@
 import { from, of } from 'rxjs'
-import { map, mergeMap, filter, catchError } from 'rxjs/operators'
+import { map, mergeMap, filter, catchError, tap } from 'rxjs/operators'
 import storage from 'local-storage'
 import createEpic from 'utils/createEpic'
 
@@ -520,65 +520,73 @@ export const loadGameEpic = createEpic((action$, state$) =>
 )
 
 export const browserSaveEpic = createEpic((action$, store$) =>
-  // @ts-ignore
-  action$
-    .ofType(BROWSER_SAVE)
-    .forEach(() => {
+  action$.pipe(
+    filter(action => action?.type === BROWSER_SAVE),
+    tap(() => {
       const pano = (castSelectors.forScene(
         sceneSelectors.currentSceneData(store$.value)
       ) as any).pano
-      storage.set('save', {
-        gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
-        currentSceneId: sceneSelectors.currentSceneId(store$.value),
-        previousSceneId: sceneSelectors.previousSceneId(store$.value),
-        saveId: gameSelectors.saveId(store$.value),
-        rotation: (pano && pano.object3D.rotation) || null,
-      })
-    })
-    .catch((err: any) =>
+      localStorage.setItem(
+        'save',
+        JSON.stringify({
+          gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
+          currentSceneId: sceneSelectors.currentSceneId(store$.value),
+          previousSceneId: sceneSelectors.previousSceneId(store$.value),
+          saveId: gameSelectors.saveId(store$.value),
+          rotation: (pano && pano.object3D.rotation) || null,
+        })
+      )
+    }),
+    catchError((err: any) =>
       of({
         type: SAVE_ERROR,
         payload: err,
       })
     )
+  )
 )
 
 export const localSaveEpic = createEpic((action$, store$) =>
   // @ts-ignore
   action$
-    .ofType(LOCAL_SAVE)
-    .forEach(() => {
-      const pano = (castSelectors.forScene(
-        sceneSelectors.currentSceneData(store$.value)
-      ) as any).pano
-      const saveFile = {
-        gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
-        currentSceneId: sceneSelectors.currentSceneId(store$.value),
-        previousSceneId: sceneSelectors.previousSceneId(store$.value),
-        saveId: gameSelectors.saveId(store$.value),
-        rotation: (pano && pano.object3D.rotation) || null,
-      }
+    // .ofType(LOCAL_SAVE)
+    .pipe(
+      filter(action => action?.type === LOCAL_SAVE),
+      tap(() => {
+        const pano = (castSelectors.forScene(
+          sceneSelectors.currentSceneData(store$.value)
+        ) as any).pano
+        const saveFile = {
+          gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
+          currentSceneId: sceneSelectors.currentSceneId(store$.value),
+          previousSceneId: sceneSelectors.previousSceneId(store$.value),
+          saveId: gameSelectors.saveId(store$.value),
+          rotation: (pano && pano.object3D.rotation) || null,
+        }
 
-      const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(
-        JSON.stringify(saveFile)
-      )}`
-      const downloadAnchorNode = document.createElement('a')
-      downloadAnchorNode.setAttribute('href', dataStr)
-      downloadAnchorNode.setAttribute('download', 'morpheus.save.json')
-      document.body.appendChild(downloadAnchorNode)
-      downloadAnchorNode.click()
-      downloadAnchorNode.remove()
-    })
-    .catch(err => ({
-      type: SAVE_ERROR,
-      payload: err,
-    }))
+        const dataStr = `data:text/json;charset=utf-8,${encodeURIComponent(
+          JSON.stringify(saveFile)
+        )}`
+        const downloadAnchorNode = document.createElement('a')
+        downloadAnchorNode.setAttribute('href', dataStr)
+        downloadAnchorNode.setAttribute('download', 'morpheus.save.json')
+        document.body.appendChild(downloadAnchorNode)
+        downloadAnchorNode.click()
+        downloadAnchorNode.remove()
+      }),
+      catchError(err =>
+        of({
+          type: SAVE_ERROR,
+          payload: err,
+        })
+      )
+    )
 )
 
 export const localLoadEpic = createEpic((action$, store$) =>
-  action$
-    .ofType(LOCAL_LOAD)
-    .mergeMap(
+  action$.pipe(
+    filter(action => action?.type === LOCAL_LOAD),
+    mergeMap(
       ({
         payload: { gamestates, currentSceneId, previousSceneId, rotation },
       }) =>
@@ -586,13 +594,14 @@ export const localLoadEpic = createEpic((action$, store$) =>
           gamestateActions.inject(gamestates),
           sceneActions.goToScene(currentSceneId, true, previousSceneId),
         ])
-    )
-    .catch(err =>
+    ),
+    catchError(err =>
       of({
         type: 'GAME_LOAD_ERROR',
         payload: err,
       })
     )
+  )
 )
 
 export const browserLoad: ActionCreator<ThunkAction<
@@ -602,7 +611,7 @@ export const browserLoad: ActionCreator<ThunkAction<
   Action
 >> = () => {
   return dispatch => {
-    const payload = storage.get('save')
+    const payload = localStorage.getItem('save')
     dispatch({
       type: BROWSER_LOAD,
       payload,
@@ -613,26 +622,32 @@ export const browserLoad: ActionCreator<ThunkAction<
 
 export const browserLoadEpic = createEpic(action$ =>
   action$
-    .ofType(BROWSER_LOAD)
-    .filter(({ payload: data }) => !!data)
-    .mergeMap(
-      ({
-        payload: { gamestates, currentSceneId, previousSceneId, rotation },
-      }) =>
-        from([
-          gamestateActions.inject(gamestates),
-          sceneActions.goToScene(
-            currentSceneId,
-            true,
-            previousSceneId,
-            rotation
-          ),
-        ])
+    // .ofType(BROWSER_LOAD)
+    .pipe(
+      filter(action => action?.type === BROWSER_LOAD),
+      filter(({ payload: data }) => !!data),
+      mergeMap(
+        ({
+          payload: { gamestates, currentSceneId, previousSceneId, rotation },
+        }) =>
+          from([
+            gamestateActions.inject(gamestates),
+            sceneActions.goToScene(
+              currentSceneId,
+              true,
+              previousSceneId,
+              rotation
+            ),
+          ])
+      )
     )
 )
 
 export const openSaveEpic = createEpic(action$ =>
-  action$.ofType(CLOUD_SAVE_OPEN).map(() => ({
-    type: SAVE_LOAD,
-  }))
+  action$.pipe(
+    filter(action => action?.type === CLOUD_SAVE_OPEN),
+    map(() => ({
+      type: SAVE_LOAD,
+    }))
+  )
 )

@@ -76,22 +76,26 @@ export default function useRenderables(
   }, [stageScenes])
   const cursorRenderable = useMemo<Renderable>(() => {
     if (cursor.image) {
-      const image: CanvasImageSource = cursor.image
+      const image = cursor.image
+      const width =
+        'width' in image && Number(image.width) ? Number(image.width) : 0
+      const height =
+        'height' in image && Number(image.height) ? Number(image.height) : 0
       const screenPos = {
-        x: cursor.left - (image.width as number) / 2,
-        y: cursor.top - (image.height as number) / 2,
+        x: cursor.left - width / 2,
+        y: cursor.top - height / 2,
       }
       const renderable: Renderable = (ctx: CanvasRenderingContext2D) => {
         ctx.drawImage(
           image,
           0,
           0,
-          image.width as number,
-          image.height as number,
+          width,
+          height,
           screenPos.x,
           screenPos.y,
-          image.width as number,
-          image.height as number
+          width,
+          height
         )
       }
 

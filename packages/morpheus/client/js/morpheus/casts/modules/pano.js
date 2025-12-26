@@ -173,7 +173,6 @@ export const actions = scene => {
       })
       Object.assign(scene3D.rotation, rot)
       object3D.rotation.x = rot.x
-      // Object.assign(object3D.rotation, rot);
       morpheusRotationTransform(rot, rotation)
       canvasTexture.needsUpdate = true
     }

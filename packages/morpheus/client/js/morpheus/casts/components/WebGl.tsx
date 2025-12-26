@@ -8,7 +8,7 @@ import React, {
 } from 'react'
 import { Dispatch } from 'redux'
 import { cloneDeep, map } from 'lodash'
-import { Canvas, PointerEvent, useThree, useFrame } from '@react-three/fiber'
+import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import {
   BufferAttribute,
   CylinderBufferGeometry,
@@ -135,7 +135,7 @@ const WebGlScene = ({
     }
   }, [panoUrl, textureLoader])
   const texture = usePanoChunk(texImage, rotation.offsetX)
-  const ref = useRef<ShaderMaterial>()
+  const ref = useRef<ShaderMaterial>(null)
   const { camera } = useThree()
 
   useEffect(() => {

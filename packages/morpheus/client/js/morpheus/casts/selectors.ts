@@ -1,7 +1,7 @@
 import { flow, partialRight, filter, entries, map } from 'lodash'
 import cache from './cache'
 // @ts-ignore
-import * as modules from './modules'
+import modules from './modules'
 import { Scene } from './types'
 import {
   LOADING,
@@ -35,6 +35,7 @@ export function forScene(scene: Scene) {
   const forStatus = (status: String) =>
     selectCastCacheForThisScene().status === status
 
+  const moduleSelectorKeys = Object.keys(modules) as (keyof typeof modules)[]
   const castSelectors = {
     cache: selectCastCacheForThisScene,
     isLoading: forStatus(LOADING),
@@ -43,27 +44,13 @@ export function forScene(scene: Scene) {
     isExiting: forStatus(EXITING),
     isUnloading: forStatus(UNLOADING),
     isPreloading: forStatus(PRELOAD),
+    ...moduleSelectorKeys.reduce((memo, name) => {
+      if ('selectors' in modules[name] && modules[name].selectors) {
+        memo[name] = modules[name].selectors
+      }
+      return memo
+    }, {} as Record<keyof typeof modules, any>),
   }
-  const moduleSelectors = Object.keys(modules).reduce((memo, name) => {
-    if (modules[name].selectors) {
-      memo[name] = modules[name].selectors
-    }
-    return memo
-  }, {} as { [key: string]: any })
-  Object.defineProperties(
-    castSelectors,
-    Object.keys(moduleSelectors).reduce(
-      (memo, name) =>
-        Object.assign(memo, {
-          [name]: {
-            get() {
-              return moduleSelectors[name](scene)
-            },
-          },
-        }),
-      {}
-    )
-  )
 
   return castSelectors
 }

@@ -18588,6 +18588,15 @@ rxjs-hooks@^0.7.0:
     tslib "^2.1.0"
     use-constant "^1.0.0"
 
+rxjs-hooks@^0.8.0-alpha.0:
+  version "0.8.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/rxjs-hooks/-/rxjs-hooks-0.8.0-alpha.0.tgz#d096c5e6befd4c7495278388c7826f2b97161e86"
+  integrity sha512-rgHaHEJPVsEZhqjHjEMu1k/7CxxmkGaaRXOBHySaN8a1web7WGL28XUylDVDerlXj1mUkPIz/LI7GfNfeLkQVQ==
+  dependencies:
+    tslib "^2.1.0"
+    use-constant "^1.0.0"
+    use-sync-external-store "^1.1.0"
+
 rxjs@^6.3.1, rxjs@^6.4.0, rxjs@^6.5.4:
   version "6.6.7"
   resolved "https://registry.yarnpkg.com/rxjs/-/rxjs-6.6.7.tgz#90ac018acabf491bf65044235d5863c4dab804c9"
@@ -21060,7 +21069,7 @@ use-sync-external-store@1.2.0:
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.2.0.tgz#7dbefd6ef3fe4e767a0cf5d7287aacfb5846928a"
   integrity sha512-eEgnFxGQ1Ife9bzYs6VLi8/4X6CObHMw9Qr9tPY43iKwsPw8xE8+EFsf/2cFZ5S3esXgpWgtSCtLNS41F+sKPA==
 
-use-sync-external-store@^1.0.0:
+use-sync-external-store@^1.0.0, use-sync-external-store@^1.1.0:
   version "1.6.0"
   resolved "https://registry.yarnpkg.com/use-sync-external-store/-/use-sync-external-store-1.6.0.tgz#b174bfa65cb2b526732d9f2ac0a408027876f32d"
   integrity sha512-Pp6GSwGP/NrPIrxVFAIkOQeyw8lFenOHijQWkUTrDvrF4ALqylP2C/KCkeS9dpUM3KvYRQhna5vt7IL95+ZQ9w==

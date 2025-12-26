@@ -1,5 +1,5 @@
 import { isCastActive } from '../isActive'
-import { Cast } from 'morpheus/casts/types'
+import { Cast, Hotspot } from 'morpheus/casts/types'
 import { Gamestates } from '../isActive'
 
 import * as tapestry from './tapestry'
@@ -9,6 +9,8 @@ import * as musicbox from './musicbox'
 import * as pins from './pins'
 import * as mapPins from './mapPins'
 import * as drums from './drums'
+import { ThunkAction } from 'redux-thunk'
+import { Action } from 'redux'
 
 const scripts = [
   tapestry,
@@ -26,7 +28,11 @@ function enabled(cast: Cast, gamestates: Gamestates): boolean {
 
 interface Script {
   id: number
-  execute?: unknown
+  execute?: (
+    hotspot: Hotspot,
+    gamestates: Gamestates,
+    isMouseDown?: boolean
+  ) => ThunkAction<void | null, unknown, unknown, Action>
   enabled?: (cast: Cast, gamestates: Gamestates) => boolean
 }
 
@@ -37,7 +43,7 @@ export default function(type: number): Script | null {
       {
         enabled,
       },
-      script,
+      script
     )
   }
   return null

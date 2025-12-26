@@ -5,7 +5,6 @@ import { NewGame, selectors as gameSelectors } from 'morpheus/game'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import Menu from '../components/Menu'
 import Settings from './Settings'
-import SaveList from './SaveList'
 import { Scene } from 'morpheus/casts/types'
 
 function mapStateToProps(state: any) {
@@ -44,7 +43,7 @@ const Game = ({
     menu.push(<Settings />)
   }
   if (saveOpen) {
-    menu.push(<SaveList />)
+    // menu.push(<SaveList />)
   }
   return (
     <div id={id} className={className} style={style}>

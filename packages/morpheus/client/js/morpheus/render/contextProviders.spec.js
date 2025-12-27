@@ -6,7 +6,9 @@ import {
   loadAsImage,
   loadAsVideo,
 } from './contextProviders';
-import gearUrl from '../../../image/icon/gear.png';
+import { resolveAssetPath } from '../assets';
+
+const gearUrl = resolveAssetPath('image/icon/gear.png');
 
 jest.mock('utils/canvas');
 jest.mock('service/image');

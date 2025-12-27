@@ -261,30 +261,30 @@ export function generateControlledRenderables({
   height: number
   gamestates: Gamestates
 }): Renderable[] {
-  return controlledCasts.reduce(
-    (memo, [img, casts]) => {
-      for (const cast of casts) {
-        const location = cast.location || cast.controlledLocation
-        memo.push(
-          calculateControlledFrameOperation({
-            cast,
-            img,
-            gamestates,
-            rect: resizeToScreen({
-              left: location.x,
-              top: location.y,
-              right: location.x + cast.width,
-              bottom: location.y + cast.height,
-              width,
-              height,
-            }),
-          })
-        )
+  return controlledCasts.reduce((memo, [img, casts]) => {
+    for (const cast of casts) {
+      let location = cast.location
+      if (cast.controlledLocation) {
+        location = cast.controlledLocation[0].location
       }
-      return memo
-    },
-    [] as Renderable[]
-  )
+      memo.push(
+        calculateControlledFrameOperation({
+          cast,
+          img,
+          gamestates,
+          rect: resizeToScreen({
+            left: location.x,
+            top: location.y,
+            right: location.x + cast.width,
+            bottom: location.y + cast.height,
+            width,
+            height,
+          }),
+        })
+      )
+    }
+    return memo
+  }, [] as Renderable[])
 }
 
 export function* generateRenderables(

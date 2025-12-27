@@ -8,16 +8,10 @@
   "main": "./dist/morpheus/index.js",
   "module": "./dist/morpheus/index.js",
   "types": "./dist/morpheus/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/morpheus/index.d.ts",
-      "import": "./dist/morpheus/index.js"
-    }
-  },
   "scripts": {
     "dev": "node ./scripts/clean-dist.mjs && node ./scripts/copy-static.mjs && node ./scripts/build-esm.mjs --watch",
-    "build": "node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && tsc -p tsconfig.declarations.json && node ./scripts/copy-static.mjs",
-    "typecheck": "tsc --noEmit",
+    "build": "node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.declarations.json && node ./scripts/copy-static.mjs",
+    "typecheck": "node ../../node_modules/typescript/bin/tsc --noEmit",
     "lint": "eslint client config server",
     "test": "jest client",
     "test:watch": "cross-env NODE_ENV=development jest client --watch"
@@ -45,16 +39,16 @@
     ]
   },
   "peerDependencies": {
-    "@react-three/fiber": ">=6.0.0",
-    "react": ">=18.0.0",
-    "react-dom": ">=18.0.0",
-    "react-redux": ">=8.0.0",
+    "@react-three/fiber": ">=9.0.0",
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0",
+    "react-redux": ">=9.0.0",
     "redux": ">=4.2.0",
     "redux-observable": ">=2.0.0",
     "redux-thunk": ">=2.4.0",
     "reselect": ">=4.1.0",
     "rxjs": ">=7.0.0",
-    "three": ">=0.160.0"
+    "three": ">=0.124.0"
   },
   "dependencies": {
     "@material-ui/core": "^4.12.4",
@@ -74,35 +68,37 @@
     "query-string": "^8.2.0",
     "raf": "^3.4.1",
     "react-bootstrap": "^2.10.3",
+    "redux": "^5.0.1",
     "redux-logger": "^3.0.6",
     "rxjs-compat": "^6.6.7",
     "rxjs-hooks": "^0.8.0-alpha.0",
+    "three": "^0.182.0",
     "ua-parser-js": "^1.0.37",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
-    "@react-three/fiber": "^8.16.2",
+    "@react-three/fiber": "^9.4.2",
     "@types/lodash": "^4.14.202",
     "@types/minimatch": "^5.1.2",
     "@types/node": "^20.14.9",
     "@types/prop-types": "^15.7.12",
     "@types/query-string": "^6.3.0",
-    "@types/react": "^18.3.5",
+    "@types/react": "^19.2.7",
     "@types/react-bootstrap": "^0.32.37",
-    "@types/react-dom": "^18.3.0",
+    "@types/react-dom": "^19.2.3",
     "@types/react-redux": "^7.1.33",
     "@types/uuid": "^9.0.8",
     "esbuild": "^0.23.0",
     "fast-glob": "^3.3.2",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "react-redux": "^8.1.3",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
+    "react-redux": "^9.2.0",
     "redux": "^4.2.1",
     "redux-observable": "^2.0.0",
     "redux-thunk": "^2.4.2",
     "reselect": "^4.1.8",
     "rxjs": "^7.8.1",
-    "three": "^0.162.0",
+    "three": "^0.124.0",
     "typescript": "^5.6.3"
   }
 }

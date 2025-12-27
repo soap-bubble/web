@@ -36,18 +36,16 @@ export function gameStateLoadComplete(responseData: any) {
   }
 }
 
-export const fetchInitial: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = () => {
-  return dispatch =>
+export const fetchInitial: ActionCreator<
+  ThunkAction<Promise<void>, any, any, Action>
+> = () => {
+  return (dispatch) =>
     fetchInitialGameState()
       .then((responseData: any) =>
         dispatch(gameStateLoadComplete(responseData))
       )
       .catch((err: any) => dispatch({ payload: err, type: API_ERROR }))
+      .then(() => undefined)
 }
 
 export function updateGameState(gamestateId: number, value: number) {
@@ -70,12 +68,9 @@ function nextSceneAngle(hotspot: MovieSpecialCast) {
   return startAngle
 }
 
-export const handleHotspot: ActionCreator<ThunkAction<
-  Promise<boolean>,
-  any,
-  any,
-  Action
->> = ({
+export const handleHotspot: ActionCreator<
+  ThunkAction<Promise<boolean>, any, any, Action>
+> = ({
   hotspot,
   currentPosition,
   startingPosition,
@@ -378,12 +373,9 @@ export const handleHotspot: ActionCreator<ThunkAction<
   }
 }
 
-export const handlePanoHotspot: ActionCreator<ThunkAction<
-  Promise<boolean>,
-  any,
-  any,
-  Action
->> = ({
+export const handlePanoHotspot: ActionCreator<
+  ThunkAction<Promise<boolean>, any, any, Action>
+> = ({
   hotspot,
   currentPosition,
   startingPosition,

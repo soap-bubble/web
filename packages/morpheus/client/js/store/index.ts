@@ -1,41 +1,41 @@
 import thunkMiddleware from 'redux-thunk'
-import { createStore, applyMiddleware, compose, Store } from 'redux'
+import { createStore, applyMiddleware, compose, Store, Middleware } from 'redux'
 import { createEpicMiddleware } from 'redux-observable'
-import qs from 'query-string'
 import { reducer } from 'utils/createReducer'
 import { epics } from 'utils/createEpic'
 import isDebug from 'utils/isDebug'
 
 declare global {
   interface Window {
-    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose
   }
 }
 
-const qp = qs.parse(location.search)
 let store: Store
 
-export default function() {
+export default function () {
   if (!store) {
     let middleware
-    const epicMiddleware = createEpicMiddleware()
+    const epicMiddlewareInstance = createEpicMiddleware()
+    const epicMiddleware = epicMiddlewareInstance as unknown as Middleware
+    const thunkAsMiddleware = thunkMiddleware as unknown as Middleware
     if (isDebug) {
       const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__
         ? window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__({
-          // @ts-ignore
+            // @ts-ignore
             actionsBlacklist: ['INPUT_CURSOR_SET_POS', 'GAME_SET_CURSOR'],
           })
         : compose
       middleware = composeEnhancers(
-        applyMiddleware(epicMiddleware, thunkMiddleware),
+        applyMiddleware(epicMiddleware, thunkAsMiddleware)
       )
     } else {
-      middleware = applyMiddleware(epicMiddleware, thunkMiddleware)
+      middleware = applyMiddleware(epicMiddleware, thunkAsMiddleware)
     }
 
     store = createStore(reducer, middleware)
 
-    epicMiddleware.run(epics())
+    epicMiddlewareInstance.run(epics())
   }
   return store
 }

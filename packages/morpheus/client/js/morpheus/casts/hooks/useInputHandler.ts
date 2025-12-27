@@ -63,7 +63,7 @@ type InputReturn = [
     onPointerDown: (e: PointerEvent) => void
     onPointerMove: (e: PointerEvent) => void
     onPointerCancelled: (e: PointerEvent) => void
-  }
+  },
 ]
 export type DispatchEvent = ThunkAction<Promise<any>, any, any, Action>
 
@@ -164,7 +164,7 @@ function eventQueueReducer(
 
 const isMovieSpecialCast = forMorpheusType('MovieSpecialCast')
 
-export default function(
+export default function (
   scene: Scene,
   gamestates: Gamestates,
   castEndObserver: Observable<SupportedSoundCasts> | undefined | null,
@@ -269,9 +269,9 @@ export default function(
         const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1
         const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1
 
-        raycaster.setFromCamera({ x, y }, camera)
+        raycaster.setFromCamera(new Vector2(x, y), camera)
         const panoIntersects = raycaster.intersectObject(panoObject)
-        const panoIntersect = panoIntersects.find(intersect => {
+        const panoIntersect = panoIntersects.find((intersect) => {
           if (intersect && intersect.uv) {
             return true
           }
@@ -318,7 +318,9 @@ export default function(
    * The currently active hotspots of the scene
    */
   const hotspots = useMemo(() => {
-    const filter = and<Cast>(isHotspot, cast => isActive({ cast, gamestates }))
+    const filter = and<Cast>(isHotspot, (cast) =>
+      isActive({ cast, gamestates })
+    )
     return scene.casts.filter(filter) as Hotspot[]
   }, [scene, gamestates])
 
@@ -343,7 +345,7 @@ export default function(
    */
   useEffect(() => {
     if (cursorIndex !== 0) {
-      promiseCursor(cursorIndex).then(cursorImg => setCursor(cursorImg))
+      promiseCursor(cursorIndex).then((cursorImg) => setCursor(cursorImg))
     }
   }, [cursorIndex])
 
@@ -382,7 +384,7 @@ export default function(
    */
   useEffect(() => {
     const nowInHotspots: Hotspot[] = []
-    each(hotspots, hotspot => {
+    each(hotspots, (hotspot) => {
       const { rectTop, rectBottom, rectLeft, rectRight } = hotspot
       if (
         (gameTop > rectTop &&
@@ -432,7 +434,7 @@ export default function(
       const activatableNewHotspots = (scene.casts as Hotspot[]).filter(
         and<Cast>(
           isHotspot,
-          cast => isActive({ cast, gamestates }),
+          (cast) => isActive({ cast, gamestates }),
           (({ gesture }: Hotspot) =>
             GESTURES[gesture] === 'Always' ||
             GESTURES[gesture] === 'SceneEnter') as (c: Cast) => boolean
@@ -453,7 +455,7 @@ export default function(
   useEffect(() => {
     let subscription: Subscription
     if (castEndObserver) {
-      subscription = castEndObserver.subscribe(movieCast => {
+      subscription = castEndObserver.subscribe((movieCast) => {
         logger.info({ cast: movieCast }, 'end observerer received cast')
         if (
           and(
@@ -461,12 +463,8 @@ export default function(
             isMovieSpecialCast
           )(movieCast)
         ) {
-          const {
-            nextSceneId,
-            actionAtEnd,
-            angleAtEnd,
-            dissolveToNextScene,
-          } = movieCast as MovieSpecialCast
+          const { nextSceneId, actionAtEnd, angleAtEnd, dissolveToNextScene } =
+            movieCast as MovieSpecialCast
           if (actionAtEnd > 0) {
             logger.info(
               {
@@ -524,7 +522,7 @@ export default function(
         () => {
           eventQueueDispatch(eventQueueActionCreators.finish(dispatchEvent))
         },
-        err => {
+        (err) => {
           console.error('Error dispatching hotspot event', err)
           eventQueueDispatch(eventQueueActionCreators.finish(dispatchEvent))
         }

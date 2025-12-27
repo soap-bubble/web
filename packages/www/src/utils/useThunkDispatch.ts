@@ -1,7 +1,5 @@
-import { useDispatch } from "react-redux";
-import { ThunkDispatch } from "redux-thunk";
-import { AnyAction } from "redux";
+import { useDispatch } from 'react-redux';
+import type { MorpheusDispatch } from '@soapbubble/morpheus-client';
 
-const useThunkDispatch = () =>
-  useDispatch<ThunkDispatch<any, any, AnyAction>>();
+const useThunkDispatch = () => useDispatch<MorpheusDispatch>();
 export default useThunkDispatch;

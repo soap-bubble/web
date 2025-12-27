@@ -19,14 +19,16 @@ import {
 import {
   titleDimensions,
 } from './selectors';
-import newMap from '../../../image/texture/new.png';
-import newBumpMap from '../../../image/texture/new-bump.png';
-import settingsMap from '../../../image/texture/settings.png';
-import settingsBumpMap from '../../../image/texture/settings-bump.png';
-import exitMap from '../../../image/texture/exit.png';
-import exitBumpMap from '../../../image/texture/exit-bump.png';
-import contMap from '../../../image/texture/cont.png';
-import contBumpMap from '../../../image/texture/cont-bump.png';
+import { resolveAssetPath } from '../assets';
+
+const newMap = resolveAssetPath('image/texture/new.png');
+const newBumpMap = resolveAssetPath('image/texture/new-bump.png');
+const settingsMap = resolveAssetPath('image/texture/settings.png');
+const settingsBumpMap = resolveAssetPath('image/texture/settings-bump.png');
+const exitMap = resolveAssetPath('image/texture/exit.png');
+const exitBumpMap = resolveAssetPath('image/texture/exit-bump.png');
+const contMap = resolveAssetPath('image/texture/cont.png');
+const contBumpMap = resolveAssetPath('image/texture/cont-bump.png');
 
 const textureLoader = new TextureLoader();
 

@@ -1,28 +1,8 @@
 
-import cursor10001 from '../../../image/cursors/Bigarrow.png';
-import cursor10011 from '../../../image/cursors/Card.png';
-import cursor10008 from '../../../image/cursors/Open.png';
-import cursor10009 from '../../../image/cursors/Closed.png';
-import cursor10000 from '../../../image/cursors/Wheel.png';
-import cursor10002 from '../../../image/cursors/Hand.png';
-import cursor10003 from '../../../image/cursors/Tele.png';
-import cursor10005 from '../../../image/cursors/Goback.png';
-import cursor10007 from '../../../image/cursors/Down.png';
-import cursor10010 from '../../../image/cursors/Tapest.png';
-import cursor10004 from '../../../image/cursors/Micro.png';
-import cursor10012 from '../../../image/cursors/Cur10012.png';
-import cursor10013 from '../../../image/cursors/Cur10013.png';
-import cursor10014 from '../../../image/cursors/Cur10014.png';
-import cursor10015 from '../../../image/cursors/Cur10015.png';
-import cursor10016 from '../../../image/cursors/Cur10016.png';
-import cursor10017 from '../../../image/cursors/cur10017.png';
-import cursor10018 from '../../../image/cursors/cur10018.png';
-import cursor10019 from '../../../image/cursors/cur10019.png';
-import cursor10020 from '../../../image/cursors/cur10020.png';
-import cursor10021 from '../../../image/cursors/cur10021.png';
-import cursor10022 from '../../../image/cursors/cur10022.png';
-import cursor10023 from '../../../image/cursors/cur10023.png';
-import cursor10024 from '../../../image/cursors/cur10024.png';
+import { resolveAssetPath } from '../assets'
+
+const cursorFrom = (fileName: string) =>
+  resolveAssetPath(`image/cursors/${fileName}`)
 
 export const CURSOR_IDS = {
   BIG_ARROW: 10001,
@@ -58,28 +38,28 @@ export const CURSOR_NAMES = Object.keys(CURSOR_IDS).reduce((memo, name) => {
 }, {} as { [key: number]: string});
 
 export const MORPHEUS_TO_CURSOR = {
-  10001: cursor10001,
-  10011: cursor10011,
-  10008: cursor10008,
-  10009: cursor10009,
-  10000: cursor10000,
-  10002: cursor10002,
-  10003: cursor10003,
-  10005: cursor10005,
-  10007: cursor10007,
-  10010: cursor10010,
-  10004: cursor10004,
-  10012: cursor10012,
-  10013: cursor10013,
-  10014: cursor10014,
-  10015: cursor10015,
-  10016: cursor10016,
-  10017: cursor10017,
-  10018: cursor10018,
-  10019: cursor10019,
-  10020: cursor10020,
-  10021: cursor10021,
-  10022: cursor10022,
-  10023: cursor10023,
-  10024: cursor10024,
+  10001: cursorFrom('Bigarrow.png'),
+  10011: cursorFrom('Card.png'),
+  10008: cursorFrom('Open.png'),
+  10009: cursorFrom('Closed.png'),
+  10000: cursorFrom('Wheel.png'),
+  10002: cursorFrom('Hand.png'),
+  10003: cursorFrom('Tele.png'),
+  10005: cursorFrom('Goback.png'),
+  10007: cursorFrom('Down.png'),
+  10010: cursorFrom('Tapest.png'),
+  10004: cursorFrom('Micro.png'),
+  10012: cursorFrom('Cur10012.png'),
+  10013: cursorFrom('Cur10013.png'),
+  10014: cursorFrom('Cur10014.png'),
+  10015: cursorFrom('Cur10015.png'),
+  10016: cursorFrom('Cur10016.png'),
+  10017: cursorFrom('cur10017.png'),
+  10018: cursorFrom('cur10018.png'),
+  10019: cursorFrom('cur10019.png'),
+  10020: cursorFrom('cur10020.png'),
+  10021: cursorFrom('cur10021.png'),
+  10022: cursorFrom('cur10022.png'),
+  10023: cursorFrom('cur10023.png'),
+  10024: cursorFrom('cur10024.png'),
 };

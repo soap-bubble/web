@@ -1,6 +1,8 @@
-import React from 'react';
-import PropTypes from 'prop-types';
-import gearUrl from '../../../../image/icon/gear.png';
+import React from 'react'
+import PropTypes from 'prop-types'
+import { resolveAssetPath } from '../../assets'
+
+const gearUrl = resolveAssetPath('image/icon/gear.png')
 
 const Menu = ({
   onMenuClick,
@@ -21,7 +23,7 @@ const Menu = ({
     onClick={() => onMenuClick(isMenuClosed)}
     onMouseMove={onMouseMove}
   />
-);
+)
 
 Menu.propTypes = {
   onMenuClick: PropTypes.func.isRequired,
@@ -29,6 +31,6 @@ Menu.propTypes = {
   location: PropTypes.object.isRequired,
   el: PropTypes.func.isRequired,
   isMenuClosed: PropTypes.bool.isRequired,
-};
+}
 
-export default Menu;
+export default Menu

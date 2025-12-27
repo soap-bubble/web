@@ -90,8 +90,8 @@ function createIndex() {
 function createGeometry(positions, uvs, index) {
   const geometry = new BufferGeometry()
   geometry.setIndex(index)
-  geometry.addAttribute('position', positions)
-  geometry.addAttribute('uv', uvs)
+  geometry.setAttribute('position', positions)
+  geometry.setAttribute('uv', uvs)
   return geometry
 }
 
@@ -112,32 +112,26 @@ function createObject3D({ geometry, material }) {
   return mesh
 }
 
-const selectors = memoize(scene => {
+const selectors = memoize((scene) => {
   const selectSceneCache = castSelectors.forScene(scene).cache
   const allCasts = () => get(scene, 'casts', [])
-  const selectSelfInStore = createSelector(
-    selectSceneCache,
-    cache => get(cache, 'controlledMovie'),
+  const selectSelfInStore = createSelector(selectSceneCache, (cache) =>
+    get(cache, 'controlledMovie')
   )
   const selectControlledCasts = createSelector(
     selectSelfInStore,
-    controlledMovie => get(controlledMovie, 'controlledCasts', []),
+    (controlledMovie) => get(controlledMovie, 'controlledCasts', [])
   )
   const selectControlledCastsData = createSelector(
     allCasts,
-    forMorpheusType('ControlledMovieCast'),
+    forMorpheusType('ControlledMovieCast')
   )
-  const selectIsPano = createSelector(
-    () => scene,
-    isPano,
+  const selectIsPano = createSelector(() => scene, isPano)
+  const selectIsLoaded = createSelector(selectSelfInStore, (controlledMovie) =>
+    get(controlledMovie, 'isLoaded')
   )
-  const selectIsLoaded = createSelector(
-    selectSelfInStore,
-    controlledMovie => get(controlledMovie, 'isLoaded'),
-  )
-  const selectIsLoading = createSelector(
-    selectSelfInStore,
-    controlledMovie => get(controlledMovie, 'isLoading'),
+  const selectIsLoading = createSelector(selectSelfInStore, (controlledMovie) =>
+    get(controlledMovie, 'isLoading')
   )
   return {
     self: selectSelfInStore,
@@ -149,7 +143,7 @@ const selectors = memoize(scene => {
   }
 })
 
-export const delegate = memoize(scene => {
+export const delegate = memoize((scene) => {
   function applies() {
     return (
       isPano(scene) && scene.casts.find(forMorpheusType('ControlledMovieCast'))
@@ -159,7 +153,7 @@ export const delegate = memoize(scene => {
   function doLoad({ setState, isLoaded, isLoading }) {
     return () => {
       const controlledCastsData = scene.casts.filter(
-        forMorpheusType('ControlledMovieCast'),
+        forMorpheusType('ControlledMovieCast')
       )
       if (isLoaded) {
         return Promise.resolve({})
@@ -168,14 +162,16 @@ export const delegate = memoize(scene => {
         return isLoading
       }
       const promise = Promise.all(
-        controlledCastsData.map(curr =>
-          createMaterial(getAssetUrl(curr.fileName, 'png')).then(material => ({
-            material,
-            positions: createControlledPositions(curr),
-            data: curr,
-          })),
-        ),
-      ).then(controlledCasts => ({
+        controlledCastsData.map((curr) =>
+          createMaterial(getAssetUrl(curr.fileName, 'png')).then(
+            (material) => ({
+              material,
+              positions: createControlledPositions(curr),
+              data: curr,
+            })
+          )
+        )
+      ).then((controlledCasts) => ({
         controlledCasts,
         isLoaded: true,
         isLoading: false,
@@ -206,8 +202,8 @@ export const delegate = memoize(scene => {
           const object3D = createObject3D({ geometry, material })
           panoObject3D.add(object3D)
           return { data, material, positions, object3D }
-        }),
-      ).then(c => ({
+        })
+      ).then((c) => ({
         controlledCasts: c,
       }))
   }

@@ -1,13 +1,22 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2022",
+    "module": "esnext",
+    "moduleResolution": "Bundler",
     "baseUrl": ".",
     "paths": {
+      "@soapbubble/morpheus-client": [
+        "../morpheus/client/js/morpheus/index.ts"
+      ],
+      "@soapbubble/morpheus-client/*": [
+        "../morpheus/client/js/morpheus/*"
+      ],
       "morpheus": [
-        "../morpheus/dist/morpheus/index"
+        "../morpheus/client/js/morpheus/index.ts"
       ],
       "morpheus/*": [
-        "../morpheus/dist/morpheus/*"
+        "../morpheus/client/js/morpheus/*"
       ],
       "*": [
         "src/*"
@@ -24,20 +33,32 @@
     "forceConsistentCasingInFileNames": true,
     "noEmit": true,
     "esModuleInterop": true,
-    "module": "esnext",
-    "moduleResolution": "node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "downlevelIteration": true,
-    "jsx": "preserve",
-    "incremental": true
+    "jsx": "react-jsx",
+    "incremental": true,
+    "composite": true,
+    "tsBuildInfoFile": "./tsconfig.tsbuildinfo",
+    "plugins": [
+      {
+        "name": "next"
+      }
+    ]
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
-    "**/*.tsx"
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts"
   ],
   "exclude": [
     "node_modules"
+  ],
+  "references": [
+    {
+      "path": "../morpheus"
+    }
   ]
 }

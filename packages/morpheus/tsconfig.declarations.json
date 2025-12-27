@@ -11,7 +11,10 @@
     "noImplicitAny": false,
     "noEmit": false,
     "noEmitOnError": false,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./dist/tsconfig.declarations.tsbuildinfo"
   },
   "include": [
     "client/js/**/*"

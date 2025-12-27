@@ -8,3 +8,6 @@ SECRETS.md
 serviceAccount.json
 deployment/local
 .env
+.turbo
+.vscode
+packages/www/public/morpheus-assets

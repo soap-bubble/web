@@ -3,16 +3,13 @@ import {
   FrontSide,
   BackSide,
   DoubleSide,
-  BufferGeometry,
   Object3D,
   BufferAttribute,
-  Uint16BufferAttribute,
   MeshBasicMaterial,
   Mesh,
   Scene,
   CanvasTexture,
   CylinderGeometry,
-  CylinderBufferGeometry,
   RepeatWrapping,
 } from 'three'
 import Tween from '@tweenjs/tween.js'
@@ -62,7 +59,7 @@ function cylindrical(theta) {
 }
 
 function createGeometry() {
-  const geometry = new CylinderBufferGeometry(
+  const geometry = new CylinderGeometry(
     1,
     1,
     sliceHeight * 2,
@@ -70,19 +67,16 @@ function createGeometry() {
     1,
     true,
     -sliceOffset / 2,
-    sliceOffset,
+    sliceOffset
   )
-  geometry.addAttribute(
-    'uv',
-    new BufferAttribute(
-      new Float32Array(
-        geometry.attributes.uv.array.map((u, i) => {
-          return 1 - u
-        }),
-      ),
-      2,
-    ),
-  )
+  const uvAttribute = geometry.getAttribute('uv')
+  if (uvAttribute) {
+    const flippedUvs = new Float32Array(uvAttribute.array.length)
+    for (let i = 0; i < uvAttribute.array.length; i += 1) {
+      flippedUvs[i] = 1 - uvAttribute.array[i]
+    }
+    geometry.setAttribute('uv', new BufferAttribute(flippedUvs, 2))
+  }
   return geometry
 }
 
@@ -100,7 +94,7 @@ function createObject3D({
 
 function createMaterial(map) {
   let material
-  const promise = new Promise(resolve => {
+  const promise = new Promise((resolve) => {
     material = new MeshBasicMaterial({
       side: BackSide,
       map,
@@ -131,7 +125,7 @@ function clamp({ x, y }) {
 
 function createScene(...objects) {
   const scene = new Scene()
-  objects.forEach(o => scene.add(o))
+  objects.forEach((o) => scene.add(o))
   return scene
 }
 
@@ -156,9 +150,9 @@ function morpheusRotationTransform(rot3, mRot) {
   mRot.x = rot3.x
 }
 
-export const actions = scene => {
+export const actions = (scene) => {
   let isSweeping = false
-  global.rotate = function(y) {
+  global.rotate = function (y) {
     forScene(scene).cache().pano.object3D.rotation.y = y
   }
   function rotate({ x, y }) {
@@ -179,7 +173,7 @@ export const actions = scene => {
   }
 
   function rotateBy({ x: deltaX, y: deltaY }) {
-    return dispatch => {
+    return (dispatch) => {
       if (!isSweeping) {
         const cache = forScene(scene).cache()
         const object3D = cache.pano.object3D
@@ -196,7 +190,7 @@ export const actions = scene => {
   }
 
   function sweepTo({ rectLeft, rectRight }) {
-    return dispatch => {
+    return (dispatch) => {
       const left = rectLeft
       const right = rectRight > rectLeft ? rectRight : rectRight + 3600
       const cache = forScene(scene).cache()
@@ -216,7 +210,7 @@ export const actions = scene => {
           }
         }
         const distance = Math.sqrt((x - v.x) ** 2 + (y - v.y) ** 2)
-        return new Promise(resolve => {
+        return new Promise((resolve) => {
           if (distance === 0) {
             // What do you know... already there
             resolve()
@@ -228,7 +222,7 @@ export const actions = scene => {
                   x,
                   y,
                 },
-                Math.sqrt(distance) * 1000,
+                Math.sqrt(distance) * 1000
               )
               .easing(Tween.Easing.Quadratic.Out)
             tween.onUpdate(() => {
@@ -255,7 +249,7 @@ export const actions = scene => {
   }
 }
 
-export const delegate = memoize(scene => {
+export const delegate = memoize((scene) => {
   function applies() {
     return scene.casts.find(forMorpheusType('PanoCast'))
   }
@@ -302,7 +296,7 @@ export const delegate = memoize(scene => {
         })
         const assets = loader.load(
           gamestateSelectors.forState(getState()),
-          gameSelectors.htmlVolume(getState()),
+          gameSelectors.htmlVolume(getState())
         )
 
         const geometry = createGeometry()
@@ -390,7 +384,7 @@ export const delegate = memoize(scene => {
         spareResourceCapacity: webGlPool.spareResourceCapacity,
         size: webGlPool.size,
       })
-      return webGlPool.acquire().then(webgl => {
+      return webGlPool.acquire().then((webgl) => {
         logger.debug({
           sceneId: scene.sceneId,
           message: 'doEnter finished',
@@ -402,7 +396,7 @@ export const delegate = memoize(scene => {
           // Hold on to panohandler separately because it needs to be turned off
           panoHandler,
           inputHandler: touchDisablesMouse(
-            composeMouseTouch(panoHandler.handlers, momentumHandler),
+            composeMouseTouch(panoHandler.handlers, momentumHandler)
           ),
         }
       })
@@ -436,9 +430,9 @@ export const delegate = memoize(scene => {
           loader
             .load(
               gamestateSelectors.forState(getState()),
-              gameSelectors.htmlVolume(getState()),
+              gameSelectors.htmlVolume(getState())
             )
-            .forEach(contextProvider => {
+            .forEach((contextProvider) => {
               if (canvasTexture.version !== textureVersion) {
                 const ctx = renderedCanvas.getContext('2d')
                 const { render } = contextProvider
@@ -455,7 +449,7 @@ export const delegate = memoize(scene => {
           x: 0,
           y: rotation.y,
         },
-        rotation,
+        rotation
       )
 
       return Promise.resolve({
@@ -495,7 +489,7 @@ export const delegate = memoize(scene => {
 
   function doUnload(state) {
     const { webGlPool, webgl, scene3D } = state
-    return dispatch => {
+    return (dispatch) => {
       logger.debug({
         sceneId: scene.sceneId,
         message: 'Release webgl resources',
@@ -509,7 +503,7 @@ export const delegate = memoize(scene => {
           size: webGlPool.size,
         })
         disposeScene(scene3D)
-        return dispatch(doPreunload(state)).then(clear => ({
+        return dispatch(doPreunload(state)).then((clear) => ({
           scene3D: null,
           object3D: null,
           webgl: null,

@@ -1,8 +1,8 @@
-import { BackSide, ShaderChunk, Vector2 } from 'three'
+import { BackSide, ShaderChunk, ShaderMaterialParameters } from 'three'
 
-const pano: any = {
+const pano = {
   uniforms: {
-    texture: { type: 't', value: null },
+    panoTexture: { type: 't', value: null },
     offset: { type: 'float', value: 0 },
   },
   vertexShader: `
@@ -13,7 +13,7 @@ const pano: any = {
   }
 `,
   fragmentShader: `
-  uniform lowp sampler2D texture;
+  uniform lowp sampler2D panoTexture;
   uniform lowp float offset;
   varying vec2 vUv;
 
@@ -27,10 +27,10 @@ const pano: any = {
       vec2 imgOffset = (1.0 - vUv);
       imgOffset *= (7.0 / 8.0);
       imgOffset.x += offset / 1024.0;
-      gl_FragColor = texture2D(texture, imgOffset);
+      gl_FragColor = texture2D(panoTexture, imgOffset);
   }
 `,
   side: BackSide,
-}
+} as ShaderMaterialParameters
 
 export default pano

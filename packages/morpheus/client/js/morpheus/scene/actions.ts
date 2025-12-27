@@ -23,12 +23,35 @@ const logger = loggerFactory('scene:actions')
 export const events = new Events()
 export const sceneLoadQueue = createSceneQueue()
 
-export const sceneLoadComplete: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = (responseData: any) => {
+export const init: ActionCreator<ThunkAction<void, any, any, Action>> = (
+  scene: Scene
+) => {
+  return (dispatch) => {
+    dispatch({
+      type: SCENE_SET_CURRENT_SCENE,
+      payload: scene,
+    })
+    dispatch({
+      type: SCENE_SET_BACKGROUND_SCENE,
+      payload: scene,
+    })
+    dispatch({
+      type: SCENE_DO_ENTERING,
+      payload: {
+        currentScene: scene,
+        currentScenes: [scene],
+        previousScene: null,
+      },
+    })
+    dispatch({
+      type: SCENE_ENTER_DONE,
+    })
+  }
+}
+
+export const sceneLoadComplete: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = (responseData: any) => {
   return (dispatch: Dispatch) => {
     logger.info(responseData)
     dispatch({
@@ -50,12 +73,9 @@ export const sceneLoadStarted: ActionCreator<Action> = (
   }
 }
 
-export const fetch: ActionCreator<ThunkAction<
-  Promise<Scene | null>,
-  any,
-  any,
-  Action
->> = (sceneId: number) => {
+export const fetch: ActionCreator<
+  ThunkAction<Promise<Scene | null>, any, any, Action>
+> = (sceneId: number) => {
   return async (dispatch: Dispatch) => {
     const db = firebase.default.firestore()
     const sceneDoc = await db
@@ -83,7 +103,7 @@ export const fetch: ActionCreator<ThunkAction<
               return castDoc.docs[0].data()
             })
           )
-          const casts = scene.casts.map(cast => {
+          const casts = scene.casts.map((cast) => {
             if ((cast as { ref: { castId: string } }).ref) {
               return loadedCasts.find(
                 ({ castId }: any) =>
@@ -107,14 +127,11 @@ export const fetch: ActionCreator<ThunkAction<
   }
 }
 
-export const fetchScene: ActionCreator<ThunkAction<
-  Promise<Scene | null>,
-  any,
-  any,
-  Action
->> = (id: string) => {
+export const fetchScene: ActionCreator<
+  ThunkAction<Promise<Scene | null>, any, any, Action>
+> = (id: string) => {
   logger.info('fetchScene', id)
-  return async dispatch => {
+  return async (dispatch) => {
     const sceneData = await dispatch(fetch(Number(id)))
     dispatch(sceneLoadComplete(sceneData))
     return sceneData
@@ -128,7 +145,7 @@ export const setBackgroundScene: ActionCreator<Action> = (scene: Scene) => {
   }
 }
 
-export const setNextStartAngle: ActionCreator<Action> = angle => {
+export const setNextStartAngle: ActionCreator<Action> = (angle) => {
   return {
     type: SET_NEXT_START_ANGLE,
     payload: angle,
@@ -137,12 +154,9 @@ export const setNextStartAngle: ActionCreator<Action> = angle => {
 
 const CURRENT_SCENE_STACK_SIZE = 6
 
-const doSceneEntering: ActionCreator<ThunkAction<
-  Scene | undefined,
-  any,
-  any,
-  Action
->> = scene => {
+const doSceneEntering: ActionCreator<
+  ThunkAction<Scene | undefined, any, any, Action>
+> = (scene) => {
   return (dispatch, getState) => {
     let oldScene: Scene | undefined = undefined
     let currentScenes = sceneSelectors.currentScenesData(getState()) as Scene[]
@@ -151,7 +165,7 @@ const doSceneEntering: ActionCreator<ThunkAction<
 
     // Check if scene is already in scene stack
     const existingScene = currentScenes.find(
-      s => (s && s.sceneId) === scene.sceneId
+      (s) => (s && s.sceneId) === scene.sceneId
     )
     if (existingScene) {
       const existingSceneIndex = currentScenes.indexOf(existingScene)
@@ -185,12 +199,9 @@ const doSceneEntering: ActionCreator<ThunkAction<
   }
 }
 
-export const runScene: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = scene => {
+export const runScene: ActionCreator<ThunkAction<void, any, any, Action>> = (
+  scene
+) => {
   return async (dispatch, getState) => {
     logger.info('runScene', scene.sceneId)
     let userIncontrol = false
@@ -199,7 +210,9 @@ export const runScene: ActionCreator<ThunkAction<
         getState()
       ) as Scene[]
       // Check if scene is already in scene stack
-      const existingScene = currentScenes.find(s => s.sceneId === scene.sceneId)
+      const existingScene = currentScenes.find(
+        (s) => s.sceneId === scene.sceneId
+      )
 
       if (!existingScene) {
         // await dispatch(castActions.lifecycle.doLoad(scene))
@@ -232,16 +245,13 @@ export const runScene: ActionCreator<ThunkAction<
   }
 }
 
-export const startAtScene: ActionCreator<ThunkAction<
-  Promise<void>,
-  any,
-  any,
-  Action
->> = id => {
-  return dispatch =>
+export const startAtScene: ActionCreator<
+  ThunkAction<Promise<void>, any, any, Action>
+> = (id) => {
+  return (dispatch) =>
     dispatch(fetchScene(id))
-      .then(scene => dispatch(runScene(scene)))
-      .catch(error => {
+      .then((scene) => dispatch(runScene(scene)))
+      .catch((error) => {
         dispatch(inputActions.enableControl())
         dispatch({
           type: SCENE_LOAD_ERROR,
@@ -251,12 +261,9 @@ export const startAtScene: ActionCreator<ThunkAction<
 }
 
 let isTransitioning = false
-export const goToScene: ActionCreator<ThunkAction<
-  Promise<void>,
-  any,
-  any,
-  Action
->> = (id: string, dissolve: boolean) => {
+export const goToScene: ActionCreator<
+  ThunkAction<Promise<void>, any, any, Action>
+> = (id: string, dissolve: boolean) => {
   return (dispatch, getState) => {
     logger.info('goToScene:queue', id)
     let currentSceneData = sceneSelectors.currentSceneData(getState())

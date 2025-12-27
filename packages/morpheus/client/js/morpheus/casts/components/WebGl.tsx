@@ -11,7 +11,7 @@ import { cloneDeep, map } from 'lodash'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import {
   BufferAttribute,
-  CylinderBufferGeometry,
+  CylinderGeometry,
   TextureLoader,
   Mesh,
   ShaderMaterial,
@@ -120,13 +120,13 @@ const WebGlScene = ({
 
     return stageActivePanoCasts
   }, [stageScenes, gamestates])
-  const meshRef = useRef<Mesh>()
+  const meshRef = useRef<Mesh>(null)
   const panoUrl = onStagePano && getAssetUrl(onStagePano.fileName, 'png')
   const textureLoader = useMemo(() => new TextureLoader(), [])
   const [texImage, setTexImage] = useState<HTMLImageElement>()
   useEffect(() => {
     if (panoUrl) {
-      const tex = textureLoader.load(panoUrl, t => {
+      const tex = textureLoader.load(panoUrl, (t) => {
         setTexImage(t.image)
       })
       if (tex) {
@@ -144,44 +144,7 @@ const WebGlScene = ({
     }
     setCamera(camera)
   }, [camera])
-  useEffect(() => {
-    setPanoObject(meshRef.current)
-  }, [meshRef.current])
 
-  // const panoInput = usePanoInput(
-  //   dispatch,
-  //   meshRef.current,
-  //   camera,
-  //   (stageScenes.length && stageScenes[stageScenes.length - 1]) || undefined,
-  //   top,
-  //   left,
-  //   width,
-  //   height,
-  //   offsetX,
-  //   rotation.x
-  // )
-  // const momentumInput = usePanoMomentum(5, 100)
-  // const pointerEvents = usePointerEvents(
-  //   {
-  //     onPointerDown: panoInput.onPointerDown,
-  //     onPointerMove: panoInput.onPointerMove,
-  //     onPointerUp: panoInput.onPointerUp,
-  //   },
-  //   {
-  //     onPointerDown: momentumInput.onPointerDown,
-  //     onPointerMove: momentumInput.onPointerMove,
-  //     onPointerUp: momentumInput.onPointerUp,
-  //     onPointerOut: momentumInput.onPointerOut,
-  //     onPointerLeave: momentumInput.onPointerLeave,
-  //   }
-  // )
-  // const {
-  //   onPointerDown,
-  //   onPointerMove,
-  //   onPointerUp,
-  //   onPointerLeave,
-  // } = pointerEvents
-  // const { delta } = momentumInput
   useFrame(() => {
     if (ref.current) {
       const offset = rotation.x - rotation.offsetX
@@ -191,6 +154,7 @@ const WebGlScene = ({
       meshRef.current.rotation.x = rotation.y
     }
   })
+
   const shaderArgs = useMemo<[ShaderMaterialParameters]>(
     () => [cloneDeep(panoShader)],
     []
@@ -198,7 +162,7 @@ const WebGlScene = ({
   return (
     <React.Fragment>
       <mesh ref={meshRef}>
-        <cylinderBufferGeometry
+        <cylinderGeometry
           attach="geometry"
           args={[
             1,
@@ -215,21 +179,21 @@ const WebGlScene = ({
           attach="material"
           ref={ref}
           args={shaderArgs}
-          uniforms-texture-value={texture}
+          uniforms-panoTexture-value={texture}
         />
       </mesh>
     </React.Fragment>
   )
 }
 
-const WebGl: FunctionComponent<GlStageProps> = props => (
+const WebGl: FunctionComponent<GlStageProps> = (props) => (
   <Canvas
     camera={{
       fov: 51.75,
       aspect: 640 / 420,
       near: 0.01,
       far: 1000,
-      position: [0, 0, 0.09],
+      position: [0, 0, 0.09] as const,
     }}
     style={{
       cursor: 'none',

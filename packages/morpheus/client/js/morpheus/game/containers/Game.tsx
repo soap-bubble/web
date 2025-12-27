@@ -1,6 +1,5 @@
 import { connect } from 'react-redux'
-import React, { CSSProperties, useMemo } from 'react'
-import PropTypes from 'prop-types'
+import React, { CSSProperties, FC } from 'react'
 import { NewGame, selectors as gameSelectors } from 'morpheus/game'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import Menu from '../components/Menu'
@@ -17,23 +16,25 @@ function mapStateToProps(state: any) {
   }
 }
 
-const Game = ({
+type StateProps = ReturnType<typeof mapStateToProps>
+type OwnProps = {
+  id: string
+  className?: string
+}
+type GameProps = StateProps &
+  OwnProps & {
+    style?: CSSProperties | Record<string, string>
+  }
+
+const Game: FC<GameProps> = ({
   id,
-  className,
+  className = '',
   style,
   stageScenes,
   menuOpen,
   settingsOpen,
   saveOpen,
-}: {
-  id: string
-  className?: string
-  style: CSSProperties
-  stageScenes: Scene[]
-  menuOpen: boolean
-  settingsOpen: boolean
-  saveOpen: boolean
-}) => {
+}: GameProps) => {
   const menu = []
   if (menuOpen) {
     menu.push(<Menu />)
@@ -45,25 +46,15 @@ const Game = ({
   if (saveOpen) {
     // menu.push(<SaveList />)
   }
+  const resolvedStyle = (style ?? {}) as CSSProperties
   return (
-    <div id={id} className={className} style={style}>
+    <div id={id} className={className} style={resolvedStyle}>
       {stageScenes.length && <NewGame stageScenes={stageScenes} />}
       {menu}
     </div>
   )
 }
 
-Game.propTypes = {
-  className: PropTypes.string,
-  menuOpen: PropTypes.bool.isRequired,
-  settingsOpen: PropTypes.bool.isRequired,
-  saveOpen: PropTypes.bool.isRequired,
-  style: PropTypes.oneOfType([PropTypes.string, PropTypes.object]),
-}
-
-Game.defaultProps = {
-  className: '',
-  style: {},
-}
-// @ts-ignore
-export default connect(mapStateToProps)(Game)
+export default connect<StateProps, Record<string, never>, OwnProps, any>(
+  mapStateToProps
+)(Game)

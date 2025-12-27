@@ -1,4 +1,6 @@
-import menuImg from '../../../image/icon/gear.png'
+import { resolveAssetPath } from '../assets'
+
+const menuImg = resolveAssetPath('image/icon/gear.png')
 
 const SIZE = 256
 const OFFSET = 10

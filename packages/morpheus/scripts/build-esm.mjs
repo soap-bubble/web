@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { resolve } from 'node:path';
+import { resolve, extname } from 'node:path';
 
 import fg from 'fast-glob';
 import { build, context } from 'esbuild';
@@ -19,8 +19,36 @@ const entryPoints = await fg(['client/js/**/*.{ts,tsx,js,jsx}'], {
   ]
 });
 
+const priorityByExtension = new Map([
+  ['.ts', 2],
+  ['.tsx', 2],
+  ['.js', 1],
+  ['.jsx', 1]
+]);
+
+const normalizedEntries = new Map();
+
+for (const entry of entryPoints) {
+  const extension = extname(entry);
+  const key = entry
+    .replace(/^client\/js\//, '')
+    .replace(/\.(ts|tsx|js|jsx)$/, '');
+  const current = normalizedEntries.get(key);
+  if (!current) {
+    normalizedEntries.set(key, entry);
+    continue;
+  }
+  const currentPriority = priorityByExtension.get(extname(current)) ?? 0;
+  const nextPriority = priorityByExtension.get(extension) ?? 0;
+  if (nextPriority >= currentPriority) {
+    normalizedEntries.set(key, entry);
+  }
+}
+
 const options = {
-  entryPoints: entryPoints.map(entry => resolve(packageRoot, entry)),
+  entryPoints: Array.from(normalizedEntries.values()).map(entry =>
+    resolve(packageRoot, entry)
+  ),
   outdir: resolve(packageRoot, 'dist'),
   outbase: resolve(packageRoot, 'client/js'),
   format: 'esm',
@@ -34,8 +62,8 @@ const options = {
   loader: {
     '.ts': 'ts',
     '.tsx': 'tsx',
-    '.js': 'jsx',
-    '.jsx': 'jsx'
+    '.js': 'tsx',
+    '.jsx': 'tsx'
   }
 };
 

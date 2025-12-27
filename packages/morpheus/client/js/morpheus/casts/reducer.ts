@@ -1,4 +1,5 @@
 import { omit } from 'lodash'
+import type { Action } from 'redux'
 import createReducer from 'utils/createReducer'
 import { Scene } from './types'
 import {
@@ -11,8 +12,14 @@ import {
   UNPRELOAD,
 } from './actionTypes'
 
+type SceneMetaAction = Action<string> & { meta?: { scene?: Scene } }
+
 function withStatus(status: string) {
-  return (state: any, { meta: { scene } }: { meta: { scene: Scene } }) => {
+  return (state: any, action: SceneMetaAction) => {
+    const scene = action.meta?.scene
+    if (!scene) {
+      return state
+    }
     const oldSceneCache = state.cache[scene.sceneId]
       ? state.cache[scene.sceneId]
       : {}
@@ -44,13 +51,21 @@ const reducer = createReducer(
     [ENTERING]: withStatus(ENTERING),
     [EXITING]: withStatus(EXITING),
     [ON_STAGE]: withStatus(ON_STAGE),
-    [UNPRELOAD](state, { meta: { scene } }) {
+    [UNPRELOAD](state, action: SceneMetaAction) {
+      const scene = action.meta?.scene
+      if (!scene) {
+        return state
+      }
       return {
         ...state,
         cache: omit(state.cache, scene.sceneId),
       }
     },
-    [UNLOADING](state, { meta: { scene } }) {
+    [UNLOADING](state, action: SceneMetaAction) {
+      const scene = action.meta?.scene
+      if (!scene) {
+        return state
+      }
       return {
         ...state,
         cache: omit(state.cache, scene.sceneId),

@@ -1,26 +1,31 @@
 {
+  "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "preserve",
-    "moduleResolution": "Bundler",
-    "jsx": "react-jsx",
-    "strict": true,
+    "composite": true,
+    "incremental": true,
+    "rootDir": "./client/js",
+    "outDir": "./dist",
+    "baseUrl": "./client/js",
     "allowJs": true,
     "checkJs": false,
-    "allowSyntheticDefaultImports": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
-    "isolatedModules": true,
-    "skipLibCheck": true,
-    "baseUrl": "./client/js",
-    "rootDir": "./client/js",
+    "emitDeclarationOnly": false,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "tsBuildInfoFile": "./dist/tsconfig.tsbuildinfo",
     "paths": {
-      "morpheus/*": ["morpheus/*"],
-      "service/*": ["service/*"],
-      "store/*": ["store/*"],
-      "utils/*": ["utils/*"]
+      "service/*": [
+        "service/*"
+      ],
+      "store/*": [
+        "store/*"
+      ],
+      "utils/*": [
+        "utils/*"
+      ]
     }
   },
-  "include": ["client/js"]
+  "include": [
+    "client/js"
+  ]
 }

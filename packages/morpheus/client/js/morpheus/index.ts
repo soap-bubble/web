@@ -56,3 +56,4 @@ export type {
   MorpheusDispatch,
 } from './types/public'
 export type { Gamestates } from './gamestate/isActive'
+export { default as Main } from './title/containers/Main'

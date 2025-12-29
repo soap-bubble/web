@@ -7,10 +7,10 @@
     "baseUrl": ".",
     "paths": {
       "@soapbubble/morpheus-client": [
-        "../morpheus/client/js/morpheus/index.ts"
+        "../morpheus/client/js/index.ts"
       ],
       "@soapbubble/morpheus-client/*": [
-        "../morpheus/client/js/morpheus/*"
+        "../morpheus/client/js/*"
       ],
       "morpheus": [
         "../morpheus/client/js/morpheus/index.ts"
@@ -51,7 +51,7 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/dev/types/**/*.ts",
   ],
   "exclude": [
     "node_modules"

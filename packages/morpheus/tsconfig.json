@@ -26,6 +26,7 @@
     }
   },
   "include": [
-    "client/js"
+    "client/js/**/*",
+    "client/js/service/morpheus.map.json"
   ]
 }

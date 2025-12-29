@@ -4,7 +4,7 @@ import Events from 'events'
 import { actions as inputActions } from 'morpheus/input'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import loggerFactory from 'utils/logger'
-import { Scene, UnresolvedScene, Cast } from '../casts/types'
+import { Scene, UnresolvedScene, Cast, SceneCasts } from '../casts/types'
 import createSceneQueue from './queue'
 import {
   SCENE_LOAD_START,
@@ -89,7 +89,7 @@ export const fetch: ActionCreator<
         const needToLoadCasts = scene.casts.filter(
           (cast: any) => !!cast.ref
         ) as {
-          ref: { castId: string }
+          ref: { castId: number }
         }[]
         if (needToLoadCasts.length) {
           logger.info(`Normalizing scene: ${sceneId}`)
@@ -104,14 +104,14 @@ export const fetch: ActionCreator<
             })
           )
           const casts = scene.casts.map((cast) => {
-            if ((cast as { ref: { castId: string } }).ref) {
+            if ((cast as { ref: { castId: number } }).ref) {
               return loadedCasts.find(
                 ({ castId }: any) =>
-                  castId === (cast as { ref: { castId: string } }).ref.castId
-              )
+                  castId === (cast as { ref: { castId: number } }).ref.castId
+              ) as SceneCasts
             }
             return cast
-          }) as Cast[]
+          }) as SceneCasts[]
           scene.casts = casts
         }
         // scene.casts = menuDecorator(scene.casts)

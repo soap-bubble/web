@@ -1,4 +1,4 @@
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 import { Action } from 'redux'
 import qs from 'query-string'
 import MenuList from '../components/MenuList'
@@ -17,6 +17,7 @@ import {
 import { closeMenu, openSettings } from '../commands'
 
 import { ThunkDispatch } from 'redux-thunk'
+import { ComponentType } from 'react'
 
 function mapStateToProps(state: any) {
   return {
@@ -61,7 +62,7 @@ function mapDispatchToPros(dispatch: ThunkDispatch<any, any, Action>) {
         return
       }
       var reader = new FileReader()
-      reader.onload = function(e) {
+      reader.onload = function (e) {
         if (e.target && e.target.result) {
           try {
             const contents = JSON.parse(e.target.result.toString())
@@ -89,14 +90,18 @@ function mapDispatchToPros(dispatch: ThunkDispatch<any, any, Action>) {
         document.location.pathname
       }?${qs.stringify({
         ...qp,
-        reload: true
+        reload: true,
       })}`
       document.location.assign(newUrl)
     },
   }
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToPros,
-)(MenuList)
+const connector = connect(mapStateToProps, mapDispatchToPros)
+
+export type MenuListProps = ConnectedProps<typeof connector>
+
+type ConnectedMenuListComponent = ComponentType<{}>
+const ConnectedMenuList = connector(MenuList) as ConnectedMenuListComponent
+
+export default ConnectedMenuList

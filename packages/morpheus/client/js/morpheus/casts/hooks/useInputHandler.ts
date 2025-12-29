@@ -34,6 +34,7 @@ import {
   MovieCast,
   MovieSpecialCast,
   SupportedSoundCasts,
+  SceneCasts,
 } from 'morpheus/casts/types'
 import { DST_RATIO, PANO_OFFSET, DST_WIDTH, GESTURES } from 'morpheus/constants'
 import { forMorpheusType } from '../matchers'
@@ -459,7 +460,7 @@ export default function (
         logger.info({ cast: movieCast }, 'end observerer received cast')
         if (
           and(
-            (cast: Cast) => scene.casts.includes(cast),
+            (cast: SceneCasts) => scene.casts.includes(cast),
             isMovieSpecialCast
           )(movieCast)
         ) {

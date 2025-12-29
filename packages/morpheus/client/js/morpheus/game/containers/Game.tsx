@@ -1,5 +1,5 @@
-import { connect } from 'react-redux'
-import React, { CSSProperties, FC } from 'react'
+import { connect, ConnectedProps } from 'react-redux'
+import React, { CSSProperties, ComponentType, FC } from 'react'
 import { NewGame, selectors as gameSelectors } from 'morpheus/game'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import Menu from '../components/Menu'
@@ -17,7 +17,7 @@ function mapStateToProps(state: any) {
 }
 
 type StateProps = ReturnType<typeof mapStateToProps>
-type OwnProps = {
+export type OwnProps = {
   id: string
   className?: string
 }
@@ -55,6 +55,12 @@ const Game: FC<GameProps> = ({
   )
 }
 
-export default connect<StateProps, Record<string, never>, OwnProps, any>(
-  mapStateToProps
-)(Game)
+const connector = connect(mapStateToProps)
+
+export type GameContainerProps = ConnectedProps<typeof connector>
+
+type ConnectedGameComponent = ComponentType<OwnProps>
+
+const ConnectedGame = connector(Game) as ConnectedGameComponent
+
+export default ConnectedGame

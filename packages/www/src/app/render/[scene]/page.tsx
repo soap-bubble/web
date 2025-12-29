@@ -3,7 +3,7 @@ import { notFound } from 'next/navigation';
 import type { Metadata, NextPage } from 'next';
 
 import Render from 'morpheus-app/Render/Render';
-import { fetch as fetchScene } from 'service/scene';
+import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import type { Scene } from 'morpheus/casts/types';
 
 type PageParams = {

@@ -1,5 +1,6 @@
 import {
   connect,
+  ConnectedProps,
 } from 'react-redux';
 import {
   setPointerCursor,
@@ -15,8 +16,11 @@ import {
   location,
 } from '../selectors';
 import { ThunkDispatch } from 'redux-thunk';
+import { ComponentType } from 'react';
 
-function mapStateToProps(state: any) {
+type State = any
+
+function mapStateToProps(state: State) {
   const isMenuClosed = menuClosed(state);
   return {
     isMenuClosed,
@@ -36,7 +40,11 @@ function mapDispatchToProps(dispatch: ThunkDispatch<any, any, any>) {
   };
 }
 
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(MenuButton);
+const connector = connect(mapStateToProps, mapDispatchToProps)
+
+export type MenuButtonProps = ConnectedProps<typeof connector>
+
+type ConnectedMenuButtonComponent = ComponentType<MenuButtonProps>
+const ConnectedMenuButton = connector(MenuButton) as ConnectedMenuButtonComponent
+
+export default ConnectedMenuButton

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import VolumeSlider from '../containers/VolumeSlider'
+// import VolumeSlider from '../containers/VolumeSlider'
 
 const settingsModalStyle: React.CSSProperties = {
   position: 'absolute',
@@ -49,7 +49,7 @@ const Settings = ({
       Fullscreen
     </button>
     <h4>Volume</h4>
-    <VolumeSlider />
+    {/* <VolumeSlider volume={volume} onChange={onChange} /> */}
   </div>
 )
 

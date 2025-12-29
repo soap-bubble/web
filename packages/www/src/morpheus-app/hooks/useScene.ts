@@ -1,7 +1,6 @@
 import { Dispatch, useContext, useMemo } from 'react';
 import { useEffect } from 'react';
 import { useReducer } from 'react';
-import { fetch } from 'service/scene';
 import { Scene } from 'morpheus/casts/types';
 import createContext from 'utils/createContext';
 

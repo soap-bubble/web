@@ -2,8 +2,7 @@ import { omit } from 'lodash';
 import Immutable from 'immutable';
 import { Gamestate, Scene } from 'morpheus/casts/types';
 import { useEffect, useMemo, useState } from 'react';
-import { fetchInitial } from 'service/gameState';
-import 'service/firebase';
+import { fetchInitial } from '@soapbubble/morpheus-client/service/gameState';
 
 export default function useInitialGamestates() {
   const [gamestates, setGamestates] = useState<Gamestate[]>([]);

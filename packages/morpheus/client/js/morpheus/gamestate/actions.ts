@@ -1,12 +1,11 @@
 import { isUndefined } from 'lodash'
 // @ts-ignore
-import { fetchInitial as fetchInitialGameState } from 'service/gameState'
+import { fetchInitial as fetchInitialGameState } from '../../service/gameState'
 import {
   actions as sceneActions,
   selectors as sceneSelectors,
 } from 'morpheus/scene'
 import { selectors as gamestateSelectors, isActive } from 'morpheus/gamestate'
-import { actions as gameActions } from 'morpheus/game'
 // @ts-ignore
 import scripts from 'morpheus/gamestate/scripts'
 import {
@@ -14,7 +13,7 @@ import {
   selectors as castSelectors,
 } from 'morpheus/casts'
 import loggerFactory from 'utils/logger'
-import { API_ERROR, LOAD_COMPLETE, UPDATE, INJECT } from './actionTypes'
+import { LOAD_COMPLETE, UPDATE, INJECT } from './actionTypes'
 import { ACTION_TYPES } from '../constants'
 import { ActionCreator, Action } from 'redux'
 import { ThunkAction } from 'redux-thunk'
@@ -39,13 +38,11 @@ export function gameStateLoadComplete(responseData: any) {
 export const fetchInitial: ActionCreator<
   ThunkAction<Promise<void>, any, any, Action>
 > = () => {
-  return (dispatch) =>
-    fetchInitialGameState()
-      .then((responseData: any) =>
-        dispatch(gameStateLoadComplete(responseData))
-      )
-      .catch((err: any) => dispatch({ payload: err, type: API_ERROR }))
-      .then(() => undefined)
+  return (dispatch) => {
+    const gamestates = fetchInitialGameState()
+    dispatch(gameStateLoadComplete(gamestates))
+    return Promise.resolve(void 0)
+  }
 }
 
 export function updateGameState(gamestateId: number, value: number) {

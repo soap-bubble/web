@@ -19,6 +19,7 @@ import {
   MovieSpecialCast,
   Cast,
   SupportedSoundCasts,
+  SceneCasts,
 } from '../types'
 import { union } from 'lodash'
 import { Observable, observable, Subscription, Subscriber } from 'rxjs'
@@ -61,9 +62,8 @@ const Special = ({
   exitingScene,
   stageScenes,
 }: SpecialProps) => {
-  const [eventSubscriber, setEventSubscriber] = useState<null | Subscriber<
-    MovieCast
-  >>()
+  const [eventSubscriber, setEventSubscriber] =
+    useState<null | Subscriber<MovieCast>>()
   const [canPlayThroughVideos, onVideoCastCanPlayThrough] = useCastRefNoticer<
     HTMLVideoElement,
     MovieCast
@@ -97,7 +97,7 @@ const Special = ({
     SupportedSoundCasts
   >()
   useEffect(() => {
-    const observable = new Observable<MovieCast>(subscriber => {
+    const observable = new Observable<MovieCast>((subscriber) => {
       setEventSubscriber(subscriber)
       return () => {
         setEventSubscriber(null)
@@ -110,7 +110,7 @@ const Special = ({
     (ref: CastRef<HTMLImageElement, MovieCast>) => {
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
-      const casts = movieCasts.filter(cast =>
+      const casts = movieCasts.filter((cast) =>
         stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
@@ -127,7 +127,7 @@ const Special = ({
     (ref: CastRef<HTMLVideoElement, MovieCast>) => {
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
-      const casts = movieCasts.filter(cast =>
+      const casts = movieCasts.filter((cast) =>
         stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
@@ -144,7 +144,7 @@ const Special = ({
     (ref: CastRef<HTMLAudioElement, SupportedSoundCasts>) => {
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
-      const casts = movieCasts.filter(cast =>
+      const casts = movieCasts.filter((cast) =>
         stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
@@ -157,23 +157,19 @@ const Special = ({
     [onAudioCastEndedBare, eventSubscriber, stageScenes]
   )
 
-  const [
-    imageCasts,
-    videoCasts,
-    soundCasts,
-    renderables,
-  ] = useComputedStageCast(
-    gamestates,
-    width,
-    height,
-    imagesLoaded,
-    availableVideos,
-    cursor,
-    stageScenes,
-    enteringScene,
-    exitingScene,
-    [canPlayThroughVideos, endedVideos, imagesErrored]
-  )
+  const [imageCasts, videoCasts, soundCasts, renderables] =
+    useComputedStageCast(
+      gamestates,
+      width,
+      height,
+      imagesLoaded,
+      availableVideos,
+      cursor,
+      stageScenes,
+      enteringScene,
+      exitingScene,
+      [canPlayThroughVideos, endedVideos, imagesErrored]
+    )
 
   useEffect(() => {
     logger.info({ scenes: stageScenes }, 'stageScenes')
@@ -189,9 +185,9 @@ const Special = ({
    */
   useEffect(() => {
     const activeAndCurrent = and(
-      (cast: Cast) =>
+      (cast: SceneCasts) =>
         !!stageScenes.length && stageScenes[0].casts.includes(cast),
-      (cast: Cast) => isActive({ cast, gamestates })
+      (cast: SceneCasts) => isActive({ cast, gamestates })
     )
     for (const [controller, casts] of availableVideos) {
       if (casts.find(activeAndCurrent)) {
@@ -209,9 +205,9 @@ const Special = ({
    */
   useEffect(() => {
     const activeAndCurrent = and(
-      (cast: Cast) =>
+      (cast: SceneCasts) =>
         !!stageScenes.length && stageScenes[0].casts.includes(cast),
-      (cast: Cast) => isActive({ cast, gamestates })
+      (cast: SceneCasts) => isActive({ cast, gamestates })
     )
     for (const [controller, casts] of availableSounds) {
       if (casts.find(activeAndCurrent)) {

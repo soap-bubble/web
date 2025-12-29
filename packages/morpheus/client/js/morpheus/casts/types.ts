@@ -1,4 +1,4 @@
-export interface Morpheus extends Object {
+export interface Morpheus {
   __t: string
 }
 
@@ -90,13 +90,21 @@ export interface MovieSpecialCast extends MovieCast {
 export type PanoCast = MovieCast
 type PreloadCast = MovieCast
 export type SoundCast = MovieCast
-
+export type SceneCasts =
+  | Hotspot
+  | MovieCast
+  | ControlledMovieCast
+  | SoundCast
+  | PanoAnim
+  | PanoCast
+  | MovieSpecialCast
+  | ControlledMovieCast
 export interface Scene {
   sceneId: number
   cdFlags: number
   sceneType: number
   palette: number
-  casts: Cast[]
+  casts: SceneCasts[]
 }
 
 export interface UnresolvedScene {
@@ -104,7 +112,17 @@ export interface UnresolvedScene {
   cdFlags: number
   sceneType: number
   palette: number
-  casts: (Cast | { ref: { castId: string } })[]
+  casts: (
+    | Hotspot
+    | MovieCast
+    | ControlledMovieCast
+    | SoundCast
+    | PanoAnim
+    | PanoCast
+    | MovieSpecialCast
+    | ControlledMovieCast
+    | { ref: { castId: number } }
+  )[]
 }
 
 export type SupportedSoundCasts =

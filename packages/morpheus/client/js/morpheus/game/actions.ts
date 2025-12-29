@@ -1,4 +1,4 @@
-import { from, of } from 'rxjs'
+import { EMPTY, from, of } from 'rxjs'
 import { map, mergeMap, filter, catchError, tap } from 'rxjs/operators'
 import storage from 'local-storage'
 import createEpic from 'utils/createEpic'
@@ -97,16 +97,13 @@ export function setVolume(volume: any) {
   }
 }
 
-export const setCursor: ActionCreator<ThunkAction<
-  Promise<any>,
-  any,
-  any,
-  Action
->> = cursor => {
+export const setCursor: ActionCreator<
+  ThunkAction<Promise<any>, any, any, Action>
+> = (cursor) => {
   return (dispatch, getState) => {
     const currentCursor = gameSelectors.morpheusCursor(getState())
     if (cursor !== 0 && currentCursor !== cursor) {
-      return promiseCursor(cursor).then(cursorImg =>
+      return promiseCursor(cursor).then((cursorImg) =>
         dispatch({
           type: GAME_SET_CURSOR,
           payload: {
@@ -121,40 +118,28 @@ export const setCursor: ActionCreator<ThunkAction<
   }
 }
 
-export const setPointerCursor: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = () => {
-  return dispatch => dispatch(setCursor(10002))
+export const setPointerCursor: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = () => {
+  return (dispatch) => dispatch(setCursor(10002))
 }
 
-export const setOpenHandCursor: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = () => {
-  return dispatch => dispatch(setCursor(10008))
+export const setOpenHandCursor: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = () => {
+  return (dispatch) => dispatch(setCursor(10008))
 }
 
-export const setCloseHandCursor: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = () => {
-  return dispatch => dispatch(setCursor(10009))
+export const setCloseHandCursor: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = () => {
+  return (dispatch) => dispatch(setCursor(10009))
 }
 
 // dispatch(inputActions.cursorSetPosition(screenPos));
-export const drawCursor: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = () => {
+export const drawCursor: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = () => {
   return (dispatch, getState) => {
     const canvas = gameSelectors.canvas(getState())
     const cursor = gameSelectors.cursorImg(getState())
@@ -181,12 +166,9 @@ export const drawCursor: ActionCreator<ThunkAction<
   }
 }
 
-export const setCursorLocationFromPage: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = ({ pageX, pageY }: any) => {
+export const setCursorLocationFromPage: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = ({ pageX, pageY }: any) => {
   return (dispatch, getState) => {
     const location = gameSelectors.location(getState())
     const top = pageY - location.y
@@ -340,9 +322,9 @@ export function openSave() {
   }
 }
 
-export const loginEpic = createEpic(action$ =>
+export const loginEpic = createEpic((action$) =>
   action$.pipe(
-    filter(action => action.type === LOGIN_START),
+    filter((action) => action.type === LOGIN_START),
     mergeMap(() =>
       from(
         firebase.default
@@ -357,15 +339,15 @@ export const loginEpic = createEpic(action$ =>
         payload: err,
       })
     ),
-    map(user => ({ type: LOGGED_IN, payload: user }))
+    map((user) => ({ type: LOGGED_IN, payload: user }))
   )
 )
 
-export const logoutEpic = createEpic(action$ =>
+export const logoutEpic = createEpic((action$) =>
   action$.pipe(
-    filter(action => action.type === LOGOUT_START),
+    filter((action) => action.type === LOGOUT_START),
     mergeMap(() => from(firebase.default.auth().signOut())),
-    map(user => ({ type: LOGGED_IN, payload: user }))
+    map((user) => ({ type: LOGGED_IN, payload: user }))
   )
 )
 
@@ -482,7 +464,9 @@ export const loadSavesEpic = createEpic((action$, state$) =>
   )
 )
 
-export const loadGameEpic = createEpic((action$, state$) =>
+export const loadGameEpic = createEpic<
+  Action<typeof CLOUD_LOAD> & { payload: string }
+>((action$, state$) =>
   action$.pipe(
     filter(({ type }) => type === CLOUD_LOAD),
     mergeMap(async ({ payload: saveId }) => {
@@ -521,11 +505,13 @@ export const loadGameEpic = createEpic((action$, state$) =>
 
 export const browserSaveEpic = createEpic((action$, store$) =>
   action$.pipe(
-    filter(action => action?.type === BROWSER_SAVE),
+    filter((action) => action?.type === BROWSER_SAVE),
     tap(() => {
-      const pano = (castSelectors.forScene(
-        sceneSelectors.currentSceneData(store$.value)
-      ) as any).pano
+      const pano = (
+        castSelectors.forScene(
+          sceneSelectors.currentSceneData(store$.value)
+        ) as any
+      ).pano
       localStorage.setItem(
         'save',
         JSON.stringify({
@@ -551,11 +537,13 @@ export const localSaveEpic = createEpic((action$, store$) =>
   action$
     // .ofType(LOCAL_SAVE)
     .pipe(
-      filter(action => action?.type === LOCAL_SAVE),
+      filter((action) => action?.type === LOCAL_SAVE),
       tap(() => {
-        const pano = (castSelectors.forScene(
-          sceneSelectors.currentSceneData(store$.value)
-        ) as any).pano
+        const pano = (
+          castSelectors.forScene(
+            sceneSelectors.currentSceneData(store$.value)
+          ) as any
+        ).pano
         const saveFile = {
           gamestates: gamestateSelectors.gamestates(store$.value).toJS(),
           currentSceneId: sceneSelectors.currentSceneId(store$.value),
@@ -574,7 +562,7 @@ export const localSaveEpic = createEpic((action$, store$) =>
         downloadAnchorNode.click()
         downloadAnchorNode.remove()
       }),
-      catchError(err =>
+      catchError((err) =>
         of({
           type: SAVE_ERROR,
           payload: err,
@@ -583,19 +571,28 @@ export const localSaveEpic = createEpic((action$, store$) =>
     )
 )
 
-export const localLoadEpic = createEpic((action$, store$) =>
+export const localLoadEpic = createEpic<
+  Action & {
+    payload: {
+      gamestates: any
+      currentSceneId: number
+      previousSceneId: number
+      rotation: number
+    }
+  }
+>((action$) =>
   action$.pipe(
-    filter(action => action?.type === LOCAL_LOAD),
+    filter((action) => action?.type === LOCAL_LOAD),
     mergeMap(
       ({
         payload: { gamestates, currentSceneId, previousSceneId, rotation },
-      }) =>
-        from([
-          gamestateActions.inject(gamestates),
-          sceneActions.goToScene(currentSceneId, true, previousSceneId),
-        ])
+      }) => {
+        gamestateActions.inject(gamestates)
+        sceneActions.goToScene(currentSceneId, true, previousSceneId, rotation)
+        return EMPTY
+      }
     ),
-    catchError(err =>
+    catchError((err) =>
       of({
         type: 'GAME_LOAD_ERROR',
         payload: err,
@@ -604,13 +601,10 @@ export const localLoadEpic = createEpic((action$, store$) =>
   )
 )
 
-export const browserLoad: ActionCreator<ThunkAction<
-  void,
-  any,
-  any,
-  Action
->> = () => {
-  return dispatch => {
+export const browserLoad: ActionCreator<
+  ThunkAction<void, any, any, Action>
+> = () => {
+  return (dispatch) => {
     const payload = localStorage.getItem('save')
     dispatch({
       type: BROWSER_LOAD,
@@ -620,32 +614,34 @@ export const browserLoad: ActionCreator<ThunkAction<
   }
 }
 
-export const browserLoadEpic = createEpic(action$ =>
-  action$
-    // .ofType(BROWSER_LOAD)
-    .pipe(
-      filter(action => action?.type === BROWSER_LOAD),
-      filter(({ payload: data }) => !!data),
-      mergeMap(
-        ({
-          payload: { gamestates, currentSceneId, previousSceneId, rotation },
-        }) =>
-          from([
-            gamestateActions.inject(gamestates),
-            sceneActions.goToScene(
-              currentSceneId,
-              true,
-              previousSceneId,
-              rotation
-            ),
-          ])
-      )
+export const browserLoadEpic = createEpic<
+  Action<typeof BROWSER_LOAD> & {
+    payload: {
+      gamestates: any
+      currentSceneId: number
+      previousSceneId: number
+      rotation: number
+    }
+  }
+>((action$) =>
+  action$.pipe(
+    filter((action) => action?.type === BROWSER_LOAD),
+    filter(({ payload: data }) => !!data),
+    mergeMap(
+      ({
+        payload: { gamestates, currentSceneId, previousSceneId, rotation },
+      }) => {
+        gamestateActions.inject(gamestates)
+        sceneActions.goToScene(currentSceneId, true, previousSceneId, rotation)
+        return EMPTY
+      }
     )
+  )
 )
 
-export const openSaveEpic = createEpic(action$ =>
+export const openSaveEpic = createEpic((action$) =>
   action$.pipe(
-    filter(action => action?.type === CLOUD_SAVE_OPEN),
+    filter((action) => action?.type === CLOUD_SAVE_OPEN),
     map(() => ({
       type: SAVE_LOAD,
     }))

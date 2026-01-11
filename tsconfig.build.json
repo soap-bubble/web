@@ -2,7 +2,7 @@
   "files": [],
   "references": [
     {
-      "path": "./packages/morpheus/tsconfig.declarations.json"
+      "path": "./packages/morpheus/tsconfig.types.json"
     }
   ]
 }

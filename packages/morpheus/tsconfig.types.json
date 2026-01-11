@@ -1,0 +1,28 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./types",
+    "rootDir": "./client/js",
+    "allowJs": true,
+    "checkJs": false,
+    "strict": false,
+    "noImplicitAny": false,
+    "noEmit": false,
+    "noEmitOnError": false,
+    "skipLibCheck": true,
+    "composite": true,
+    "incremental": true,
+    "tsBuildInfoFile": "./types/tsconfig.types.tsbuildinfo"
+  },
+  "include": [
+    "client/js/**/*",
+    "client/js/service/morpheus.map.json"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "types"
+  ]
+}

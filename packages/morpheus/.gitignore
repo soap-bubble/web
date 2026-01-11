@@ -2,6 +2,7 @@
 public
 lib
 dist
+types
 
 # configuration
 config/local.js

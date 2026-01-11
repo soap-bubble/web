@@ -7,11 +7,11 @@
   "browserslist": "last 2 Chrome versions",
   "main": "./dist/index.js",
   "module": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./types/index.d.ts",
   "scripts": {
-    "dev": "node ./scripts/clean-dist.mjs && node ./scripts/copy-static.mjs && node ./scripts/build-esm.mjs --watch",
+    "dev": "node ./scripts/clean-types.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.types.json --watch --preserveWatchOutput",
     "build": "node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.declarations.json && node ./scripts/copy-static.mjs",
-    "typecheck": "node ../../node_modules/typescript/bin/tsc --noEmit",
+    "typecheck": "node ./scripts/clean-types.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.types.json",
     "lint": "eslint client config server",
     "test": "jest client",
     "test:watch": "cross-env NODE_ENV=development jest client --watch"

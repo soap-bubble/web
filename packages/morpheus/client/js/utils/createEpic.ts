@@ -21,5 +21,5 @@ export function epics() {
 export default function createEpic<A extends Action>(
   epic: Epic<A, A, void, any>
 ) {
-  _epics.push(epic)
+  _epics.push(epic as unknown as Epic<Action, Action, void, any>)
 }

@@ -1,5 +1,8 @@
 # Operation MorpheusReforge
 
+## IMPORTANT for NODE usage
+Agent terminals do not pick `.nvmrc` automatically. Before running node, npm or yarn commands first run `nvm use` in the session.
+
 ## Repo stance (facts)
 
 - Workspace: Yarn classic + Lerna (`package.json` at repo root). No package-manager migrations without explicit approval.

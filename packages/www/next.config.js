@@ -15,12 +15,9 @@ const configuredAssetBase =
       process.env.MORPHEUS_ASSET_BASE,
   ) || DEFAULT_ASSET_BASE;
 
-const env =
-  prod || !offline
-    ? env
-    : {
-        ASSET_HOST: '',
-      };
+const env = {
+  ASSET_HOST: '',
+}
 
 env.MORPHEUS_ASSET_BASE = configuredAssetBase;
 env.NEXT_PUBLIC_MORPHEUS_ASSET_BASE = configuredAssetBase;

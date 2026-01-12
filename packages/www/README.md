@@ -1,34 +1,104 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Morpheus Web (morpheus-next)
+
+Next.js frontend for the Morpheus game engine.
 
 ## Getting Started
 
-First, run the development server:
+### Standard Development
 
 ```bash
-npm run dev
-# or
-yarn dev
+yarn workspace morpheus-next dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Development with Agent Game Control (MCP)
 
-You can start editing the page by modifying `pages/index.js`. The page auto-updates as you edit the file.
+For agent-controlled testing, use the custom server with WebSocket support:
 
-[API routes](https://nextjs.org/docs/api-routes/introduction) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.js`.
+```bash
+yarn workspace morpheus-next dev
+```
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/api-routes/introduction) instead of React pages.
+This enables the WebSocket broker at `ws://localhost:3000/api/game-control` for communication between the MCP server and browser.
 
-## Learn More
+Open [http://localhost:3000/scene/1050](http://localhost:3000/scene/1050) to load a scene.
 
-To learn more about Next.js, take a look at the following resources:
+## MCP Server for Agent Testing
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+The `mcp-server/` directory contains an MCP (Model Context Protocol) server that allows AI agents to control the game for testing purposes.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+### Available Tools
 
-## Deploy on Vercel
+| Tool | Description |
+|------|-------------|
+| `morpheus_connect_session` | Connect to a named session (browser must use `?mcp=sessionName`) |
+| `morpheus_load_scene` | Navigate to a scene by ID |
+| `morpheus_rotate_to` | Rotate panorama to coordinates (x: 0-3600, y: -250 to 250) |
+| `morpheus_get_scene_info` | Get hotspots and connected scenes for a scene ID |
+| `morpheus_get_current_state` | Get live game state from browser |
+| `morpheus_list_scenes` | List all available scene IDs |
+| `morpheus_connection_status` | Get current connection status |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Session Management
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+The WebSocket broker manages sessions between MCP clients and browser clients using **named sessions**:
+
+**Basic workflow:**
+1. Open browser with named session: `http://localhost:3000/scene/1050?mcp=test1`
+2. MCP connects to same session: `morpheus_connect_session({ sessionName: "test1" })`
+3. Commands flow between the paired MCP and browser
+
+**Session naming:**
+- Browser URL: `/scene/1050?mcp=myTestSession`
+- MCP tool: `morpheus_connect_session` with `sessionName: "myTestSession"`
+- Both must use the **same session name** to pair
+
+**Connection indicator:**
+- Bottom-right corner shows connection status
+- Green = connected, shows session name
+- Red = disconnected
+
+**Multiple sessions:**
+- Different test runs can use different session names
+- Each session pairs one MCP client with one browser client
+
+### Local Development Only
+
+The WebSocket game control is designed for **local development only**:
+
+- The custom server (`server.ts`) must be running locally
+- Production Vercel deployments use standard Next.js (no WebSocket support)
+- The MCP server connects to `ws://localhost:3000/api/game-control`
+
+For production testing, consider:
+- Running a local dev server that connects to production APIs
+- Using the browser MCP tools for UI interaction instead
+
+## Scripts
+
+| Script | Description |
+|--------|-------------|
+| `dev:next` | Standard Next.js dev server |
+| `dev` | Custom server with WebSocket broker for MCP |
+| `mcp` | Run the MCP server directly (normally auto-started by Cursor) |
+| `build` | Production build |
+| `start` | Production server |
+
+## Architecture
+
+```
+┌──────────────┐  stdio   ┌──────────────┐
+│    Cursor    │◄────────►│  MCP Server  │
+└──────────────┘          └──────┬───────┘
+                                 │ WebSocket
+                                 ▼
+                    ┌────────────────────────┐
+                    │  Custom Next.js Server │
+                    │  (port 3000)           │
+                    │  └─ WebSocket Broker   │
+                    └────────────┬───────────┘
+                                 │ WebSocket
+                                 ▼
+                    ┌────────────────────────┐
+                    │  Browser (Game Client) │
+                    └────────────────────────┘
+```

@@ -3,7 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --webpack",
+    "dev:next": "next dev --webpack",
+    "dev": "npx tsx server.ts",
+    "mcp": "npx tsx mcp-server/index.ts",
     "build": "yarn run build:types && next build --webpack",
     "build:types": "node ../../node_modules/typescript/bin/tsc -b ../../tsconfig.build.json",
     "start": "next start",
@@ -11,6 +13,7 @@
     "ts:watch": "yarn ts --watch"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.25.2",
     "@react-three/fiber": "^9.4.2",
     "@reduxjs/toolkit": "^1.7.1",
     "@rooks/use-raf": "^4.11.2",
@@ -40,7 +43,9 @@
     "rxjs": "^7.8.1",
     "rxjs-hooks": "^0.8.0-alpha.0",
     "three": "^0.182.0",
-    "ua-parser-js": "^1.0.37"
+    "ua-parser-js": "^1.0.37",
+    "ws": "^8.19.0",
+    "zod": "^4.3.5"
   },
   "devDependencies": {
     "@types/classnames": "^2.3.1",
@@ -51,6 +56,7 @@
     "@types/react-dom": "^19.2.3",
     "@types/ua-parser-js": "^0.7.39",
     "@types/w3c-generic-sensor": "^1.0.8",
+    "@types/ws": "^8.18.1",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"
   }

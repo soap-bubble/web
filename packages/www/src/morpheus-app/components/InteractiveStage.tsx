@@ -1,6 +1,6 @@
 'use client';
 
-import { FC, useMemo, useState } from 'react';
+import { FC, useMemo, useState, useEffect, useCallback } from 'react';
 import { Camera, Object3D } from 'three';
 import { Observable } from 'rxjs';
 
@@ -15,6 +15,12 @@ import type { Scene, PanoCast, Cast, MovieCast } from 'morpheus/casts/types';
 import { and, not, Matcher } from '@/utils/matchers';
 import useCursorHandler from '../hooks/useCursorHandler';
 
+export interface RotationState {
+  x: number;
+  y: number;
+  offsetX: number;
+}
+
 interface InteractiveStageProps {
   scene: Scene;
   gamestates: Gamestates;
@@ -24,10 +30,22 @@ interface InteractiveStageProps {
   left?: number;
   volume?: number;
   onSceneChange?: (sceneId: number) => void;
+  onRotationChange?: (rotation: RotationState) => void;
+  rotationOverride?: { x: number; y: number } | null;
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
   return (cast: T) => isCastActive({ cast, gamestates });
+}
+
+// Convert external coordinates (0-3600) to internal coordinates (0-3072)
+function externalToInternal(x: number): number {
+  return (x / 3600) * 3072;
+}
+
+// Compute offsetX from x coordinate
+function computeOffsetX(x: number): number {
+  return Math.floor((x % 3072) / 24) * 24;
 }
 
 const InteractiveStage: FC<InteractiveStageProps> = ({
@@ -38,6 +56,8 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   top = 0,
   left = 0,
   volume = 0.5,
+  onRotationChange,
+  rotationOverride,
 }) => {
   const stageScenes = useMemo(() => [scene], [scene]);
 
@@ -49,7 +69,58 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   const [panoObject, setPanoObject] = useState<Object3D | undefined>();
   const [specialMovieCast, setSpecialMovieCast] = useState<Observable<MovieCast> | null>(null);
 
-  const [rotation, momentumPointerHandler] = usePanoMomentum(5, 100);
+  const [internalRotation, momentumPointerHandler] = usePanoMomentum(5, 100);
+
+  // State for external rotation override
+  const [overrideRotation, setOverrideRotation] = useState<RotationState | null>(null);
+
+  // Apply rotation override when prop changes
+  useEffect(() => {
+    if (rotationOverride) {
+      const internalX = externalToInternal(rotationOverride.x);
+      setOverrideRotation({
+        x: internalX,
+        y: rotationOverride.y,
+        offsetX: computeOffsetX(internalX),
+      });
+    } else {
+      setOverrideRotation(null);
+    }
+  }, [rotationOverride]);
+
+  // Use override rotation if set, otherwise use internal momentum rotation
+  const rotation = overrideRotation ?? internalRotation;
+
+  // Notify parent of rotation changes
+  const prevRotationRef = useMemo(() => ({ current: rotation }), []);
+  useEffect(() => {
+    if (
+      onRotationChange &&
+      (prevRotationRef.current.x !== rotation.x ||
+        prevRotationRef.current.y !== rotation.y)
+    ) {
+      prevRotationRef.current = rotation;
+      onRotationChange(rotation);
+    }
+  }, [rotation, onRotationChange, prevRotationRef]);
+
+  // Clear override when user starts interacting
+  const handlePointerDown = useCallback(
+    (event: React.PointerEvent<HTMLCanvasElement>) => {
+      setOverrideRotation(null);
+      momentumPointerHandler.onPointerDown?.(event);
+    },
+    [momentumPointerHandler]
+  );
+
+  // Wrap momentum pointer handler to clear override on interaction
+  const wrappedMomentumHandler = useMemo(
+    () => ({
+      ...momentumPointerHandler,
+      onPointerDown: handlePointerDown,
+    }),
+    [momentumPointerHandler, handlePointerDown]
+  );
 
   const [cursor, hotspotPointerHandler] = useCursorHandler(
     scene,
@@ -65,7 +136,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   );
 
   const pointerHandler = composePointer([
-    momentumPointerHandler,
+    wrappedMomentumHandler,
     hotspotPointerHandler,
   ]);
 

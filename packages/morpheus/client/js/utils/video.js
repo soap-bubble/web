@@ -1,7 +1,6 @@
 import uasParser from 'ua-parser-js';
 
-const userAgentString = (global.navigator && global.navigator.userAgent) || '';
-const uas = uasParser(userAgentString);
+
 
 export function addSourceToVideo(element, src, type) {
   const source = document.createElement('source');
@@ -13,6 +12,8 @@ export function addSourceToVideo(element, src, type) {
 }
 
 export function createVideo(url, options) {
+  const userAgentString = typeof window !== 'undefined' ? (window.navigator && window.navigator.userAgent) || '' : '';
+  const uas = uasParser(userAgentString);
   const video = document.createElement('video');
   video.crossOrigin = 'anonymous';
   video.setAttribute('webkit-playsinline', 'webkit-playsinline');

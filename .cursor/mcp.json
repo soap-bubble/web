@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "morpheus-game": {
+      "command": "npx",
+      "args": ["tsx", "packages/www/mcp-server/index.ts"],
+      "cwd": "${workspaceFolder}",
+      "env": {
+        "GAME_WS_URL": "ws://localhost:3000/api/game-control"
+      }
+    }
+  }
+}

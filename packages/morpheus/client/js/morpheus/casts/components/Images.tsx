@@ -5,8 +5,8 @@ import React, {
   useMemo,
   SyntheticEvent,
 } from 'react'
-import { getAssetUrl } from 'service/gamedb'
 import { MovieCast, MovieSpecialCast } from '../types'
+import { getAssetUrl } from 'service/gamedb'
 
 interface ImageElProps {
   url: string

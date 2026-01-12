@@ -50,15 +50,19 @@ module.exports = {
   env,
   outputFileTracingRoot: path.resolve(__dirname, '../..'),
   webpack(config) {
-    const distRoot = path.resolve(__dirname, '../morpheus/dist/morpheus');
+    const srcRoot = path.resolve(__dirname, '../morpheus/client/js');
+    const morpheusRoot = path.join(srcRoot, 'morpheus');
     config.resolve.alias = config.resolve.alias || {};
-    const distEntry = path.join(distRoot, 'index.js');
-    config.resolve.alias['morpheus'] = distEntry;
-    config.resolve.alias['morpheus$'] = distEntry;
-    config.resolve.alias['morpheus/'] = `${distRoot}/`;
-    config.resolve.alias['@soapbubble/morpheus-client'] = distEntry;
-    config.resolve.alias['@soapbubble/morpheus-client$'] = distEntry;
-    config.resolve.alias['@soapbubble/morpheus-client/'] = `${distRoot}/`;
+    const srcEntry = path.join(morpheusRoot, 'index.ts');
+    config.resolve.alias['morpheus'] = srcEntry;
+    config.resolve.alias['morpheus$'] = srcEntry;
+    config.resolve.alias['morpheus/'] = `${morpheusRoot}/`;
+    config.resolve.alias['service'] = path.join(srcRoot, 'service');
+    config.resolve.alias['service/'] = `${path.join(srcRoot, 'service')}/`;
+    config.resolve.alias['store'] = path.join(srcRoot, 'store');
+    config.resolve.alias['store/'] = `${path.join(srcRoot, 'store')}/`;
+    config.resolve.alias['utils'] = path.join(srcRoot, 'utils');
+    config.resolve.alias['utils/'] = `${path.join(srcRoot, 'utils')}/`;
     return config;
   },
 };

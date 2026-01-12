@@ -10,13 +10,23 @@
         "../morpheus/client/js/index.ts"
       ],
       "@soapbubble/morpheus-client/*": [
-        "../morpheus/client/js/*"
+        "../morpheus/client/js/*",
+        "../../packages/*"
       ],
       "morpheus": [
         "../morpheus/client/js/morpheus/index.ts"
       ],
       "morpheus/*": [
         "../morpheus/client/js/morpheus/*"
+      ],
+      "service/*": [
+        "../morpheus/client/js/service/*"
+      ],
+      "store/*": [
+        "../morpheus/client/js/store/*"
+      ],
+      "utils/*": [
+        "../morpheus/client/js/utils/*"
       ],
       "@/*": [
         "src/*"

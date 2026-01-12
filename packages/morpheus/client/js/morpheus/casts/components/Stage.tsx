@@ -101,7 +101,18 @@ const Stage: FunctionComponent<StageProps> = ({
     )
   }, [gamestates, stageScenes])
   return (
-    <>
+    <div
+      style={{
+        position: 'relative',
+        width: `${width}px`,
+        height: `${height}px`,
+        overflow: 'hidden',
+        pointerEvents: 'auto',
+        cursor: 'none',
+        left: `${left}px`,
+        top: `${top}px`,
+      }}
+    >
       <WebGL
         stageScenes={webGlScenes}
         enteringScene={enteringScene}
@@ -111,8 +122,8 @@ const Stage: FunctionComponent<StageProps> = ({
         setPanoObject={setPanoObject}
         rotation={rotation}
         volume={volume}
-        top={top}
-        left={left}
+        top={0}
+        left={0}
         width={width}
         height={height}
       />
@@ -124,8 +135,8 @@ const Stage: FunctionComponent<StageProps> = ({
         exitingScene={exitingScene}
         gamestates={gamestates}
         volume={volume}
-        top={top}
-        left={left}
+        top={0}
+        left={0}
         width={width}
         height={height}
         onPointerDown={onPointerDown}
@@ -133,7 +144,7 @@ const Stage: FunctionComponent<StageProps> = ({
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerLeave}
       />
-    </>
+    </div>
   )
 }
 

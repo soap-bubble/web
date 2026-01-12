@@ -181,11 +181,13 @@ const WebGl: FunctionComponent<GlStageProps & { width: number; height: number; l
       position: [0, 0, 0.09] as const,
     }}
     style={{
+      position: 'absolute',
       cursor: 'none',
       left: `${props.left}px`,
       top: `${props.top}px`,
       width: `${props.width}px`,
       height: `${props.height}px`,
+      zIndex: 0,
     }}
   >
     <WebGlScene {...props} />

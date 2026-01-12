@@ -64,11 +64,13 @@ const Canvas = ({
       onPointerMove={onPointerMove}
       onPointerLeave={onPointerLeave}
       style={{
+        position: 'absolute',
         cursor: 'none',
         width: `${width}px`,
         height: `${height}px`,
         left: `${left}px`,
         top: `${top}px`,
+        zIndex: 1,
       }}
     />
   )

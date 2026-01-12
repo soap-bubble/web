@@ -4,7 +4,7 @@ import Events from 'events'
 import { actions as inputActions } from 'morpheus/input'
 import { selectors as sceneSelectors } from 'morpheus/scene'
 import loggerFactory from 'utils/logger'
-import { Scene, UnresolvedScene, Cast, SceneCasts } from '../casts/types'
+import { Scene, UnresolvedScene, SceneCasts } from '../casts/types'
 import createSceneQueue from './queue'
 import {
   SCENE_LOAD_START,

@@ -4,35 +4,23 @@ import React, {
   useState,
   useEffect,
   FunctionComponent,
-  useCallback,
 } from 'react'
 import { Dispatch } from 'redux'
 import { cloneDeep, map } from 'lodash'
 import { Canvas, useThree, useFrame } from '@react-three/fiber'
 import {
-  BufferAttribute,
-  CylinderGeometry,
   TextureLoader,
   Mesh,
   ShaderMaterial,
-  PerspectiveCamera,
-  CanvasTexture,
   ShaderMaterialParameters,
-  Texture,
   Camera,
   Object3D,
 } from 'three'
-import createCanvas from 'utils/canvas'
 import panoShader from '../shader/panoChunk'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
-import { VideoController } from './Videos'
 import { getAssetUrl } from 'service/gamedb'
-import useCastRefNoticer from '../hooks/useCastRefNoticer'
-import { Scene, PanoCast, MovieSpecialCast, Cast } from '../types'
-import { flatten } from 'lodash'
+import { Scene, PanoCast, Cast } from '../types'
 import usePanoChunk from '../hooks/panoChunk'
-import usePanoMomentum from '../hooks/panoMomentum'
-import { usePointerEvents } from 'morpheus/hotspot/eventInterface'
 import { Matcher, forMorpheusType } from '../matchers'
 import { and } from 'utils/matchers'
 import { PANO_OFFSET, PANO_CANVAS_WIDTH } from '../../constants'
@@ -69,7 +57,6 @@ const step = (num: number, max: number) => {
   return num
 }
 interface GlStageProps {
-  dispatch: Dispatch
   stageScenes: Scene[]
   enteringScene?: Scene
   exitingScene?: Scene
@@ -78,10 +65,6 @@ interface GlStageProps {
   setPanoObject: (o: Object3D | undefined) => void
   rotation: { x: number; y: number; offsetX: number }
   volume: number
-  top: number
-  left: number
-  width: number
-  height: number
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
@@ -89,12 +72,6 @@ function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
 }
 
 const WebGlScene = ({
-  dispatch,
-  width,
-  volume,
-  height,
-  top,
-  left,
   rotation,
   gamestates,
   setCamera,
@@ -161,9 +138,17 @@ const WebGlScene = ({
   )
   return (
     <React.Fragment>
-      <mesh ref={meshRef}>
+      <mesh  ref={(object) => {
+        if (object) {
+          setPanoObject(object)
+        } else {
+          setPanoObject(undefined)  
+        }
+        meshRef.current = object
+      }}>
         <cylinderGeometry
           attach="geometry"
+         
           args={[
             1,
             1,
@@ -186,7 +171,7 @@ const WebGlScene = ({
   )
 }
 
-const WebGl: FunctionComponent<GlStageProps> = (props) => (
+const WebGl: FunctionComponent<GlStageProps & { width: number; height: number; left: number; top: number }> = (props) => (
   <Canvas
     camera={{
       fov: 51.75,
@@ -199,6 +184,8 @@ const WebGl: FunctionComponent<GlStageProps> = (props) => (
       cursor: 'none',
       left: `${props.left}px`,
       top: `${props.top}px`,
+      width: `${props.width}px`,
+      height: `${props.height}px`,
     }}
   >
     <WebGlScene {...props} />

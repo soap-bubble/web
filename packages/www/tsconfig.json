@@ -18,7 +18,7 @@
       "morpheus/*": [
         "../morpheus/client/js/morpheus/*"
       ],
-      "*": [
+      "@/*": [
         "src/*"
       ]
     },

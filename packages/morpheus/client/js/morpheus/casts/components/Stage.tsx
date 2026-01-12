@@ -103,7 +103,6 @@ const Stage: FunctionComponent<StageProps> = ({
   return (
     <>
       <WebGL
-        dispatch={dispatch}
         stageScenes={webGlScenes}
         enteringScene={enteringScene}
         exitingScene={exitingScene}

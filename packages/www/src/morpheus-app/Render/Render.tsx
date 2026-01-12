@@ -3,7 +3,7 @@
 import '../runtime';
 
 import React, { FC, useCallback, useMemo } from 'react';
-import OgMetaCanvas from 'morpheus-app/components/OgMetaCanvas';
+import OgMetaCanvas from '@/morpheus-app/components/OgMetaCanvas';
 import useInitialGamestates from '../hooks/useInitialGamestate';
 
 import { Scene } from 'morpheus/casts/types';

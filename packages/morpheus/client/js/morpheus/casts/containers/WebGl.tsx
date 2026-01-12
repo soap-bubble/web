@@ -1,4 +1,4 @@
-import { connect, useDispatch, useSelector } from 'react-redux'
+import { useSelector } from 'react-redux'
 import { FC } from 'react'
 import { Camera, Object3D } from 'three'
 
@@ -25,7 +25,6 @@ const WebGlContainer: FC<ContainerProps> = ({
   enteringScene,
   exitingScene,
 }) => {
-  const dispatch = useDispatch()
   const gamestates = useSelector(gamestateSelectors.forState)
   const width = useSelector(gameSelectors.width)
   const height = useSelector(gameSelectors.height)
@@ -34,7 +33,6 @@ const WebGlContainer: FC<ContainerProps> = ({
   const volume = useSelector(gameSelectors.htmlVolume)
   return (
     <WebGl
-      dispatch={dispatch}
       stageScenes={stageScenes}
       gamestates={gamestates}
       setCamera={setCamera}

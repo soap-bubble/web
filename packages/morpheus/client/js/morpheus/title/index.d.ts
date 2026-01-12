@@ -1,6 +1,7 @@
 import type { ComponentType } from 'react'
 import type { AnyAction } from 'redux'
 import type { ThunkAction } from 'redux-thunk'
+import type Main from './components/Main'
 import type { Scene } from '../casts/types'
 
 export declare const data: Scene
@@ -19,7 +20,8 @@ export namespace actions {
   function titleDone(): ThunkAction<Promise<void>, unknown, unknown, AnyAction>
 }
 
-export declare const Main: ComponentType<Record<string, unknown>>
+
+export type { default as Main } from './components/Main'
 
 declare const _default: {
   data: typeof data

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, SyntheticEvent } from 'react'
+import React, { useRef, useEffect, useMemo, useCallback, SyntheticEvent } from 'react'
 import { getAssetUrl } from 'service/gamedb'
 import { MovieSpecialCast } from '../types'
 
@@ -39,39 +39,52 @@ const VideoEl = ({
   onVideoCanPlayThrough,
 }: VideoElProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
+  const hasRegistered = useRef(false)
+  // Store latest values in refs to avoid callback dependencies
+  const castsRef = useRef(casts)
+  const onVideoRefRef = useRef(onVideoRef)
+  castsRef.current = casts
+  onVideoRefRef.current = onVideoRef
 
-  useEffect(() => {
-    onVideoRef({
-      el: videoRef.current,
-      castIds: casts.map(c => c.castId),
-      play() {
-        if (videoRef.current) {
-          videoRef.current.play()
-        }
-      },
-      pause() {
-        if (videoRef.current) {
-          videoRef.current.pause()
-        }
-      },
-      end() {
-        if (videoRef.current) {
-          videoRef.current.pause()
-          // videoRef.current.currentTime = 0
-        }
-      },
-    })
-  }, [videoRef.current])
+  const handleVideoRef = useCallback((el: HTMLVideoElement | null) => {
+    videoRef.current = el
+    if (el && !hasRegistered.current) {
+      hasRegistered.current = true
+      const currentCasts = castsRef.current
+      const controller = {
+        el,
+        castIds: currentCasts.map(c => c.castId),
+        play() {
+          if (videoRef.current) {
+            videoRef.current.play()
+          }
+        },
+        pause() {
+          if (videoRef.current) {
+            videoRef.current.pause()
+          }
+        },
+        end() {
+          if (videoRef.current) {
+            videoRef.current.pause()
+          }
+        },
+      }
+      onVideoRefRef.current(controller)
+    } else if (!el) {
+      hasRegistered.current = false
+    }
+  }, [])
 
   useEffect(() => {
     if (videoRef.current) {
       videoRef.current.volume = volume
     }
-  }, [volume, videoRef.current])
+  }, [volume])
 
   return (
     <video
-      ref={videoRef}
+      ref={handleVideoRef}
       style={{
         display: 'none',
       }}

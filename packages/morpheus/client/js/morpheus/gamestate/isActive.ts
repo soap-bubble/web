@@ -18,16 +18,16 @@ function doCompare({
   if (!gs) {
     throw new Error(`Gamestate with id ${gameStateId} not found`)
   }
-  const gsValue = gs && gs.value
+  const gsValue = gs.value
   switch (TEST_TYPES[testType]) {
     case 'EqualTo':
-      return gs && gsValue === value
+      return gsValue === value
     case 'NotEqualTo':
-      return gs && gsValue !== value
+      return gsValue !== value
     case 'GreaterThan':
-      return gs && gsValue > value
+      return gsValue > value
     case 'LessThan':
-      return gs && gsValue < value
+      return gsValue < value
     default:
       return true
   }

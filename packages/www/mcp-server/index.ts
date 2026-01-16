@@ -362,7 +362,7 @@ server.registerTool(
   'morpheus_rotate_to',
   {
     description:
-      'Rotate the panorama view to specific coordinates. X ranges from 0-3600 (horizontal), Y ranges from roughly -250 to 250 (vertical).',
+      'Rotate the panorama view to specific coordinates. X ranges from 0-3600 (horizontal), Y ranges from roughly -120 to 120 (vertical).',
     inputSchema: {
       x: z
         .number()
@@ -371,9 +371,9 @@ server.registerTool(
         .describe('Horizontal position (0-3600, wraps around)'),
       y: z
         .number()
-        .min(-250)
-        .max(250)
-        .describe('Vertical position (-250 to 250, clamped)'),
+        .min(-120)
+        .max(120)
+        .describe('Vertical position (-120 to 120, clamped)'),
     },
   },
   async ({ x, y }) => {

@@ -21,15 +21,11 @@ import { Renderable } from 'morpheus/casts/components/Canvas'
 import {
   matchActiveCast,
   generateRenderables,
-  generateMovieCastDrawOps,
   generateControlledRenderables,
   generateMovieCastRenderables,
 } from './transforms'
 import { flatten, uniqBy } from 'lodash'
-import loggerFactory from 'utils/logger'
-import { render } from 'utils/render'
 
-const logger = loggerFactory('cast:hooks:useRenderables')
 function describeRenderables(renderables: Renderable[]) {
   const describaleRenderables = renderables.filter(
     r => !!r.description
@@ -218,13 +214,6 @@ export default function useRenderables(
     ]
     const exitingRenderables = [] as Renderable[]
 
-    // logger.info({
-    //   imageCasts,
-    //   videoCasts,
-    //   enteringRenderables: describeRenderables(enteringRenderables),
-    //   stageRenderables: describeRenderables(stageRenderables),
-    //   exitingRenderables: describeRenderables(exitingRenderables),
-    // })
     return [
       imageCasts,
       videoCasts,

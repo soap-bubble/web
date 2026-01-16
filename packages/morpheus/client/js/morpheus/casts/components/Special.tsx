@@ -111,7 +111,7 @@ const Special = ({
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
       const casts = movieCasts.filter((cast) =>
-        stageScenes[0].casts.includes(cast)
+        stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
         for (const cast of casts) {
@@ -128,7 +128,7 @@ const Special = ({
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
       const casts = movieCasts.filter((cast) =>
-        stageScenes[0].casts.includes(cast)
+        stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
         for (const cast of casts) {
@@ -145,7 +145,7 @@ const Special = ({
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
       const casts = movieCasts.filter((cast) =>
-        stageScenes[0].casts.includes(cast)
+        stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
         for (const cast of casts) {
@@ -170,10 +170,6 @@ const Special = ({
       exitingScene,
       [canPlayThroughVideos, endedVideos, imagesErrored]
     )
-
-  useEffect(() => {
-    logger.info({ scenes: stageScenes }, 'stageScenes')
-  }, [stageScenes])
 
   /**
    * Find all videos that need to be started and stopped
@@ -233,13 +229,15 @@ const Special = ({
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerLeave}
       />
-      <Videos
-        movieSpecialCasts={videoCasts}
-        volume={volume}
-        onVideoCastEnded={onVideoCastEnded}
-        onVideoCastCanPlaythrough={onVideoCastCanPlayThrough}
-        onVideoCastRef={onVideoCastRef}
-      />
+      {videoCasts.length > 0 && (
+        <Videos
+          movieSpecialCasts={videoCasts}
+          volume={volume}
+          onVideoCastEnded={onVideoCastEnded}
+          onVideoCastCanPlaythrough={onVideoCastCanPlayThrough}
+          onVideoCastRef={onVideoCastRef}
+        />
+      )}
       <Images
         movieSpecialCasts={imageCasts}
         onImageCastLoad={onImageLoad}

@@ -82,18 +82,14 @@ const Stage: FunctionComponent<StageProps> = ({
     const matchActive = matchActiveCast(gamestates)
     const isPanoCast = forMorpheusType('PanoCast')
     const matchPanoCast = and<PanoCast>(isPanoCast, matchActive)
-    const matchActiveNotPanoScene = and(
-      (scene: Scene) => scene.casts.some(cast => matchActive(cast)),
-      not(isPano)
-    )
     const matchActivePanoScene = (scene: Scene) =>
       scene.casts.some((cast: Cast) => matchPanoCast(cast as MovieCast))
     return stageScenes.reduce(
       ([webGlScenes, specialScenes], scene) => {
-        if (!webGlScenes.length && matchActiveNotPanoScene(scene)) {
-          specialScenes.push(scene)
-        } else if (matchActivePanoScene(scene)) {
+        if (matchActivePanoScene(scene)) {
           webGlScenes.push(scene)
+        } else if (!webGlScenes.length && !isPano(scene)) {
+          specialScenes.push(scene)
         }
         return [webGlScenes, specialScenes]
       },

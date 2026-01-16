@@ -1,7 +1,6 @@
 import React, {
   useCallback,
   useRef,
-  useEffect,
   useMemo,
   SyntheticEvent,
 } from 'react'
@@ -73,8 +72,12 @@ const Images = ({
           <ImageEl
             key={url}
             url={url}
-            onLoad={e => onImageCastLoad([e.currentTarget, casts])}
-            onError={e => onImageCastError([e.currentTarget, casts])}
+            onLoad={e => {
+              onImageCastLoad([e.currentTarget, casts])
+            }}
+            onError={e => {
+              onImageCastError([e.currentTarget, casts])
+            }}
           />
         )
       })}

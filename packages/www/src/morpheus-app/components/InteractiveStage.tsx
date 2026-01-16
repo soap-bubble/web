@@ -146,19 +146,15 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     const matchActive = matchActiveCast(gamestates);
     const isPanoCast = forMorpheusType('PanoCast');
     const matchPanoCast = and<PanoCast>(isPanoCast, matchActive);
-    const matchActiveNotPanoScene = and(
-      (s: Scene) => s.casts.some((cast: Cast) => matchActive(cast)),
-      not(isPano),
-    );
     const matchActivePanoScene = (s: Scene) =>
       s.casts.some((cast: Cast) => matchPanoCast(cast as MovieCast));
 
     return stageScenes.reduce(
       ([webGl, special], s) => {
-        if (!webGl.length && matchActiveNotPanoScene(s)) {
-          special.push(s);
-        } else if (matchActivePanoScene(s)) {
+        if (matchActivePanoScene(s)) {
           webGl.push(s);
+        } else if (!webGl.length && !isPano(s)) {
+          special.push(s);
         }
         return [webGl, special];
       },

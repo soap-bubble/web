@@ -21,12 +21,37 @@ import {
   SupportedSoundCasts,
   SceneCasts,
 } from '../types'
+import type { SceneTransitionRequest } from 'morpheus/scene/types'
 import { union } from 'lodash'
 import { Observable, observable, Subscription, Subscriber } from 'rxjs'
 import { share } from 'rxjs/operators'
 import { and } from 'utils/matchers'
 
 const logger = loggerFactory('Special')
+
+const RAD_TO_MORPHEUS = 3600 / (Math.PI * 2)
+const TRANSITION_SCENE_SENTINEL = 0x3fffffff
+
+const normalizeMorpheusAngle = (value: number) => {
+  let normalized = value % 3600
+  if (normalized < 0) {
+    normalized += 3600
+  }
+  return normalized
+}
+
+const computeStartAngle = (angleAtEnd: number) => {
+  if (!Number.isFinite(angleAtEnd) || angleAtEnd === -1) {
+    return undefined
+  }
+  let startAngle = (angleAtEnd * Math.PI) / 1800
+  startAngle -= Math.PI - Math.PI / 6
+  const morpheusAngle = startAngle * RAD_TO_MORPHEUS + 1800
+  return normalizeMorpheusAngle(morpheusAngle)
+}
+
+const isMovieSpecialCast = (cast: MovieCast): cast is MovieSpecialCast =>
+  cast.__t === 'MovieSpecialCast'
 interface SpecialProps {
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerDown?: (e: PointerEvent<HTMLCanvasElement>) => void
@@ -43,6 +68,7 @@ interface SpecialProps {
   left: number
   width: number
   height: number
+  onTransition?: (transition: SceneTransitionRequest) => void
 }
 
 const Special = ({
@@ -61,6 +87,7 @@ const Special = ({
   enteringScene,
   exitingScene,
   stageScenes,
+  onTransition,
 }: SpecialProps) => {
   const [eventSubscriber, setEventSubscriber] =
     useState<null | Subscriber<MovieCast>>()
@@ -135,9 +162,41 @@ const Special = ({
           eventSubscriber.next(cast)
         }
       }
+      if (onTransition && stageScenes.length > 0) {
+        const currentSceneId = stageScenes[0].sceneId
+        for (const cast of casts) {
+          if (!isMovieSpecialCast(cast)) {
+            continue
+          }
+          if (!isActive({ cast, gamestates })) {
+            continue
+          }
+          const nextSceneId = cast.nextSceneId
+          if (
+            !Number.isFinite(nextSceneId) ||
+            nextSceneId === TRANSITION_SCENE_SENTINEL ||
+            nextSceneId === currentSceneId
+          ) {
+            continue
+          }
+          const startAngle = computeStartAngle(cast.angleAtEnd)
+          onTransition({
+            sceneId: nextSceneId,
+            dissolve: !!cast.dissolveToNextScene,
+            startAngle,
+            sourceCastId: cast.castId,
+          })
+        }
+      }
       onVideoCastEndedBare(ref)
     },
-    [onVideoCastEndedBare, eventSubscriber, stageScenes]
+    [
+      onVideoCastEndedBare,
+      eventSubscriber,
+      stageScenes,
+      gamestates,
+      onTransition,
+    ]
   )
 
   const onAudioCastEnded = useCallback(

@@ -4,6 +4,7 @@ import * as actions from './actions'
 import * as matchers from './matchers'
 import './epics'
 import { Scene } from 'morpheus/casts/types'
+export type { SceneTransitionRequest } from './types'
 
 export const SCENE_TYPE_LIST = {
   1: 'panorama',

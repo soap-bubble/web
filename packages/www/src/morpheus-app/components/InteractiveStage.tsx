@@ -1,8 +1,9 @@
 'use client';
 
-import { FC, useMemo, useState, useEffect, useCallback } from 'react';
+import { FC, useMemo, useState, useEffect, useCallback, useRef } from 'react';
 import { Camera, Object3D } from 'three';
 import { Observable } from 'rxjs';
+import type { SceneTransitionRequest } from 'morpheus/scene/types';
 
 import WebGl from 'morpheus/casts/components/WebGl';
 import Special from 'morpheus/casts/components/Special';
@@ -21,17 +22,23 @@ export interface RotationState {
   offsetX: number;
 }
 
+export type ExternalRotation = {
+  yaw3600: number;
+  pitch: number;
+};
+
 interface InteractiveStageProps {
-  scene: Scene;
+  stageScenes: Scene[];
+  activeScene: Scene;
   gamestates: Gamestates;
   width?: number;
   height?: number;
   top?: number;
   left?: number;
   volume?: number;
-  onSceneChange?: (sceneId: number) => void;
-  onRotationChange?: (rotation: RotationState) => void;
-  rotationOverride?: { x: number; y: number } | null;
+  onRotationChange?: (rotation: ExternalRotation) => void;
+  rotation: ExternalRotation;
+  onTransition?: (transition: SceneTransitionRequest) => void;
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
@@ -43,13 +50,19 @@ function externalToInternal(x: number): number {
   return (x / 3600) * 3072;
 }
 
+// Convert internal coordinates (0-3072) to external (0-3600)
+function internalToExternal(x: number): number {
+  return (x / 3072) * 3600;
+}
+
 // Compute offsetX from x coordinate
 function computeOffsetX(x: number): number {
   return Math.floor((x % 3072) / 24) * 24;
 }
 
 const InteractiveStage: FC<InteractiveStageProps> = ({
-  scene,
+  stageScenes,
+  activeScene,
   gamestates,
   width = 800,
   height = 600,
@@ -57,78 +70,78 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   left = 0,
   volume = 0.5,
   onRotationChange,
-  rotationOverride,
+  rotation,
+  onTransition,
 }) => {
-  const stageScenes = useMemo(() => [scene], [scene]);
+  const active = activeScene;
 
   const isPanoScene = useMemo(() => {
-    return scene && isPano(scene);
-  }, [scene]);
+    return active ? isPano(active) : false;
+  }, [active]);
 
   const [camera, setCamera] = useState<Camera | undefined>();
   const [panoObject, setPanoObject] = useState<Object3D | undefined>();
   const [specialMovieCast, setSpecialMovieCast] = useState<Observable<MovieCast> | null>(null);
 
-  const [internalRotation, momentumPointerHandler] = usePanoMomentum(5, 100);
+  const targetInternal = useMemo(() => {
+    const internalX = externalToInternal(rotation.yaw3600);
+    return {
+      x: internalX,
+      y: rotation.pitch,
+      offsetX: computeOffsetX(internalX),
+    };
+  }, [rotation]);
 
-  // State for external rotation override
-  const [overrideRotation, setOverrideRotation] = useState<RotationState | null>(null);
+  const [internalRotation, momentumPointerHandler, setInternalRotation] =
+    usePanoMomentum(5, 100, targetInternal);
 
-  // Apply rotation override when prop changes
+  // Track whether we're syncing from Redux to avoid dispatch loops
+  const syncingFromReduxRef = useRef(false);
+  const internalRotationRef = useRef(internalRotation);
+
   useEffect(() => {
-    if (rotationOverride) {
-      const internalX = externalToInternal(rotationOverride.x);
-      setOverrideRotation({
-        x: internalX,
-        y: rotationOverride.y,
-        offsetX: computeOffsetX(internalX),
-      });
-    } else {
-      setOverrideRotation(null);
+    internalRotationRef.current = internalRotation;
+  }, [internalRotation]);
+
+  // Sync from Redux → internal (only when Redux changed externally)
+  useEffect(() => {
+    const diffX = Math.abs(internalRotationRef.current.x - targetInternal.x);
+    const diffY = Math.abs(internalRotationRef.current.y - targetInternal.y);
+    if (diffX > 0.5 || diffY > 0.001) {
+      syncingFromReduxRef.current = true;
+      setInternalRotation(targetInternal);
     }
-  }, [rotationOverride]);
+  }, [targetInternal, setInternalRotation]);
 
-  // Use override rotation if set, otherwise use internal momentum rotation
-  const rotation = overrideRotation ?? internalRotation;
-
-  // Notify parent of rotation changes
-  const prevRotationRef = useMemo(() => ({ current: rotation }), []);
+  // Notify parent of rotation changes (but skip when syncing from Redux)
+  const prevRotationRef = useRef({ x: internalRotation.x, y: internalRotation.y });
   useEffect(() => {
+    // Skip if we just synced from Redux
+    if (syncingFromReduxRef.current) {
+      syncingFromReduxRef.current = false;
+      prevRotationRef.current = { x: internalRotation.x, y: internalRotation.y };
+      return;
+    }
     if (
       onRotationChange &&
-      (prevRotationRef.current.x !== rotation.x ||
-        prevRotationRef.current.y !== rotation.y)
+      (prevRotationRef.current.x !== internalRotation.x ||
+        prevRotationRef.current.y !== internalRotation.y)
     ) {
-      prevRotationRef.current = rotation;
-      onRotationChange(rotation);
+      prevRotationRef.current = { x: internalRotation.x, y: internalRotation.y };
+      onRotationChange({
+        yaw3600: internalToExternal(internalRotation.x),
+        pitch: internalRotation.y,
+      });
     }
-  }, [rotation, onRotationChange, prevRotationRef]);
-
-  // Clear override when user starts interacting
-  const handlePointerDown = useCallback(
-    (event: React.PointerEvent<HTMLCanvasElement>) => {
-      setOverrideRotation(null);
-      momentumPointerHandler.onPointerDown?.(event);
-    },
-    [momentumPointerHandler]
-  );
-
-  // Wrap momentum pointer handler to clear override on interaction
-  const wrappedMomentumHandler = useMemo(
-    () => ({
-      ...momentumPointerHandler,
-      onPointerDown: handlePointerDown,
-    }),
-    [momentumPointerHandler, handlePointerDown]
-  );
+  }, [internalRotation, onRotationChange]);
 
   const [cursor, hotspotPointerHandler] = useCursorHandler(
-    scene,
+    active,
     gamestates,
     isPanoScene,
     camera,
     panoObject,
-    rotation.offsetX,
+    internalRotation.offsetX,
     left,
     top,
     width,
@@ -136,7 +149,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   );
 
   const pointerHandler = composePointer([
-    wrappedMomentumHandler,
+    momentumPointerHandler,
     hotspotPointerHandler,
   ]);
 
@@ -180,7 +193,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         gamestates={gamestates}
         setCamera={setCamera}
         setPanoObject={setPanoObject}
-        rotation={rotation}
+        rotation={internalRotation}
         volume={volume}
         top={0}
         left={0}
@@ -201,6 +214,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerLeave}
+        onTransition={onTransition}
       />
     </div>
   );

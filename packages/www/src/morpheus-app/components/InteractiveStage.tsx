@@ -24,7 +24,7 @@ import type {
 } from 'morpheus/casts/types';
 
 import { and, Matcher } from '@/utils/matchers';
-import useCursorHandler from '../hooks/useCursorHandler';
+import { useInputHandler } from '../hooks/useInputHandler';
 
 export interface RotationState {
   x: number;
@@ -155,18 +155,25 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     }
   }, [internalRotation, onRotationChange]);
 
-  const [cursor, hotspotPointerHandler] = useCursorHandler(
-    active,
+  const previousSceneId = useMemo(
+    () => (stageScenes.length > 1 ? stageScenes[1].sceneId : undefined),
+    [stageScenes],
+  );
+
+  const [cursor, hotspotPointerHandler] = useInputHandler({
+    scene: active,
     gamestates,
     isPanoScene,
     camera,
     panoObject,
-    internalRotation.offsetX,
-    left,
-    top,
-    width,
-    height,
-  );
+    offsetX: internalRotation.offsetX,
+    screenLeft: left,
+    screenTop: top,
+    screenWidth: width,
+    screenHeight: height,
+    previousSceneId,
+    onTransition,
+  });
 
   const pointerHandler = composePointer([
     momentumPointerHandler,

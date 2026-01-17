@@ -23,7 +23,6 @@ import { and } from 'utils/matchers'
 
 const logger = loggerFactory('Special')
 
-const RAD_TO_MORPHEUS = 3600 / (Math.PI * 2)
 const TRANSITION_SCENE_SENTINEL = 0x3fffffff
 
 const normalizeMorpheusAngle = (value: number) => {
@@ -38,10 +37,10 @@ const computeStartAngle = (angleAtEnd: number) => {
   if (!Number.isFinite(angleAtEnd) || angleAtEnd === -1) {
     return undefined
   }
-  let startAngle = (angleAtEnd * Math.PI) / 1800
-  startAngle -= Math.PI - Math.PI / 6
-  const morpheusAngle = startAngle * RAD_TO_MORPHEUS + 1800
-  return normalizeMorpheusAngle(morpheusAngle)
+  // In the new system, yaw3600 represents the view center directly in Morpheus coordinates.
+  // The legacy formula had conversions for radians and morpheusOffsetLeft (left edge),
+  // but we can now use angleAtEnd directly since yaw3600 is the view center.
+  return normalizeMorpheusAngle(angleAtEnd)
 }
 
 const isMovieSpecialCast = (cast: MovieCast): cast is MovieSpecialCast =>
@@ -276,19 +275,21 @@ const Special = ({
    * uppermost stage scene
    */
   useEffect(() => {
-    const activeAndCurrent = and(
-      (cast: SceneCasts) =>
-        !!stageScenes.length && stageScenes[0].casts.includes(cast),
-      (cast: SceneCasts) => isActive({ cast, gamestates })
-    )
+    const topSceneCastIds = stageScenes.length > 0 
+      ? new Set(stageScenes[0].casts.map(c => c.castId))
+      : new Set<number>()
+
     for (const [controller, casts] of availableVideos) {
-      if (casts.find(activeAndCurrent)) {
+      const isInTopScene = casts.some(cast => topSceneCastIds.has(cast.castId))
+      const isActiveCast = casts.some(cast => isActive({ cast, gamestates }))
+
+      if (isInTopScene && isActiveCast) {
         controller.play()
       } else {
         controller.end()
       }
     }
-  }, [availableVideos])
+  }, [availableVideos, stageScenes, gamestates])
 
   return (
     <React.Fragment>

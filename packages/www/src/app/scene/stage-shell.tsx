@@ -8,10 +8,10 @@ import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import InteractiveStage, {
   ExternalRotation,
 } from '@/morpheus-app/components/InteractiveStage';
-import useInitialGamestates from '@/morpheus-app/hooks/useInitialGamestate';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
 import useGameControl, { HotspotState } from '@/morpheus-app/hooks/useGameControl';
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
+import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import {
   activateScene,
   scenePrefetched,
@@ -92,7 +92,7 @@ export const SceneStageShell = () => {
   const searchParams = useSearchParams();
   const mcpSessionName = searchParams.get('mcp');
 
-  const gamestates = useInitialGamestates();
+  const gamestates = useAppSelector(selectGamestatesAccessor);
   const { width, height, left, top } = useResponsiveSize();
   const dispatch = useAppDispatch();
 

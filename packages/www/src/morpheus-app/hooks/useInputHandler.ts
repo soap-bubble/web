@@ -1,0 +1,846 @@
+import {
+  PointerEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
+import { Raycaster, Object3D, Camera, Vector2 } from 'three';
+import { isActive } from '@soapbubble/morpheus-client';
+import type { Hotspot, Scene, Cast } from 'morpheus/casts/types';
+import { isHotspot } from 'morpheus/casts/matchers';
+import { DST_RATIO, DST_WIDTH, GESTURES } from 'morpheus/constants';
+
+import { and } from '@/utils/matchers';
+import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
+import { updateGamestate } from '@/morpheus-app/store/slices/gamestateSlice';
+import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
+import { setRotation } from '@/morpheus-app/store/slices/rotationSlice';
+import { selectRotation } from '@/morpheus-app/store/slices/rotationSlice';
+import { handleHotspotAction } from '@/morpheus-app/hotspot/handleHotspotAction';
+import { resolveCursor } from '@/morpheus-app/hotspot/handlers';
+import {
+  gesture,
+  hotspotRectMatchesPosition,
+  actionType,
+} from '@/morpheus-app/hotspot/matchers';
+import { or } from '@/utils/matchers';
+
+const ORIGINAL_HEIGHT = 400;
+const ORIGINAL_WIDTH = 640;
+const CLICK_THRESHOLD_MS = 800;
+const CLICK_DISTANCE_THRESHOLD = 10; // Max pixels moved for interaction to be considered a click
+const SWEEP_MIN_DURATION_MS = 150;
+
+type Rotation = { yaw3600: number; pitch: number };
+
+interface CursorState {
+  top: number;
+  left: number;
+  image: HTMLImageElement | undefined;
+}
+
+interface PointerHandlers {
+  onPointerUp: (e: PointerEvent<HTMLCanvasElement>) => void;
+  onPointerDown: (e: PointerEvent<HTMLCanvasElement>) => void;
+  onPointerMove: (e: PointerEvent<HTMLCanvasElement>) => void;
+  onPointerLeave: (e: PointerEvent<HTMLCanvasElement>) => void;
+}
+
+type InputReturn = [CursorState, PointerHandlers];
+
+const cursorCache = new Map<number, Promise<HTMLImageElement | null>>();
+
+function loadCursorImage(cursorId: number): Promise<HTMLImageElement | null> {
+  if (cursorId === 0) {
+    return Promise.resolve(null);
+  }
+
+  const cached = cursorCache.get(cursorId);
+  if (cached) {
+    return cached;
+  }
+
+  const cursorFiles: Record<number, string> = {
+    10001: 'Bigarrow.png',
+    10011: 'Card.png',
+    10008: 'Open.png',
+    10009: 'Closed.png',
+    10000: 'Wheel.png',
+    10002: 'Hand.png',
+    10003: 'Tele.png',
+    10005: 'Goback.png',
+    10007: 'Down.png',
+    10010: 'Tapest.png',
+    10004: 'Micro.png',
+    10012: 'Cur10012.png',
+    10013: 'Cur10013.png',
+    10014: 'Cur10014.png',
+    10015: 'Cur10015.png',
+    10016: 'Cur10016.png',
+    10017: 'cur10017.png',
+    10018: 'cur10018.png',
+    10019: 'cur10019.png',
+    10020: 'cur10020.png',
+    10021: 'cur10021.png',
+    10022: 'cur10022.png',
+    10023: 'cur10023.png',
+    10024: 'cur10024.png',
+  };
+
+  const fileName = cursorFiles[cursorId];
+  if (!fileName) {
+    return Promise.resolve(null);
+  }
+
+  const url = `/image/cursors/${fileName}`;
+
+  const promise = new Promise<HTMLImageElement | null>((resolve) => {
+    const img = new Image();
+    img.crossOrigin = 'anonymous';
+    img.onload = () => resolve(img);
+    img.onerror = () => resolve(null);
+    img.src = url;
+  });
+
+  cursorCache.set(cursorId, promise);
+  return promise;
+}
+
+function screenToGameCoords(params: {
+  top: number;
+  left: number;
+  height: number;
+  width: number;
+}): { top: number; left: number } {
+  const { top, left, height, width } = params;
+  return {
+    top: top / (height / ORIGINAL_HEIGHT),
+    left: left / (width / ORIGINAL_WIDTH),
+  };
+}
+
+interface PointerState {
+  screenX: number;
+  screenY: number;
+  isDown: boolean;
+  downTime: number;
+  startScreenX: number;
+  startScreenY: number;
+  startGameX: number;
+  startGameY: number;
+}
+
+export function useInputHandler(params: {
+  scene: Scene;
+  gamestates: GamestatesAccessor;
+  isPanoScene: boolean;
+  camera: Camera | undefined;
+  panoObject: Object3D | undefined;
+  offsetX: number;
+  screenLeft: number;
+  screenTop: number;
+  screenWidth: number;
+  screenHeight: number;
+  previousSceneId?: number;
+  onTransition?: (transition: {
+    sceneId: number;
+    dissolve: boolean;
+    startAngle?: number;
+    sourceCastId?: number;
+  }) => void;
+}): InputReturn {
+  const {
+    scene,
+    gamestates,
+    isPanoScene,
+    camera,
+    panoObject,
+    offsetX,
+    screenLeft,
+    screenTop,
+    screenWidth,
+    screenHeight,
+    previousSceneId,
+    onTransition,
+  } = params;
+
+  const dispatch = useAppDispatch();
+  const rotation = useAppSelector(selectRotation);
+
+  // Keep gamestates and previousSceneId in refs so callbacks stay stable
+  const gamestatesRef = useRef(gamestates);
+  const previousSceneIdRef = useRef(previousSceneId);
+  const onTransitionRef = useRef(onTransition);
+  useEffect(() => {
+    gamestatesRef.current = gamestates;
+  }, [gamestates]);
+  useEffect(() => {
+    previousSceneIdRef.current = previousSceneId;
+  }, [previousSceneId]);
+  useEffect(() => {
+    onTransitionRef.current = onTransition;
+  }, [onTransition]);
+
+  const [cursor, setCursor] = useState<HTMLImageElement>();
+  const [pointer, setPointer] = useState<PointerState>({
+    screenX: screenLeft,
+    screenY: screenTop,
+    isDown: false,
+    downTime: 0,
+    startScreenX: 0,
+    startScreenY: 0,
+    startGameX: 0,
+    startGameY: 0,
+  });
+
+  // Mirror pointer state in a ref for synchronous reads in event handlers
+  const pointerRef = useRef(pointer);
+  useEffect(() => {
+    pointerRef.current = pointer;
+  }, [pointer]);
+
+  const rotationRef = useRef(rotation);
+  useEffect(() => {
+    rotationRef.current = rotation;
+  }, [rotation]);
+
+  // Raycaster for pano coordinate conversion
+  const raycaster = useMemo(() => new Raycaster(), []);
+
+  // Convert screen coords to game coords
+  const gamePosition = useMemo(() => {
+    const cursorTop = pointer.screenY - screenTop;
+    const cursorLeft = pointer.screenX - screenLeft;
+
+    if (isPanoScene && camera && panoObject && !document.hidden) {
+      const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
+      const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
+
+      raycaster.setFromCamera(new Vector2(x, y), camera);
+      const panoIntersects = raycaster.intersectObject(panoObject);
+      const panoIntersect = panoIntersects.find(
+        (intersect) => intersect.uv !== undefined,
+      );
+      if (panoIntersect?.uv) {
+        const { uv } = panoIntersect;
+        const top = uv.y * -512 + 256;
+        let left =
+          (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
+        if (left < 0) {
+          left += 3600;
+        } else if (left > 3600) {
+          left -= 3600;
+        }
+        return { top, left };
+      }
+    }
+
+    return screenToGameCoords({
+      top: cursorTop,
+      left: cursorLeft,
+      height: screenHeight,
+      width: screenWidth,
+    });
+  }, [
+    pointer.screenX,
+    pointer.screenY,
+    screenTop,
+    screenLeft,
+    isPanoScene,
+    camera,
+    panoObject,
+    offsetX,
+    raycaster,
+    screenWidth,
+    screenHeight,
+  ]);
+
+  // Active hotspots for current scene
+  const hotspots = useMemo(() => {
+    const gs = gamestatesRef.current;
+    const filter = and<Cast>(isHotspot, (cast) => isActive({ cast, gamestates: gs }));
+    return scene.casts.filter(filter) as Hotspot[];
+  }, [scene]);
+
+  // Cursor index based on position and hotspots
+  const cursorIndex = useMemo(() => {
+    const gs = gamestatesRef.current;
+    return resolveCursor(
+      hotspots,
+      gs,
+      gamePosition,
+      { top: pointer.startGameY, left: pointer.startGameX },
+      pointer.isDown,
+    );
+  }, [hotspots, gamePosition, pointer.startGameX, pointer.startGameY, pointer.isDown]);
+
+  // Load cursor image when index changes
+  useEffect(() => {
+    if (cursorIndex !== 0) {
+      loadCursorImage(cursorIndex).then((img) => {
+        if (img) {
+          setCursor(img);
+        }
+      });
+    }
+  }, [cursorIndex]);
+
+  // Process a hotspot action and dispatch results
+  const pendingTransitionRef = useRef<{
+    transition: { sceneId: number; dissolve: boolean; startAngle?: number };
+    targetRotation: Rotation;
+    startRotation: Rotation;
+    startedAt: number;
+    durationMs: number;
+  } | null>(null);
+  const sweepRafRef = useRef<number | null>(null);
+
+  const normalizeYaw = useCallback((yaw: number) => {
+    let next = yaw;
+    while (next < 0) {
+      next += 3600;
+    }
+    while (next >= 3600) {
+      next -= 3600;
+    }
+    return next;
+  }, []);
+
+  const shortestYawDelta = useCallback((from: number, to: number) => {
+    const raw = ((to - from + 5400) % 3600) - 1800;
+    return raw;
+  }, []);
+
+  const startSweepTo = useCallback(
+    (transition: { sceneId: number; dissolve: boolean; startAngle?: number }, target: Rotation) => {
+      const startRotation = rotationRef.current;
+      const deltaYaw = shortestYawDelta(startRotation.yaw3600, target.yaw3600);
+      const distanceRad = Math.abs(deltaYaw) * (Math.PI * 2 / 3600);
+      const durationMs = Math.max(SWEEP_MIN_DURATION_MS, Math.sqrt(distanceRad) * 1000);
+
+      pendingTransitionRef.current = {
+        transition,
+        targetRotation: target,
+        startRotation,
+        startedAt: performance.now(),
+        durationMs,
+      };
+
+      if (sweepRafRef.current !== null) {
+        cancelAnimationFrame(sweepRafRef.current);
+      }
+      const tick = (time: number) => {
+        const sweep = pendingTransitionRef.current;
+        if (!sweep) {
+          sweepRafRef.current = null;
+          return;
+        }
+        const elapsed = time - sweep.startedAt;
+        const t = Math.min(1, elapsed / sweep.durationMs);
+        const eased = t * (2 - t);
+        const nextYaw =
+          sweep.startRotation.yaw3600 +
+          shortestYawDelta(sweep.startRotation.yaw3600, sweep.targetRotation.yaw3600) * eased;
+        const nextPitch =
+          sweep.startRotation.pitch +
+          (sweep.targetRotation.pitch - sweep.startRotation.pitch) * eased;
+
+        dispatch(
+          setRotation({
+            yaw3600: normalizeYaw(nextYaw),
+            pitch: nextPitch,
+          }),
+        );
+
+        if (t >= 1) {
+          sweepRafRef.current = null;
+          if (pendingTransitionRef.current) {
+            const { transition: pending } = pendingTransitionRef.current;
+            pendingTransitionRef.current = null;
+            onTransitionRef.current?.(pending);
+          }
+          return;
+        }
+        sweepRafRef.current = requestAnimationFrame(tick);
+      };
+      sweepRafRef.current = requestAnimationFrame(tick);
+    },
+    [dispatch, normalizeYaw, shortestYawDelta],
+  );
+
+  const processHotspotAction = useCallback(
+    (
+      hotspot: Hotspot,
+      currentPosition: { top: number; left: number },
+      startingPosition: { top: number; left: number },
+    ) => {
+      const result = handleHotspotAction({
+        hotspot,
+        gamestates: gamestatesRef.current,
+        currentPosition,
+        startingPosition,
+        previousSceneId: previousSceneIdRef.current,
+        isPanoScene,
+      });
+
+      for (const update of result.gamestateUpdates) {
+        dispatch(updateGamestate(update));
+      }
+
+      if (result.sceneTransition && result.preTransitionRotation && isPanoScene) {
+        startSweepTo(result.sceneTransition, result.preTransitionRotation);
+        return result.allDone;
+      }
+
+      if (result.sceneTransition && onTransitionRef.current) {
+        onTransitionRef.current(result.sceneTransition);
+      }
+
+      return result.allDone;
+    },
+    [dispatch, isPanoScene, startSweepTo],
+  );
+
+  // Reset pointer state on scene change
+  const sceneIdRef = useRef(scene.sceneId);
+  useEffect(() => {
+    if (sceneIdRef.current !== scene.sceneId) {
+      sceneIdRef.current = scene.sceneId;
+      pendingTransitionRef.current = null;
+      if (sweepRafRef.current !== null) {
+        cancelAnimationFrame(sweepRafRef.current);
+        sweepRafRef.current = null;
+      }
+      setPointer({
+        screenX: screenLeft,
+        screenY: screenTop,
+        isDown: false,
+        downTime: 0,
+        startScreenX: 0,
+        startScreenY: 0,
+        startGameX: 0,
+        startGameY: 0,
+      });
+    }
+  }, [scene.sceneId, screenLeft, screenTop]);
+
+  // Process scene-enter and always hotspots once per scene
+  const processedSceneIdRef = useRef<number | null>(null);
+  useEffect(() => {
+    if (processedSceneIdRef.current === scene.sceneId) {
+      return;
+    }
+    processedSceneIdRef.current = scene.sceneId;
+
+    const gs = gamestatesRef.current;
+    const sceneEnterHotspots = (scene.casts as Hotspot[]).filter(
+      and<Cast>(
+        isHotspot,
+        (cast) => isActive({ cast, gamestates: gs }),
+        (({ gesture: g }: Hotspot) =>
+          GESTURES[g] === 'Always' || GESTURES[g] === 'SceneEnter') as (
+          cast: Cast,
+        ) => boolean,
+      ),
+    );
+
+    for (const hotspot of sceneEnterHotspots) {
+      processHotspotAction(
+        hotspot,
+        { top: 0, left: 0 },
+        { top: 0, left: 0 },
+      );
+    }
+  }, [scene.sceneId, scene.casts, processHotspotAction]);
+
+  // Track which hotspots the pointer was in (for enter/leave events)
+  const wasInHotspotsRef = useRef<Set<number>>(new Set());
+
+  // Process pointer events - called from handlers
+  const processPointerEvent = useCallback(
+    (opts: {
+      gamePos: { top: number; left: number };
+      startPos: { top: number; left: number };
+      isDown: boolean;
+      wasDown: boolean;
+      wasMoved: boolean;
+      wasUpped: boolean;
+    }) => {
+      const { gamePos, startPos, isDown, wasDown, wasMoved, wasUpped } = opts;
+      const gs = gamestatesRef.current;
+      const activeHotspots = hotspots.filter((h) =>
+        isActive({ cast: h, gamestates: gs }),
+      );
+
+      // Determine which hotspots the pointer is currently in
+      const nowInHotspotIds = new Set<number>();
+      for (const hotspot of activeHotspots) {
+        if (hotspotRectMatchesPosition(gamePos)(hotspot)) {
+          nowInHotspotIds.add(hotspot.castId);
+        }
+      }
+
+      // Compute entering/leaving
+      const wasIn = wasInHotspotsRef.current;
+      const enteringIds = new Set<number>();
+      const leavingIds = new Set<number>();
+
+      for (const id of nowInHotspotIds) {
+        if (!wasIn.has(id)) {
+          enteringIds.add(id);
+        }
+      }
+      for (const id of wasIn) {
+        if (!nowInHotspotIds.has(id)) {
+          leavingIds.add(id);
+        }
+      }
+
+      wasInHotspotsRef.current = nowInHotspotIds;
+
+      // Process mouse leave hotspots
+      if (wasMoved && leavingIds.size > 0) {
+        for (const hotspot of activeHotspots) {
+          if (leavingIds.has(hotspot.castId) && gesture.isMouseLeave(hotspot)) {
+            processHotspotAction(hotspot, gamePos, startPos);
+          }
+        }
+      }
+
+      // Process mouse enter hotspots
+      if (wasMoved && enteringIds.size > 0) {
+        for (const hotspot of activeHotspots) {
+          if (enteringIds.has(hotspot.castId) && gesture.isMouseEnter(hotspot)) {
+            processHotspotAction(hotspot, gamePos, startPos);
+          }
+        }
+      }
+
+      // Process mouse up hotspots
+      // Note: Click detection is handled in onPointerUp which has access to downTime
+      if (wasUpped) {
+        for (const hotspot of activeHotspots) {
+          if (
+            nowInHotspotIds.has(hotspot.castId) &&
+            hotspotRectMatchesPosition(startPos)(hotspot) &&
+            gesture.isMouseUp(hotspot)
+          ) {
+            if (processHotspotAction(hotspot, gamePos, startPos)) {
+              break;
+            }
+          }
+        }
+      }
+
+      // Process drag hotspots (mouse moved while down)
+      if (wasMoved && isDown) {
+        for (const hotspot of activeHotspots) {
+          if (
+            hotspotRectMatchesPosition(startPos)(hotspot) &&
+            or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown)(hotspot) &&
+            or(
+              actionType.isRotate,
+              actionType.isHorizSlider,
+              actionType.isVertSlider,
+              actionType.isTwoAxisSlider,
+            )(hotspot)
+          ) {
+            if (processHotspotAction(hotspot, gamePos, startPos)) {
+              break;
+            }
+          }
+        }
+      }
+
+      // Process mouse down hotspots
+      if (wasDown) {
+        for (const hotspot of activeHotspots) {
+          if (nowInHotspotIds.has(hotspot.castId) && gesture.isMouseDown(hotspot)) {
+            if (processHotspotAction(hotspot, gamePos, startPos)) {
+              break;
+            }
+          }
+        }
+
+        // Store oldValue for slider hotspots
+        for (const hotspot of activeHotspots) {
+          if (
+            nowInHotspotIds.has(hotspot.castId) &&
+            or(
+              actionType.isRotate,
+              actionType.isHorizSlider,
+              actionType.isVertSlider,
+              actionType.isTwoAxisSlider,
+            )(hotspot)
+          ) {
+            const gsState = gs.byId(hotspot.param1);
+            if (gsState) {
+              (hotspot as Hotspot & { oldValue?: number }).oldValue = gsState.value;
+            }
+          }
+        }
+      }
+    },
+    [hotspots, processHotspotAction],
+  );
+
+  // Pointer handlers
+  const onPointerDown = useCallback(
+    (event: PointerEvent<HTMLCanvasElement>) => {
+      const { clientX, clientY } = event;
+
+      // Compute game position immediately for startPos
+      const cursorTop = clientY - screenTop;
+      const cursorLeft = clientX - screenLeft;
+      let startGamePos = screenToGameCoords({
+        top: cursorTop,
+        left: cursorLeft,
+        height: screenHeight,
+        width: screenWidth,
+      });
+
+      if (isPanoScene && camera && panoObject && !document.hidden) {
+        const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
+        const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
+        raycaster.setFromCamera(new Vector2(x, y), camera);
+        const panoIntersects = raycaster.intersectObject(panoObject);
+        const panoIntersect = panoIntersects.find((i) => i.uv !== undefined);
+        if (panoIntersect?.uv) {
+          const { uv } = panoIntersect;
+          const top = uv.y * -512 + 256;
+          let left =
+            (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
+          if (left < 0) left += 3600;
+          else if (left > 3600) left -= 3600;
+          startGamePos = { top, left };
+        }
+      }
+
+      const now = Date.now();
+      setPointer((prev) => ({
+        ...prev,
+        screenX: clientX,
+        screenY: clientY,
+        isDown: true,
+        downTime: now,
+        startScreenX: clientX,
+        startScreenY: clientY,
+        startGameX: startGamePos.left,
+        startGameY: startGamePos.top,
+      }));
+
+      processPointerEvent({
+        gamePos: startGamePos,
+        startPos: startGamePos,
+        isDown: true,
+        wasDown: true,
+        wasMoved: false,
+        wasUpped: false,
+      });
+    },
+    [
+      screenTop,
+      screenLeft,
+      screenHeight,
+      screenWidth,
+      isPanoScene,
+      camera,
+      panoObject,
+      offsetX,
+      raycaster,
+      processPointerEvent,
+    ],
+  );
+
+  const onPointerMove = useCallback(
+    (event: PointerEvent<HTMLCanvasElement>) => {
+      const { clientX, clientY } = event;
+      const prev = pointerRef.current;
+
+      // Skip if position unchanged
+      if (prev.screenX === clientX && prev.screenY === clientY) {
+        return;
+      }
+
+      // Update state (pure)
+      setPointer((p) => ({
+        ...p,
+        screenX: clientX,
+        screenY: clientY,
+      }));
+
+      // Compute current game position
+      const cursorTop = clientY - screenTop;
+      const cursorLeft = clientX - screenLeft;
+      let currentGamePos = screenToGameCoords({
+        top: cursorTop,
+        left: cursorLeft,
+        height: screenHeight,
+        width: screenWidth,
+      });
+
+      if (isPanoScene && camera && panoObject && !document.hidden) {
+        const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
+        const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
+        raycaster.setFromCamera(new Vector2(x, y), camera);
+        const panoIntersects = raycaster.intersectObject(panoObject);
+        const panoIntersect = panoIntersects.find((i) => i.uv !== undefined);
+        if (panoIntersect?.uv) {
+          const { uv } = panoIntersect;
+          const top = uv.y * -512 + 256;
+          let left =
+            (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
+          if (left < 0) left += 3600;
+          else if (left > 3600) left -= 3600;
+          currentGamePos = { top, left };
+        }
+      }
+
+      // Process event (side effect, outside state updater)
+      processPointerEvent({
+        gamePos: currentGamePos,
+        startPos: { top: prev.startGameY, left: prev.startGameX },
+        isDown: prev.isDown,
+        wasDown: false,
+        wasMoved: true,
+        wasUpped: false,
+      });
+    },
+    [
+      screenTop,
+      screenLeft,
+      screenHeight,
+      screenWidth,
+      isPanoScene,
+      camera,
+      panoObject,
+      offsetX,
+      raycaster,
+      processPointerEvent,
+    ],
+  );
+
+  const onPointerUp = useCallback(
+    (event: PointerEvent<HTMLCanvasElement>) => {
+      const { clientX, clientY } = event;
+      const prev = pointerRef.current;
+
+      // Compute current game position
+      const cursorTop = clientY - screenTop;
+      const cursorLeft = clientX - screenLeft;
+      let currentGamePos = screenToGameCoords({
+        top: cursorTop,
+        left: cursorLeft,
+        height: screenHeight,
+        width: screenWidth,
+      });
+
+      if (isPanoScene && camera && panoObject && !document.hidden) {
+        const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
+        const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
+        raycaster.setFromCamera(new Vector2(x, y), camera);
+        const panoIntersects = raycaster.intersectObject(panoObject);
+        const panoIntersect = panoIntersects.find((i) => i.uv !== undefined);
+        if (panoIntersect?.uv) {
+          const { uv } = panoIntersect;
+          const top = uv.y * -512 + 256;
+          let left =
+            (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
+          if (left < 0) left += 3600;
+          else if (left > 3600) left -= 3600;
+          currentGamePos = { top, left };
+        }
+      }
+
+      const timeSinceDown = Date.now() - prev.downTime;
+      const dx = clientX - prev.startScreenX;
+      const dy = clientY - prev.startScreenY;
+      const distanceMoved = Math.sqrt(dx * dx + dy * dy);
+      const isClick =
+        timeSinceDown < CLICK_THRESHOLD_MS &&
+        distanceMoved < CLICK_DISTANCE_THRESHOLD;
+      const startPos = { top: prev.startGameY, left: prev.startGameX };
+
+      // Update state (pure)
+      setPointer((p) => ({
+        ...p,
+        screenX: clientX,
+        screenY: clientY,
+        isDown: false,
+      }));
+
+      // Process up event (side effect, outside state updater)
+      processPointerEvent({
+        gamePos: currentGamePos,
+        startPos,
+        isDown: false,
+        wasDown: false,
+        wasMoved: false,
+        wasUpped: true,
+      });
+
+      // Process click if applicable
+      if (isClick) {
+        const gs = gamestatesRef.current;
+        const activeHotspots = hotspots.filter((h) =>
+          isActive({ cast: h, gamestates: gs }),
+        );
+
+        for (const hotspot of activeHotspots) {
+          if (
+            hotspotRectMatchesPosition(currentGamePos)(hotspot) &&
+            hotspotRectMatchesPosition(startPos)(hotspot) &&
+            gesture.isMouseClick(hotspot)
+          ) {
+            if (processHotspotAction(hotspot, currentGamePos, startPos)) {
+              break;
+            }
+          }
+        }
+      }
+    },
+    [
+      screenTop,
+      screenLeft,
+      screenHeight,
+      screenWidth,
+      isPanoScene,
+      camera,
+      panoObject,
+      offsetX,
+      raycaster,
+      processPointerEvent,
+      hotspots,
+      processHotspotAction,
+    ],
+  );
+
+  const onPointerLeave = useCallback(
+    (event: PointerEvent<HTMLCanvasElement>) => {
+      const { clientX, clientY } = event;
+      setPointer((prev) => ({
+        ...prev,
+        screenX: clientX,
+        screenY: clientY,
+        isDown: false,
+      }));
+    },
+    [],
+  );
+
+  return [
+    {
+      image: cursor,
+      top: pointer.screenY - screenTop,
+      left: pointer.screenX - screenLeft,
+    },
+    {
+      onPointerUp,
+      onPointerMove,
+      onPointerDown,
+      onPointerLeave,
+    },
+  ];
+}

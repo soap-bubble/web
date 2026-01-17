@@ -392,6 +392,7 @@ export const handlePanoHotspot: ActionCreator<
           `From GoBack at ${currentScene.sceneId} requesting next scene ${hotspot.param1}`
         )
         context.nextSceneSpread = [hotspot.param1, false]
+        // why is this disabled? does this function do anything?
         // await dispatch(sceneActions.goToScene(hotspot.param1, false));
         return !hotspot.defaultPass
       }

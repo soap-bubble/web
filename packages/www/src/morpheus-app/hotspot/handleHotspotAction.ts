@@ -18,7 +18,6 @@ type HotspotWithAngle = Hotspot & {
   angleAtEnd?: number;
   nextSceneId?: number;
   dissolveToNextScene?: boolean;
-  oldValue?: number;
 };
 
 function normalizeAngle(angle: number): number {
@@ -62,6 +61,7 @@ export function handleHotspotAction(params: {
   startingPosition: Position;
   previousSceneId?: number;
   isPanoScene: boolean;
+  oldValue?: number;
 }): HotspotActionResult {
   const {
     hotspot,
@@ -70,6 +70,7 @@ export function handleHotspotAction(params: {
     startingPosition,
     previousSceneId,
     isPanoScene,
+    oldValue,
   } = params;
 
   const result: HotspotActionResult = {
@@ -238,7 +239,7 @@ export function handleHotspotAction(params: {
         rate = max - min;
       }
       const delta = Math.round(rate * ratio * 2 - 0.5);
-      let vertValue = (hotspot.oldValue ?? gs.value) + delta;
+      let vertValue = (oldValue ?? gs.value) + delta;
       if (vertValue < min) {
         vertValue = stateWraps ? vertValue + (max - min) : min;
       }
@@ -262,7 +263,7 @@ export function handleHotspotAction(params: {
         rate = max - min;
       }
       const delta = Math.round(rate * ratio + 0.5);
-      let horizValue = (hotspot.oldValue ?? gs.value) + delta;
+      let horizValue = (oldValue ?? gs.value) + delta;
       if (horizValue < min) {
         horizValue = stateWraps ? horizValue + (max - min) : min;
       }

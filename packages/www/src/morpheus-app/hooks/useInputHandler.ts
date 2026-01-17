@@ -287,6 +287,9 @@ export function useInputHandler(params: {
     }
   }, [cursorIndex]);
 
+  // Track old values for slider hotspots (keyed by castId)
+  const sliderOldValuesRef = useRef<Map<number, number>>(new Map());
+
   // Process a hotspot action and dispatch results
   const pendingTransitionRef = useRef<{
     transition: { sceneId: number; dissolve: boolean; startAngle?: number };
@@ -376,6 +379,7 @@ export function useInputHandler(params: {
       currentPosition: { top: number; left: number },
       startingPosition: { top: number; left: number },
     ) => {
+      const oldValue = sliderOldValuesRef.current.get(hotspot.castId);
       const result = handleHotspotAction({
         hotspot,
         gamestates: gamestatesRef.current,
@@ -383,6 +387,7 @@ export function useInputHandler(params: {
         startingPosition,
         previousSceneId: previousSceneIdRef.current,
         isPanoScene,
+        oldValue,
       });
 
       for (const update of result.gamestateUpdates) {
@@ -409,6 +414,7 @@ export function useInputHandler(params: {
     if (sceneIdRef.current !== scene.sceneId) {
       sceneIdRef.current = scene.sceneId;
       pendingTransitionRef.current = null;
+      sliderOldValuesRef.current.clear();
       if (sweepRafRef.current !== null) {
         cancelAnimationFrame(sweepRafRef.current);
         sweepRafRef.current = null;
@@ -564,7 +570,7 @@ export function useInputHandler(params: {
           }
         }
 
-        // Store oldValue for slider hotspots
+        // Store oldValue for slider hotspots in the ref (not on the frozen hotspot object)
         for (const hotspot of activeHotspots) {
           if (
             nowInHotspotIds.has(hotspot.castId) &&
@@ -577,7 +583,7 @@ export function useInputHandler(params: {
           ) {
             const gsState = gs.byId(hotspot.param1);
             if (gsState) {
-              (hotspot as Hotspot & { oldValue?: number }).oldValue = gsState.value;
+              sliderOldValuesRef.current.set(hotspot.castId, gsState.value);
             }
           }
         }
@@ -619,8 +625,7 @@ export function useInputHandler(params: {
       }
 
       const now = Date.now();
-      setPointer((prev) => ({
-        ...prev,
+      const newPointerState = {
         screenX: clientX,
         screenY: clientY,
         isDown: true,
@@ -629,7 +634,10 @@ export function useInputHandler(params: {
         startScreenY: clientY,
         startGameX: startGamePos.left,
         startGameY: startGamePos.top,
-      }));
+      };
+      // Update ref synchronously so subsequent events see correct state
+      pointerRef.current = newPointerState;
+      setPointer(newPointerState);
 
       processPointerEvent({
         gamePos: startGamePos,
@@ -664,12 +672,14 @@ export function useInputHandler(params: {
         return;
       }
 
-      // Update state (pure)
-      setPointer((p) => ({
-        ...p,
+      // Update ref synchronously and state
+      const newPointerState = {
+        ...prev,
         screenX: clientX,
         screenY: clientY,
-      }));
+      };
+      pointerRef.current = newPointerState;
+      setPointer(newPointerState);
 
       // Compute current game position
       const cursorTop = clientY - screenTop;
@@ -763,13 +773,22 @@ export function useInputHandler(params: {
         distanceMoved < CLICK_DISTANCE_THRESHOLD;
       const startPos = { top: prev.startGameY, left: prev.startGameX };
 
-      // Update state (pure)
-      setPointer((p) => ({
-        ...p,
+      // Clear slider old values when pointer is released
+      sliderOldValuesRef.current.clear();
+
+      // Update ref synchronously and state - reset start positions so cursor doesn't match old drag start
+      const newPointerState = {
+        ...prev,
         screenX: clientX,
         screenY: clientY,
         isDown: false,
-      }));
+        startScreenX: 0,
+        startScreenY: 0,
+        startGameX: 0,
+        startGameY: 0,
+      };
+      pointerRef.current = newPointerState;
+      setPointer(newPointerState);
 
       // Process up event (side effect, outside state updater)
       processPointerEvent({
@@ -820,12 +839,19 @@ export function useInputHandler(params: {
   const onPointerLeave = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
       const { clientX, clientY } = event;
-      setPointer((prev) => ({
+      const prev = pointerRef.current;
+      const newPointerState = {
         ...prev,
         screenX: clientX,
         screenY: clientY,
         isDown: false,
-      }));
+        startScreenX: 0,
+        startScreenY: 0,
+        startGameX: 0,
+        startGameY: 0,
+      };
+      pointerRef.current = newPointerState;
+      setPointer(newPointerState);
     },
     [],
   );

@@ -175,10 +175,15 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     onTransition,
   });
 
-  const pointerHandler = composePointer([
-    momentumPointerHandler,
-    hotspotPointerHandler,
-  ]);
+  // Only include momentum handler (pano rotation) when the active scene is a pano
+  // This prevents pano rotation when interacting with special/controlled scenes
+  const pointerHandler = useMemo(
+    () =>
+      isPanoScene
+        ? composePointer([momentumPointerHandler, hotspotPointerHandler])
+        : composePointer([hotspotPointerHandler]),
+    [isPanoScene, momentumPointerHandler, hotspotPointerHandler],
+  );
 
   const { onPointerUp, onPointerMove, onPointerDown, onPointerLeave } = pointerHandler;
 
@@ -320,17 +325,29 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     const matchActivePanoScene = (s: Scene) =>
       s.casts.some((cast: Cast) => matchPanoCast(cast as MovieCast));
 
-    return stageScenes.reduce(
-      ([webGl, special], s) => {
-        if (matchActivePanoScene(s)) {
-          webGl.push(s);
-        } else if (!webGl.length && !isPano(s)) {
+    // Determine if the active scene (first in stack) is a pano or special
+    const activeIsPano = stageScenes.length > 0 && matchActivePanoScene(stageScenes[0]);
+
+    const webGl: Scene[] = [];
+    const special: Scene[] = [];
+
+    for (const s of stageScenes) {
+      const sceneIsPano = matchActivePanoScene(s);
+      
+      if (sceneIsPano) {
+        // Pano scenes go to WebGl
+        webGl.push(s);
+      } else if (!isPano(s)) {
+        // Non-pano scenes go to Special, but only if:
+        // - The active scene is NOT a pano (special scene should be visible), OR
+        // - This scene is the active scene itself
+        if (!activeIsPano || s.sceneId === stageScenes[0]?.sceneId) {
           special.push(s);
         }
-        return [webGl, special];
-      },
-      [[], []] as [Scene[], Scene[]],
-    );
+      }
+    }
+
+    return [webGl, special];
   }, [gamestates, stageScenes]);
 
   // Split pending scenes into pano vs special for preloading

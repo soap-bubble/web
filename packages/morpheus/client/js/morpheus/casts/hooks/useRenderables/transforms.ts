@@ -22,6 +22,13 @@ import {
 import { VideoController } from 'morpheus/casts/components/Videos'
 import { render } from 'utils/render'
 
+// Track controlled movie animation state externally since cast objects from Redux are frozen
+type ControlledAnimState = {
+  currentValue: number
+  ticks: number
+}
+const controlledAnimStates = new Map<number, ControlledAnimState>()
+
 export function calculateControlledFrameOperation({
   cast,
   img,
@@ -47,34 +54,42 @@ export function calculateControlledFrameOperation({
     sizeY: height,
   }
 
+  // Get or create animation state for this cast
+  let animState = controlledAnimStates.get(cast.castId)
+  if (!animState) {
+    animState = { currentValue: currentOffset, ticks: 0 }
+    controlledAnimStates.set(cast.castId, animState)
+  }
+
   const renderable: Renderable = (context: CanvasRenderingContext2D) => {
-    if (
-      typeof controlledMovieCallbacks[0].currentValue === 'undefined' ||
-      frames <= 1
-    ) {
-      controlledMovieCallbacks[0].currentValue = currentOffset
-    } else if (controlledMovieCallbacks[0].currentValue < currentOffset) {
-      controlledMovieCallbacks[0].ticks = controlledMovieCallbacks[0].ticks || 0
-      if (controlledMovieCallbacks[0].ticks < 4) {
-        controlledMovieCallbacks[0].ticks++
+    // Re-fetch animation state in case it was updated
+    let state = controlledAnimStates.get(cast.castId)
+    if (!state) {
+      state = { currentValue: currentOffset, ticks: 0 }
+      controlledAnimStates.set(cast.castId, state)
+    }
+
+    if (frames <= 1) {
+      state.currentValue = currentOffset
+    } else if (state.currentValue < currentOffset) {
+      state.ticks = state.ticks || 0
+      if (state.ticks < 4) {
+        state.ticks++
       } else {
-        controlledMovieCallbacks[0].ticks = 0
-        controlledMovieCallbacks[0].currentValue += 1
+        state.ticks = 0
+        state.currentValue += 1
       }
-    } else if (controlledMovieCallbacks[0].currentValue > currentOffset) {
-      if (
-        controlledMovieCallbacks[0].ticks &&
-        controlledMovieCallbacks[0].ticks < 4
-      ) {
-        controlledMovieCallbacks[0].ticks++
+    } else if (state.currentValue > currentOffset) {
+      if (state.ticks && state.ticks < 4) {
+        state.ticks++
       } else {
-        controlledMovieCallbacks[0].ticks = 0
-        controlledMovieCallbacks[0].currentValue -= 1
+        state.ticks = 0
+        state.currentValue -= 1
       }
     }
     context.drawImage(
       img,
-      Math.floor(controlledMovieCallbacks[0].currentValue) * width,
+      Math.floor(state.currentValue) * width,
       source.y,
       source.sizeX,
       source.sizeY,

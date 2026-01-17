@@ -50,7 +50,9 @@ export function resolveCursor(
         hotspot.cursorShapeWhenActive === CURSOR_IDS.HAND &&
         or(
           hotspotRectMatchesPosition(currentPosition),
+          // Only consider starting position when mouse is down (actively dragging)
           and(
+            () => isMouseDown,
             hotspotRectMatchesPosition(startingPosition),
             or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown),
             or(

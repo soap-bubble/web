@@ -303,7 +303,7 @@ export const delegate = memoize(scene => {
         })
         const assetsUrl = isActiveSound({
           casts: scene.casts.filter(
-            and(forMorpheusType('SoundCast'), cast => cast.looping),
+            and(forMorpheusType('SoundCast'),  (cast) => cast.looping),
           ),
           gamestates: gamestateSelectors.forState(getState()),
         }).map(cast => get(cast, 'fileName'))

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { Providers } from '@/app/providers';
 
 const RootLayout = ({ children }: { children: ReactNode }) => (
   <html lang="en">
@@ -9,7 +10,7 @@ const RootLayout = ({ children }: { children: ReactNode }) => (
         overflow: 'hidden',
       }}
     >
-      {children}
+      <Providers>{children}</Providers>
     </body>
   </html>
 );

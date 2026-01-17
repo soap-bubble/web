@@ -229,20 +229,22 @@ export default function useCursorHandler(
   }, [cursorIndex]);
 
   useEffect(() => {
-    let newMouseDown = mouseDown;
+    let nextMouseDown = mouseDown;
 
     if (lastUpdate.wasPointerUpped) {
-      newMouseDown = false;
+      nextMouseDown = false;
     }
 
-    if (!newMouseDown && lastUpdate.wasPointerDown) {
-      newMouseDown = true;
+    if (!nextMouseDown && lastUpdate.wasPointerDown) {
+      nextMouseDown = true;
       setClickStartPos({ top: gameTop, left: gameLeft });
       setLastMouseDown(Date.now());
     }
 
-    setMouseDown(newMouseDown);
-  }, [lastUpdate, gameTop, gameLeft]);
+    if (nextMouseDown !== mouseDown) {
+      setMouseDown(nextMouseDown);
+    }
+  }, [gameLeft, gameTop, lastUpdate, mouseDown]);
 
   const onPointerUp = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {

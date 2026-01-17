@@ -8,7 +8,9 @@
  * Run with: npx tsx server.ts
  */
 
-import { createServer, IncomingMessage } from 'node:http'
+import { createServer } from 'node:http'
+import type { IncomingMessage } from 'node:http'
+import type { Socket } from 'node:net'
 import { parse } from 'node:url'
 import next from 'next'
 import { WebSocketServer, WebSocket } from 'ws'
@@ -58,14 +60,22 @@ function sendMessage(ws: WebSocket, message: GameControlMessage): void {
   }
 }
 
+function isPlainObject(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function hasOwn(obj: object, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(obj, key)
+}
+
 // Parse incoming message
 function parseMessage(data: string): GameControlMessage | null {
   try {
-    const parsed = JSON.parse(data) as GameControlMessage
-    if (typeof parsed === 'object' && parsed !== null && 'type' in parsed) {
-      return parsed
-    }
-    return null
+    const parsed: unknown = JSON.parse(data)
+    if (!isPlainObject(parsed)) return null
+    if (!hasOwn(parsed, 'type')) return null
+    if (typeof parsed.type !== 'string') return null
+    return parsed as GameControlMessage
   } catch {
     return null
   }
@@ -154,16 +164,31 @@ async function main() {
   const handle = app.getRequestHandler()
 
   await app.prepare()
+  const upgradeHandler = app.getUpgradeHandler()
 
   const server = createServer((req, res) => {
     const parsedUrl = parse(req.url ?? '', true)
     handle(req, res, parsedUrl)
   })
 
-  // Create WebSocket server attached to the HTTP server
-  const wss = new WebSocketServer({
-    server,
-    path: '/api/game-control',
+  // Create WebSocket server in "noServer" mode so it never intercepts
+  // Next.js dev HMR upgrades (e.g. `/_next/webpack-hmr`).
+  const wss = new WebSocketServer({ noServer: true })
+
+  // Route WebSocket upgrades:
+  // - Our broker (`/api/game-control`) is handled by `ws`
+  // - Everything else (including Next.js dev HMR) goes to Next's upgrade handler
+  server.on('upgrade', (req: IncomingMessage, socket: Socket, head: Buffer) => {
+    const parsedUrl = parse(req.url ?? '', true)
+
+    if (parsedUrl.pathname === '/api/game-control') {
+      wss.handleUpgrade(req, socket, head, (ws) => {
+        wss.emit('connection', ws, req)
+      })
+      return
+    }
+
+    upgradeHandler(req, socket, head)
   })
 
   wss.on('connection', (ws, req) => {
@@ -171,8 +196,9 @@ async function main() {
     const query = parsedUrl.query
 
     // Determine client type from query parameter
-    const clientType = (query.client as ClientType) ?? 'browser'
-    const sessionId = query.session as string | undefined
+    const clientParam = typeof query.client === 'string' ? query.client : undefined
+    const clientType: ClientType = clientParam === 'mcp' ? 'mcp' : 'browser'
+    const sessionId = typeof query.session === 'string' ? query.session : undefined
 
     handleConnection(ws, req, clientType, sessionId)
   })

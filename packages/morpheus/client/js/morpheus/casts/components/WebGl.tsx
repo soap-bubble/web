@@ -122,7 +122,7 @@ const WebGlScene = ({
     }).filter(item => item.panoCast !== undefined) as { sceneId: number; panoCast: PanoCast }[]
   }, [pendingScenes, gamestates])
 
-  const meshRef = useRef<Mesh>(null)
+  const meshRef = useRef<Mesh | null>(null)
   const panoUrl = onStagePano && getAssetUrl(onStagePano.fileName, 'png')
   const textureLoader = useMemo(() => new TextureLoader(), [])
   const [texImage, setTexImage] = useState<HTMLImageElement>()
@@ -218,16 +218,23 @@ const WebGlScene = ({
     () => [cloneDeep(panoShader)],
     []
   )
+
+  // IMPORTANT: this ref callback must be stable. If it's recreated every render,
+  // React will call the previous ref with `null` and the new ref with the object,
+  // which would repeatedly trigger `setPanoObject` and cause an update loop.
+  const handleMeshRef = useCallback(
+    (object: Mesh | null) => {
+      if (meshRef.current === object) {
+        return
+      }
+      meshRef.current = object
+      setPanoObject(object ?? undefined)
+    },
+    [setPanoObject]
+  )
   return (
     <React.Fragment>
-      <mesh  ref={(object) => {
-        if (object) {
-          setPanoObject(object)
-        } else {
-          setPanoObject(undefined)  
-        }
-        meshRef.current = object
-      }}>
+      <mesh ref={handleMeshRef}>
         <cylinderGeometry
           attach="geometry"
          

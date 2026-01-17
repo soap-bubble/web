@@ -1,7 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getScene } from '@/app/actions';
 import { Client } from './client';
-import { Providers } from '@/app/providers';
 
 const ScenePage = async ({
   params,
@@ -13,11 +12,7 @@ const ScenePage = async ({
   if (!scene) {
     notFound();
   }
-  return (
-    <Providers>
-      <Client scene={scene} />
-    </Providers>
-  );
+  return <Client scene={scene} />;
 };
 
 export default ScenePage;

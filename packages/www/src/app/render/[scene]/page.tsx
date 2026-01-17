@@ -5,7 +5,6 @@ import type { Metadata, NextPage } from 'next';
 import Render from '@/morpheus-app/Render/Render';
 import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import type { Scene } from 'morpheus/casts/types';
-import { Providers } from '@/app/providers';
 
 type PageParams = {
   scene: string;
@@ -86,11 +85,7 @@ const RenderScenePage = (async ({ params }) => {
   if (!scene) {
     notFound();
   }
-  return (
-    <Providers>
-      <Render scene={scene} />
-    </Providers>
-  );
+  return <Render scene={scene} />;
 }) as NextPage<PageProps>;
 
 export default RenderScenePage;

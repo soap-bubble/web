@@ -2,7 +2,7 @@ const resolveAssetBase = () => {
   const raw =
     process.env.NEXT_PUBLIC_MORPHEUS_ASSET_BASE ||
     process.env.MORPHEUS_ASSET_BASE 
-  return raw.replace(/\/+$/, '');
+  return raw?.replace(/\/+$/, '') ?? '';
 };
 
 const basePath = resolveAssetBase();

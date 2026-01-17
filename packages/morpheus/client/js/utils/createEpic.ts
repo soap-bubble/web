@@ -12,7 +12,7 @@ import 'rxjs-compat/add/operator/take'
 import { Action, AnyAction } from 'redux'
 import { combineEpics, Epic } from 'redux-observable'
 
-export const _epics: Epic<Action, Action, void, any>[] = []
+export const _epics: Epic<Action<any>, Action<any>, void, any>[] = []
 
 export function epics() {
   return combineEpics(..._epics)

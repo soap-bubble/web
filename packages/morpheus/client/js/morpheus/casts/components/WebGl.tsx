@@ -4,6 +4,7 @@ import React, {
   useState,
   useEffect,
   FunctionComponent,
+  useCallback,
 } from 'react'
 import { Dispatch } from 'redux'
 import { cloneDeep, map } from 'lodash'
@@ -15,6 +16,7 @@ import {
   ShaderMaterialParameters,
   Camera,
   Object3D,
+  Texture,
 } from 'three'
 import panoShader from '../shader/panoChunk'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
@@ -24,6 +26,9 @@ import usePanoChunk from '../hooks/panoChunk'
 import { Matcher, forMorpheusType } from '../matchers'
 import { and } from 'utils/matchers'
 import { PANO_OFFSET, PANO_CANVAS_WIDTH } from '../../constants'
+import loggerFactory from 'utils/logger'
+
+const logger = loggerFactory('WebGl')
 
 enum SceneType {
   VIDEO,
@@ -58,6 +63,7 @@ const step = (num: number, max: number) => {
 }
 interface GlStageProps {
   stageScenes: Scene[]
+  pendingScenes?: Scene[]
   enteringScene?: Scene
   exitingScene?: Scene
   gamestates: Gamestates
@@ -65,6 +71,7 @@ interface GlStageProps {
   setPanoObject: (o: Object3D | undefined) => void
   rotation: { x: number; y: number; offsetX: number }
   volume: number
+  onSceneReady?: (sceneId: number) => void
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
@@ -79,6 +86,8 @@ const WebGlScene = ({
   enteringScene,
   exitingScene,
   stageScenes,
+  pendingScenes = [],
+  onSceneReady,
 }: GlStageProps) => {
   const onStagePano: PanoCast | undefined = useMemo(() => {
     const matchActive = matchActiveCast(gamestates)
@@ -97,10 +106,83 @@ const WebGlScene = ({
 
     return stageActivePanoCasts
   }, [stageScenes, gamestates])
+
+  // Find pano casts in pending scenes for preloading
+  const pendingPanoCasts = useMemo(() => {
+    const matchActive = matchActiveCast(gamestates)
+    const matchPanoCast = and<PanoCast>(
+      forMorpheusType('PanoCast'),
+      matchActive
+    )
+    return pendingScenes.map(scene => {
+      const panoCast = scene.casts.find((cast: Cast) =>
+        matchPanoCast(cast as PanoCast)
+      ) as PanoCast | undefined
+      return { sceneId: scene.sceneId, panoCast }
+    }).filter(item => item.panoCast !== undefined) as { sceneId: number; panoCast: PanoCast }[]
+  }, [pendingScenes, gamestates])
+
   const meshRef = useRef<Mesh>(null)
   const panoUrl = onStagePano && getAssetUrl(onStagePano.fileName, 'png')
   const textureLoader = useMemo(() => new TextureLoader(), [])
   const [texImage, setTexImage] = useState<HTMLImageElement>()
+
+  // Track which pending scenes have their textures ready
+  const pendingSceneReadyRef = useRef<Set<number>>(new Set())
+  const [preloadedTextures, setPreloadedTextures] = useState<Map<number, HTMLImageElement>>(new Map())
+
+  // Preload textures for pending scenes
+  useEffect(() => {
+    if (!pendingPanoCasts.length) return
+
+    for (const { sceneId, panoCast } of pendingPanoCasts) {
+      if (pendingSceneReadyRef.current.has(sceneId)) continue
+      if (preloadedTextures.has(sceneId)) continue
+
+      const url = getAssetUrl(panoCast.fileName, 'png')
+      logger.info({ sceneId, url }, 'Preloading pano texture for pending scene')
+      
+      textureLoader.load(url, (tex) => {
+        tex.flipY = false
+        setPreloadedTextures(prev => new Map(prev).set(sceneId, tex.image))
+        logger.info({ sceneId }, 'Pending scene pano texture ready')
+      })
+    }
+  }, [pendingPanoCasts, textureLoader, preloadedTextures])
+
+  // Notify when pending scene textures are ready
+  useEffect(() => {
+    if (!onSceneReady) return
+
+    for (const { sceneId } of pendingPanoCasts) {
+      if (pendingSceneReadyRef.current.has(sceneId)) continue
+      if (preloadedTextures.has(sceneId)) {
+        pendingSceneReadyRef.current.add(sceneId)
+        onSceneReady(sceneId)
+      }
+    }
+  }, [pendingPanoCasts, preloadedTextures, onSceneReady])
+
+  // Reset ready tracking when pending scenes change
+  useEffect(() => {
+    const currentPendingIds = new Set(pendingScenes.map(s => s.sceneId))
+    for (const id of pendingSceneReadyRef.current) {
+      if (!currentPendingIds.has(id)) {
+        pendingSceneReadyRef.current.delete(id)
+      }
+    }
+    // Clean up preloaded textures for scenes no longer pending
+    setPreloadedTextures(prev => {
+      const next = new Map(prev)
+      for (const id of next.keys()) {
+        if (!currentPendingIds.has(id)) {
+          next.delete(id)
+        }
+      }
+      return next
+    })
+  }, [pendingScenes])
+
   useEffect(() => {
     if (panoUrl) {
       const tex = textureLoader.load(panoUrl, (t) => {

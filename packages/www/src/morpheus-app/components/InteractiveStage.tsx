@@ -30,6 +30,7 @@ export type ExternalRotation = {
 interface InteractiveStageProps {
   stageScenes: Scene[];
   activeScene: Scene;
+  pendingScenes?: Scene[];
   gamestates: Gamestates;
   width?: number;
   height?: number;
@@ -39,6 +40,7 @@ interface InteractiveStageProps {
   onRotationChange?: (rotation: ExternalRotation) => void;
   rotation: ExternalRotation;
   onTransition?: (transition: SceneTransitionRequest) => void;
+  onSceneReady?: (sceneId: number) => void;
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
@@ -63,6 +65,7 @@ function computeOffsetX(x: number): number {
 const InteractiveStage: FC<InteractiveStageProps> = ({
   stageScenes,
   activeScene,
+  pendingScenes = [],
   gamestates,
   width = 800,
   height = 600,
@@ -72,6 +75,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   onRotationChange,
   rotation,
   onTransition,
+  onSceneReady,
 }) => {
   const active = activeScene;
 
@@ -175,6 +179,21 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     );
   }, [gamestates, stageScenes]);
 
+  // Split pending scenes into pano vs special for preloading
+  const [pendingPanoScenes, pendingSpecialScenes] = useMemo(() => {
+    return pendingScenes.reduce(
+      ([pano, special], s) => {
+        if (isPano(s)) {
+          pano.push(s);
+        } else {
+          special.push(s);
+        }
+        return [pano, special];
+      },
+      [[], []] as [Scene[], Scene[]],
+    );
+  }, [pendingScenes]);
+
   return (
     <div
       style={{
@@ -190,6 +209,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     >
       <WebGl
         stageScenes={webGlScenes}
+        pendingScenes={pendingPanoScenes}
         gamestates={gamestates}
         setCamera={setCamera}
         setPanoObject={setPanoObject}
@@ -199,11 +219,13 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         left={0}
         width={width}
         height={height}
+        onSceneReady={onSceneReady}
       />
       <Special
         cursor={cursor}
         setDoneObserver={setSpecialMovieCast}
         stageScenes={specialScenes}
+        pendingScenes={pendingSpecialScenes}
         gamestates={gamestates}
         volume={volume}
         top={0}
@@ -215,6 +237,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         onPointerUp={onPointerUp}
         onPointerLeave={onPointerLeave}
         onTransition={onTransition}
+        onSceneReady={onSceneReady}
       />
     </div>
   );

@@ -1,11 +1,9 @@
 'use client';
 
-import { useCallback, useMemo, useRef } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import type { Scene, Hotspot, PanoCast, Cast } from '@soapbubble/morpheus-client/morpheus/casts/types';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import type { Scene, Hotspot } from '@soapbubble/morpheus-client/morpheus/casts/types';
 import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
-import { getAssetUrl } from '@soapbubble/morpheus-client/service/gamedb';
-import { isPano } from '@soapbubble/morpheus-client/morpheus/casts/matchers';
 import InteractiveStage, {
   ExternalRotation,
 } from '@/morpheus-app/components/InteractiveStage';
@@ -17,6 +15,8 @@ import useGameControl, {
 import { useSceneSystem } from '@/morpheus-app/systems/useSceneSystem';
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
 import {
+  activateScene,
+  scenePrefetched,
   selectActiveSceneId,
   selectStageScenes,
 } from '@/morpheus-app/store/slices/sceneSlice';
@@ -28,23 +28,11 @@ import {
 
 import '@/morpheus-app/runtime';
 
-function isPanoCast(cast: Cast): cast is PanoCast {
-  return cast.__t === 'PanoCast';
-}
-
-function prefetchPanoTexture(scene: Scene): Promise<void> {
-  const panoCast = scene.casts.find(isPanoCast);
-  if (!panoCast) {
-    return Promise.resolve();
-  }
-  const panoUrl = getAssetUrl(panoCast.fileName, 'png');
-  return new Promise((resolve) => {
-    const img = new Image();
-    img.onload = () => resolve();
-    img.onerror = () => resolve();
-    img.src = panoUrl;
-  });
-}
+type PendingTransition = {
+  sceneId: number;
+  scene: Scene;
+  startAngle?: number;
+};
 
 interface ClientProps {
   scene: Scene;
@@ -102,7 +90,6 @@ function getGestureName(gesture: number): string {
 }
 
 export const Client = ({ scene }: ClientProps) => {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const gamestates = useInitialGamestates();
   const { width, height, left, top } = useResponsiveSize();
@@ -117,7 +104,7 @@ export const Client = ({ scene }: ClientProps) => {
 
   // Extract hotspot info from scene for state reporting
   const hotspots = useMemo((): HotspotState[] => {
-    return scene.casts.filter(isHotspot).map((hotspot) => {
+    return scene.casts.filter(isHotspot).map((hotspot: Hotspot) => {
       const actionType = getActionTypeName(hotspot.type)
       const isSceneChange = hotspot.type === 0 || hotspot.type === 1
 
@@ -136,15 +123,30 @@ export const Client = ({ scene }: ClientProps) => {
     })
   }, [scene])
 
-  // Game control callbacks - preserve mcp session when navigating
+  // Game control callbacks - use in-app transition (no navigation)
   const handleLoadScene = useCallback(
-    (sceneId: number) => {
-      const url = mcpSessionName
-        ? `/scene/${sceneId}?mcp=${encodeURIComponent(mcpSessionName)}`
-        : `/scene/${sceneId}`;
-      router.push(url);
+    async (sceneId: number) => {
+      if (transitionInProgressRef.current) return;
+      transitionInProgressRef.current = true;
+
+      try {
+        const targetScene = await fetchScene(sceneId);
+        if (targetScene) {
+          dispatch(scenePrefetched(targetScene));
+          dispatch(activateScene(sceneId));
+          
+          const url = mcpSessionName
+            ? `/scene/${sceneId}?mcp=${encodeURIComponent(mcpSessionName)}`
+            : `/scene/${sceneId}`;
+          window.history.replaceState(null, '', url);
+        }
+      } catch (error) {
+        console.error('Failed to load scene:', error);
+      } finally {
+        transitionInProgressRef.current = false;
+      }
     },
-    [router, mcpSessionName]
+    [dispatch, mcpSessionName]
   );
 
   const handleRotateTo = useCallback(
@@ -154,10 +156,16 @@ export const Client = ({ scene }: ClientProps) => {
     [dispatch]
   );
 
-  // Track if a transition is in progress to prevent double-navigation
+  // Track pending transition and scenes to preload
+  const [pendingTransition, setPendingTransition] = useState<PendingTransition | null>(null);
   const transitionInProgressRef = useRef(false);
 
-  // Scene transition: prefetch pano texture, seed rotation, then navigate
+  // Pending scenes for asset preloading
+  const pendingScenes = useMemo(() => {
+    return pendingTransition ? [pendingTransition.scene] : [];
+  }, [pendingTransition]);
+
+  // Scene transition: fetch scene data, add to pending for preload
   const handleSceneTransition = useCallback(
     async ({
       sceneId,
@@ -167,40 +175,77 @@ export const Client = ({ scene }: ClientProps) => {
       dissolve: boolean;
       startAngle?: number;
     }) => {
-      // Prevent double-navigation
+      // Prevent double-transition
       if (transitionInProgressRef.current) {
         return;
       }
       transitionInProgressRef.current = true;
 
-      // Seed rotation so new page starts at correct angle
+      // Seed rotation so new scene starts at correct angle
       if (startAngle !== undefined) {
         dispatch(seedRotationFromTransition({ yaw3600: startAngle, pitch: 0 }));
       }
 
-      // Fetch scene data and prefetch pano texture before navigating
-      // This ensures the texture is in browser cache when the new page loads
+      // Fetch scene data and add to pending for preloading
       try {
         const targetScene = await fetchScene(sceneId);
-        if (targetScene && isPano(targetScene)) {
-          // Wait for texture to load (with 3s timeout)
-          await Promise.race([
-            prefetchPanoTexture(targetScene),
-            new Promise((resolve) => setTimeout(resolve, 3000)),
-          ]);
+        if (targetScene) {
+          setPendingTransition({ sceneId, scene: targetScene, startAngle });
+        } else {
+          // Scene not found - reset transition flag
+          transitionInProgressRef.current = false;
+          console.error(`Scene ${sceneId} not found`);
         }
-      } catch {
-        // If prefetch fails, continue with navigation anyway
+      } catch (error) {
+        // If fetch fails, reset transition flag
+        transitionInProgressRef.current = false;
+        console.error('Failed to fetch scene:', error);
       }
-
-      // Navigate
-      const url = mcpSessionName
-        ? `/scene/${sceneId}?mcp=${encodeURIComponent(mcpSessionName)}`
-        : `/scene/${sceneId}`;
-      router.push(url);
     },
-    [dispatch, mcpSessionName, router]
+    [dispatch]
   );
+
+  // Called when all assets for a pending scene are ready
+  const handleSceneReady = useCallback(
+    (readySceneId: number) => {
+      if (pendingTransition && pendingTransition.sceneId === readySceneId) {
+        // Assets are ready - activate scene in Redux (no navigation!)
+        dispatch(scenePrefetched(pendingTransition.scene));
+        dispatch(activateScene(readySceneId));
+        
+        // Update URL without triggering navigation (keeps WebGL context alive)
+        const url = mcpSessionName
+          ? `/scene/${readySceneId}?mcp=${encodeURIComponent(mcpSessionName)}`
+          : `/scene/${readySceneId}`;
+        window.history.replaceState(null, '', url);
+        
+        setPendingTransition(null);
+        transitionInProgressRef.current = false;
+      }
+    },
+    [pendingTransition, mcpSessionName, dispatch]
+  );
+
+  // Timeout fallback: activate scene even if assets don't fully load within 5s
+  useEffect(() => {
+    if (!pendingTransition) return;
+
+    const timeoutId = setTimeout(() => {
+      // Activate scene anyway after timeout
+      dispatch(scenePrefetched(pendingTransition.scene));
+      dispatch(activateScene(pendingTransition.sceneId));
+      
+      const url = mcpSessionName
+        ? `/scene/${pendingTransition.sceneId}?mcp=${encodeURIComponent(mcpSessionName)}`
+        : `/scene/${pendingTransition.sceneId}`;
+      window.history.replaceState(null, '', url);
+      
+      setPendingTransition(null);
+      transitionInProgressRef.current = false;
+    }, 5000);
+
+    return () => clearTimeout(timeoutId);
+  }, [pendingTransition, mcpSessionName, dispatch]);
 
   // State getter for game control hook
   const getState = useCallback(() => {
@@ -281,6 +326,7 @@ export const Client = ({ scene }: ClientProps) => {
       <InteractiveStage
         stageScenes={stageScenes}
         activeScene={activeScene}
+        pendingScenes={pendingScenes}
         gamestates={gamestates}
         width={width}
         height={height}
@@ -289,6 +335,7 @@ export const Client = ({ scene }: ClientProps) => {
         onRotationChange={handleRotationChange}
         rotation={rotation}
         onTransition={handleSceneTransition}
+        onSceneReady={handleSceneReady}
       />
       {/* Connection indicator for debugging */}
       {process.env.NODE_ENV === 'development' && (

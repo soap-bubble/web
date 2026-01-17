@@ -1,6 +1,6 @@
 import thunkMiddleware from 'redux-thunk';
-import { createStore, applyMiddleware, compose, Store } from 'redux';
-import { createEpicMiddleware } from 'redux-observable';
+import { createStore, applyMiddleware, compose, Store, Action } from 'redux';
+import { createEpicMiddleware, Epic } from 'redux-observable';
 import { reducer } from 'utils/createReducer';
 import { epics } from 'utils/createEpic';
 import isDebug from 'utils/isDebug';
@@ -31,7 +31,7 @@ export default function Index() {
 
     store = createStore(reducer, middleware);
 
-    epicMiddleware.run(epics());
+    epicMiddleware.run(epics() as unknown as Epic<Action<any>, Action<any>, void, any>);
   }
   return store;
 }

@@ -165,7 +165,7 @@ function resolveScene(sceneId: number): UnresolvedScene | null {
     return null
   }
 
-  return foundScene.data as UnresolvedScene
+  return foundScene.data as unknown as UnresolvedScene
 }
 
 function extractHotspots(scene: UnresolvedScene): HotspotInfo[] {

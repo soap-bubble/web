@@ -1,6 +1,6 @@
 'use client';
-import { Main } from '@soapbubble/morpheus-client';
+// import { Main } from '@soapbubble/morpheus-client';
 
 export const Client = () => {
-  return <Main />;
+  return <div>Client Page</div>;
 };

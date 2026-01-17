@@ -2,7 +2,7 @@ import { useContext, useState } from 'react';
 import { useEffect, useMemo } from 'react';
 import { from, fromEvent, map, Observable } from 'rxjs';
 
-import createContext from 'utils/createContext';
+import createContext from '@/utils/createContext';
 
 export interface ResizeRequest {
   height: number;

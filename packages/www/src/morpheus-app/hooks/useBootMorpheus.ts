@@ -12,7 +12,7 @@ import {
 } from 'morpheus/title';
 import keycode from 'keycode';
 import { actions as gameActions } from 'morpheus/game';
-import useQueryParams from 'hooks/useQueryParams';
+import useQueryParams from '@/hooks/useQueryParams';
 import { useSelector } from 'react-redux';
 
 export default function useBootMorpheus() {

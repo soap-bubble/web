@@ -2,7 +2,6 @@ import './runtime';
 
 import { FC } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
-import { Provider as SceneProvider } from './hooks/useScene';
 import { Provider as SizeProvider } from './hooks/useSize';
 import 'morpheus';
 import { Game } from 'morpheus/game';
@@ -19,11 +18,9 @@ const Content: FC = () => {
 const App: FC = () => {
   return (
     <ReduxProvider store={store}>
-      <SceneProvider>
-        <SizeProvider>
-          <Content />
-        </SizeProvider>
-      </SceneProvider>
+      <SizeProvider>
+        <Content />
+      </SizeProvider>
     </ReduxProvider>
   );
 };

@@ -89,7 +89,11 @@ export interface MovieSpecialCast extends MovieCast {
 
 export type PanoCast = MovieCast
 type PreloadCast = MovieCast
-export type SoundCast = MovieCast
+export interface SoundCast extends MovieCast {
+  looping?: boolean
+  dissolveToNextScene?: boolean
+  nextSceneId?: number
+}
 export type SceneCasts =
   | Hotspot
   | MovieCast

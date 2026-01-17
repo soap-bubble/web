@@ -9,24 +9,15 @@ import React, {
 import { Gamestates, isActive } from 'morpheus/gamestate/isActive'
 import Canvas from './Canvas'
 import Videos, { VideoController } from './Videos'
-import Sounds, { AudioController } from './Sounds'
 import Images from './Images'
 import useComputedStageCast from '../hooks/useRenderables'
 import useCastRefNoticer, { CastRef } from '../hooks/useCastRefNoticer'
 import loggerFactory from 'utils/logger'
-import {
-  Scene,
-  MovieCast,
-  MovieSpecialCast,
-  Cast,
-  SupportedSoundCasts,
-  SceneCasts,
-} from '../types'
+import { Scene, MovieCast, MovieSpecialCast, Cast, SceneCasts } from '../types'
 import type { SceneTransitionRequest } from 'morpheus/scene/types'
-import { union, flatten, uniqBy } from 'lodash'
-import { forMorpheusType, isImage, isMovie, isAudio } from '../matchers'
-import { or } from 'utils/matchers'
-import { Observable, observable, Subscription, Subscriber } from 'rxjs'
+import { flatten, uniqBy } from 'lodash'
+import { forMorpheusType, isImage, isMovie } from '../matchers'
+import { Observable, Subscriber } from 'rxjs'
 import { share } from 'rxjs/operators'
 import { and } from 'utils/matchers'
 
@@ -119,18 +110,6 @@ const Special = ({
     HTMLImageElement,
     MovieCast
   >()
-  const [canPlayThroughSounds, onAudioCastCanPlayThrough] = useCastRefNoticer<
-    HTMLAudioElement,
-    SupportedSoundCasts
-  >()
-  const [endedSounds, onAudioCastEndedBare] = useCastRefNoticer<
-    HTMLAudioElement,
-    SupportedSoundCasts
-  >()
-  const [availableSounds, onAudioCastRef] = useCastRefNoticer<
-    AudioController,
-    SupportedSoundCasts
-  >()
   useEffect(() => {
     const observable = new Observable<MovieCast>((subscriber) => {
       setEventSubscriber(subscriber)
@@ -207,41 +186,23 @@ const Special = ({
     ]
   )
 
-  const onAudioCastEnded = useCallback(
-    (ref: CastRef<HTMLAudioElement, SupportedSoundCasts>) => {
-      const [_, movieCasts] = ref
-      // Find any movieCasts of the uppermost scene
-      const casts = movieCasts.filter((cast) =>
-        stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
-      )
-      if (eventSubscriber) {
-        for (const cast of casts) {
-          eventSubscriber.next(cast)
-        }
-      }
-      onAudioCastEndedBare(ref)
-    },
-    [onAudioCastEndedBare, eventSubscriber, stageScenes]
+  const [imageCasts, videoCasts, , renderables] = useComputedStageCast(
+    gamestates,
+    width,
+    height,
+    imagesLoaded,
+    availableVideos,
+    cursor,
+    stageScenes,
+    enteringScene,
+    exitingScene,
+    [canPlayThroughVideos, endedVideos, imagesErrored]
   )
-
-  const [imageCasts, videoCasts, soundCasts, renderables] =
-    useComputedStageCast(
-      gamestates,
-      width,
-      height,
-      imagesLoaded,
-      availableVideos,
-      cursor,
-      stageScenes,
-      enteringScene,
-      exitingScene,
-      [canPlayThroughVideos, endedVideos, imagesErrored]
-    )
 
   // Compute casts for pending scenes (for preloading)
   const pendingSceneCasts = useMemo(() => {
     if (!pendingScenes.length) {
-      return { images: [] as MovieCast[], videos: [] as MovieSpecialCast[], sounds: [] as SupportedSoundCasts[] }
+      return { images: [] as MovieCast[], videos: [] as MovieSpecialCast[] }
     }
     const matchActive = (cast: Cast) => isActive({ cast, gamestates })
     const matchSpecialMovies = and<MovieSpecialCast>(
@@ -255,18 +216,7 @@ const Special = ({
     )
     const images = movieSpecialCasts.filter(isImage) as MovieCast[]
     const videos = movieSpecialCasts.filter(isMovie)
-    const sounds = pendingScenes.flatMap(scene =>
-      scene.casts.filter(
-        or(
-          and(
-            or(forMorpheusType('MovieSpecialCast'), forMorpheusType('ControlledMovieCast')),
-            (cast: Cast) => isAudio(cast as MovieCast)
-          ),
-          forMorpheusType('SoundCast')
-        )
-      ) as SupportedSoundCasts[]
-    )
-    return { images, videos, sounds }
+    return { images, videos }
   }, [pendingScenes, gamestates])
 
   // Merge stage casts with pending scene casts for loading
@@ -278,11 +228,6 @@ const Special = ({
     () => uniqBy([...videoCasts, ...pendingSceneCasts.videos], c => c.castId),
     [videoCasts, pendingSceneCasts.videos]
   )
-  const allSoundCasts = useMemo(
-    () => uniqBy([...soundCasts, ...pendingSceneCasts.sounds], c => c.castId),
-    [soundCasts, pendingSceneCasts.sounds]
-  )
-
   // Track which pending scenes have all their assets ready
   const pendingSceneReadyRef = useRef<Set<number>>(new Set())
   useEffect(() => {
@@ -304,18 +249,13 @@ const Special = ({
       const loadedVideoCastIds = new Set(canPlayThroughVideos.flatMap(([, casts]) => casts.map(c => c.castId)))
       const allVideosReady = sceneVideoCasts.every(c => loadedVideoCastIds.has(c.castId))
 
-      // Check sounds (canPlayThrough)
-      const sceneSoundCasts = pendingSceneCasts.sounds.filter(c => sceneCastIds.has(c.castId))
-      const loadedSoundCastIds = new Set(canPlayThroughSounds.flatMap(([, casts]) => casts.map(c => c.castId)))
-      const allSoundsReady = sceneSoundCasts.every(c => loadedSoundCastIds.has(c.castId))
-
-      if (allImagesReady && allVideosReady && allSoundsReady) {
+      if (allImagesReady && allVideosReady) {
         pendingSceneReadyRef.current.add(scene.sceneId)
         logger.info({ sceneId: scene.sceneId }, 'Pending scene assets ready')
         onSceneReady(scene.sceneId)
       }
     }
-  }, [pendingScenes, pendingSceneCasts, imagesLoaded, canPlayThroughVideos, canPlayThroughSounds, onSceneReady])
+  }, [pendingScenes, pendingSceneCasts, imagesLoaded, canPlayThroughVideos, onSceneReady])
 
   // Reset ready tracking when pending scenes change
   useEffect(() => {
@@ -350,28 +290,6 @@ const Special = ({
     }
   }, [availableVideos])
 
-  /**
-   * Find all sounds that need to be started and stopped. Only looping sounds
-   * are stopped when they are no longer upper-most. Non-looping sounds will
-   * be allowed to finish naturally
-   */
-  useEffect(() => {
-    const activeAndCurrent = and(
-      (cast: SceneCasts) =>
-        !!stageScenes.length && stageScenes[0].casts.includes(cast),
-      (cast: SceneCasts) => isActive({ cast, gamestates })
-    )
-    for (const [controller, casts] of availableSounds) {
-      if (casts.find(activeAndCurrent)) {
-        logger.info({ casts }, `Playing ${controller.url}`)
-        controller.play()
-      } else {
-        logger.info({ casts }, `Stopping ${controller.url}`)
-        controller.pause()
-      }
-    }
-  }, [availableSounds])
-
   return (
     <React.Fragment>
       <Canvas
@@ -398,13 +316,6 @@ const Special = ({
         movieSpecialCasts={allImageCasts}
         onImageCastLoad={onImageLoad}
         onImageCastError={onImageError}
-      />
-      <Sounds
-        soundCasts={allSoundCasts}
-        volume={volume}
-        onAudioCastEnded={onAudioCastEnded}
-        onAudioCastCanPlaythrough={onAudioCastCanPlayThrough}
-        onAudioCastRef={onAudioCastRef}
       />
     </React.Fragment>
   )

@@ -7,11 +7,21 @@ import type { SceneTransitionRequest } from 'morpheus/scene/types';
 
 import WebGl from 'morpheus/casts/components/WebGl';
 import Special from 'morpheus/casts/components/Special';
+import Sounds, { AudioController } from 'morpheus/casts/components/Sounds';
+import useCastRefNoticer from 'morpheus/casts/hooks/useCastRefNoticer';
 import usePanoMomentum from 'morpheus/casts/hooks/panoMomentum';
 import { composePointer } from 'morpheus/hotspot/eventInterface';
-import { isPano, forMorpheusType } from 'morpheus/casts/matchers';
+import { isPano, forMorpheusType, isAudio } from 'morpheus/casts/matchers';
 import { isCastActive, Gamestates } from '@soapbubble/morpheus-client';
-import type { Scene, PanoCast, Cast, MovieCast } from 'morpheus/casts/types';
+import type {
+  Scene,
+  PanoCast,
+  Cast,
+  MovieCast,
+  MovieSpecialCast,
+  SoundCast,
+  SupportedSoundCasts,
+} from 'morpheus/casts/types';
 
 import { and, Matcher } from '@/utils/matchers';
 import useCursorHandler from '../hooks/useCursorHandler';
@@ -42,6 +52,8 @@ interface InteractiveStageProps {
   onTransition?: (transition: SceneTransitionRequest) => void;
   onSceneReady?: (sceneId: number) => void;
 }
+
+const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
   return (cast: T) => isCastActive({ cast, gamestates });
@@ -78,6 +90,10 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   onSceneReady,
 }) => {
   const active = activeScene;
+  const [availableSounds, onAudioCastRef] = useCastRefNoticer<
+    AudioController,
+    SupportedSoundCasts
+  >();
 
   const isPanoScene = useMemo(() => {
     return active ? isPano(active) : false;
@@ -159,6 +175,137 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
 
   const { onPointerUp, onPointerMove, onPointerDown, onPointerLeave } = pointerHandler;
 
+  const isSoundCast = useCallback(
+    (cast: Cast): cast is SoundCast => cast.__t === 'SoundCast',
+    [],
+  );
+  const isMovieSpecialAudioCast = useCallback(
+    (cast: Cast): cast is MovieSpecialCast =>
+      cast.__t === 'MovieSpecialCast' && isAudio(cast as MovieCast),
+    [],
+  );
+  const isControlledAudioCast = useCallback(
+    (cast: Cast): cast is SupportedSoundCasts =>
+      cast.__t === 'ControlledMovieCast' && isAudio(cast as MovieCast),
+    [],
+  );
+
+  const aggregatedSoundCasts = useMemo(() => {
+    if (!stageScenes.length) {
+      return [] as SupportedSoundCasts[];
+    }
+    const matchActive = matchActiveCast(gamestates);
+    const loopingSoundCasts: SoundCast[] = [];
+    for (const scene of stageScenes) {
+      for (const cast of scene.casts) {
+        if (isSoundCast(cast) && cast.looping && matchActive(cast)) {
+          loopingSoundCasts.push(cast);
+        }
+      }
+    }
+
+    const activeSceneSounds: SupportedSoundCasts[] = [];
+    const activeSceneCasts = activeScene?.casts ?? [];
+    for (const cast of activeSceneCasts) {
+      if (!matchActive(cast)) {
+        continue;
+      }
+      if (isSoundCast(cast)) {
+        if (!cast.looping) {
+          activeSceneSounds.push(cast);
+        }
+        continue;
+      }
+      if (isMovieSpecialAudioCast(cast) || isControlledAudioCast(cast)) {
+        activeSceneSounds.push(cast);
+      }
+    }
+
+    const seen = new Set<number>();
+    const uniqueCasts: SupportedSoundCasts[] = [];
+    for (const cast of [...loopingSoundCasts, ...activeSceneSounds]) {
+      if (seen.has(cast.castId)) {
+        continue;
+      }
+      seen.add(cast.castId);
+      uniqueCasts.push(cast);
+    }
+    return uniqueCasts;
+  }, [
+    activeScene?.casts,
+    gamestates,
+    isControlledAudioCast,
+    isMovieSpecialAudioCast,
+    isSoundCast,
+    stageScenes,
+  ]);
+
+  const handleAudioCastEnded = useCallback(
+    (ref: [HTMLAudioElement, SupportedSoundCasts[]]) => {
+      const [, casts] = ref;
+      if (!activeScene) {
+        return;
+      }
+      for (const cast of casts) {
+        if (!isSoundCast(cast)) {
+          continue;
+        }
+        const isInActiveScene = activeScene.casts.some(
+          (sceneCast) => sceneCast.castId === cast.castId,
+        );
+        if (!isInActiveScene) {
+          continue;
+        }
+        if (!isCastActive({ cast, gamestates })) {
+          continue;
+        }
+        const nextSceneId = cast.nextSceneId;
+        if (
+          typeof nextSceneId !== 'number' ||
+          nextSceneId === TRANSITION_SCENE_SENTINEL
+        ) {
+          continue;
+        }
+        onTransition?.({
+          sceneId: nextSceneId,
+          dissolve: !!cast.dissolveToNextScene,
+        });
+      }
+    },
+    [activeScene, gamestates, isSoundCast, onTransition],
+  );
+
+  const handleAudioCastCanPlayThrough = useCallback(() => {}, []);
+
+  useEffect(() => {
+    const activeSceneCasts = activeScene?.casts ?? [];
+    const isActiveCast = (cast: Cast) => isCastActive({ cast, gamestates });
+    const isCastInStage = (cast: Cast) =>
+      stageScenes.some((scene) =>
+        scene.casts.some((sceneCast) => sceneCast.castId === cast.castId),
+      );
+    const isCastInActiveScene = (cast: Cast) =>
+      activeSceneCasts.some((sceneCast) => sceneCast.castId === cast.castId);
+
+    for (const [controller, casts] of availableSounds) {
+      const shouldPlay = casts.some((cast) => {
+        if (!isActiveCast(cast)) {
+          return false;
+        }
+        if (isSoundCast(cast) && cast.looping) {
+          return isCastInStage(cast);
+        }
+        return isCastInActiveScene(cast);
+      });
+
+      if (shouldPlay) {
+        controller.play();
+      } else {
+        controller.pause();
+      }
+    }
+  }, [activeScene, availableSounds, gamestates, isSoundCast, stageScenes]);
+
   const [webGlScenes, specialScenes] = useMemo(() => {
     const matchActive = matchActiveCast(gamestates);
     const isPanoCast = forMorpheusType('PanoCast');
@@ -239,6 +386,15 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         onTransition={onTransition}
         onSceneReady={onSceneReady}
       />
+      {aggregatedSoundCasts.length > 0 && (
+        <Sounds
+          soundCasts={aggregatedSoundCasts}
+          volume={volume}
+          onAudioCastEnded={handleAudioCastEnded}
+          onAudioCastCanPlaythrough={handleAudioCastCanPlayThrough}
+          onAudioCastRef={onAudioCastRef}
+        />
+      )}
     </div>
   );
 };

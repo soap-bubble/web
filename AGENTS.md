@@ -9,6 +9,10 @@ Agent terminals do not pick `.nvmrc` automatically. Before running node, npm or 
 - Active focus: `packages/morpheus` (engine source lives under `packages/morpheus/client/js/morpheus`) and `packages/www` (Next app).
 - Legacy / do-not-touch unless requested: `packages/auth`, `packages/bot*`, `packages/cordova`, `packages/electron`, `packages/functions`, `packages/ssl`, `packages/style`, infra under `ops/`.
 
+## Package-level agent docs
+
+- `packages/www/AGENTS.md`: Next.js app (`morpheus-next`) notes: dev commands, WebSocket/MCP broker, and the **Redux Toolkit** store wiring for scene + rotation state.
+
 ## Commands we still rely on
 
 - Install deps: `yarn install`
@@ -85,6 +89,10 @@ The `morpheus-game` MCP is for programmatic game control (scene loading, rotatio
 - Document new workflows immediately here or in package-level README files.
 - Never delete or reformat historical assets under `packages/morpheus/client/playthrough`, `packages/morpheus/server`, or `packages/www/public` without direction.
 - Treat Firebase configs, Dockerfiles, and deployment manifests as read-only unless an ops request says otherwise.
+
+## State management note (web)
+
+The Next app in `packages/www` now has a **Redux Toolkit** store at `packages/www/src/morpheus-app/store/store.ts` with typed hooks in `packages/www/src/morpheus-app/store/hooks.ts`. Prefer extending that store for new app-router UI/gameplay state (scene stack, rotation, etc.).
 
 ## Open questions to resolve as we modernize
 

@@ -1,18 +1,50 @@
 'use client';
 
-import { useState, useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import type { Scene, Hotspot } from '@soapbubble/morpheus-client/morpheus/casts/types';
+import type { Scene, Hotspot, PanoCast, Cast } from '@soapbubble/morpheus-client/morpheus/casts/types';
+import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
+import { getAssetUrl } from '@soapbubble/morpheus-client/service/gamedb';
+import { isPano } from '@soapbubble/morpheus-client/morpheus/casts/matchers';
 import InteractiveStage, {
-  RotationState,
+  ExternalRotation,
 } from '@/morpheus-app/components/InteractiveStage';
 import useInitialGamestates from '@/morpheus-app/hooks/useInitialGamestate';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
 import useGameControl, {
   HotspotState,
 } from '@/morpheus-app/hooks/useGameControl';
+import { useSceneSystem } from '@/morpheus-app/systems/useSceneSystem';
+import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
+import {
+  selectActiveSceneId,
+  selectStageScenes,
+} from '@/morpheus-app/store/slices/sceneSlice';
+import {
+  seedRotationFromTransition,
+  selectRotation,
+  setRotation,
+} from '@/morpheus-app/store/slices/rotationSlice';
 
 import '@/morpheus-app/runtime';
+
+function isPanoCast(cast: Cast): cast is PanoCast {
+  return cast.__t === 'PanoCast';
+}
+
+function prefetchPanoTexture(scene: Scene): Promise<void> {
+  const panoCast = scene.casts.find(isPanoCast);
+  if (!panoCast) {
+    return Promise.resolve();
+  }
+  const panoUrl = getAssetUrl(panoCast.fileName, 'png');
+  return new Promise((resolve) => {
+    const img = new Image();
+    img.onload = () => resolve();
+    img.onerror = () => resolve();
+    img.src = panoUrl;
+  });
+}
 
 interface ClientProps {
   scene: Scene;
@@ -74,22 +106,14 @@ export const Client = ({ scene }: ClientProps) => {
   const searchParams = useSearchParams();
   const gamestates = useInitialGamestates();
   const { width, height, left, top } = useResponsiveSize();
+  const dispatch = useAppDispatch();
 
   // Get MCP session name from URL query param ?mcp=sessionName
   const mcpSessionName = searchParams.get('mcp');
 
-  // State for external rotation control
-  const [rotationOverride, setRotationOverride] = useState<{
-    x: number;
-    y: number;
-  } | null>(null);
-
-  // Track current rotation for state reporting
-  const [currentRotation, setCurrentRotation] = useState<RotationState>({
-    x: 0,
-    y: 0,
-    offsetX: 0,
-  });
+  const rotation = useAppSelector(selectRotation);
+  const stageScenes = useAppSelector(selectStageScenes);
+  const activeSceneId = useAppSelector(selectActiveSceneId);
 
   // Extract hotspot info from scene for state reporting
   const hotspots = useMemo((): HotspotState[] => {
@@ -123,21 +147,75 @@ export const Client = ({ scene }: ClientProps) => {
     [router, mcpSessionName]
   );
 
-  const handleRotateTo = useCallback((x: number, y: number) => {
-    setRotationOverride({ x, y });
-    // Also update currentRotation for state reporting (using external coordinates)
-    // InteractiveStage uses internal coords (0-3072), but we report external (0-3600)
-    setCurrentRotation({ x, y, offsetX: 0 });
-  }, []);
+  const handleRotateTo = useCallback(
+    (x: number, y: number) => {
+      dispatch(setRotation({ yaw3600: x, pitch: y }));
+    },
+    [dispatch]
+  );
+
+  // Track if a transition is in progress to prevent double-navigation
+  const transitionInProgressRef = useRef(false);
+
+  // Scene transition: prefetch pano texture, seed rotation, then navigate
+  const handleSceneTransition = useCallback(
+    async ({
+      sceneId,
+      startAngle,
+    }: {
+      sceneId: number;
+      dissolve: boolean;
+      startAngle?: number;
+    }) => {
+      // Prevent double-navigation
+      if (transitionInProgressRef.current) {
+        return;
+      }
+      transitionInProgressRef.current = true;
+
+      // Seed rotation so new page starts at correct angle
+      if (startAngle !== undefined) {
+        dispatch(seedRotationFromTransition({ yaw3600: startAngle, pitch: 0 }));
+      }
+
+      // Fetch scene data and prefetch pano texture before navigating
+      // This ensures the texture is in browser cache when the new page loads
+      try {
+        const targetScene = await fetchScene(sceneId);
+        if (targetScene && isPano(targetScene)) {
+          // Wait for texture to load (with 3s timeout)
+          await Promise.race([
+            prefetchPanoTexture(targetScene),
+            new Promise((resolve) => setTimeout(resolve, 3000)),
+          ]);
+        }
+      } catch {
+        // If prefetch fails, continue with navigation anyway
+      }
+
+      // Navigate
+      const url = mcpSessionName
+        ? `/scene/${sceneId}?mcp=${encodeURIComponent(mcpSessionName)}`
+        : `/scene/${sceneId}`;
+      router.push(url);
+    },
+    [dispatch, mcpSessionName, router]
+  );
 
   // State getter for game control hook
   const getState = useCallback(() => {
+    const internalX = (rotation.yaw3600 / 3600) * 3072;
+    const offsetX = Math.floor((internalX % 3072) / 24) * 24;
     return {
       sceneId: scene.sceneId,
-      rotation: currentRotation,
+      rotation: {
+        x: rotation.yaw3600,
+        y: rotation.pitch,
+        offsetX,
+      },
       hotspots,
     };
-  }, [scene.sceneId, currentRotation, hotspots]);
+  }, [scene.sceneId, rotation, hotspots]);
 
   // Game control hook - use mcp session name from URL if present
   const { state: gameControlState } = useGameControl({
@@ -155,16 +233,20 @@ export const Client = ({ scene }: ClientProps) => {
 
   // Handle rotation changes from InteractiveStage
   // InteractiveStage uses internal coordinates (0-3072), convert to external (0-3600)
-  const handleRotationChange = useCallback((rotation: RotationState) => {
-    const externalX = (rotation.x / 3072) * 3600;
-    setCurrentRotation({
-      x: externalX,
-      y: rotation.y,
-      offsetX: rotation.offsetX,
-    });
-  }, []);
+  const handleRotationChange = useCallback(
+    (nextRotation: ExternalRotation) => {
+      dispatch(setRotation(nextRotation));
+    },
+    [dispatch]
+  );
 
-  if (!gamestates) {
+  useSceneSystem({
+    scene,
+    sceneId: scene.sceneId,
+    mcpSessionName,
+  });
+
+  if (!gamestates || stageScenes.length === 0 || !activeSceneId) {
     return (
       <div
         style={{
@@ -182,6 +264,10 @@ export const Client = ({ scene }: ClientProps) => {
     );
   }
 
+  const activeScene =
+    stageScenes.find((stageScene) => stageScene.sceneId === activeSceneId) ??
+    stageScenes[0];
+
   return (
     <div
       style={{
@@ -193,14 +279,16 @@ export const Client = ({ scene }: ClientProps) => {
       }}
     >
       <InteractiveStage
-        scene={scene}
+        stageScenes={stageScenes}
+        activeScene={activeScene}
         gamestates={gamestates}
         width={width}
         height={height}
         left={left}
         top={top}
         onRotationChange={handleRotationChange}
-        rotationOverride={rotationOverride}
+        rotation={rotation}
+        onTransition={handleSceneTransition}
       />
       {/* Connection indicator for debugging */}
       {process.env.NODE_ENV === 'development' && (

@@ -3,7 +3,6 @@ import React, {
   FunctionComponent,
   useState,
   useEffect,
-  useCallback,
 } from 'react';
 
 import { debounce, map } from 'rxjs/operators';
@@ -12,13 +11,10 @@ import WebGl from 'morpheus/casts/components/WebGl';
 import { useObservable } from 'rxjs-hooks';
 import { Gamestates, isCastActive } from '@soapbubble/morpheus-client';
 import { Scene, PanoCast, Cast, MovieCast } from 'morpheus/casts/types';
-import { useAppDispatch } from '@/morpheus-app/store/hooks';
-import { setPendingTransition } from '@/morpheus-app/store/slices/sceneSlice';
-import { and, Matcher, not } from '@/utils/matchers';
+import { and, Matcher } from '@/utils/matchers';
 import { interval, Observable, of } from 'rxjs';
 import useRotation from 'morpheus/casts/hooks/useRotation';
 import { forMorpheusType, isPano } from 'morpheus/casts/matchers';
-import type { SceneTransitionRequest } from 'morpheus/scene/types';
 
 interface StageProps {
   stageScenes: Scene[];
@@ -51,7 +47,6 @@ const OgMetaCanvas: FunctionComponent<StageProps> = ({
   height = 600,
   settled,
 }) => {
-  const dispatch = useAppDispatch();
   const [specialMovieCast, setSpecialMovieCast] =
     useState<null | Observable<MovieCast>>();
   const debounceCastLoaderObservable = useObservable(() => {
@@ -108,12 +103,6 @@ const OgMetaCanvas: FunctionComponent<StageProps> = ({
     }),
     [],
   );
-  const handleSceneTransition = useCallback(
-    ({ sceneId, dissolve, startAngle, sourceCastId }: SceneTransitionRequest) => {
-      dispatch(setPendingTransition({ sceneId, dissolve, startAngle }));
-    },
-    [dispatch],
-  );
   return (
     <>
       {gamestates && webGlScenes && (
@@ -145,7 +134,6 @@ const OgMetaCanvas: FunctionComponent<StageProps> = ({
           left={left}
           width={width}
           height={height}
-          onTransition={handleSceneTransition}
         />
       )}
     </>

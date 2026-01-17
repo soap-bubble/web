@@ -13,7 +13,7 @@ import { isPano, forMorpheusType } from 'morpheus/casts/matchers';
 import { isCastActive, Gamestates } from '@soapbubble/morpheus-client';
 import type { Scene, PanoCast, Cast, MovieCast } from 'morpheus/casts/types';
 
-import { and, not, Matcher } from '@/utils/matchers';
+import { and, Matcher } from '@/utils/matchers';
 import useCursorHandler from '../hooks/useCursorHandler';
 
 export interface RotationState {
@@ -81,7 +81,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
 
   const [camera, setCamera] = useState<Camera | undefined>();
   const [panoObject, setPanoObject] = useState<Object3D | undefined>();
-  const [specialMovieCast, setSpecialMovieCast] = useState<Observable<MovieCast> | null>(null);
+  const [, setSpecialMovieCast] = useState<Observable<MovieCast> | null>(null);
 
   const targetInternal = useMemo(() => {
     const internalX = externalToInternal(rotation.yaw3600);

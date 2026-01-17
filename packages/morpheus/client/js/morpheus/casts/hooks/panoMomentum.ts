@@ -56,21 +56,27 @@ function convertFromVerticalSpeed(delta: number, sensitivity: number) {
   return (delta * DEG_TO_RAD) / (40 * ((19 - sensitivity) / 18.0))
 }
 
+type RotationState = { x: number; y: number; offsetX: number }
+
 type PanoHandler = [
-  { x: number; y: number; offsetX: number },
-  PointerEvents<HTMLCanvasElement>
+  RotationState,
+  PointerEvents<HTMLCanvasElement>,
+  (nextRotation: RotationState) => void
 ]
 
 export default function(
   sensitivity: number,
-  interactionDebounce: number
+  interactionDebounce: number,
+  initialRotation?: RotationState
 ): PanoHandler {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
-  const [rotation, setRotation] = useState({
-    x: 0,
-    y: 0,
-    offsetX: 0,
-  })
+  const [rotation, setRotation] = useState<RotationState>(
+    initialRotation ?? {
+      x: 0,
+      y: 0,
+      offsetX: 0,
+    }
+  )
 
   // If we are in a user interaction
   const [active, setActive] = useState(false)
@@ -206,5 +212,12 @@ export default function(
     [onPointerUp, onPointerDown, onPointerMove]
   )
 
-  return [rotation, pointerEvents]
+  const setExternalRotation = useCallback(
+    (nextRotation: RotationState) => {
+      setRotation(nextRotation)
+    },
+    [setRotation]
+  )
+
+  return [rotation, pointerEvents, setExternalRotation]
 }

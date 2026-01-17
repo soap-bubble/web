@@ -8,9 +8,11 @@ import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import InteractiveStage, {
   ExternalRotation,
 } from '@/morpheus-app/components/InteractiveStage';
+import SettingsOverlay from '@/morpheus-app/components/SettingsOverlay';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
 import useGameControl, { HotspotState } from '@/morpheus-app/hooks/useGameControl';
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
+import type { AppDispatch } from '@/morpheus-app/store/store';
 import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import {
   activateScene,
@@ -26,6 +28,8 @@ import {
   selectRotationSeeded,
   setRotation,
 } from '@/morpheus-app/store/slices/rotationSlice';
+import { commitSceneUpdates } from '@/morpheus-app/store/slices/gamestateSlice';
+import { useGamestateHistory } from '@/morpheus-app/hooks/useGamestateHistory';
 
 import '@/morpheus-app/runtime';
 
@@ -94,7 +98,8 @@ export const SceneStageShell = () => {
 
   const gamestates = useAppSelector(selectGamestatesAccessor);
   const { width, height, left, top } = useResponsiveSize();
-  const dispatch = useAppDispatch();
+  const dispatch: AppDispatch = useAppDispatch();
+  useGamestateHistory();
 
   const rotation = useAppSelector(selectRotation);
   const rotationSeeded = useAppSelector(selectRotationSeeded);
@@ -104,6 +109,10 @@ export const SceneStageShell = () => {
     useAppSelector((state) =>
       activeSceneId ? selectSceneById(state, activeSceneId) : undefined,
     ) ?? stageScenes[0];
+  const activeSceneIdRef = useRef<number | null>(activeSceneId ?? null);
+  useEffect(() => {
+    activeSceneIdRef.current = activeSceneId ?? null;
+  }, [activeSceneId]);
 
   // Clear the rotation seed after it has been applied once.
   useEffect(() => {
@@ -237,6 +246,8 @@ export const SceneStageShell = () => {
       }
       committedTransitionSceneIdRef.current = readySceneId;
 
+      const previousSceneId = activeSceneIdRef.current ?? readySceneId;
+      dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
       dispatch(scenePrefetched(pendingTransition.scene));
       dispatch(activateScene(readySceneId));
       setPendingTransition(null);
@@ -257,6 +268,8 @@ export const SceneStageShell = () => {
         return;
       }
       committedTransitionSceneIdRef.current = pendingTransition.sceneId;
+      const previousSceneId = activeSceneIdRef.current ?? pendingTransition.sceneId;
+      dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
       dispatch(scenePrefetched(pendingTransition.scene));
       dispatch(activateScene(pendingTransition.sceneId));
       setPendingTransition(null);
@@ -316,6 +329,7 @@ export const SceneStageShell = () => {
         position: 'relative',
       }}
     >
+      <SettingsOverlay />
       <InteractiveStage
         stageScenes={stageScenes}
         activeScene={activeScene}

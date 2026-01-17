@@ -9,6 +9,7 @@
     "build": "yarn run build:types && next build --webpack",
     "build:types": "node ../../node_modules/typescript/bin/tsc -b ../../tsconfig.build.json",
     "start": "next start",
+    "test": "vitest",
     "ts": "node ../../node_modules/typescript/bin/tsc --noEmit --incremental",
     "ts:watch": "yarn ts --watch"
   },
@@ -57,7 +58,11 @@
     "@types/ua-parser-js": "^0.7.39",
     "@types/w3c-generic-sensor": "^1.0.8",
     "@types/ws": "^8.18.1",
+    "@vitest/coverage-v8": "^4.0.17",
+    "@vitest/ui": "^4.0.17",
+    "fake-indexeddb": "^6.2.5",
     "prettier": "^3.2.5",
-    "typescript": "^5.3.3"
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.17"
   }
 }

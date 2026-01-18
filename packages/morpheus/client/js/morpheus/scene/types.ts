@@ -3,4 +3,5 @@ export type SceneTransitionRequest = {
   dissolve: boolean
   startAngle?: number
   sourceCastId?: number
+  mode?: 'goBack'
 }

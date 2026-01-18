@@ -1,4 +1,4 @@
-import React, { useRef, PointerEvent } from 'react'
+import React, { useRef, useEffect, PointerEvent } from 'react'
 import { useSelector } from 'react-redux'
 import useRaf from '@rooks/use-raf'
 import { selectors as gameSelectors } from 'morpheus/game'
@@ -39,13 +39,24 @@ const Canvas = ({
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
+  // Use ref to avoid stale closure in RAF callback
+  const renderablesRef = useRef(renderables)
+  const dimensionsRef = useRef({ width, height })
+  useEffect(() => {
+    renderablesRef.current = renderables
+  }, [renderables])
+  useEffect(() => {
+    dimensionsRef.current = { width, height }
+  }, [width, height])
+
   useRaf(() => {
     if (canvasRef.current) {
       try {
         const ctx = canvasRef.current.getContext('2d')
         if (ctx) {
-          ctx.clearRect(0, 0, width, height)
-          for (let render of renderables) {
+          const { width: w, height: h } = dimensionsRef.current
+          ctx.clearRect(0, 0, w, h)
+          for (let render of renderablesRef.current) {
             render(ctx)
           }
         }

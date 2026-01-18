@@ -61,7 +61,7 @@ export interface ControlledMovieCallback {
 }
 
 export interface ControlledMovieCast extends MovieCast {
-  controlledLocation: MovieCast[]
+  controlledLocation: { x: number, y: number }
   companionMovieCastId: number
   scale: number
   controlledMovieCallbacks: ControlledMovieCallback[]

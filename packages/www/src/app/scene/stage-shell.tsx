@@ -16,6 +16,7 @@ import type { AppDispatch } from '@/morpheus-app/store/store';
 import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import {
   activateScene,
+  activateScenePrune,
   scenePrefetched,
   selectActiveSceneId,
   selectSceneById,
@@ -37,6 +38,7 @@ type PendingTransition = {
   sceneId: number;
   scene: Scene;
   startAngle?: number;
+  mode?: 'goBack';
 };
 
 function isHotspot(cast: unknown): cast is Hotspot {
@@ -184,10 +186,12 @@ export const SceneStageShell = () => {
     async ({
       sceneId,
       startAngle,
+      mode,
     }: {
       sceneId: number;
       dissolve: boolean;
       startAngle?: number;
+      mode?: 'goBack';
     }) => {
       if (transitionInProgressRef.current) {
         return;
@@ -205,7 +209,7 @@ export const SceneStageShell = () => {
           transitionInProgressRef.current = false;
           return;
         }
-        setPendingTransition({ sceneId, scene: targetScene, startAngle });
+        setPendingTransition({ sceneId, scene: targetScene, startAngle, mode });
       } catch {
         transitionInProgressRef.current = false;
       }
@@ -249,7 +253,11 @@ export const SceneStageShell = () => {
       const previousSceneId = activeSceneIdRef.current ?? readySceneId;
       dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
       dispatch(scenePrefetched(pendingTransition.scene));
-      dispatch(activateScene(readySceneId));
+      if (pendingTransition.mode === 'goBack') {
+        dispatch(activateScenePrune(readySceneId));
+      } else {
+        dispatch(activateScene(readySceneId));
+      }
       setPendingTransition(null);
       transitionInProgressRef.current = false;
 
@@ -271,7 +279,11 @@ export const SceneStageShell = () => {
       const previousSceneId = activeSceneIdRef.current ?? pendingTransition.sceneId;
       dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
       dispatch(scenePrefetched(pendingTransition.scene));
-      dispatch(activateScene(pendingTransition.sceneId));
+      if (pendingTransition.mode === 'goBack') {
+        dispatch(activateScenePrune(pendingTransition.sceneId));
+      } else {
+        dispatch(activateScene(pendingTransition.sceneId));
+      }
       setPendingTransition(null);
       transitionInProgressRef.current = false;
       pushSceneRoute(pendingTransition.sceneId);

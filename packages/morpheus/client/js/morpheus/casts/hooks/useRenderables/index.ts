@@ -177,7 +177,9 @@ export default function useRenderables(
     const videoCasts = movieSpecialCasts.filter(isMovie)
     const enteringRenderables = [] as Renderable[]
     const images = movieSpecialCasts.reduce((memo, curr) => {
-      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+      const loaded = imagesLoaded.find(([_, casts]) =>
+        casts.some((c) => c.castId === curr.castId),
+      )
       if (loaded) {
         memo.push(loaded)
       }
@@ -185,7 +187,9 @@ export default function useRenderables(
     }, [] as ImageDrawable<MovieCast>[]) as ImageDrawable<MovieSpecialCast>[]
 
     const controlledCastsDrawable = controlledCasts.reduce((memo, curr) => {
-      const loaded = imagesLoaded.find(([_, casts]) => casts.includes(curr))
+      const loaded = imagesLoaded.find(([_, casts]) =>
+        casts.some((c) => c.castId === curr.castId),
+      )
       if (loaded) {
         memo.push(loaded)
       }

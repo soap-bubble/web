@@ -46,8 +46,8 @@ const Images = ({
   onImageCastError,
 }: ImagesProps) => {
   const aggregatedImageRefs = useMemo(
-    () =>
-      movieSpecialCasts.reduce(
+    () => {
+      return movieSpecialCasts.reduce(
         (memo: MovieCastCollectionMap, curr: MovieCast) => {
           const { fileName, url, image, startFrame } = curr as MovieSpecialCast
           let key =
@@ -57,12 +57,17 @@ const Images = ({
                 'png',
               )) ||
             url
+          if (!key) {
+            console.warn('[Images] NO URL for cast', curr.castId);
+            return memo;
+          }
           const ref = (memo[key] = memo[key] || [])
           ref.push(curr)
           return memo
         },
         {} as MovieCastCollectionMap,
-      ),
+      );
+    },
     [movieSpecialCasts],
   )
   return (
@@ -76,6 +81,7 @@ const Images = ({
               onImageCastLoad([e.currentTarget, casts])
             }}
             onError={e => {
+              console.error('[Images] ERROR loading:', url, 'casts:', casts.map(c => c.castId));
               onImageCastError([e.currentTarget, casts])
             }}
           />

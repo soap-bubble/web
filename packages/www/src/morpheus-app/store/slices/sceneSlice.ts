@@ -95,6 +95,41 @@ const sceneSlice = createSlice({
       }
       state.requestedSceneId = null;
     },
+    activateScenePrune(state, action: PayloadAction<number>) {
+      const sceneId = action.payload;
+      if (!state.byId[sceneId]) {
+        state.requestedSceneId = sceneId;
+        return;
+      }
+      const existingIndex = state.stack.findIndex(
+        (entry) => entry.sceneId === sceneId
+      );
+      if (existingIndex >= 0) {
+        state.stack = state.stack.slice(existingIndex);
+      }
+      if (state.stack[0]?.sceneId !== sceneId) {
+        state.stack.unshift({
+          sceneId,
+          status: 'active',
+          loadedAt: Date.now(),
+        });
+      } else {
+        state.stack[0] = {
+          ...state.stack[0],
+          status: 'active',
+          loadedAt: Date.now(),
+        };
+      }
+      state.activeSceneId = sceneId;
+      state.stack = state.stack.map((entry, index) => ({
+        ...entry,
+        status: index === 0 ? 'active' : 'background',
+      }));
+      if (state.stack.length > state.maxStackSize) {
+        state.stack = state.stack.slice(0, state.maxStackSize);
+      }
+      state.requestedSceneId = null;
+    },
     setMaxStackSize(state, action: PayloadAction<number>) {
       state.maxStackSize = action.payload;
       if (state.stack.length > state.maxStackSize) {
@@ -114,6 +149,7 @@ export const {
   requestScene,
   stageScene,
   activateScene,
+  activateScenePrune,
   setMaxStackSize,
 } = sceneSlice.actions;
 

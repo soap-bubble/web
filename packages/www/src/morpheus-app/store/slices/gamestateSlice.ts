@@ -92,7 +92,7 @@ const gamestateSlice = createSlice({
       const existing = state.byId[stateId];
       if (existing) {
         existing.value = value;
-        state.pendingUpdates[stateId] = value;
+        state.pendingUpdates = { ...state.pendingUpdates, [stateId]: value };
       }
     },
     restoreGamestate(
@@ -152,14 +152,20 @@ export type GamestatesAccessor = {
 };
 
 export const selectGamestatesAccessor = createSelector(
-  [(state: { gamestate: GamestateState }) => state.gamestate.byId],
-  (byId): GamestatesAccessor => ({
-    byId(id: number) {
-      const gamestate = byId[id];
-      if (!gamestate) {
-        throw new Error(`VariableNotFound ${id} inside ${Object.keys(byId).length} elements`);
-      }
-      return gamestate;
-    },
-  }),
+  [
+    (state: { gamestate: GamestateState }) => state.gamestate.byId,
+    (state: { gamestate: GamestateState }) => state.gamestate.pendingUpdates,
+  ],
+  (byId, pendingUpdates): GamestatesAccessor => {
+    console.log('[Selector] selectGamestatesAccessor recomputed, pendingUpdates:', Object.keys(pendingUpdates));
+    return {
+      byId(id: number) {
+        const gamestate = byId[id];
+        if (!gamestate) {
+          throw new Error(`VariableNotFound ${id} inside ${Object.keys(byId).length} elements`);
+        }
+        return gamestate;
+      },
+    };
+  },
 );

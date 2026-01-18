@@ -20,7 +20,6 @@ import {
   Cast,
 } from 'morpheus/casts/types'
 import { VideoController } from 'morpheus/casts/components/Videos'
-import { render } from 'utils/render'
 
 // Track controlled movie animation state externally since cast objects from Redux are frozen
 type ControlledAnimState = {
@@ -28,6 +27,104 @@ type ControlledAnimState = {
   ticks: number
 }
 const controlledAnimStates = new Map<number, ControlledAnimState>()
+
+function getDrawSourceDimensions(img: DrawSource): { width: number; height: number } {
+  if (img instanceof HTMLVideoElement) {
+    return { width: img.videoWidth, height: img.videoHeight }
+  }
+  if (img instanceof HTMLImageElement) {
+    return { width: img.naturalWidth || img.width, height: img.naturalHeight || img.height }
+  }
+  // HTMLCanvasElement
+  return { width: img.width, height: img.height }
+}
+
+interface FrameSourceRect {
+  x: number
+  y: number
+  width: number
+  height: number
+}
+
+// Known frame dimensions for different asset sources
+// New extracted assets use 352x288 (1.222 aspect ratio)
+// Original game uses 320x200 scaled dimensions (1.6 aspect ratio)
+const KNOWN_FRAME_DIMENSIONS = [
+  { width: 352, height: 288 },  // New extracted assets
+]
+
+function detectFrameDimensions(
+  imgWidth: number,
+  imgHeight: number,
+  castFrameWidth: number,
+  castFrameHeight: number
+): { frameWidth: number; frameHeight: number; cols: number; rows: number } {
+  // First, check if image dimensions are exact multiples of known frame sizes
+  for (const known of KNOWN_FRAME_DIMENSIONS) {
+    const cols = imgWidth / known.width
+    const rows = imgHeight / known.height
+    // Check if these divide evenly (within small tolerance for rounding)
+    if (cols >= 1 && rows >= 1 && 
+        Math.abs(cols - Math.round(cols)) < 0.01 &&
+        Math.abs(rows - Math.round(rows)) < 0.01) {
+      return {
+        frameWidth: known.width,
+        frameHeight: known.height,
+        cols: Math.round(cols),
+        rows: Math.round(rows),
+      }
+    }
+  }
+
+  // Check for single-row sprite sheet (original format)
+  // Image height matches cast height within tolerance
+  if (Math.abs(imgHeight - castFrameHeight) <= 2) {
+    const cols = Math.max(1, Math.round(imgWidth / castFrameWidth))
+    return {
+      frameWidth: imgWidth / cols,
+      frameHeight: imgHeight,
+      cols,
+      rows: 1,
+    }
+  }
+
+  // Fall back to calculating grid from cast dimensions
+  const cols = Math.max(1, Math.floor(imgWidth / castFrameWidth))
+  const rows = Math.max(1, Math.round(imgHeight / castFrameHeight))
+  
+  return {
+    frameWidth: imgWidth / cols,
+    frameHeight: imgHeight / rows,
+    cols,
+    rows,
+  }
+}
+
+function calculateFrameSourceRect(
+  frameIndex: number,
+  castFrameWidth: number,
+  castFrameHeight: number,
+  imgWidth: number,
+  imgHeight: number
+): FrameSourceRect {
+  const { frameWidth, frameHeight, cols } = detectFrameDimensions(
+    imgWidth,
+    imgHeight,
+    castFrameWidth,
+    castFrameHeight
+  )
+  
+  // Find frame position in grid
+  const col = frameIndex % cols
+  const row = Math.floor(frameIndex / cols)
+  
+  return {
+    x: col * frameWidth,
+    y: row * frameHeight,
+    width: frameWidth,
+    height: frameHeight,
+  }
+}
 
 export function calculateControlledFrameOperation({
   cast,
@@ -46,13 +143,6 @@ export function calculateControlledFrameOperation({
   const value = Math.round(gs.value)
   const frames = get(controlledMovieCallbacks, '[0].frames', 1)
   const currentOffset = value * frames
-
-  const source = {
-    x: value * width,
-    y: 0,
-    sizeX: width,
-    sizeY: height,
-  }
 
   // Get or create animation state for this cast
   let animState = controlledAnimStates.get(cast.castId)
@@ -87,12 +177,27 @@ export function calculateControlledFrameOperation({
         state.currentValue -= 1
       }
     }
+
+    // Fetch image dimensions at render time (image may not be loaded at creation time)
+    const imgDimensions = getDrawSourceDimensions(img)
+
+    // Calculate source rectangle in sprite sheet grid (left-to-right, top-to-bottom)
+    // This handles both single-row and grid layouts, including scaled sprite sheets
+    const frameIdx = Math.floor(state.currentValue)
+    const srcRect = calculateFrameSourceRect(
+      frameIdx,
+      width,
+      height,
+      imgDimensions.width,
+      imgDimensions.height
+    )
+
     context.drawImage(
       img,
-      Math.floor(state.currentValue) * width,
-      source.y,
-      source.sizeX,
-      source.sizeY,
+      srcRect.x,
+      srcRect.y,
+      srcRect.width,
+      srcRect.height,
       rect.x,
       rect.y,
       rect.sizeX,
@@ -119,29 +224,30 @@ export function calculateImageOperation({
   img: DrawSource
   rect: Rect
 }): Renderable {
-  const { scale = 1, width, height } = cast
+  const { scale = 1 } = cast
 
-  const source = {
-    x: 0,
-    y: 0,
-    sizeX: width,
-    sizeY: height,
+  const renderable: Renderable = (ctx: CanvasRenderingContext2D) => {
+    // Use actual image dimensions for source rect to handle assets that don't
+    // match their declared cast dimensions
+    const imgDimensions = getDrawSourceDimensions(img)
+    
+    const drawOperation: DrawOperation = [
+      img,
+      0,
+      0,
+      imgDimensions.width,
+      imgDimensions.height,
+      rect.x * scale,
+      rect.y * scale,
+      rect.sizeX * scale,
+      rect.sizeY * scale,
+    ]
+    ctx.drawImage(...drawOperation)
   }
-
-  const drawOperation: DrawOperation = [
-    img,
-    source.x,
-    source.y,
-    source.sizeX,
-    source.sizeY,
-    rect.x * scale,
-    rect.y * scale,
-    rect.sizeX * scale,
-    rect.sizeY * scale,
-  ]
-  const renderable: Renderable = ctx => ctx.drawImage(...drawOperation)
-  renderable.description = () =>
-    `cast: ${cast.castId} src: ${cast.fileName} src.x: ${source.x} src.y ${source.y} src.width ${source.sizeX} src.height ${source.sizeY} dest.x ${rect.x} dest.y ${rect.y} width: ${rect.sizeX} height ${rect.sizeY}`
+  renderable.description = () => {
+    const imgDimensions = getDrawSourceDimensions(img)
+    return `cast: ${cast.castId} src: ${cast.fileName} src.x: 0 src.y 0 src.width ${imgDimensions.width} src.height ${imgDimensions.height} dest.x ${rect.x} dest.y ${rect.y} width: ${rect.sizeX} height ${rect.sizeY}`
+  }
   return renderable
 }
 
@@ -280,7 +386,7 @@ export function generateControlledRenderables({
     for (const cast of casts) {
       let location = cast.location
       if (cast.controlledLocation) {
-        location = cast.controlledLocation[0].location
+        location = cast.controlledLocation
       }
       memo.push(
         calculateControlledFrameOperation({

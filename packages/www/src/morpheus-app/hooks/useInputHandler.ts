@@ -9,6 +9,7 @@ import {
 import { Raycaster, Object3D, Camera, Vector2 } from 'three';
 import { isActive } from '@soapbubble/morpheus-client';
 import type { Hotspot, Scene, Cast } from 'morpheus/casts/types';
+import type { SceneTransitionRequest } from 'morpheus/scene/types';
 import { isHotspot } from 'morpheus/casts/matchers';
 import { DST_RATIO, DST_WIDTH, GESTURES } from 'morpheus/constants';
 
@@ -144,12 +145,7 @@ export function useInputHandler(params: {
   screenWidth: number;
   screenHeight: number;
   previousSceneId?: number;
-  onTransition?: (transition: {
-    sceneId: number;
-    dissolve: boolean;
-    startAngle?: number;
-    sourceCastId?: number;
-  }) => void;
+  onTransition?: (transition: SceneTransitionRequest) => void;
 }): InputReturn {
   const {
     scene,
@@ -391,6 +387,7 @@ export function useInputHandler(params: {
       });
 
       for (const update of result.gamestateUpdates) {
+        console.log('[GamestateUpdate]', update.stateId, '->', update.value);
         dispatch(updateGamestate(update));
       }
 

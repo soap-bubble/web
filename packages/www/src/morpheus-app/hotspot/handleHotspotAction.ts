@@ -9,7 +9,12 @@ type Position = { top: number; left: number };
 
 export type HotspotActionResult = {
   gamestateUpdates: Array<{ stateId: number; value: number }>;
-  sceneTransition?: { sceneId: number; dissolve: boolean; startAngle?: number };
+  sceneTransition?: {
+    sceneId: number;
+    dissolve: boolean;
+    startAngle?: number;
+    mode?: 'goBack';
+  };
   preTransitionRotation?: { yaw3600: number; pitch: number };
   allDone: boolean;
 };
@@ -95,6 +100,7 @@ export function handleHotspotAction(params: {
           sceneId: previousSceneId,
           dissolve: false,
           startAngle: nextSceneStartAngle(hotspot),
+          mode: 'goBack',
         };
       }
       break;
@@ -175,6 +181,7 @@ export function handleHotspotAction(params: {
       const value = hotspot.param2;
       const gs = gamestates.byId(hotspot.param1);
       if (gs.value !== value) {
+        console.log('[GamestateUpdate]', hotspot.param1, gs.value, '->', value);
         result.gamestateUpdates.push({ stateId: hotspot.param1, value });
       }
       break;

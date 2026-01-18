@@ -11,7 +11,7 @@ import Sounds, { AudioController } from 'morpheus/casts/components/Sounds';
 import useCastRefNoticer from 'morpheus/casts/hooks/useCastRefNoticer';
 import usePanoMomentum from 'morpheus/casts/hooks/panoMomentum';
 import { composePointer } from 'morpheus/hotspot/eventInterface';
-import { isPano, forMorpheusType, isAudio } from 'morpheus/casts/matchers';
+import { isPano, forMorpheusType, isAudio, isMovie } from 'morpheus/casts/matchers';
 import { isCastActive, Gamestates } from '@soapbubble/morpheus-client';
 import type {
   Scene,
@@ -19,6 +19,7 @@ import type {
   Cast,
   MovieCast,
   MovieSpecialCast,
+  ControlledMovieCast,
   SoundCast,
   SupportedSoundCasts,
 } from 'morpheus/casts/types';
@@ -57,6 +58,77 @@ const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
   return (cast: T) => isCastActive({ cast, gamestates });
+}
+
+function isControlledMovieCast(cast: Cast): cast is ControlledMovieCast {
+  return cast.__t === 'ControlledMovieCast';
+}
+
+function isAudioCast(cast: MovieCast | ControlledMovieCast): boolean {
+  return cast.audioOnly;
+}
+
+function isMovieCastType(cast: Cast): cast is MovieCast {
+  return (
+    cast.__t === 'MovieCast' ||
+    cast.__t === 'PanoCast' ||
+    cast.__t === 'PanoAnim' ||
+    cast.__t === 'MovieSpecialCast' ||
+    cast.__t === 'ControlledMovieCast' ||
+    cast.__t === 'SoundCast'
+  );
+}
+
+function isNonAudioControlledCast(cast: Cast): cast is ControlledMovieCast {
+  return isControlledMovieCast(cast) && !isAudioCast(cast);
+}
+
+function sceneHasNonAudioControlled(scene: Scene): boolean {
+  return scene.casts.some((cast) => isNonAudioControlledCast(cast));
+}
+
+function isSpecialCast(cast: Cast): cast is MovieSpecialCast | ControlledMovieCast {
+  return cast.__t === 'MovieSpecialCast' || cast.__t === 'ControlledMovieCast';
+}
+
+function isActiveSpecialCast(cast: Cast, gamestates: Gamestates): boolean {
+  if (!isSpecialCast(cast)) {
+    return false;
+  }
+  if (isAudioCast(cast)) {
+    return false;
+  }
+  return isCastActive({ cast, gamestates });
+}
+
+function isFullscreenCast(cast: Cast): boolean {
+  if (!isMovieCastType(cast)) {
+    return false;
+  }
+  return cast.width >= 320 && cast.height >= 200;
+}
+
+function sceneHasActiveSpecialCast(scene: Scene, gamestates: Gamestates): boolean {
+  return scene.casts.some((cast) => isActiveSpecialCast(cast, gamestates));
+}
+
+function sceneHasActiveFullscreenCast(scene: Scene, gamestates: Gamestates): boolean {
+  return scene.casts.some(
+    (cast) => isActiveSpecialCast(cast, gamestates) && isFullscreenCast(cast),
+  );
+}
+
+function sceneHasActiveFullscreenMovieSpecialCast(
+  scene: Scene,
+  gamestates: Gamestates,
+): boolean {
+  return scene.casts.some(
+    (cast) =>
+      cast.__t === 'MovieSpecialCast' &&
+      isActiveSpecialCast(cast, gamestates) &&
+      isMovie(cast) &&
+      isFullscreenCast(cast),
+  );
 }
 
 // Convert external coordinates (0-3600) to internal coordinates (0-3072)
@@ -98,6 +170,95 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   const isPanoScene = useMemo(() => {
     return active ? isPano(active) : false;
   }, [active]);
+
+  const activeHasControlledOverlay = useMemo(() => {
+    return active ? sceneHasNonAudioControlled(active) : false;
+  }, [active]);
+
+  const { webGlScenes, specialScenes, showPano } = useMemo(() => {
+    const matchActive = matchActiveCast(gamestates);
+    const isPanoCast = forMorpheusType('PanoCast');
+    const matchPanoCast = and<PanoCast>(isPanoCast, matchActive);
+    const matchActivePanoScene = (s: Scene) =>
+      s.casts.some((cast: Cast) => matchPanoCast(cast as MovieCast));
+
+    const webGl: Scene[] = [];
+    const special: Scene[] = [];
+    let foundFullscreen = false;
+    let allowSpecialStack = true;
+
+    for (const s of stageScenes) {
+      if (matchActivePanoScene(s)) {
+        webGl.push(s);
+      }
+
+      if (foundFullscreen || !allowSpecialStack) {
+        continue;
+      }
+
+      if (!sceneHasActiveSpecialCast(s, gamestates)) {
+        // Stop as soon as a non-special scene is on top of the stack.
+        allowSpecialStack = false;
+        continue;
+      }
+
+      special.push(s);
+
+      if (sceneHasActiveFullscreenCast(s, gamestates)) {
+        foundFullscreen = true;
+      }
+    }
+
+    const hasFullscreenSpecial = special.some((scene) =>
+      sceneHasActiveFullscreenCast(scene, gamestates),
+    );
+    const hasFullscreenMovieSpecial = special.some((scene) =>
+      sceneHasActiveFullscreenMovieSpecialCast(scene, gamestates),
+    );
+    const showPano = !hasFullscreenSpecial || hasFullscreenMovieSpecial;
+
+    return { webGlScenes: showPano ? webGl : [], specialScenes: special, showPano };
+  }, [gamestates, stageScenes]);
+
+  // const debugStackSummary = useMemo(() => {
+  //   if (process.env.NODE_ENV !== 'development') {
+  //     return null;
+  //   }
+  //   return stageScenes.map((scene) => {
+  //     const activeSpecial = scene.casts.filter((cast) =>
+  //       isActiveSpecialCast(cast, gamestates),
+  //     );
+  //     const activeFullscreen = activeSpecial.filter((cast) => isFullscreenCast(cast));
+  //     return {
+  //       sceneId: scene.sceneId,
+  //       activeSpecial: activeSpecial.length,
+  //       activeFullscreen: activeFullscreen.length,
+  //       hasPano: scene.casts.some((cast) => cast.__t === 'PanoCast'),
+  //     };
+  //   });
+  // }, [gamestates, stageScenes]);
+
+  // const debugText = useMemo(() => {
+  //   if (!debugStackSummary) {
+  //     return null;
+  //   }
+  //   return [
+  //     `activeScene=${active?.sceneId ?? 'none'}`,
+  //     `showPano=${showPano}`,
+  //     `webGlScenes=${webGlScenes.map((s) => s.sceneId).join(',') || '[]'}`,
+  //     `specialScenes=${specialScenes.map((s) => s.sceneId).join(',') || '[]'}`,
+  //     `stack=${debugStackSummary
+  //       .map(
+  //         (s) =>
+  //           `${s.sceneId}[special=${s.activeSpecial},full=${s.activeFullscreen},pano=${s.hasPano}]`,
+  //       )
+  //       .join(' -> ')}`,
+  //   ].join('\n');
+  // }, [active?.sceneId, debugStackSummary, showPano, specialScenes, webGlScenes]);
+
+  const enablePanoInput = useMemo(() => {
+    return showPano && isPanoScene && specialScenes.length === 0 && !activeHasControlledOverlay;
+  }, [showPano, isPanoScene, specialScenes.length, activeHasControlledOverlay]);
 
   const [camera, setCamera] = useState<Camera | undefined>();
   const [panoObject, setPanoObject] = useState<Object3D | undefined>();
@@ -163,7 +324,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   const [cursor, hotspotPointerHandler] = useInputHandler({
     scene: active,
     gamestates,
-    isPanoScene,
+    isPanoScene: enablePanoInput,
     camera,
     panoObject,
     offsetX: internalRotation.offsetX,
@@ -179,10 +340,10 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   // This prevents pano rotation when interacting with special/controlled scenes
   const pointerHandler = useMemo(
     () =>
-      isPanoScene
+      enablePanoInput
         ? composePointer([momentumPointerHandler, hotspotPointerHandler])
         : composePointer([hotspotPointerHandler]),
-    [isPanoScene, momentumPointerHandler, hotspotPointerHandler],
+    [enablePanoInput, momentumPointerHandler, hotspotPointerHandler],
   );
 
   const { onPointerUp, onPointerMove, onPointerDown, onPointerLeave } = pointerHandler;
@@ -318,38 +479,6 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     }
   }, [activeScene, availableSounds, gamestates, isSoundCast, stageScenes]);
 
-  const [webGlScenes, specialScenes] = useMemo(() => {
-    const matchActive = matchActiveCast(gamestates);
-    const isPanoCast = forMorpheusType('PanoCast');
-    const matchPanoCast = and<PanoCast>(isPanoCast, matchActive);
-    const matchActivePanoScene = (s: Scene) =>
-      s.casts.some((cast: Cast) => matchPanoCast(cast as MovieCast));
-
-    // Determine if the active scene (first in stack) is a pano or special
-    const activeIsPano = stageScenes.length > 0 && matchActivePanoScene(stageScenes[0]);
-
-    const webGl: Scene[] = [];
-    const special: Scene[] = [];
-
-    for (const s of stageScenes) {
-      const sceneIsPano = matchActivePanoScene(s);
-      
-      if (sceneIsPano) {
-        // Pano scenes go to WebGl
-        webGl.push(s);
-      } else if (!isPano(s)) {
-        // Non-pano scenes go to Special, but only if:
-        // - The active scene is NOT a pano (special scene should be visible), OR
-        // - This scene is the active scene itself
-        if (!activeIsPano || s.sceneId === stageScenes[0]?.sceneId) {
-          special.push(s);
-        }
-      }
-    }
-
-    return [webGl, special];
-  }, [gamestates, stageScenes]);
-
   // Split pending scenes into pano vs special for preloading
   const [pendingPanoScenes, pendingSpecialScenes] = useMemo(() => {
     return pendingScenes.reduce(
@@ -378,20 +507,22 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         top: `${top}px`,
       }}
     >
-      <WebGl
-        stageScenes={webGlScenes}
-        pendingScenes={pendingPanoScenes}
-        gamestates={gamestates}
-        setCamera={setCamera}
-        setPanoObject={setPanoObject}
-        rotation={internalRotation}
-        volume={volume}
-        top={0}
-        left={0}
-        width={width}
-        height={height}
-        onSceneReady={onSceneReady}
-      />
+      {showPano && (
+        <WebGl
+          stageScenes={webGlScenes}
+          pendingScenes={pendingPanoScenes}
+          gamestates={gamestates}
+          setCamera={setCamera}
+          setPanoObject={setPanoObject}
+          rotation={internalRotation}
+          volume={volume}
+          top={0}
+          left={0}
+          width={width}
+          height={height}
+          onSceneReady={onSceneReady}
+        />
+      )}
       <Special
         cursor={cursor}
         setDoneObserver={setSpecialMovieCast}

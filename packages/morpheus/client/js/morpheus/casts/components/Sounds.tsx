@@ -47,7 +47,12 @@ const AudioEl = ({
       castIds: casts.map(c => c.castId),
       play() {
         if (audioRef.current) {
-          audioRef.current.play()
+          audioRef.current.play().catch((err: Error) => {
+            // Autoplay was blocked by browser policy - will retry on user interaction
+            if (err.name !== 'NotAllowedError') {
+              console.error('Audio play failed:', err)
+            }
+          })
           audioRef.current.setAttribute('data-played', '1')
         }
       },

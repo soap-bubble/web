@@ -56,7 +56,12 @@ const VideoEl = ({
         castIds: currentCasts.map(c => c.castId),
         play() {
           if (videoRef.current) {
-            videoRef.current.play()
+            videoRef.current.play().catch((err: Error) => {
+              // Autoplay was blocked by browser policy - will retry on user interaction
+              if (err.name !== 'NotAllowedError') {
+                console.error('Video play failed:', err)
+              }
+            })
           }
         },
         pause() {

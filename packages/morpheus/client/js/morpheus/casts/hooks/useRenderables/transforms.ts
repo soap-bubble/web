@@ -21,13 +21,6 @@ import {
 } from 'morpheus/casts/types'
 import { VideoController } from 'morpheus/casts/components/Videos'
 
-// Track controlled movie animation state externally since cast objects from Redux are frozen
-type ControlledAnimState = {
-  currentValue: number
-  ticks: number
-}
-const controlledAnimStates = new Map<number, ControlledAnimState>()
-
 function getDrawSourceDimensions(img: DrawSource): { width: number; height: number } {
   if (img instanceof HTMLVideoElement) {
     return { width: img.videoWidth, height: img.videoHeight }
@@ -139,51 +132,20 @@ export function calculateControlledFrameOperation({
 }): Renderable {
   const { controlledMovieCallbacks, width, height } = cast
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null)
-  const gs = gamestates.byId(gameStateId)
-  const value = Math.round(gs.value)
   const frames = get(controlledMovieCallbacks, '[0].frames', 1)
-  const currentOffset = value * frames
-
-  // Get or create animation state for this cast
-  let animState = controlledAnimStates.get(cast.castId)
-  if (!animState) {
-    animState = { currentValue: currentOffset, ticks: 0 }
-    controlledAnimStates.set(cast.castId, animState)
-  }
 
   const renderable: Renderable = (context: CanvasRenderingContext2D) => {
-    // Re-fetch animation state in case it was updated
-    let state = controlledAnimStates.get(cast.castId)
-    if (!state) {
-      state = { currentValue: currentOffset, ticks: 0 }
-      controlledAnimStates.set(cast.castId, state)
-    }
-
-    if (frames <= 1) {
-      state.currentValue = currentOffset
-    } else if (state.currentValue < currentOffset) {
-      state.ticks = state.ticks || 0
-      if (state.ticks < 4) {
-        state.ticks++
-      } else {
-        state.ticks = 0
-        state.currentValue += 1
-      }
-    } else if (state.currentValue > currentOffset) {
-      if (state.ticks && state.ticks < 4) {
-        state.ticks++
-      } else {
-        state.ticks = 0
-        state.currentValue -= 1
-      }
-    }
+    // Read gamestate value at render time so it reflects current state
+    const gs = gamestates.byId(gameStateId)
+    const value = Math.round(gs.value)
+    // Frame index = gamestate value * frames-per-value
+    const frameIdx = value * frames
 
     // Fetch image dimensions at render time (image may not be loaded at creation time)
     const imgDimensions = getDrawSourceDimensions(img)
 
     // Calculate source rectangle in sprite sheet grid (left-to-right, top-to-bottom)
     // This handles both single-row and grid layouts, including scaled sprite sheets
-    const frameIdx = Math.floor(state.currentValue)
     const srcRect = calculateFrameSourceRect(
       frameIdx,
       width,
@@ -204,8 +166,10 @@ export function calculateControlledFrameOperation({
       rect.sizeY
     )
   }
-  renderable.description = () =>
-    `cast: ${cast.castId} src: ${cast.fileName} gamestateId: ${gameStateId} value: ${value}`
+  renderable.description = () => {
+    const gs = gamestates.byId(gameStateId)
+    return `cast: ${cast.castId} src: ${cast.fileName} gamestateId: ${gameStateId} value: ${gs.value}`
+  }
   return renderable
 }
 

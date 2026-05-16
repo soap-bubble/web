@@ -585,6 +585,14 @@ export function useInputHandler(params: {
           }
         }
       }
+
+      // Process "Always" hotspots with castId === 0 on every event
+      // This is how the original game triggers scene changes based on gamestate
+      for (const hotspot of activeHotspots) {
+        if (hotspot.castId === 0 && gesture.isAlways(hotspot)) {
+          processHotspotAction(hotspot, gamePos, startPos);
+        }
+      }
     },
     [hotspots, processHotspotAction],
   );

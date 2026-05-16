@@ -362,6 +362,10 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
       cast.__t === 'ControlledMovieCast' && isAudio(cast as MovieCast),
     [],
   );
+  const isMovieSpecialCastType = useCallback(
+    (cast: Cast): cast is MovieSpecialCast => cast.__t === 'MovieSpecialCast',
+    [],
+  );
 
   const aggregatedSoundCasts = useMemo(() => {
     if (!stageScenes.length) {
@@ -420,9 +424,6 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         return;
       }
       for (const cast of casts) {
-        if (!isSoundCast(cast)) {
-          continue;
-        }
         const isInActiveScene = activeScene.casts.some(
           (sceneCast) => sceneCast.castId === cast.castId,
         );
@@ -432,20 +433,39 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         if (!isCastActive({ cast, gamestates })) {
           continue;
         }
-        const nextSceneId = cast.nextSceneId;
+
+        let targetSceneId: number | undefined;
+        let dissolve = false;
+
+        if (isSoundCast(cast)) {
+          targetSceneId = cast.nextSceneId;
+          dissolve = !!cast.dissolveToNextScene;
+        } else if (isMovieSpecialCastType(cast)) {
+          if (cast.actionAtEnd > 0) {
+            targetSceneId = cast.actionAtEnd;
+          } else if (cast.nextSceneId !== undefined) {
+            targetSceneId = cast.nextSceneId;
+          }
+          dissolve = !!cast.dissolveToNextScene;
+        } else {
+          // ControlledMovieCast doesn't have scene transition properties
+          continue;
+        }
+
         if (
-          typeof nextSceneId !== 'number' ||
-          nextSceneId === TRANSITION_SCENE_SENTINEL
+          typeof targetSceneId !== 'number' ||
+          targetSceneId === TRANSITION_SCENE_SENTINEL
         ) {
           continue;
         }
+
         onTransition?.({
-          sceneId: nextSceneId,
-          dissolve: !!cast.dissolveToNextScene,
+          sceneId: targetSceneId,
+          dissolve,
         });
       }
     },
-    [activeScene, gamestates, isSoundCast, onTransition],
+    [activeScene, gamestates, isSoundCast, isMovieSpecialCastType, onTransition],
   );
 
   const handleAudioCastCanPlayThrough = useCallback(() => {}, []);

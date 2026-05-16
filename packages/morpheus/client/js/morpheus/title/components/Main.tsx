@@ -80,14 +80,23 @@ const Main: React.FC = () => {
   // Auto-start in dev mode
   useEffect(() => {
     if (process.env.NEXT_PUBLIC_AUTOSTART && audioRef.current) {
-      audioRef.current.play()
+      audioRef.current.play().catch((err: Error) => {
+        // Autoplay blocked by browser policy - expected in dev mode
+        if (err.name !== 'NotAllowedError') {
+          console.error('Title audio play failed:', err)
+        }
+      })
     }
   }, [])
 
   const handlePlayClick = useCallback(() => {
     setStarted(true)
     if (audioRef.current) {
-      audioRef.current.play()
+      audioRef.current.play().catch((err: Error) => {
+        if (err.name !== 'NotAllowedError') {
+          console.error('Title audio play failed:', err)
+        }
+      })
     }
     requestFullscreen()
   }, [])

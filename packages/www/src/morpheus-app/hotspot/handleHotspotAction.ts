@@ -205,9 +205,12 @@ export function handleHotspotAction(params: {
       break;
     }
     case 'TwoAxisSlider': {
+      // Original formula from legacy actions.ts
       const gs = gamestates.byId(hotspot.param1);
       const maxVert = gamestates.byId(hotspot.param2).maxValue + 1;
       const maxHor = gamestates.byId(hotspot.param3).maxValue;
+
+      // Clamp position to hotspot rect
       let vertPos = currentPosition.top;
       if (currentPosition.top < hotspot.rectTop) {
         vertPos = hotspot.rectTop;
@@ -220,22 +223,27 @@ export function handleHotspotAction(params: {
       } else if (currentPosition.left > hotspot.rectRight) {
         horizPos = hotspot.rectRight;
       }
+
+      // Calculate ratios exactly as original
       const verticalRatio = Math.floor(
         (maxVert - 1) *
-          ((vertPos - hotspot.rectTop) /
-            (hotspot.rectBottom - hotspot.rectTop)),
+          ((vertPos - hotspot.rectTop) / (hotspot.rectBottom - hotspot.rectTop)),
       );
       const horizontalRatio =
         maxHor *
-        ((horizPos - hotspot.rectLeft) /
-          (hotspot.rectRight - hotspot.rectLeft));
-      const value = Math.floor(maxVert * verticalRatio + horizontalRatio);
-      if (gs.value !== value) {
-        result.gamestateUpdates.push({ stateId: hotspot.param1, value });
+        ((horizPos - hotspot.rectLeft) / (hotspot.rectRight - hotspot.rectLeft));
+
+      // Original formula: maxVert * verticalRatio + horizontalRatio
+      if (gs && maxVert && maxHor) {
+        const value = Math.floor(maxVert * verticalRatio + horizontalRatio);
+        if (gs.value !== value) {
+          result.gamestateUpdates.push({ stateId: hotspot.param1, value });
+        }
       }
       break;
     }
     case 'VertSlider': {
+      // Original formula from legacy actions.ts
       const gs = gamestates.byId(hotspot.param1);
       let rate = hotspot.param2;
       const { maxValue: max, minValue: min, stateWraps } = gs;
@@ -245,6 +253,7 @@ export function handleHotspotAction(params: {
       if (rate === 0) {
         rate = max - min;
       }
+      // Original: Math.round(rate * ratio * 2 - 0.5)
       const delta = Math.round(rate * ratio * 2 - 0.5);
       let vertValue = (oldValue ?? gs.value) + delta;
       if (vertValue < min) {
@@ -260,6 +269,7 @@ export function handleHotspotAction(params: {
       break;
     }
     case 'HorizSlider': {
+      // Original formula from legacy actions.ts
       const gs = gamestates.byId(hotspot.param1);
       let rate = hotspot.param2;
       const { maxValue: max, minValue: min, stateWraps } = gs;
@@ -269,6 +279,7 @@ export function handleHotspotAction(params: {
       if (rate === 0) {
         rate = max - min;
       }
+      // Original: Math.round(rate * ratio + 0.5)
       const delta = Math.round(rate * ratio + 0.5);
       let horizValue = (oldValue ?? gs.value) + delta;
       if (horizValue < min) {

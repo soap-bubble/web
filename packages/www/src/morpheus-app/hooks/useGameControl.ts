@@ -4,6 +4,8 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import type {
   MCPToBrowserMessage,
   BrowserToMCPMessage,
+  ClickHotspotRequest,
+  ClickHotspotResult,
 } from '@/lib/game-control-protocol'
 
 export interface GameControlState {
@@ -28,7 +30,9 @@ export interface HotspotState {
 export interface GameControlCallbacks {
   onLoadScene?: (sceneId: number) => void
   onRotateTo?: (x: number, y: number) => void
-  onClickHotspot?: (castId: number) => void
+  onClickHotspot?: (
+    request: ClickHotspotRequest
+  ) => ClickHotspotResult | Promise<ClickHotspotResult>
 }
 
 export interface GameStateGetter {
@@ -132,6 +136,10 @@ export default function useGameControl(
     [sendMessage]
   )
 
+  const getCurrentSceneId = useCallback(() => {
+    return getStateRef.current?.()?.sceneId ?? 0
+  }, [])
+
   const handleMessage = useCallback((event: MessageEvent) => {
     try {
       const message = JSON.parse(event.data) as
@@ -157,8 +165,50 @@ export default function useGameControl(
           break
 
         case 'CLICK_HOTSPOT':
-          console.log('[GameControl] Click hotspot:', message.payload.castId)
-          callbacksRef.current?.onClickHotspot?.(message.payload.castId)
+          console.log(
+            '[GameControl] Click hotspot:',
+            message.payload.hotspot.castId
+          )
+          const clickHotspot = callbacksRef.current?.onClickHotspot
+          if (!clickHotspot) {
+            sendMessage({
+              type: 'CLICK_HOTSPOT_RESULT',
+              payload: {
+                requestId: message.payload.requestId,
+                outcome: 'stage_not_ready',
+                castId: message.payload.hotspot.castId,
+                currentSceneId: getCurrentSceneId(),
+                expectedSourceSceneId: message.payload.expectedSourceSceneId,
+                expectedSceneId: message.payload.expectedSceneId,
+                message: 'Game stage is not ready for hotspot clicks.',
+              },
+            })
+            break
+          }
+
+          void Promise.resolve(clickHotspot(message.payload))
+            .then((result) => {
+              sendMessage({
+                type: 'CLICK_HOTSPOT_RESULT',
+                payload: result,
+              })
+            })
+            .catch((error: unknown) => {
+              const errorMessage =
+                error instanceof Error ? error.message : String(error)
+              sendMessage({
+                type: 'CLICK_HOTSPOT_RESULT',
+                payload: {
+                  requestId: message.payload.requestId,
+                  outcome: 'stage_not_ready',
+                  castId: message.payload.hotspot.castId,
+                  currentSceneId: getCurrentSceneId(),
+                  expectedSourceSceneId: message.payload.expectedSourceSceneId,
+                  expectedSceneId: message.payload.expectedSceneId,
+                  message: errorMessage,
+                },
+              })
+            })
           break
 
         case 'GET_STATE':
@@ -199,7 +249,7 @@ export default function useGameControl(
     } catch (error) {
       console.error('[GameControl] Error parsing message:', error)
     }
-  }, [sendMessage])
+  }, [getCurrentSceneId, sendMessage])
 
   const connect = useCallback(() => {
     if (wsRef.current?.readyState === WebSocket.OPEN) {

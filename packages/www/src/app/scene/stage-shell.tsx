@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { Scene, Hotspot } from '@soapbubble/morpheus-client/morpheus/casts/types';
+import type { Cast, Hotspot, Scene } from '@soapbubble/morpheus-client/morpheus/casts/types';
 import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 
 import InteractiveStage, {
@@ -11,6 +11,11 @@ import InteractiveStage, {
 import SettingsOverlay from '@/morpheus-app/components/SettingsOverlay';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
 import useGameControl, { HotspotState } from '@/morpheus-app/hooks/useGameControl';
+import type { HarnessClickHandler } from '@/morpheus-app/hooks/useInputHandler';
+import type {
+  ClickHotspotRequest,
+  ClickHotspotResult,
+} from '@/lib/game-control-protocol';
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
 import type { AppDispatch } from '@/morpheus-app/store/store';
 import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
@@ -41,16 +46,8 @@ type PendingTransition = {
   mode?: 'goBack';
 };
 
-function isHotspot(cast: unknown): cast is Hotspot {
-  return (
-    typeof cast === 'object' &&
-    cast !== null &&
-    'rectLeft' in cast &&
-    'rectRight' in cast &&
-    'rectTop' in cast &&
-    'rectBottom' in cast &&
-    'gesture' in cast
-  );
+function isHotspot(cast: Cast): cast is Hotspot {
+  return cast.__t === 'Hotspot';
 }
 
 function getActionTypeName(type: number): string {
@@ -115,6 +112,7 @@ export const SceneStageShell = () => {
   useEffect(() => {
     activeSceneIdRef.current = activeSceneId ?? null;
   }, [activeSceneId]);
+  const harnessClickRef = useRef<HarnessClickHandler | null>(null);
 
   // Clear the rotation seed after it has been applied once.
   useEffect(() => {
@@ -159,6 +157,13 @@ export const SceneStageShell = () => {
       dispatch(setRotation({ yaw3600: x, pitch: y }));
     },
     [dispatch],
+  );
+
+  const handleHarnessClickReady = useCallback(
+    (handler: HarnessClickHandler | null) => {
+      harnessClickRef.current = handler;
+    },
+    [],
   );
 
   const handleRotationChange = useCallback(
@@ -300,6 +305,111 @@ export const SceneStageShell = () => {
     [handleSceneTransition],
   );
 
+  const waitForScene = useCallback((sceneId: number) => {
+    if (activeSceneIdRef.current === sceneId) {
+      return Promise.resolve(true);
+    }
+
+    return new Promise<boolean>((resolve) => {
+      const startedAt = Date.now();
+      const intervalId = window.setInterval(() => {
+        if (activeSceneIdRef.current === sceneId) {
+          window.clearInterval(intervalId);
+          resolve(true);
+          return;
+        }
+        if (Date.now() - startedAt >= 6500) {
+          window.clearInterval(intervalId);
+          resolve(false);
+        }
+      }, 50);
+    });
+  }, []);
+
+  const handleClickHotspot = useCallback(
+    async (request: ClickHotspotRequest): Promise<ClickHotspotResult> => {
+      const clickHotspot = harnessClickRef.current;
+      const currentSceneId = activeSceneIdRef.current ?? activeScene?.sceneId ?? 0;
+
+      if (!clickHotspot) {
+        return {
+          requestId: request.requestId,
+          outcome: 'stage_not_ready',
+          castId: request.hotspot.castId,
+          currentSceneId,
+          expectedSourceSceneId: request.expectedSourceSceneId,
+          expectedSceneId: request.expectedSceneId,
+          message: 'Game stage is not ready for hotspot clicks.',
+        };
+      }
+
+      if (currentSceneId !== request.expectedSourceSceneId) {
+        return {
+          requestId: request.requestId,
+          outcome: 'source_scene_mismatch',
+          castId: request.hotspot.castId,
+          currentSceneId,
+          expectedSourceSceneId: request.expectedSourceSceneId,
+          expectedSceneId: request.expectedSceneId,
+          message: `Browser is on scene ${currentSceneId}, but the click request targets scene ${request.expectedSourceSceneId}.`,
+        };
+      }
+
+      const result = clickHotspot(request.hotspot);
+
+      if (result.outcome !== 'applied') {
+        return {
+          requestId: request.requestId,
+          outcome: result.outcome,
+          castId: request.hotspot.castId,
+          currentSceneId: activeSceneIdRef.current ?? result.sceneId,
+          expectedSourceSceneId: request.expectedSourceSceneId,
+          expectedSceneId: request.expectedSceneId,
+          matchedHotspot: result.matchedHotspot,
+          message: result.message,
+        };
+      }
+
+      const expectedSceneId =
+        request.expectedSceneId ??
+        result.actionResult.sceneTransition?.sceneId ??
+        result.matchedHotspot.targetSceneId;
+      let reachedExpectedScene = true;
+      if (typeof expectedSceneId === 'number' && expectedSceneId > 0) {
+        reachedExpectedScene = await waitForScene(expectedSceneId);
+      }
+
+      const observedSceneId = activeSceneIdRef.current ?? result.sceneId;
+      if (!reachedExpectedScene) {
+        return {
+          requestId: request.requestId,
+          outcome: 'expected_state_not_reached',
+          castId: request.hotspot.castId,
+          currentSceneId: observedSceneId,
+          expectedSourceSceneId: request.expectedSourceSceneId,
+          expectedSceneId,
+          matchedHotspot: result.matchedHotspot,
+          gamestateUpdates: result.actionResult.gamestateUpdates,
+          sceneTransition: result.actionResult.sceneTransition,
+          message: `Browser did not reach expected scene ${expectedSceneId}.`,
+        };
+      }
+
+      return {
+        requestId: request.requestId,
+        outcome: 'applied',
+        castId: request.hotspot.castId,
+        currentSceneId: observedSceneId,
+        expectedSourceSceneId: request.expectedSourceSceneId,
+        expectedSceneId,
+        matchedHotspot: result.matchedHotspot,
+        gamestateUpdates: result.actionResult.gamestateUpdates,
+        sceneTransition: result.actionResult.sceneTransition,
+      };
+    },
+    [activeScene?.sceneId, waitForScene],
+  );
+
   const { state: gameControlState } = useGameControl({
     enabled: true,
     sessionName: mcpSessionName,
@@ -307,8 +417,9 @@ export const SceneStageShell = () => {
       () => ({
         onLoadScene: handleLoadScene,
         onRotateTo: handleRotateTo,
+        onClickHotspot: handleClickHotspot,
       }),
-      [handleLoadScene, handleRotateTo],
+      [handleClickHotspot, handleLoadScene, handleRotateTo],
     ),
     getState,
   });
@@ -355,6 +466,7 @@ export const SceneStageShell = () => {
         rotation={rotation}
         onTransition={handleSceneTransition}
         onSceneReady={handleSceneReady}
+        onHarnessClickReady={handleHarnessClickReady}
       />
       {process.env.NODE_ENV === 'development' && (
         <div
@@ -380,4 +492,3 @@ export const SceneStageShell = () => {
     </div>
   );
 };
-

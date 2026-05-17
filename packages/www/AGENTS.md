@@ -23,6 +23,12 @@ Notes:
 The browser typically chooses the session name via the scene URL query param:
 - `/scene/1050?mcp=mySessionName`
 
+Hotspot click control is browser-authoritative:
+- `morpheus_click_hotspot` sends an exact hotspot selector to the connected browser and waits for a browser-reported result.
+- Static map data is only candidate discovery; active scene identity and gamestate eligibility are decided by the browser.
+- `morpheus_rotate_to_hotspot` is a viewing helper, not evidence that a click occurred.
+- Direct `morpheus_load_scene` remains available for explicit scene loads, but hotspot click helpers should not use it as a shortcut.
+
 ### App Router entry points
 
 - **Root layout**: `src/app/layout.tsx` wraps the app in `src/app/providers.tsx`

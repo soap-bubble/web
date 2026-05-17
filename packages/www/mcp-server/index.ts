@@ -20,6 +20,20 @@ import { z } from 'zod'
 import WebSocket from 'ws'
 // Local map query module for MCP server (standalone, no workspace path deps)
 import { getSceneInfo, getAllSceneIds } from './map-query.js'
+import {
+  formatClickHotspotToolResult,
+  formatNoBrowserSessionResult,
+  selectClickHotspotCandidate,
+  toClickHotspotSelector,
+} from './click-hotspot-tool.js'
+import type {
+  ClickHotspotRequest,
+  ClickHotspotResult,
+} from '../src/lib/game-control-protocol.js'
+import {
+  getErrorMessagePayload,
+  isClickHotspotResult,
+} from '../src/lib/game-control-protocol.js'
 
 // WebSocket connection state
 let ws: WebSocket | null = null
@@ -34,6 +48,14 @@ let pendingStateRequest: {
   resolve: (value: GameState) => void
   reject: (error: Error) => void
 } | null = null
+let pendingClickRequest: {
+  requestId: string
+  castId: number
+  timeoutId: NodeJS.Timeout
+  resolve: (value: ClickHotspotResult) => void
+  reject: (error: Error) => void
+} | null = null
+let clickRequestCounter = 0
 
 interface GameState {
   sceneId: number
@@ -48,6 +70,19 @@ interface GameState {
 }
 
 const WS_URL = process.env.GAME_WS_URL ?? 'ws://localhost:3000/api/game-control'
+
+function nextClickRequestId(): string {
+  clickRequestCounter += 1
+  return `click-${Date.now()}-${clickRequestCounter}`
+}
+
+function clearPendingClickRequest(): void {
+  if (!pendingClickRequest) {
+    return
+  }
+  clearTimeout(pendingClickRequest.timeoutId)
+  pendingClickRequest = null
+}
 
 function connectWebSocket(sessionName?: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -145,17 +180,46 @@ function handleMessage(message: { type: string; payload?: unknown }): void {
       )
       break
 
-    case 'ERROR':
-      console.error(
-        `[MCP] Game error: ${(message.payload as { message: string }).message}`
-      )
-      if (pendingStateRequest) {
-        pendingStateRequest.reject(
-          new Error((message.payload as { message: string }).message)
-        )
-        pendingStateRequest = null
+    case 'CLICK_HOTSPOT_RESULT':
+      if (pendingClickRequest) {
+        if (!isClickHotspotResult(message.payload)) {
+          pendingClickRequest.reject(
+            new Error('Malformed click hotspot result from browser')
+          )
+          clearPendingClickRequest()
+          break
+        }
+        if (message.payload.requestId !== pendingClickRequest.requestId) {
+          break
+        }
+        if (message.payload.castId !== pendingClickRequest.castId) {
+          pendingClickRequest.reject(
+            new Error(
+              `Click hotspot result castId mismatch: expected ${pendingClickRequest.castId}, got ${message.payload.castId}`
+            )
+          )
+          clearPendingClickRequest()
+          break
+        }
+        pendingClickRequest.resolve(message.payload)
+        clearPendingClickRequest()
       }
       break
+
+    case 'ERROR': {
+      const errorMessage =
+        getErrorMessagePayload(message.payload) ?? 'Unknown game error'
+      console.error(`[MCP] Game error: ${errorMessage}`)
+      if (pendingStateRequest) {
+        pendingStateRequest.reject(new Error(errorMessage))
+        pendingStateRequest = null
+      }
+      if (pendingClickRequest) {
+        pendingClickRequest.reject(new Error(errorMessage))
+        clearPendingClickRequest()
+      }
+      break
+    }
 
     case 'PONG':
       // Heartbeat response
@@ -195,6 +259,39 @@ async function requestGameState(): Promise<GameState> {
         pendingStateRequest = null
       }
     }, 5000)
+  })
+}
+
+async function requestHotspotClick(
+  payload: ClickHotspotRequest
+): Promise<ClickHotspotResult> {
+  await ensureConnected()
+
+  return new Promise((resolve, reject) => {
+    if (pendingClickRequest) {
+      reject(new Error('Click hotspot request already pending'))
+      return
+    }
+
+    const timeoutId = setTimeout(() => {
+      if (pendingClickRequest) {
+        pendingClickRequest.reject(new Error('Click hotspot result timeout'))
+        pendingClickRequest = null
+      }
+    }, 8000)
+    pendingClickRequest = {
+      requestId: payload.requestId,
+      castId: payload.hotspot.castId,
+      timeoutId,
+      resolve,
+      reject,
+    }
+    try {
+      sendMessage({ type: 'CLICK_HOTSPOT', payload })
+    } catch (error) {
+      clearPendingClickRequest()
+      reject(error instanceof Error ? error : new Error(String(error)))
+    }
   })
 }
 
@@ -656,7 +753,7 @@ server.registerTool(
   'morpheus_click_hotspot',
   {
     description:
-      'Click a hotspot to trigger its action. For scene-changing hotspots, this will navigate to the target scene. First rotates to the hotspot, then triggers the click.',
+      'Click a hotspot through the connected browser scene. Success is based on the browser-reported click result, not direct scene loading.',
     inputSchema: {
       sceneId: z.number().describe('The current scene ID'),
       targetSceneId: z
@@ -667,9 +764,15 @@ server.registerTool(
         .number()
         .optional()
         .describe('The index of the hotspot to click (0-based)'),
+      castId: z
+        .number()
+        .optional()
+        .describe(
+          'The hotspot castId to click. If multiple hotspots share this castId, add targetSceneId or hotspotIndex.'
+        ),
     },
   },
-  async ({ sceneId, targetSceneId, hotspotIndex }) => {
+  async ({ sceneId, targetSceneId, hotspotIndex, castId }) => {
     try {
       const info = getSceneInfo(sceneId)
       if (!info) {
@@ -681,86 +784,56 @@ server.registerTool(
         }
       }
 
-      let hotspot: (typeof info.hotspots)[0] | undefined
+      const selected = selectClickHotspotCandidate({
+        info,
+        castId,
+        targetSceneId,
+        hotspotIndex,
+      })
 
-      if (targetSceneId !== undefined) {
-        hotspot = info.hotspots.find((h) => h.targetSceneId === targetSceneId)
-        if (!hotspot) {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: `No hotspot in scene ${sceneId} leads to scene ${targetSceneId}. Available targets: ${info.connectedScenes.map((c) => c.sceneId).join(', ')}`,
-              },
-            ],
-            isError: true,
-          }
-        }
-      } else if (hotspotIndex !== undefined) {
-        hotspot = info.hotspots[hotspotIndex]
-        if (!hotspot) {
-          return {
-            content: [
-              {
-                type: 'text' as const,
-                text: `Hotspot index ${hotspotIndex} not found. Scene has ${info.hotspots.length} hotspots.`,
-              },
-            ],
-            isError: true,
-          }
-        }
-      } else {
+      if (!selected.ok) {
         return {
           content: [
             {
               type: 'text' as const,
-              text: 'Must specify either targetSceneId or hotspotIndex.',
+              text: selected.message,
             },
           ],
           isError: true,
         }
       }
 
-      await ensureConnected()
+      const result = await requestHotspotClick({
+        requestId: nextClickRequestId(),
+        expectedSourceSceneId: sceneId,
+        hotspot: toClickHotspotSelector(selected.hotspot),
+        expectedSceneId: selected.hotspot.targetSceneId,
+      })
+      const formatted = formatClickHotspotToolResult(result)
 
-      // First rotate to the hotspot center
-      const centerX = Math.round(
-        (hotspot.bounds.left + hotspot.bounds.right) / 2
-      )
-      const centerY = Math.round(
-        (hotspot.bounds.top + hotspot.bounds.bottom) / 2
-      )
-      sendMessage({ type: 'ROTATE_TO', payload: { x: centerX, y: centerY } })
-
-      // Then trigger the hotspot click (which for scene-changing hotspots loads the target scene)
-      if (hotspot.targetSceneId && hotspot.targetSceneId > 0) {
-        // Small delay to let rotation complete visually
-        await new Promise((resolve) => setTimeout(resolve, 300))
-        sendMessage({
-          type: 'LOAD_SCENE',
-          payload: { sceneId: hotspot.targetSceneId },
-        })
-
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: `Clicked hotspot at (${centerX}, ${centerY}). Navigating to scene ${hotspot.targetSceneId}.`,
-            },
-          ],
-        }
-      } else {
-        return {
-          content: [
-            {
-              type: 'text' as const,
-              text: `Rotated to hotspot at (${centerX}, ${centerY}). Action: ${hotspot.actionType} (non-navigation hotspot).`,
-            },
-          ],
-        }
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: formatted.text,
+          },
+        ],
+        isError: formatted.isError,
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : String(error)
+      if (message.includes('No browser client connected')) {
+        const formatted = formatNoBrowserSessionResult(targetSessionName)
+        return {
+          content: [
+            {
+              type: 'text' as const,
+              text: formatted.text,
+            },
+          ],
+          isError: formatted.isError,
+        }
+      }
       return {
         content: [{ type: 'text' as const, text: `Error: ${message}` }],
         isError: true,

@@ -45,6 +45,7 @@ The `morpheus-game` MCP server enables agents to control the game for testing. I
 - `morpheus_get_current_state` - Get live state from browser
 - `morpheus_list_scenes` - List all scene IDs
 - `morpheus_connection_status` - Check connection state
+- `morpheus_click_hotspot` - Click a hotspot through the connected browser scene and report the browser-observed result
 
 ### Named Sessions Workflow
 
@@ -64,6 +65,12 @@ This allows:
 - Session name preserved when navigating between scenes
 
 **Note**: Game control only works locally with `dev`. Production deploys don't include WebSocket support.
+
+### Hotspot Click Semantics
+
+`morpheus_get_scene_info` and the map query helpers are candidate-discovery tools. They can identify likely hotspot selectors, but the connected browser is the source of truth for whether the exact hotspot exists in the expected active scene, is enabled for current gamestate, and actually applied.
+
+`morpheus_click_hotspot` must not fake success by sending `LOAD_SCENE`. It sends an exact hotspot selector to the browser and reports the browser result. `morpheus_rotate_to_hotspot` is only a viewing helper; rotating toward a hotspot is not proof that interaction happened.
 
 ### Using the Browser MCP for UI Testing
 

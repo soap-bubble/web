@@ -133,6 +133,13 @@ function handleConnection(
       // MCP -> Browser
       if (session.browserClient) {
         sendMessage(session.browserClient, message)
+      } else {
+        sendMessage(ws, {
+          type: 'ERROR',
+          payload: {
+            message: `No browser client connected to session ${session.id}`,
+          },
+        })
       }
     }
   })

@@ -25,7 +25,10 @@ import type {
 } from 'morpheus/casts/types';
 
 import { and, Matcher } from '@/utils/matchers';
-import { useInputHandler } from '../hooks/useInputHandler';
+import {
+  useInputHandler,
+  type HarnessClickHandler,
+} from '../hooks/useInputHandler';
 
 export interface RotationState {
   x: number;
@@ -52,6 +55,7 @@ interface InteractiveStageProps {
   rotation: ExternalRotation;
   onTransition?: (transition: SceneTransitionRequest) => void;
   onSceneReady?: (sceneId: number) => void;
+  onHarnessClickReady?: (handler: HarnessClickHandler | null) => void;
 }
 
 const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
@@ -160,6 +164,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   rotation,
   onTransition,
   onSceneReady,
+  onHarnessClickReady,
 }) => {
   const active = activeScene;
   const [availableSounds, onAudioCastRef] = useCastRefNoticer<
@@ -321,7 +326,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     [stageScenes],
   );
 
-  const [cursor, hotspotPointerHandler] = useInputHandler({
+  const [cursor, hotspotPointerHandler, clickHotspot] = useInputHandler({
     scene: active,
     gamestates,
     isPanoScene: enablePanoInput,
@@ -335,6 +340,11 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     previousSceneId,
     onTransition,
   });
+
+  useEffect(() => {
+    onHarnessClickReady?.(clickHotspot);
+    return () => onHarnessClickReady?.(null);
+  }, [clickHotspot, onHarnessClickReady]);
 
   // Only include momentum handler (pano rotation) when the active scene is a pano
   // This prevents pano rotation when interacting with special/controlled scenes

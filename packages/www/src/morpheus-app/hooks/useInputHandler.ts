@@ -19,7 +19,14 @@ import { updateGamestate } from '@/morpheus-app/store/slices/gamestateSlice';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import { setRotation } from '@/morpheus-app/store/slices/rotationSlice';
 import { selectRotation } from '@/morpheus-app/store/slices/rotationSlice';
-import { handleHotspotAction } from '@/morpheus-app/hotspot/handleHotspotAction';
+import {
+  handleHotspotAction,
+  type HotspotActionResult,
+} from '@/morpheus-app/hotspot/handleHotspotAction';
+import {
+  executeHarnessHotspotClick,
+  type HarnessClickResult,
+} from '@/morpheus-app/hotspot/harnessClick';
 import { resolveCursor } from '@/morpheus-app/hotspot/handlers';
 import {
   gesture,
@@ -27,6 +34,7 @@ import {
   actionType,
 } from '@/morpheus-app/hotspot/matchers';
 import { or } from '@/utils/matchers';
+import type { ClickHotspotMatchedHotspot } from '@/lib/game-control-protocol';
 
 const ORIGINAL_HEIGHT = 400;
 const ORIGINAL_WIDTH = 640;
@@ -49,7 +57,11 @@ interface PointerHandlers {
   onPointerLeave: (e: PointerEvent<HTMLCanvasElement>) => void;
 }
 
-type InputReturn = [CursorState, PointerHandlers];
+export type HarnessClickHandler = (
+  hotspot: ClickHotspotMatchedHotspot,
+) => HarnessClickResult;
+
+type InputReturn = [CursorState, PointerHandlers, HarnessClickHandler];
 
 const cursorCache = new Map<number, Promise<HTMLImageElement | null>>();
 
@@ -369,23 +381,8 @@ export function useInputHandler(params: {
     [dispatch, normalizeYaw, shortestYawDelta],
   );
 
-  const processHotspotAction = useCallback(
-    (
-      hotspot: Hotspot,
-      currentPosition: { top: number; left: number },
-      startingPosition: { top: number; left: number },
-    ) => {
-      const oldValue = sliderOldValuesRef.current.get(hotspot.castId);
-      const result = handleHotspotAction({
-        hotspot,
-        gamestates: gamestatesRef.current,
-        currentPosition,
-        startingPosition,
-        previousSceneId: previousSceneIdRef.current,
-        isPanoScene,
-        oldValue,
-      });
-
+  const applyHotspotActionResult = useCallback(
+    (result: HotspotActionResult) => {
       for (const update of result.gamestateUpdates) {
         console.log('[GamestateUpdate]', update.stateId, '->', update.value);
         dispatch(updateGamestate(update));
@@ -403,6 +400,47 @@ export function useInputHandler(params: {
       return result.allDone;
     },
     [dispatch, isPanoScene, startSweepTo],
+  );
+
+  const processHotspotAction = useCallback(
+    (
+      hotspot: Hotspot,
+      currentPosition: { top: number; left: number },
+      startingPosition: { top: number; left: number },
+    ) => {
+      const oldValue = sliderOldValuesRef.current.get(hotspot.castId);
+      const result = handleHotspotAction({
+        hotspot,
+        gamestates: gamestatesRef.current,
+        currentPosition,
+        startingPosition,
+        previousSceneId: previousSceneIdRef.current,
+        isPanoScene,
+        oldValue,
+      });
+
+      return applyHotspotActionResult(result);
+    },
+    [applyHotspotActionResult, isPanoScene],
+  );
+
+  const clickHotspot = useCallback(
+    (hotspot: ClickHotspotMatchedHotspot) => {
+      const result = executeHarnessHotspotClick({
+        scene,
+        gamestates: gamestatesRef.current,
+        hotspot,
+        previousSceneId: previousSceneIdRef.current,
+        isPanoScene,
+      });
+
+      if (result.outcome === 'applied') {
+        applyHotspotActionResult(result.actionResult);
+      }
+
+      return result;
+    },
+    [applyHotspotActionResult, isPanoScene, scene],
   );
 
   // Reset pointer state on scene change
@@ -873,5 +911,6 @@ export function useInputHandler(params: {
       onPointerDown,
       onPointerLeave,
     },
+    clickHotspot,
   ];
 }

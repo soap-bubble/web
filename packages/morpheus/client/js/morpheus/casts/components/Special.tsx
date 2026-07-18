@@ -20,28 +20,11 @@ import { forMorpheusType, isImage, isMovie } from '../matchers'
 import { Observable, Subscriber } from 'rxjs'
 import { share } from 'rxjs/operators'
 import { and } from 'utils/matchers'
+import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle'
 
 const logger = loggerFactory('Special')
 
 const TRANSITION_SCENE_SENTINEL = 0x3fffffff
-
-const normalizeMorpheusAngle = (value: number) => {
-  let normalized = value % 3600
-  if (normalized < 0) {
-    normalized += 3600
-  }
-  return normalized
-}
-
-const computeStartAngle = (angleAtEnd: number) => {
-  if (!Number.isFinite(angleAtEnd) || angleAtEnd === -1) {
-    return undefined
-  }
-  // In the new system, yaw3600 represents the view center directly in Morpheus coordinates.
-  // The legacy formula had conversions for radians and morpheusOffsetLeft (left edge),
-  // but we can now use angleAtEnd directly since yaw3600 is the view center.
-  return normalizeMorpheusAngle(angleAtEnd)
-}
 
 const isMovieSpecialCast = (cast: MovieCast): cast is MovieSpecialCast =>
   cast.__t === 'MovieSpecialCast'
@@ -165,7 +148,7 @@ const Special = ({
           ) {
             continue
           }
-          const startAngle = computeStartAngle(cast.angleAtEnd)
+          const startAngle = transitionAngleToPanoramaYaw(cast.angleAtEnd)
           onTransition({
             sceneId: nextSceneId,
             dissolve: !!cast.dissolveToNextScene,

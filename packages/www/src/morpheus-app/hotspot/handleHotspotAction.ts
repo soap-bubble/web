@@ -1,5 +1,6 @@
 import { ACTION_TYPES } from 'morpheus/constants';
 import type { Hotspot } from 'morpheus/casts/types';
+import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import { getScript } from '@/morpheus-app/hotspot/scripts';
 
@@ -42,9 +43,7 @@ function nextSceneStartAngle(hotspot: HotspotWithAngle): number | undefined {
     hotspot.nextSceneId !== TRANSITION_SCENE_SENTINEL
   ) {
     if (typeof hotspot.angleAtEnd === 'number' && hotspot.angleAtEnd !== -1) {
-      // In the new system, yaw3600 represents the view center directly in Morpheus coordinates.
-      // Use angleAtEnd directly without the legacy offset conversion.
-      return normalizeAngle(hotspot.angleAtEnd);
+      return transitionAngleToPanoramaYaw(hotspot.angleAtEnd);
     }
   }
   return undefined;

@@ -22,7 +22,7 @@
     ]
   },
   "devDependencies": {
-    "axios": "^0.18.0",
+    "axios": "^0.21.2",
     "cross-env": "^5.2.0",
     "cross-spawn": "^5.1.0",
     "firebase": "^8.1.2",

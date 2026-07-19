@@ -478,6 +478,14 @@ export function useInputHandler(params: {
         }
         dispatch(updateGamestate(update));
       }
+      // Redux updates synchronously, but React does not refresh this hook's
+      // selector/ref until the next render. A slider can trigger an authored
+      // scene transition before that render, so keep event-time state current
+      // for the incoming scene's Always rules.
+      gamestatesRef.current = withGamestateUpdates(
+        gamestatesRef.current,
+        result.gamestateUpdates,
+      );
       if (result.gamestateUpdates.length > 0) {
         stableActionChangedRef.current = true;
       }

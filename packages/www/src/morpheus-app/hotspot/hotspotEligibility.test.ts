@@ -12,6 +12,18 @@ import {
 } from './hotspotEligibility';
 
 describe('hotspot eligibility during pointer events', () => {
+  it('recognizes authored hotspots that omit the runtime discriminator', () => {
+    const authoredHotspot = createHotspot({ castId: 42 });
+    Object.defineProperty(authoredHotspot, '__t', {
+      value: undefined,
+      configurable: true,
+    });
+
+    expect(getHotspotCandidates(createScene([authoredHotspot]))).toEqual([
+      authoredHotspot,
+    ]);
+  });
+
   it('keeps inactive Always hotspots eligible for later gamestate updates', () => {
     const launchHotspot = createHotspot({
       castId: 0,

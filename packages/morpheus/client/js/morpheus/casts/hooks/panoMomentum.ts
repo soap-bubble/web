@@ -122,6 +122,18 @@ export default function(
     onSettledRef.current = onSettled
   }, [onSettled])
 
+  useEffect(
+    () => () => {
+      if (settlementFrameRef.current !== null) {
+        cancelAnimationFrame(settlementFrameRef.current)
+        settlementFrameRef.current = null
+      }
+      settlementPendingRef.current = false
+      interactionStartRotationRef.current = null
+    },
+    []
+  )
+
   useEffect(() => {
     if (!momentumEnabled && settlementPendingRef.current) {
       settlementPendingRef.current = false
@@ -311,10 +323,15 @@ export default function(
     return hadInteraction
   }, [active, momentumEnabled])
 
+  const interactionController = useMemo(
+    () => ({ cancelInteraction }),
+    [cancelInteraction]
+  )
+
   return [
     rotation,
     pointerEvents,
     setExternalRotation,
-    { cancelInteraction },
+    interactionController,
   ]
 }

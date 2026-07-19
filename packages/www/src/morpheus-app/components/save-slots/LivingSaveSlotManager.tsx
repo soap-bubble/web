@@ -43,7 +43,7 @@ export const LivingSaveSlotManager = ({
     if (Object.keys(livingSaves.tombstones).length === 0) {
       return;
     }
-    const timer = window.setInterval(() => setNow(Date.now()), 250);
+    const timer = window.setInterval(() => setNow(Date.now()), 1_000);
     return () => window.clearInterval(timer);
   }, [livingSaves.tombstones]);
 
@@ -74,11 +74,14 @@ export const LivingSaveSlotManager = ({
       const anchor = document.createElement('a');
       anchor.href = url;
       anchor.download = fileNameForSlot(slot, result.value.resumePointId);
+      document.body.append(anchor);
       anchor.click();
-      URL.revokeObjectURL(url);
+      anchor.remove();
+      window.setTimeout(() => URL.revokeObjectURL(url), 0);
     },
     [coordinator],
   );
+  const countdownNow = Math.max(now, Date.now());
 
   return (
     <SaveSlotHub
@@ -92,7 +95,10 @@ export const LivingSaveSlotManager = ({
       renderManagementActions={(slot) => {
         const tombstone = livingSaves.tombstones[slot.slotId];
         const undoSeconds = tombstone
-          ? Math.max(0, Math.ceil((tombstone.expiresAt - now) / 1000))
+          ? Math.max(
+              0,
+              Math.ceil((tombstone.expiresAt - countdownNow) / 1000),
+            )
           : 0;
 
         return (
@@ -126,16 +132,18 @@ export const LivingSaveSlotManager = ({
                       input.value = '';
                       return;
                     }
-                    void file
-                      .text()
-                      .then((text) =>
-                        runManagement(() =>
+                    void (async () => {
+                      try {
+                        const text = await file.text();
+                        await runManagement(() =>
                           coordinator.importFileText(slot.slotId, text),
-                        ),
-                      )
-                      .finally(() => {
+                        );
+                      } catch {
+                        setLocalFailure('The save file could not be read.');
+                      } finally {
                         input.value = '';
-                      });
+                      }
+                    })();
                   }}
                 />
               </label>

@@ -1,4 +1,5 @@
 import { writeLivingSaveCheckpoint } from '@/morpheus-app/storage/livingSaveStorage';
+import { createLivingSaveResumePointId } from '@/morpheus-app/storage/livingSaveIdentity';
 import {
   LIVING_SAVE_GAME_DATA_VERSION,
   LIVING_SAVE_SESSION_FORMAT,
@@ -39,13 +40,6 @@ export type LivingSaveCheckpointCoordinator = {
   requestCheckpoint: (runtimeGeneration: number) => Promise<void>;
 };
 
-function browserResumePointId(): string {
-  if (typeof globalThis.crypto?.randomUUID === 'function') {
-    return globalThis.crypto.randomUUID();
-  }
-  return `resume-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
 export function createLivingSaveCheckpointCoordinator(
   dependencies: LivingSaveCheckpointDependencies,
 ): LivingSaveCheckpointCoordinator {
@@ -54,7 +48,7 @@ export function createLivingSaveCheckpointCoordinator(
 
   const persistGeneration = async (runtimeGeneration: number) => {
     const state = dependencies.getState();
-    const { activeSlotId } = state.livingSaves;
+    const activeSlotId = state.livingSaves.runtimeSlotId;
     if (
       activeSlotId === null ||
       state.livingSaves.runtimeGeneration !== runtimeGeneration ||
@@ -88,12 +82,17 @@ export function createLivingSaveCheckpointCoordinator(
     dependencies.dispatch(
       livingSaveCheckpointStarted({ runtimeGeneration, slotId: activeSlotId }),
     );
-    const result = await dependencies.writeCheckpoint({
-      slotId: activeSlotId,
-      envelope,
-      expectedCatalogRevision: state.livingSaves.catalogRevision,
-      expectedSlotRevision: slot.revision,
-    });
+    let result: LivingSaveResult<LivingSaveCatalog>;
+    try {
+      result = await dependencies.writeCheckpoint({
+        slotId: activeSlotId,
+        envelope,
+        expectedCatalogRevision: state.livingSaves.catalogRevision,
+        expectedSlotRevision: slot.revision,
+      });
+    } catch {
+      result = { ok: false, code: 'unavailable-storage' };
+    }
     if (!result.ok) {
       dependencies.dispatch(
         livingSaveCheckpointFailed({
@@ -139,7 +138,7 @@ const browserCheckpointCoordinator = createLivingSaveCheckpointCoordinator({
   getState: store.getState,
   writeCheckpoint: writeLivingSaveCheckpoint,
   now: Date.now,
-  createResumePointId: browserResumePointId,
+  createResumePointId: createLivingSaveResumePointId,
 });
 
 export function requestLivingSaveCheckpoint(

@@ -95,6 +95,12 @@ export const GameMenu = ({ saveSlots, onBeforeOpen }: GameMenuProps) => {
           event.stopPropagation();
           close();
         }}
+        onKeyDown={(event) => {
+          if (event.key !== 'Escape') return;
+          event.preventDefault();
+          event.stopPropagation();
+          close();
+        }}
         onClose={() => {
           if (menu.open) close();
         }}

@@ -17,7 +17,12 @@ export type InstallLivingSaveRuntimePayload = {
   activeScene: Scene;
   returnScene: Scene | null;
   saveHealth: 'saved' | 'volatile';
+  skipSceneEntryActions: boolean;
 };
 
 export const installLivingSaveRuntime =
   createAction<InstallLivingSaveRuntimePayload>('livingSaves/installRuntime');
+
+export const detachLivingSaveRuntime = createAction<{
+  runtimeGeneration: number;
+}>('livingSaves/detachRuntime');

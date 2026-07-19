@@ -8,13 +8,16 @@ import type {
   LivingSaveTombstoneSummary,
   LivingSaveUnloadableReason,
 } from '@/morpheus-app/storage/livingSaveTypes';
-import { installLivingSaveRuntime, resetGame } from '../actions';
+import {
+  detachLivingSaveRuntime,
+  installLivingSaveRuntime,
+  resetGame,
+} from '../actions';
 
 export type LivingSaveBootstrapPhase = 'idle' | 'booting' | 'ready' | 'failed';
 export type LivingSaveOperationKind =
   | 'bootstrap'
   | 'restore'
-  | 'switch'
   | 'manage';
 export type LivingSaveHealth =
   | 'idle'
@@ -41,6 +44,8 @@ export type LivingSavesState = {
   slots: LivingSaveSlotSummary[];
   tombstones: Partial<Record<LivingSaveSlotId, LivingSaveTombstoneSummary>>;
   runtimeGeneration: number;
+  runtimeSlotId: LivingSaveSlotId | null;
+  skipSceneEntryActions: boolean;
   operation: {
     id: string;
     kind: LivingSaveOperationKind;
@@ -68,6 +73,8 @@ const createInitialState = (): LivingSavesState => ({
   slots: emptySlotSummaries(),
   tombstones: {},
   runtimeGeneration: 0,
+  runtimeSlotId: null,
+  skipSceneEntryActions: false,
   operation: null,
   saveHealth: 'idle',
   failureReason: null,
@@ -202,7 +209,7 @@ const livingSavesSlice = createSlice({
     ) {
       if (
         state.runtimeGeneration !== action.payload.runtimeGeneration ||
-        state.activeSlotId !== action.payload.slotId
+        state.runtimeSlotId !== action.payload.slotId
       ) {
         return;
       }
@@ -219,7 +226,7 @@ const livingSavesSlice = createSlice({
     ) {
       if (
         state.runtimeGeneration !== action.payload.runtimeGeneration ||
-        state.activeSlotId !== action.payload.slotId
+        state.runtimeSlotId !== action.payload.slotId
       ) {
         return;
       }
@@ -237,7 +244,7 @@ const livingSavesSlice = createSlice({
     ) {
       if (
         state.runtimeGeneration !== action.payload.runtimeGeneration ||
-        state.activeSlotId !== action.payload.slotId
+        state.runtimeSlotId !== action.payload.slotId
       ) {
         return;
       }
@@ -256,6 +263,8 @@ const livingSavesSlice = createSlice({
       }
       applyCatalog(state, action.payload.catalog);
       state.runtimeGeneration += 1;
+      state.runtimeSlotId = action.payload.slotId;
+      state.skipSceneEntryActions = action.payload.skipSceneEntryActions;
       state.activeSlotId = action.payload.slotId;
       state.slots = state.slots.map((slot) => ({
         ...slot,
@@ -263,6 +272,13 @@ const livingSavesSlice = createSlice({
       }));
       state.operation = null;
       state.saveHealth = action.payload.saveHealth;
+      state.failureReason = null;
+    });
+    builder.addCase(detachLivingSaveRuntime, (state, action) => {
+      state.runtimeGeneration = action.payload.runtimeGeneration;
+      state.runtimeSlotId = null;
+      state.skipSceneEntryActions = false;
+      state.saveHealth = 'volatile';
       state.failureReason = null;
     });
   },
@@ -283,9 +299,3 @@ export default livingSavesSlice.reducer;
 
 export const selectLivingSaves = (state: { livingSaves: LivingSavesState }) =>
   state.livingSaves;
-
-export const selectLivingSaveInputEnabled = (state: {
-  livingSaves: LivingSavesState;
-}) =>
-  state.livingSaves.bootstrapPhase === 'ready' &&
-  state.livingSaves.operation === null;

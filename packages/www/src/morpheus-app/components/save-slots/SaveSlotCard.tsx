@@ -12,16 +12,18 @@ type SaveSlotCardProps = {
   slot: LivingSaveSlotSummary;
   saveHealth: LivingSaveHealth;
   disabled?: boolean;
-  onSelect: (slotId: LivingSaveSlotSummary['slotId']) => void;
+  onSelect: () => void;
   renderManagementActions?: (slot: LivingSaveSlotSummary) => ReactNode;
 };
 
+const savedAtFormatter = new Intl.DateTimeFormat('en-US', {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  timeZone: 'UTC',
+});
+
 const formatSavedAt = (savedAt: number): string =>
-  new Intl.DateTimeFormat('en-US', {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-    timeZone: 'UTC',
-  }).format(savedAt);
+  savedAtFormatter.format(savedAt);
 
 function statusForSlot(
   slot: LivingSaveSlotSummary,
@@ -33,7 +35,7 @@ function statusForSlot(
   if (saveHealth === 'saving') return 'Saving';
   if (saveHealth === 'save-unavailable') return 'Save unavailable';
   if (saveHealth === 'volatile') return 'Playing without save';
-  if (saveHealth === 'saved') return 'Saved';
+  if (saveHealth === 'saved') return 'Active save';
   return 'Active save';
 }
 
@@ -105,7 +107,7 @@ export const SaveSlotCard = ({
             suppressClickRef.current = false;
             return;
           }
-          onSelect(slot.slotId);
+          onSelect();
         }}
       >
         <span className={styles.slotNumber}>Slot {slot.slotId.slice(-1)}</span>

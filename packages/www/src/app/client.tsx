@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 import { LivingSaveSlotManager } from '@/morpheus-app/components/save-slots/LivingSaveSlotManager';
+import { MORPHEUS_INITIAL_SCENE_ID } from '@/morpheus-app/storage/livingSaveIdentity';
 import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordinatorContext';
 import type { LivingSaveSlotSummary } from '@/morpheus-app/store/slices/livingSavesSlice';
 import { getAssetUrl } from '@/service/gamedb';
@@ -12,7 +13,6 @@ import styles from './title-screen.module.css';
 
 type TitlePhase = 'title' | 'intro' | 'error';
 
-const FIRST_GAME_SCENE = 2000;
 const INTRO_WEBM = getAssetUrl('GameDB/Deck1/introMOV.webm');
 const INTRO_MP4 = getAssetUrl('GameDB/Deck1/introMOV.mp4');
 const TITLE_ART_STYLE: CSSProperties & { '--title-image': string } = {
@@ -26,7 +26,6 @@ export const Client = () => {
   const mountedRef = useRef(true);
   const selectingSlotRef = useRef(false);
   const [phase, setPhase] = useState<TitlePhase>('title');
-  const [selectionError, setSelectionError] = useState<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -36,7 +35,7 @@ export const Client = () => {
   }, []);
 
   const startGame = useCallback(() => {
-    router.push(`/scene/${FIRST_GAME_SCENE}`);
+    router.push(`/scene/${MORPHEUS_INITIAL_SCENE_ID}`);
   }, [router]);
 
   const playIntro = useCallback(() => {
@@ -65,7 +64,6 @@ export const Client = () => {
       }
 
       selectingSlotRef.current = true;
-      setSelectionError(null);
       const outcome =
         slot.state === 'empty'
           ? await coordinator.createNewSlot(slot.slotId)
@@ -76,7 +74,6 @@ export const Client = () => {
       }
       if (!outcome.ok) {
         selectingSlotRef.current = false;
-        setSelectionError(outcome.reason);
         return;
       }
       if (slot.state === 'empty') {
@@ -100,11 +97,6 @@ export const Client = () => {
                 void selectSlot(slot);
               }}
             />
-            {selectionError && (
-              <p className={styles.selectionError} role="status">
-                The slot could not be opened: {selectionError.replace(/-/g, ' ')}.
-              </p>
-            )}
           </div>
         </div>
       </section>

@@ -1,0 +1,962 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Ideation: Morpheus Local Saves and Game Menu</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #0b0e12;
+      --surface: #12171d;
+      --surface-2: #182029;
+      --surface-3: #202b35;
+      --text: #f3efe5;
+      --muted: #b7c0c7;
+      --faint: #87939d;
+      --line: #34414b;
+      --gold: #e2b85a;
+      --gold-soft: #392f1b;
+      --gold-text: #f6d995;
+      --cyan: #7fc7c9;
+      --cyan-soft: #173538;
+      --cyan-text: #a9e6e7;
+      --green-soft: #193528;
+      --green-text: #a8dfbd;
+      --warn-soft: #3b2820;
+      --warn-text: #f2b9a0;
+      --shadow: 0 18px 50px rgba(0, 0, 0, .26);
+      --radius: 14px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background:
+        radial-gradient(circle at 15% 0%, rgba(127, 199, 201, .08), transparent 32rem),
+        radial-gradient(circle at 88% 10%, rgba(226, 184, 90, .07), transparent 28rem),
+        var(--page);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--cyan-text);
+      text-underline-offset: .2em;
+    }
+
+    a:hover {
+      color: #d5ffff;
+    }
+
+    code {
+      color: #e7edf0;
+      background: #0d1217;
+      border: 1px solid #2d3942;
+      border-radius: 5px;
+      padding: .08rem .32rem;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .88em;
+      overflow-wrap: anywhere;
+    }
+
+    strong {
+      color: inherit;
+    }
+
+    .page {
+      width: min(940px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 3rem 0 5rem;
+    }
+
+    header {
+      padding: 2.2rem;
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      background: linear-gradient(145deg, rgba(24, 32, 41, .96), rgba(13, 18, 23, .96));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 .45rem;
+      color: var(--gold-text);
+      font-size: .77rem;
+      font-weight: 750;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3 {
+      margin-top: 0;
+      letter-spacing: -.025em;
+      line-height: 1.2;
+    }
+
+    h1 {
+      max-width: 18ch;
+      margin-bottom: .8rem;
+      font-size: clamp(2rem, 6vw, 3.6rem);
+      font-weight: 760;
+    }
+
+    h2 {
+      margin-bottom: .9rem;
+      font-size: clamp(1.55rem, 3.4vw, 2.15rem);
+    }
+
+    h3 {
+      margin-bottom: .55rem;
+      font-size: 1.35rem;
+    }
+
+    p {
+      max-width: 72ch;
+    }
+
+    .lede {
+      margin: 0;
+      max-width: 70ch;
+      color: #d7dde0;
+      font-size: 1.08rem;
+    }
+
+    .metadata {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .65rem 1.2rem;
+      margin: 1.7rem 0 0;
+      padding-top: 1.3rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .metadata div,
+    .fields div {
+      min-width: 0;
+    }
+
+    dt {
+      color: var(--faint);
+      font-size: .72rem;
+      font-weight: 750;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    dd {
+      margin: .16rem 0 0;
+      color: var(--text);
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: .8rem;
+      margin: 1rem 0 0;
+    }
+
+    .stat {
+      padding: .9rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(18, 23, 29, .76);
+    }
+
+    .stat strong {
+      display: block;
+      font-size: 1.35rem;
+      line-height: 1.1;
+    }
+
+    .stat span {
+      color: var(--muted);
+      font-size: .78rem;
+    }
+
+    section {
+      margin-top: 3rem;
+      scroll-margin-top: 1.5rem;
+    }
+
+    .section-intro {
+      color: var(--muted);
+    }
+
+    .callout {
+      margin: 1.25rem 0 0;
+      padding: 1.15rem 1.25rem;
+      border: 1px solid #5a4b29;
+      border-radius: var(--radius);
+      background: var(--gold-soft);
+      color: #f7e7bd;
+    }
+
+    .callout p {
+      margin: 0;
+    }
+
+    .axis-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .9rem;
+    }
+
+    .axis {
+      padding: 1.1rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--surface);
+    }
+
+    .axis b {
+      display: block;
+      margin-bottom: .25rem;
+    }
+
+    .axis span {
+      color: var(--muted);
+    }
+
+    .jump-list {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .55rem;
+      margin: 1rem 0 1.4rem;
+      padding: 0;
+      list-style: none;
+    }
+
+    .jump-list a {
+      display: block;
+      height: 100%;
+      padding: .7rem .8rem;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: var(--surface);
+      text-decoration: none;
+    }
+
+    .idea {
+      margin: 1.15rem 0;
+      padding: 1.45rem;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: linear-gradient(150deg, rgba(24, 32, 41, .97), rgba(15, 20, 25, .97));
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .17);
+      scroll-margin-top: 1.5rem;
+    }
+
+    .idea.top-pick {
+      border-color: #796536;
+      background: linear-gradient(145deg, rgba(57, 47, 27, .72), rgba(17, 23, 29, .98) 48%);
+    }
+
+    .idea-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+
+    .rank {
+      color: var(--gold-text);
+      font-size: .78rem;
+      font-weight: 800;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: .4rem;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      min-height: 1.65rem;
+      padding: .22rem .6rem;
+      border: 1px solid transparent;
+      border-radius: 999px;
+      font-size: .74rem;
+      font-weight: 720;
+      white-space: nowrap;
+    }
+
+    .chip.conf {
+      color: var(--green-text);
+      background: var(--green-soft);
+      border-color: #315d46;
+    }
+
+    .chip.complexity {
+      color: var(--cyan-text);
+      background: var(--cyan-soft);
+      border-color: #2f5b5f;
+    }
+
+    .chip.pick {
+      color: var(--gold-text);
+      background: var(--gold-soft);
+      border-color: #6e5a2d;
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: .8rem 1.2rem;
+      margin: 1.15rem 0;
+      padding: 1rem;
+      border-radius: 10px;
+      background: rgba(9, 13, 17, .56);
+    }
+
+    .fields .wide {
+      grid-column: 1 / -1;
+    }
+
+    .basis,
+    .downside {
+      padding: .9rem 1rem;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: rgba(11, 15, 19, .68);
+    }
+
+    .basis {
+      color: #dbe8e8;
+    }
+
+    .downside {
+      color: #ecd3c7;
+      background: var(--warn-soft);
+      border-color: #624232;
+    }
+
+    .field-label {
+      display: block;
+      margin-bottom: .25rem;
+      color: var(--faint);
+      font-size: .72rem;
+      font-weight: 760;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+    }
+
+    .concept-flow {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr auto 1fr auto 1fr;
+      align-items: center;
+      gap: .45rem;
+      margin: 1.2rem 0;
+      padding: 1rem;
+      border: 1px solid var(--line);
+      border-radius: 11px;
+      background: #0d1217;
+    }
+
+    .concept-flow .node {
+      min-height: 4.7rem;
+      display: grid;
+      place-items: center;
+      padding: .65rem;
+      border: 1px solid #49606a;
+      border-radius: 9px;
+      background: var(--surface-2);
+      text-align: center;
+      font-size: .83rem;
+      font-weight: 680;
+    }
+
+    .concept-flow .node:last-child {
+      border-color: #746233;
+      background: var(--gold-soft);
+      color: var(--gold-text);
+    }
+
+    .concept-flow .arrow {
+      color: var(--faint);
+      font-size: 1.25rem;
+    }
+
+    .concept-caption {
+      margin-top: -.75rem;
+      color: var(--faint);
+      font-size: .8rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 1rem;
+      font-size: .9rem;
+    }
+
+    th,
+    td {
+      padding: .7rem .75rem;
+      border-bottom: 1px solid var(--line);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      color: var(--gold-text);
+      background: var(--surface-2);
+      font-size: .72rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+    }
+
+    tbody tr:hover {
+      background: rgba(127, 199, 201, .04);
+    }
+
+    .composition-signal {
+      margin-top: 3rem;
+      padding-top: 1.2rem;
+      border-top: 1px solid var(--line);
+      color: var(--faint);
+      font-size: .8rem;
+    }
+
+    @media (max-width: 720px) {
+      .page {
+        width: min(100% - 1rem, 940px);
+        padding-top: .5rem;
+      }
+
+      header {
+        padding: 1.35rem;
+        border-radius: 12px;
+      }
+
+      .metadata,
+      .axis-grid,
+      .jump-list,
+      .fields {
+        grid-template-columns: 1fr;
+      }
+
+      .fields .wide {
+        grid-column: auto;
+      }
+
+      .stats {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .idea-head {
+        display: block;
+      }
+
+      .chips {
+        justify-content: flex-start;
+        margin: .6rem 0;
+      }
+
+      .concept-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .concept-flow .arrow {
+        justify-self: center;
+        transform: rotate(90deg);
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: white;
+        color: #111;
+      }
+
+      header,
+      .idea,
+      .axis,
+      .stat,
+      .basis,
+      .downside,
+      .concept-flow {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      a,
+      code {
+        color: #111;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <p class="eyebrow">Repo-grounded ideation</p>
+      <h1>Local saves that remember the whole room</h1>
+      <p class="lede">
+        Morpheus-typescript should preserve a coherent playable session—not merely a bag of gamestate
+        values—and restore the top-left navigation-wheel button as the trusted boundary for pause,
+        save/load, settings, and return-to-game behavior.
+      </p>
+
+      <dl class="metadata">
+        <div>
+          <dt>Date</dt>
+          <dd><time datetime="2026-07-18">2026-07-18</time></dd>
+        </div>
+        <div>
+          <dt>Topic</dt>
+          <dd>morpheus-local-saves-game-menu</dd>
+        </div>
+        <div>
+          <dt>Focus</dt>
+          <dd>Durable local save/resume and the legacy navigation-wheel game menu</dd>
+        </div>
+        <div>
+          <dt>Mode</dt>
+          <dd>repo-grounded</dd>
+        </div>
+      </dl>
+
+      <div class="stats" aria-label="Ideation counts">
+        <div class="stat"><strong>42</strong><span>raw candidates</span></div>
+        <div class="stat"><strong>12</strong><span>consolidated</span></div>
+        <div class="stat"><strong>6</strong><span>ranked survivors</span></div>
+        <div class="stat"><strong>4</strong><span>topic axes covered</span></div>
+      </div>
+    </header>
+
+    <section id="grounding-context">
+      <p class="eyebrow">What the sources actually say</p>
+      <h2>Codebase Context</h2>
+      <p>
+        The TypeScript port already has an IndexedDB delta history, but gameplay mutations remain in
+        Redux until a later scene transition commits them. The entry and active-head metadata are then
+        written separately. A reload can therefore lose the latest meaningful action, and an
+        interruption can expose a plausible-looking but incomplete checkpoint.
+      </p>
+      <p>
+        The persisted TypeScript shape also stops short of a full resume contract. It records a scene
+        ID beside each delta, but hydration restores only gamestate values. Morpheus-javascript and
+        Morpheus-C++ both establish a wider behavioral baseline: state values, current and previous
+        scene context, panorama position, version handling, and player-facing save/load flows.
+      </p>
+      <p>
+        The current title offers only “Start a new game,” and that path clears persisted progress before
+        the intro. The current top-left gear opens debug settings. Legacy JavaScript proves a top-left
+        gear/menu button and a conventional menu; C++ proves a wheel cursor and dedicated Help-return
+        semantics. The user calls the desired control the navigation wheel. Nothing in the evidence
+        justifies turning the menu itself into radial spokes.
+      </p>
+      <div class="callout">
+        <p>
+          <strong>Core product judgment:</strong> use one automatic, durable “continue where I was”
+          session as the default. Restore explicit load/export/import as ownership and recovery tools,
+          not as a chore the player must perform after every puzzle.
+        </p>
+      </div>
+    </section>
+
+    <section id="topic-axes">
+      <p class="eyebrow">The decision surface</p>
+      <h2>Topic Axes</h2>
+      <div class="axis-grid">
+        <div class="axis">
+          <b>1. Save trigger and durability semantics</b>
+          <span>When progress becomes durable, what reload guarantees, and how interrupted writes behave.</span>
+        </div>
+        <div class="axis">
+          <b>2. Snapshot fidelity and evolution</b>
+          <span>What makes a session resumable, how it migrates, and how corrupt or stale data is contained.</span>
+        </div>
+        <div class="axis">
+          <b>3. Save UX and player ownership</b>
+          <span>Continue/New Game, save visibility, portable files, and protection from destructive choices.</span>
+        </div>
+        <div class="axis">
+          <b>4. Navigation-wheel menu and input ownership</b>
+          <span>Legacy presentation, action hierarchy, focus, keyboard/touch, and suppression of stage input.</span>
+        </div>
+      </div>
+    </section>
+
+    <section id="ranked-ideas">
+      <p class="eyebrow">The cut that survived scrutiny</p>
+      <h2>Ranked Ideas</h2>
+      <p class="section-intro">
+        These are directions, not implementation units. The ranking favors source fidelity, reload
+        correctness, player trust, and leverage across the rest of the port.
+      </p>
+      <ol class="jump-list">
+        <li><a href="#idea-1">1. The Living Passport Checkpoint</a></li>
+        <li><a href="#idea-2">2. The Honest Load Gate</a></li>
+        <li><a href="#idea-3">3. The Navigation-Wheel Boundary</a></li>
+        <li><a href="#idea-4">4. Continue and New Game</a></li>
+        <li><a href="#idea-5">5. The Living Resume Card</a></li>
+        <li><a href="#idea-6">6. The Detour-Safe Chronicle</a></li>
+      </ol>
+
+      <article class="idea top-pick" id="idea-1">
+        <div class="idea-head">
+          <div>
+            <div class="rank">Idea 1</div>
+            <h3>1. The Living Passport Checkpoint</h3>
+          </div>
+          <div class="chips">
+            <span class="chip pick">Top pick</span>
+            <span class="chip conf">Confidence 94%</span>
+            <span class="chip complexity">Complexity High</span>
+          </div>
+        </div>
+        <p>
+          Treat the durable resume as one complete, schema-versioned session passport: gamestate,
+          active scene, semantically relevant previous/return context, and panorama position. After a
+          meaningful action settles—or a scene transition reaches a coherent boundary—construct and
+          validate the passport, then atomically promote it as the one current resume. Reload sees the
+          last fully committed story moment, never a half-transition.
+        </p>
+        <div class="concept-flow" role="img" aria-label="A settled gameplay action becomes a validated session passport and only then becomes the durable resume.">
+          <div class="node">Meaningful gameplay action</div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node">Scene and state settle</div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node">Validate complete passport</div>
+          <div class="arrow" aria-hidden="true">→</div>
+          <div class="node">Atomically promote durable resume</div>
+        </div>
+        <p class="concept-caption">
+          Illustrative flow: if any stage fails, the prior committed passport remains authoritative.
+        </p>
+        <dl class="fields">
+          <div>
+            <dt>Axis</dt>
+            <dd>Save trigger and durability semantics</dd>
+          </div>
+          <div>
+            <dt>Meeting test</dt>
+            <dd>An interrupted transition resumes either the old coherent scene or the fully ready new one.</dd>
+          </div>
+          <div class="wide">
+            <dt>Basis</dt>
+            <dd>
+              <strong>direct:</strong> current commits save an entry and then separately write
+              <code>stackHead</code> (<code>packages/www/src/morpheus-app/store/slices/gamestateSlice.ts:51-59</code>);
+              transition commit begins before target activation
+              (<code>packages/www/src/app/scene/stage-shell.tsx:372-380</code>); C++ writes version,
+              panorama, current/previous scenes, and every state value
+              (<code>original_source_code/MorpheusWin/CommonSources/MorpheusSupport/CGameState.cpp:160-187</code>).
+            </dd>
+          </div>
+        </dl>
+        <p><strong>Rationale:</strong> It combines the two load-bearing corrections—write atomically and save the full playable place—into one continuity contract. It is the foundation on which every other save/menu idea can remain small.</p>
+        <p class="downside"><span class="field-label">Downsides</span>“Meaningful action” needs an exact boundary. Too broad means write churn; too narrow preserves the current loss window. The complete envelope also creates the largest compatibility surface of the set.</p>
+      </article>
+
+      <article class="idea" id="idea-2">
+        <div class="idea-head">
+          <div>
+            <div class="rank">Idea 2</div>
+            <h3>2. The Honest Load Gate and Quarantine Shelf</h3>
+          </div>
+          <div class="chips">
+            <span class="chip conf">Confidence 96%</span>
+            <span class="chip complexity">Complexity Medium</span>
+          </div>
+        </div>
+        <p>
+          Never hydrate persisted bytes directly into live play. First validate the envelope, migrate
+          supported versions, verify that its scene can be resolved, and wait for the runtime’s safe
+          scene-ready boundary before applying rotation and dependent state. If validation fails,
+          preserve the original save as a recoverable quarantine condition instead of silently
+          truncating history or starting over.
+        </p>
+        <dl class="fields">
+          <div>
+            <dt>Axis</dt>
+            <dd>Snapshot fidelity and evolution</dd>
+          </div>
+          <div>
+            <dt>Meeting test</dt>
+            <dd>A malformed, future-version, or unavailable-scene save cannot partially mutate the game.</dd>
+          </div>
+          <div class="wide">
+            <dt>Basis</dt>
+            <dd>
+              <strong>direct:</strong> current chain resolution stops at a missing entry and returns
+              accumulated values (<code>packages/www/src/morpheus-app/storage/gamestateStorage.ts:92-109</code>);
+              hydration has no local recovery gate
+              (<code>packages/www/src/morpheus-app/hooks/useGamestateHistory.ts:19-31</code>); C++ rejects
+              incompatible major versions, bounds-checks values, and warns on missing scenes
+              (<code>original_source_code/MorpheusWin/CommonSources/MorpheusSupport/CGameState.cpp:60-129</code>).
+            </dd>
+          </div>
+        </dl>
+        <p><strong>Rationale:</strong> Browser data outlives deployments. A truthful failure state protects both future engine evolution and the player’s trust far better than a green “Continue” button that lands in nonsense.</p>
+        <p class="downside"><span class="field-label">Downsides</span>Migration and quarantine can become a mini support product if allowed to sprawl. Keep the initial recovery vocabulary bounded: valid, migratable, preserved-but-unloadable, or empty.</p>
+      </article>
+
+      <article class="idea" id="idea-3">
+        <div class="idea-head">
+          <div>
+            <div class="rank">Idea 3</div>
+            <h3>3. The Navigation-Wheel Button as a Modal Input Boundary</h3>
+          </div>
+          <div class="chips">
+            <span class="chip conf">Confidence 91%</span>
+            <span class="chip complexity">Complexity Medium</span>
+          </div>
+        </div>
+        <p>
+          Restore the top-left navigation-wheel icon as a button that opens the conventional in-game
+          menu. While the menu is open, it owns pointer, keyboard, touch, and focus; panorama drags,
+          special-scene sliders, hotspots, and timed world interaction cannot also react. Closing by
+          Resume, Escape, or the button restores focus and exactly one game-input authority.
+        </p>
+        <p>
+          This deliberately does <em>not</em> propose a radial-spoke menu. The user names the icon as
+          the navigation wheel; the repository proves a top-left gear button, a conventional menu
+          container, and a separate wheel cursor.
+        </p>
+        <dl class="fields">
+          <div>
+            <dt>Axis</dt>
+            <dd>Navigation-wheel menu and input ownership</dd>
+          </div>
+          <div>
+            <dt>Meeting test</dt>
+            <dd>Dragging or pressing keys over an open menu cannot rotate the panorama or move a scene control.</dd>
+          </div>
+          <div class="wide">
+            <dt>Basis</dt>
+            <dd>
+              <strong>direct:</strong> the user explicitly requests the top-left navigation-wheel icon;
+              legacy <code>MenuButton</code> uses the gear asset and a 10px stage inset
+              (<code>upstream/master:packages/morpheus/client/js/morpheus/game/components/MenuButton.tsx:1-32</code>);
+              legacy <code>Game</code> conditionally renders Menu/Settings/SaveList
+              (<code>upstream/master:packages/morpheus/client/js/morpheus/game/containers/Game.tsx:11-53</code>);
+              current pointer handling has no cited menu-open gate
+              (<code>packages/www/src/morpheus-app/hooks/useInputHandler.ts:500-573</code>).
+            </dd>
+          </div>
+        </dl>
+        <p><strong>Rationale:</strong> The menu is not decorative chrome. In pointer-sensitive Morpheus scenes, it is a mode boundary; treating it that way prevents exactly the kind of cross-input weirdness already exposed by slider work.</p>
+        <p class="downside"><span class="field-label">Downsides</span>A blunt global “paused” flag could suppress valid media or restoration work. The menu-open state needs one explicit owner and a carefully defined boundary between world input, media playback, and persistence.</p>
+      </article>
+
+      <article class="idea" id="idea-4">
+        <div class="idea-head">
+          <div>
+            <div class="rank">Idea 4</div>
+            <h3>4. Continue and New Game as Deliberate Choices</h3>
+          </div>
+          <div class="chips">
+            <span class="chip conf">Confidence 97%</span>
+            <span class="chip complexity">Complexity Medium</span>
+          </div>
+        </div>
+        <p>
+          Make the title honest about the local relationship. Show Continue only when the load gate
+          confirms a valid resume, and take the player back to that session. Keep New Game as a
+          separate path, with an explicit warning when it will replace durable progress. With no valid
+          save, New Game remains the natural primary action and the established intro path stays intact.
+        </p>
+        <dl class="fields">
+          <div>
+            <dt>Axis</dt>
+            <dd>Save UX and player ownership</dd>
+          </div>
+          <div>
+            <dt>Meeting test</dt>
+            <dd>Continue never lies, and New Game cannot silently clear a valid local resume.</dd>
+          </div>
+          <div class="wide">
+            <dt>Basis</dt>
+            <dd>
+              <strong>direct:</strong> the current title exposes only Start a new game
+              (<code>packages/www/src/app/client.tsx:101-108</code>) and its start path clears persistence
+              (<code>packages/www/src/app/client.tsx:39-76</code>); legacy Continue loads the browser save
+              only when one exists, while New deletes it
+              (<code>upstream/master:www/src/morpheus/title/actions.js:110-121</code>).
+            </dd>
+          </div>
+        </dl>
+        <p><strong>Rationale:</strong> Continue is a promise about data validity; New Game is a destructive choice only when a valid story already exists. Making those semantics visible removes the title screen as a progress-loss footgun.</p>
+        <p class="downside"><span class="field-label">Downsides</span>Resume validation is asynchronous, so the title needs a brief checking state rather than flashing the wrong action. The intro/new-game timing should remain behaviorally unchanged.</p>
+      </article>
+
+      <article class="idea" id="idea-5">
+        <div class="idea-head">
+          <div>
+            <div class="rank">Idea 5</div>
+            <h3>5. The Living Resume Card and Portable Memory</h3>
+          </div>
+          <div class="chips">
+            <span class="chip conf">Confidence 93%</span>
+            <span class="chip complexity">Complexity Medium</span>
+          </div>
+        </div>
+        <p>
+          Give the one local resume a compact player-facing card: where the story is, when it became
+          durable, and whether it is valid or recoverable. Restore JSON export/import as the portability
+          seam for browser-local ownership. Import validates into staging and preserves the current
+          resume until the incoming session proves loadable.
+        </p>
+        <dl class="fields">
+          <div>
+            <dt>Axis</dt>
+            <dd>Save UX and player ownership</dd>
+          </div>
+          <div>
+            <dt>Meeting test</dt>
+            <dd>A player can identify, export, and safely import the one resume without an account or silent overwrite.</dd>
+          </div>
+          <div class="wide">
+            <dt>Basis</dt>
+            <dd>
+              <strong>direct:</strong> current persistence is one origin-local IndexedDB history
+              (<code>packages/www/src/morpheus-app/storage/gamestateStorage.ts:4-27</code>,
+              <code>packages/www/src/morpheus-app/storage/types.ts:3-14</code>); legacy browser save includes
+              state, scene context, save ID, and rotation
+              (<code>upstream/master:www/src/morpheus/game/actions.ts:504-527</code>); legacy file load/download
+              uses <code>morpheus.save.json</code> and exposes a load-error path
+              (<code>upstream/master:www/src/morpheus/game/actions.ts:530-585</code>).
+            </dd>
+          </div>
+        </dl>
+        <p><strong>Rationale:</strong> Local storage is convenient but origin-bound. One living resume plus a portable file restores meaningful player ownership without dragging accounts, cloud conflict resolution, or a slot-management spreadsheet into the game.</p>
+        <p class="downside"><span class="field-label">Downsides</span>Imported files are untrusted input. Portability depends on the same versioning and quarantine discipline as reload, and the UI must avoid implying cloud-grade durability.</p>
+      </article>
+
+      <article class="idea" id="idea-6">
+        <div class="idea-head">
+          <div>
+            <div class="rank">Idea 6</div>
+            <h3>6. The Detour-Safe Chronicle</h3>
+          </div>
+          <div class="chips">
+            <span class="chip conf">Confidence 95%</span>
+            <span class="chip complexity">Complexity Medium</span>
+          </div>
+        </div>
+        <p>
+          Keep two kinds of memory deliberately separate. The validated passport is durable gameplay
+          truth; Help and other menu detours receive a transient return context. Returning from Help is
+          an authored continuation, not browser Back and not an alternate save history. A reload during
+          a detour can still recover the last durable gameplay session without confusing route history
+          for story progress.
+        </p>
+        <dl class="fields">
+          <div>
+            <dt>Axis</dt>
+            <dd>Snapshot fidelity and evolution</dd>
+          </div>
+          <div>
+            <dt>Meeting test</dt>
+            <dd>Help, refresh, and browser Back never manufacture or replace a gameplay checkpoint.</dd>
+          </div>
+          <div class="wide">
+            <dt>Basis</dt>
+            <dd>
+              <strong>direct:</strong> current GoBack uses one <code>previousSceneId</code> and has no live
+              <code>ReturnFromHelp</code> case
+              (<code>packages/www/src/morpheus-app/hotspot/handleHotspotAction.ts:95-289</code>); C++ stores
+              a dedicated return scene for normal-to-help transitions
+              (<code>original_source_code/MorpheusWin/CommonSources/MorpheusSupport/CScene.cpp:430-463</code>)
+              and resolves it through <code>ReturnFromHelp</code>
+              (<code>original_source_code/MorpheusWin/CommonSources/MorpheusCast/CHotSpot.cpp:711-729</code>).
+            </dd>
+          </div>
+        </dl>
+        <p><strong>Rationale:</strong> The original runtime distinguishes story navigation from help detours. Preserving that distinction keeps Continue, menu return, and browser navigation from becoming three competing versions of “where am I?”</p>
+        <p class="downside"><span class="field-label">Downsides</span>The transient return token must never become a second durable authority. Its behavior across refresh needs an explicit product choice even if its storage stays ephemeral.</p>
+      </article>
+    </section>
+
+    <section id="rejection-summary">
+      <p class="eyebrow">What did not earn a separate direction</p>
+      <h2>Rejection Summary</h2>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Idea or variant</th>
+            <th>Reason rejected</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>1</td>
+            <td>The Continuous Durable Thread</td>
+            <td>Its legacy automatic-save basis was weak and “meaningful action” was underspecified; its useful continuity goal is absorbed into Idea 1.</td>
+          </tr>
+          <tr>
+            <td>2</td>
+            <td>The Atomic Checkpoint Ceremony</td>
+            <td>Sound, but only half of the stronger Living Passport Checkpoint; atomicity without a complete session still resumes the wrong place.</td>
+          </tr>
+          <tr>
+            <td>3</td>
+            <td>The Complete Versioned Session Passport</td>
+            <td>Sound, but merged into Idea 1 so snapshot fidelity and write durability are decided together.</td>
+          </tr>
+          <tr>
+            <td>4</td>
+            <td>Radial wheel / authored spoke menu</td>
+            <td>Basis refuted: the sources prove a top-left button, conventional menu, and wheel cursor—not a radial-spoke interaction.</td>
+          </tr>
+          <tr>
+            <td>5</td>
+            <td>The Wheel of Trust</td>
+            <td>Duplicated the menu boundary and save card while repeating the unsupported radial-wheel premise. Save status can remain a small menu/card detail.</td>
+          </tr>
+          <tr>
+            <td>6</td>
+            <td>Authored Wheel Intentions</td>
+            <td>The JavaScript Help/spoke claims were weak. The source-backed C++ Help return grammar survives as Idea 6.</td>
+          </tr>
+          <tr>
+            <td>7</td>
+            <td>The Recovery Observatory</td>
+            <td>Sound but overlapping. Its preservation/export behavior belongs inside the Honest Load Gate and Resume Card.</td>
+          </tr>
+          <tr>
+            <td>8</td>
+            <td>Named manual slots and cloud saves</td>
+            <td>Scope and complexity exceed the user’s reload-survival need. The evidence supports one local resume plus portable file ownership first.</td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="section-intro">All four topic axes retain at least one survivor; no deliberate coverage gap remains.</p>
+    </section>
+
+    <footer class="composition-signal">
+      Composed <time datetime="2026-07-18T19:54:41-06:00">2026-07-18T19:54:41-06:00</time>
+      by <code>ce-ideate</code> from the user prompt, current Morpheus-typescript sources,
+      <code>upstream/master</code>, and <code>original_source_code/MorpheusWin</code>.
+    </footer>
+  </main>
+</body>
+</html>

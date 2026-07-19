@@ -44,6 +44,7 @@ describe('living-save checkpoints', () => {
         activeScene: scene(2000),
         returnScene: null,
         saveHealth: 'saved',
+        skipSceneEntryActions: false,
       }),
     );
     const changed = initial[0];
@@ -121,5 +122,43 @@ describe('living-save checkpoints', () => {
     await checkpoints.requestCheckpoint(99);
 
     expect(writes).toBe(0);
+  });
+
+  it('recovers from a rejected storage write', async () => {
+    const store = createAppStore();
+    const original = createLivingSaveEnvelopeFixture();
+    const catalog = occupyLivingSaveSlot(
+      createEmptyLivingSaveCatalogFixture(),
+      'slot-1',
+      original,
+    );
+    store.dispatch(
+      installLivingSaveRuntime({
+        operationId: 'install',
+        catalog,
+        slotId: 'slot-1',
+        envelope: original,
+        activeScene: scene(original.activeSceneId),
+        returnScene: null,
+        saveHealth: 'saved',
+        skipSceneEntryActions: false,
+      }),
+    );
+    const checkpoints = createLivingSaveCheckpointCoordinator({
+      dispatch: store.dispatch,
+      getState: store.getState,
+      writeCheckpoint: async () => {
+        throw new Error('IndexedDB unavailable');
+      },
+      now: Date.now,
+      createResumePointId: () => 'unused',
+    });
+
+    await expect(checkpoints.requestCheckpoint(1)).resolves.toBeUndefined();
+
+    expect(store.getState().livingSaves).toMatchObject({
+      saveHealth: 'save-unavailable',
+      failureReason: 'unavailable-storage',
+    });
   });
 });

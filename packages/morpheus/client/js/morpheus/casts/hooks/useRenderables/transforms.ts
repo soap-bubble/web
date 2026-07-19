@@ -283,6 +283,10 @@ export function calculateControlledFrameOperation({
 }): Renderable {
   const { controlledMovieCallbacks, width, height } = cast
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null)
+  const logicalGridWidth =
+    typeof gameStateId === 'number'
+      ? TWO_AXIS_GRID_WIDTH_BY_GAMESTATE.get(gameStateId)
+      : undefined
   const frames = get(controlledMovieCallbacks, '[0].frames', 1)
   const direction = get(controlledMovieCallbacks, '[0].direction', 0)
 
@@ -296,7 +300,7 @@ export function calculateControlledFrameOperation({
       frames,
       frameCount: layout.frameCount,
       direction,
-      logicalGridWidth: TWO_AXIS_GRID_WIDTH_BY_GAMESTATE.get(gameStateId),
+      logicalGridWidth,
     })
 
     // Calculate source rectangle in sprite sheet grid (left-to-right, top-to-bottom)

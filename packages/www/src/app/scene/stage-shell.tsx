@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import type {
-  Cast,
   Hotspot,
   Scene,
 } from '@soapbubble/morpheus-client/morpheus/casts/types';
@@ -29,6 +28,9 @@ import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordin
 import type { AppDispatch } from '@/morpheus-app/store/store';
 import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import {
+  detachLivingSaveRuntime,
+} from '@/morpheus-app/store/actions';
+import {
   activateScene,
   activateScenePrune,
   scenePrefetched,
@@ -50,6 +52,7 @@ import {
   selectGameMenu,
 } from '@/morpheus-app/store/slices/gameMenuSlice';
 import type { LivingSaveSlotSummary } from '@/morpheus-app/store/slices/livingSavesSlice';
+import { getHotspotCandidates } from '@/morpheus-app/hotspot/hotspotEligibility';
 
 import '@/morpheus-app/runtime';
 
@@ -60,6 +63,7 @@ type PendingTransition = {
   startAngle?: number;
   mode?: 'goBack';
   runtimeGeneration: number;
+  checkpointOnReady: boolean;
 };
 
 const DISSOLVE_DURATION_MS = 600;
@@ -119,10 +123,6 @@ function captureStageFrame(
   }
 
   return capturedCanvas;
-}
-
-function isHotspot(cast: Cast): cast is Hotspot {
-  return cast.__t === 'Hotspot';
 }
 
 function getActionTypeName(type: number): string {
@@ -205,7 +205,7 @@ export const SceneStageShell = () => {
 
   const hotspots = useMemo((): HotspotState[] => {
     if (!activeScene) return [];
-    return activeScene.casts.filter(isHotspot).map((hotspot: Hotspot) => {
+    return getHotspotCandidates(activeScene).map((hotspot: Hotspot) => {
       const actionType = getActionTypeName(hotspot.type);
       const isSceneChange = hotspot.type === 0 || hotspot.type === 1;
 
@@ -226,6 +226,7 @@ export const SceneStageShell = () => {
 
   const [pendingTransition, setPendingTransition] =
     useState<PendingTransition | null>(null);
+  const [transitionActive, setTransitionActive] = useState(false);
   const transitionInProgressRef = useRef(false);
   const committedTransitionSceneIdRef = useRef<number | null>(null);
   const lastPushedSceneIdRef = useRef<number | null>(null);
@@ -260,6 +261,13 @@ export const SceneStageShell = () => {
   const handleHarnessClickReady = useCallback(
     (handler: HarnessClickHandler | null) => {
       harnessClickRef.current = handler;
+    },
+    [],
+  );
+
+  const handleInputControllerReady = useCallback(
+    (controller: StageInputController | null) => {
+      stageInputControllerRef.current = controller;
     },
     [],
   );
@@ -314,18 +322,23 @@ export const SceneStageShell = () => {
       dissolve,
       startAngle,
       mode,
+      checkpointOnReady = true,
+      detachRuntime = false,
     }: {
       sceneId: number;
       dissolve: boolean;
       startAngle?: number;
       mode?: 'goBack';
-    }) => {
+      checkpointOnReady?: boolean;
+      detachRuntime?: boolean;
+    }): Promise<boolean> => {
       if (transitionInProgressRef.current) {
-        return;
+        return false;
       }
       transitionInProgressRef.current = true;
+      setTransitionActive(true);
       committedTransitionSceneIdRef.current = null;
-      const transitionGeneration = runtimeGenerationRef.current;
+      let transitionGeneration = runtimeGenerationRef.current;
 
       if (startAngle !== undefined) {
         dispatch(seedRotationFromTransition({ yaw3600: startAngle, pitch: 0 }));
@@ -335,11 +348,22 @@ export const SceneStageShell = () => {
         const targetScene = await fetchScene(sceneId);
         if (runtimeGenerationRef.current !== transitionGeneration) {
           transitionInProgressRef.current = false;
-          return;
+          setTransitionActive(false);
+          return false;
         }
         if (!targetScene) {
           transitionInProgressRef.current = false;
-          return;
+          setTransitionActive(false);
+          return false;
+        }
+        if (detachRuntime) {
+          transitionGeneration += 1;
+          runtimeGenerationRef.current = transitionGeneration;
+          dispatch(
+            detachLivingSaveRuntime({
+              runtimeGeneration: transitionGeneration,
+            }),
+          );
         }
         setPendingTransition({
           sceneId,
@@ -348,9 +372,13 @@ export const SceneStageShell = () => {
           startAngle,
           mode,
           runtimeGeneration: transitionGeneration,
+          checkpointOnReady,
         });
+        return true;
       } catch {
         transitionInProgressRef.current = false;
+        setTransitionActive(false);
+        return false;
       }
     },
     [dispatch],
@@ -384,6 +412,7 @@ export const SceneStageShell = () => {
       if (transition.runtimeGeneration !== runtimeGenerationRef.current) {
         setPendingTransition(null);
         transitionInProgressRef.current = false;
+        setTransitionActive(false);
         return;
       }
       if (committedTransitionSceneIdRef.current === transition.sceneId) {
@@ -439,10 +468,13 @@ export const SceneStageShell = () => {
       }
       setPendingTransition(null);
       pushSceneRoute(transition.sceneId);
-      void requestLivingSaveCheckpoint(transition.runtimeGeneration);
+      if (transition.checkpointOnReady) {
+        void requestLivingSaveCheckpoint(transition.runtimeGeneration);
+      }
       // The incoming scene may immediately author another transition. The fade
       // is visual cleanup, not part of transition admission.
       transitionInProgressRef.current = false;
+      setTransitionActive(false);
 
       if (!shouldDissolve || !overlay) {
         return;
@@ -490,7 +522,12 @@ export const SceneStageShell = () => {
   const handleLoadScene = useCallback(
     async (sceneId: number) => {
       // Treat external "load scene" the same as an in-game transition
-      await handleSceneTransition({ sceneId, dissolve: false });
+      await handleSceneTransition({
+        sceneId,
+        dissolve: false,
+        checkpointOnReady: false,
+        detachRuntime: true,
+      });
     },
     [handleSceneTransition],
   );
@@ -522,7 +559,7 @@ export const SceneStageShell = () => {
       const currentSceneId =
         activeSceneIdRef.current ?? activeScene?.sceneId ?? 0;
 
-      if (!clickHotspot) {
+      if (!clickHotspot || transitionInProgressRef.current) {
         return {
           requestId: request.requestId,
           outcome: 'stage_not_ready',
@@ -669,12 +706,16 @@ export const SceneStageShell = () => {
           inputEnabled={
             livingSaves.bootstrapPhase === 'ready' &&
             livingSaves.operation === null &&
+            !transitionActive &&
             !gameMenu.open
           }
           onStableAction={handleStableAction}
-          onInputControllerReady={(controller) => {
-            stageInputControllerRef.current = controller;
-          }}
+          onInputControllerReady={handleInputControllerReady}
+          skipSceneEntryGeneration={
+            livingSaves.skipSceneEntryActions
+              ? livingSaves.runtimeGeneration
+              : null
+          }
         />
       </div>
       <canvas

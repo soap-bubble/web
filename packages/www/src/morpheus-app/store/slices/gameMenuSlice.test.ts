@@ -6,7 +6,6 @@ import {
   openGameMenu,
   showGameMenuMain,
   showGameMenuSaveSlots,
-  toggleGameMenu,
 } from './gameMenuSlice';
 
 describe('gameMenuSlice', () => {
@@ -21,13 +20,10 @@ describe('gameMenuSlice', () => {
     expect(state).toEqual({ open: false, screen: 'main' });
   });
 
-  it('supports the wheel toggle and explicit return to main', () => {
-    let state = gameMenuReducer(undefined, toggleGameMenu());
-    expect(state.open).toBe(true);
+  it('supports explicit return to the main screen', () => {
+    let state = gameMenuReducer(undefined, openGameMenu());
     state = gameMenuReducer(state, showGameMenuSaveSlots());
     state = gameMenuReducer(state, showGameMenuMain());
     expect(state.screen).toBe('main');
-    state = gameMenuReducer(state, toggleGameMenu());
-    expect(state).toEqual({ open: false, screen: 'main' });
   });
 });

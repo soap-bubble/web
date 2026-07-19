@@ -173,8 +173,9 @@ export function useInputHandler(params: {
   screenHeight: number;
   previousSceneId?: number;
   inputEnabled?: boolean;
-  onTransition?: (transition: SceneTransitionRequest) => void;
+  onTransition?: (transition: SceneTransitionRequest) => Promise<boolean>;
   onActionSettled?: () => void;
+  skipSceneEntryGeneration?: number | null;
 }): InputReturn {
   const {
     scene,
@@ -191,6 +192,7 @@ export function useInputHandler(params: {
     inputEnabled = true,
     onTransition,
     onActionSettled,
+    skipSceneEntryGeneration = null,
   } = params;
 
   const dispatch = useAppDispatch();
@@ -333,6 +335,7 @@ export function useInputHandler(params: {
   const gestureStartRotationRef = useRef<Rotation | null>(null);
   const stableActionChangedRef = useRef(false);
   const transitionPendingRef = useRef(false);
+  const skippedSceneEntryGenerationRef = useRef<number | null>(null);
   const capturedPointerRef = useRef<{
     target: HTMLCanvasElement;
     pointerId: number;
@@ -347,6 +350,32 @@ export function useInputHandler(params: {
     durationMs: number;
   } | null>(null);
   const sweepRafRef = useRef<number | null>(null);
+
+  const settleRejectedTransition = useCallback(() => {
+    transitionPendingRef.current = false;
+    if (stableActionChangedRef.current) {
+      stableActionChangedRef.current = false;
+      onActionSettledRef.current?.();
+    }
+  }, []);
+
+  const requestTransition = useCallback(
+    (transition: SceneTransitionRequest) => {
+      const transitionHandler = onTransitionRef.current;
+      if (!transitionHandler) {
+        settleRejectedTransition();
+        return;
+      }
+      void transitionHandler(transition)
+        .then((accepted) => {
+          if (!accepted) {
+            settleRejectedTransition();
+          }
+        })
+        .catch(settleRejectedTransition);
+    },
+    [settleRejectedTransition],
+  );
 
   const normalizeYaw = useCallback((yaw: number) => {
     let next = yaw;
@@ -420,7 +449,7 @@ export function useInputHandler(params: {
           if (pendingTransitionRef.current) {
             const { transition: pending } = pendingTransitionRef.current;
             pendingTransitionRef.current = null;
-            onTransitionRef.current?.(pending);
+            requestTransition(pending);
           }
           return;
         }
@@ -428,7 +457,7 @@ export function useInputHandler(params: {
       };
       sweepRafRef.current = requestAnimationFrame(tick);
     },
-    [dispatch, normalizeYaw, shortestYawDelta],
+    [dispatch, normalizeYaw, requestTransition, shortestYawDelta],
   );
 
   const applyHotspotActionResult = useCallback(
@@ -461,12 +490,12 @@ export function useInputHandler(params: {
 
       if (result.sceneTransition && onTransitionRef.current) {
         transitionPendingRef.current = true;
-        onTransitionRef.current(result.sceneTransition);
+        requestTransition(result.sceneTransition);
       }
 
       return result.allDone;
     },
-    [dispatch, isPanoScene, startSweepTo],
+    [dispatch, isPanoScene, requestTransition, startSweepTo],
   );
 
   const settlePendingAction = useCallback(() => {
@@ -549,10 +578,22 @@ export function useInputHandler(params: {
   // Process scene-enter and always hotspots once per scene
   const processedSceneIdRef = useRef<number | null>(null);
   useEffect(() => {
+    const shouldSkipSceneEntry =
+      skipSceneEntryGeneration !== null &&
+      skippedSceneEntryGenerationRef.current !== skipSceneEntryGeneration;
+
     if (processedSceneIdRef.current === scene.sceneId) {
+      if (shouldSkipSceneEntry) {
+        skippedSceneEntryGenerationRef.current = skipSceneEntryGeneration;
+      }
       return;
     }
     processedSceneIdRef.current = scene.sceneId;
+
+    if (shouldSkipSceneEntry) {
+      skippedSceneEntryGenerationRef.current = skipSceneEntryGeneration;
+      return;
+    }
 
     const gs = gamestatesRef.current;
     const sceneEnterHotspots = getActiveHotspots(hotspots, gs).filter(
@@ -565,7 +606,13 @@ export function useInputHandler(params: {
       processHotspotAction(hotspot, { top: 0, left: 0 }, { top: 0, left: 0 });
     }
     settlePendingAction();
-  }, [scene.sceneId, hotspots, processHotspotAction, settlePendingAction]);
+  }, [
+    scene.sceneId,
+    hotspots,
+    processHotspotAction,
+    settlePendingAction,
+    skipSceneEntryGeneration,
+  ]);
 
   // Track which hotspots the pointer was in (for enter/leave events)
   const wasInHotspotsRef = useRef<Set<number>>(new Set());
@@ -1071,6 +1118,8 @@ export function useInputHandler(params: {
     return true;
   }, [dispatch]);
 
+  const inputController = useMemo(() => ({ cancelGesture }), [cancelGesture]);
+
   return [
     {
       image: cursor,
@@ -1084,6 +1133,6 @@ export function useInputHandler(params: {
       onPointerLeave,
     },
     clickHotspot,
-    { cancelGesture },
+    inputController,
   ];
 }

@@ -37,6 +37,29 @@ describe('living-save session schema', () => {
     expect(parseLivingSaveSessionEnvelope(envelope).success).toBe(false);
   });
 
+  it('rejects timestamps that JavaScript cannot render', () => {
+    const envelope = createEnvelope();
+    envelope.savedAt = Number.MAX_SAFE_INTEGER;
+
+    expect(parseLivingSaveSessionEnvelope(envelope).success).toBe(false);
+  });
+
+  it('classifies newer schema versions before validating their shape', async () => {
+    const newerEnvelope = {
+      format: 'morpheus-living-save-session',
+      schemaVersion: 2,
+      futureField: true,
+    };
+
+    expect(
+      await validateLivingSaveSessionEnvelope(newerEnvelope, {
+        supportedGameDataVersions: [1],
+        expectedGamestateBounds: {},
+        isSceneAvailable: async () => true,
+      }),
+    ).toMatchObject({ ok: false, code: 'unsupported-version' });
+  });
+
   it('uses the load gate for game data, complete gamestate, and scenes', async () => {
     const result = await validateLivingSaveSessionEnvelope(createEnvelope(), {
       supportedGameDataVersions: [1],

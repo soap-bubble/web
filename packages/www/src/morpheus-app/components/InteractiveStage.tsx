@@ -62,12 +62,13 @@ interface InteractiveStageProps {
   volume?: number;
   onRotationChange?: (rotation: ExternalRotation) => void;
   rotation: ExternalRotation;
-  onTransition?: (transition: SceneTransitionRequest) => void;
+  onTransition?: (transition: SceneTransitionRequest) => Promise<boolean>;
   onSceneReady?: (sceneId: number) => void;
   onHarnessClickReady?: (handler: HarnessClickHandler | null) => void;
   inputEnabled?: boolean;
   onStableAction?: () => void;
   onInputControllerReady?: (controller: StageInputController | null) => void;
+  skipSceneEntryGeneration?: number | null;
 }
 
 const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
@@ -188,6 +189,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   inputEnabled = true,
   onStableAction,
   onInputControllerReady,
+  skipSceneEntryGeneration = null,
 }) => {
   const active = activeScene;
   const [availableSounds, onAudioCastRef] = useCastRefNoticer<
@@ -387,6 +389,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
       inputEnabled,
       onTransition,
       onActionSettled: onStableAction,
+      skipSceneEntryGeneration,
     });
 
   useEffect(() => {

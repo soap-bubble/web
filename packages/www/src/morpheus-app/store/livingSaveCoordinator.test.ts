@@ -21,6 +21,12 @@ const scene = (sceneId: number): Scene => ({
   casts: [],
 });
 
+const unconfiguredFileParser = async () => ({
+  ok: false as const,
+  code: 'malformed' as const,
+  reason: 'File parsing is not used by this test.',
+});
+
 function createHarness(catalog: LivingSaveCatalog) {
   const store = createAppStore();
   const replacedRoutes: number[] = [];
@@ -36,6 +42,7 @@ function createHarness(catalog: LivingSaveCatalog) {
     readCatalog: async () => ({ ok: true, value: catalog }),
     activateSlot: async () => ({ ok: true, value: catalog }),
     createSlot: async () => ({ ok: true, value: catalog }),
+    parseFileText: unconfiguredFileParser,
     validateEnvelope: (envelope) => validateEnvelope(envelope),
     fetchScene: async (sceneId) => scene(sceneId),
     replaceRoute: (sceneId) => replacedRoutes.push(sceneId),
@@ -71,6 +78,30 @@ describe('livingSaveCoordinator', () => {
 
     expect(harness.store.getState().scene.activeSceneId).toBe(2000);
     expect(harness.replacedRoutes).toEqual([2000]);
+    expect(
+      harness.store.getState().livingSaves.skipSceneEntryActions,
+    ).toBe(true);
+  });
+
+  it('keeps the title hub visible when an active slot exists', async () => {
+    const envelope = createLivingSaveEnvelopeFixture({ activeSceneId: 2000 });
+    const catalog = occupyLivingSaveSlot(
+      createEmptyLivingSaveCatalogFixture(),
+      'slot-1',
+      envelope,
+    );
+    const harness = createHarness(catalog);
+
+    await expect(
+      harness.coordinator.bootstrap({
+        routeSceneId: null,
+        mcpSessionName: null,
+      }),
+    ).resolves.toEqual({ ok: true, kind: 'title' });
+
+    expect(harness.replacedRoutes).toEqual([]);
+    expect(harness.store.getState().scene.activeSceneId).toBeNull();
+    expect(harness.store.getState().livingSaves.activeSlotId).toBe('slot-1');
   });
 
   it('returns normal direct navigation to title when no slot is active', async () => {
@@ -97,6 +128,7 @@ describe('livingSaveCoordinator', () => {
     expect(harness.store.getState().livingSaves).toMatchObject({
       activeSlotId: null,
       saveHealth: 'volatile',
+      skipSceneEntryActions: false,
     });
   });
 
@@ -161,6 +193,7 @@ describe('livingSaveCoordinator', () => {
         await creation;
         return { ok: true, value: createdCatalog };
       },
+      parseFileText: unconfiguredFileParser,
       validateEnvelope: async (envelope) => ({ ok: true, envelope }),
       fetchScene: async (sceneId) => scene(sceneId),
       replaceRoute: () => undefined,
@@ -183,6 +216,7 @@ describe('livingSaveCoordinator', () => {
     expect(store.getState().livingSaves).toMatchObject({
       activeSlotId: 'slot-2',
       saveHealth: 'saved',
+      skipSceneEntryActions: false,
     });
     expect(store.getState().scene.activeSceneId).toBe(2000);
   });
@@ -228,6 +262,7 @@ describe('livingSaveCoordinator', () => {
         value: { ...catalog, activeSlotId: slotId },
       }),
       createSlot: async () => ({ ok: true, value: catalog }),
+      parseFileText: unconfiguredFileParser,
       validateEnvelope: async (envelope) => {
         if (envelope.resumePointId === 'first') await firstValidation;
         return { ok: true, envelope };
@@ -286,6 +321,7 @@ describe('livingSaveCoordinator', () => {
       activateSlot: async () => ({ ok: true, value: catalog }),
       createSlot: async () => ({ ok: true, value: catalog }),
       deleteSlot,
+      parseFileText: unconfiguredFileParser,
       validateEnvelope: async (value) => ({ ok: true, envelope: value }),
       fetchScene: async (sceneId) => scene(sceneId),
       replaceRoute: () => undefined,

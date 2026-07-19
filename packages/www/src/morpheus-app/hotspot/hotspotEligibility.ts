@@ -1,14 +1,36 @@
 import { isActive } from '@soapbubble/morpheus-client';
-import { isHotspot } from 'morpheus/casts/matchers';
-import type { Hotspot, Scene } from 'morpheus/casts/types';
+import type { Hotspot, Scene, SceneCasts } from 'morpheus/casts/types';
 
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import type { HotspotActionResult } from './handleHotspotAction';
 
+const HOTSPOT_NUMBER_FIELDS = [
+  'rectLeft',
+  'rectRight',
+  'rectTop',
+  'rectBottom',
+  'gesture',
+  'type',
+] as const;
+
+function hasNumericOwnProperty(value: object, key: string): boolean {
+  const descriptor = Object.getOwnPropertyDescriptor(value, key);
+  return typeof descriptor?.value === 'number';
+}
+
+export function isHotspotCandidate(cast: SceneCasts): cast is Hotspot {
+  return (
+    cast.__t === 'Hotspot' ||
+    HOTSPOT_NUMBER_FIELDS.every((field) =>
+      hasNumericOwnProperty(cast, field),
+    )
+  );
+}
+
 export function getHotspotCandidates(
   scene: Pick<Scene, 'casts'>,
 ): Hotspot[] {
-  return scene.casts.filter(isHotspot) as Hotspot[];
+  return scene.casts.filter(isHotspotCandidate);
 }
 
 export function getActiveHotspots(

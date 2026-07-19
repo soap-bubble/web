@@ -24,10 +24,6 @@ const gameMenuSlice = createSlice({
       state.open = false;
       state.screen = 'main';
     },
-    toggleGameMenu(state) {
-      state.open = !state.open;
-      state.screen = 'main';
-    },
     showGameMenuMain(state) {
       state.screen = 'main';
     },
@@ -45,7 +41,6 @@ export const {
   openGameMenu,
   showGameMenuMain,
   showGameMenuSaveSlots,
-  toggleGameMenu,
 } = gameMenuSlice.actions;
 
 export const gameMenuReducer = gameMenuSlice.reducer;

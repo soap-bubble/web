@@ -51,6 +51,7 @@ describe('installLivingSaveRuntime', () => {
         activeScene: scene(2000),
         returnScene: scene(1050),
         saveHealth: 'saved',
+        skipSceneEntryActions: true,
       }),
     );
 

@@ -51,16 +51,6 @@
   transform: translateX(-50%);
 }
 
-.selectionError {
-  margin: 10px auto 0;
-  padding: 8px 12px;
-  border: 1px solid rgba(235, 216, 158, 0.78);
-  background: rgba(49, 38, 24, 0.9);
-  color: #fff4ce;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  font-size: 0.85rem;
-}
-
 .skipButton:focus-visible,
 .error button:focus-visible {
   outline: 3px solid #eef8ff;

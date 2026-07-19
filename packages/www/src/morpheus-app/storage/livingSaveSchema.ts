@@ -24,13 +24,27 @@ const integerRecordSchema = z.record(z.string(), z.number().int()).superRefine(
   },
 );
 
+const MAX_JAVASCRIPT_DATE_MS = 8_640_000_000_000_000;
+
+const envelopeVersionSchema = z
+  .object({
+    format: z.literal(LIVING_SAVE_SESSION_FORMAT),
+    schemaVersion: z.number().int().positive(),
+  })
+  .passthrough();
+
 const envelopeSchema = z
   .object({
     format: z.literal(LIVING_SAVE_SESSION_FORMAT),
     schemaVersion: z.number().int().positive(),
     gameDataVersion: z.number().int().positive(),
     resumePointId: z.string().min(1).max(200),
-    savedAt: z.number().int().nonnegative().finite(),
+    savedAt: z
+      .number()
+      .int()
+      .nonnegative()
+      .finite()
+      .max(MAX_JAVASCRIPT_DATE_MS),
     gamestateValues: integerRecordSchema,
     activeSceneId: z.number().int().positive(),
     returnSceneId: z.number().int().positive().nullable(),
@@ -48,6 +62,19 @@ export type LivingSaveParseResult =
 export function parseLivingSaveSessionEnvelope(
   value: unknown,
 ): LivingSaveParseResult {
+  const version = envelopeVersionSchema.safeParse(value);
+  if (
+    version.success &&
+    version.data.schemaVersion !== LIVING_SAVE_SESSION_SCHEMA_VERSION
+  ) {
+    return {
+      success: false,
+      issues: [
+        `Unsupported session schema version ${version.data.schemaVersion}`,
+      ],
+    };
+  }
+
   const parsed = envelopeSchema.safeParse(value);
   if (!parsed.success) {
     return {
@@ -55,15 +82,6 @@ export function parseLivingSaveSessionEnvelope(
       issues: parsed.error.issues.map((issue) => issue.message),
     };
   }
-  if (parsed.data.schemaVersion !== LIVING_SAVE_SESSION_SCHEMA_VERSION) {
-    return {
-      success: false,
-      issues: [
-        `Unsupported session schema version ${parsed.data.schemaVersion}`,
-      ],
-    };
-  }
-
   const gamestateValues: Record<number, number> = {};
   for (const [key, gamestateValue] of Object.entries(
     parsed.data.gamestateValues,
@@ -97,7 +115,7 @@ export async function validateLivingSaveSessionEnvelope(
     };
   }
 
-  const { envelope } = { envelope: parsed.data };
+  const envelope = parsed.data;
   if (
     !context.supportedGameDataVersions.includes(envelope.gameDataVersion) ||
     envelope.gameDataVersion !== LIVING_SAVE_GAME_DATA_VERSION

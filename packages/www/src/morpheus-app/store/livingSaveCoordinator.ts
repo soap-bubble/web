@@ -11,12 +11,14 @@ import {
   undoLivingSaveDeletion,
 } from '@/morpheus-app/storage/livingSaveStorage';
 import {
-  MAX_LIVING_SAVE_FILE_BYTES,
   parseLivingSaveFileText,
 } from '@/morpheus-app/storage/livingSaveFiles';
 import type { LivingSaveFileParseResult } from '@/morpheus-app/storage/livingSaveFiles';
 import { validateLivingSaveSessionEnvelope } from '@/morpheus-app/storage/livingSaveSchema';
-import { parseLivingSaveSessionEnvelope } from '@/morpheus-app/storage/livingSaveSchema';
+import {
+  createLivingSaveResumePointId,
+  MORPHEUS_INITIAL_SCENE_ID,
+} from '@/morpheus-app/storage/livingSaveIdentity';
 import {
   LIVING_SAVE_GAME_DATA_VERSION,
   LIVING_SAVE_SESSION_FORMAT,
@@ -83,7 +85,7 @@ export type LivingSaveCoordinatorDependencies = {
   readEnvelope?: (
     slotId: LivingSaveSlotId,
   ) => Promise<LivingSaveResult<LivingSaveSessionEnvelope>>;
-  parseFileText?: (text: string) => Promise<LivingSaveFileParseResult>;
+  parseFileText: (text: string) => Promise<LivingSaveFileParseResult>;
   validateEnvelope: (
     envelope: LivingSaveSessionEnvelope,
   ) => Promise<LivingSaveValidationResult>;
@@ -97,8 +99,7 @@ export type LivingSaveCoordinatorOutcome =
       ok: true;
       kind: 'restored' | 'volatile' | 'title' | 'created' | 'managed';
     }
-  | { ok: false; reason: string }
-  | { ok: false; reason: 'stale-operation' };
+  | { ok: false; reason: string };
 
 export type LivingSaveCoordinator = {
   bootstrap: (params: {
@@ -130,24 +131,17 @@ function createOperationId(kind: string, sequence: number): string {
   return `${kind}-${sequence}`;
 }
 
-function createResumePointId(): string {
-  if (typeof globalThis.crypto?.randomUUID === 'function') {
-    return globalThis.crypto.randomUUID();
-  }
-  return `resume-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-}
-
 export function createGenesisLivingSaveEnvelope(): LivingSaveSessionEnvelope {
   return {
     format: LIVING_SAVE_SESSION_FORMAT,
     schemaVersion: LIVING_SAVE_SESSION_SCHEMA_VERSION,
     gameDataVersion: LIVING_SAVE_GAME_DATA_VERSION,
-    resumePointId: createResumePointId(),
+    resumePointId: createLivingSaveResumePointId(),
     savedAt: Date.now(),
     gamestateValues: Object.fromEntries(
       fetchInitial().map((gamestate) => [gamestate.stateId, gamestate.value]),
     ),
-    activeSceneId: 2000,
+    activeSceneId: MORPHEUS_INITIAL_SCENE_ID,
     returnSceneId: null,
     rotation: { yaw3600: 0, pitch: 0 },
   };
@@ -162,7 +156,7 @@ export function createLivingSaveCoordinator(
   const isCurrent = (operationId: string) => currentOperationId === operationId;
 
   const startOperation = (
-    kind: 'bootstrap' | 'restore' | 'switch' | 'manage',
+    kind: 'bootstrap' | 'restore' | 'manage',
   ): string => {
     operationSequence += 1;
     const operationId = createOperationId(kind, operationSequence);
@@ -195,10 +189,9 @@ export function createLivingSaveCoordinator(
   const resolveCatalog = (
     operationId: string,
     catalog: LivingSaveCatalog,
-  ): boolean => {
-    if (!isCurrent(operationId)) return false;
+  ): void => {
+    if (!isCurrent(operationId)) return;
     dependencies.dispatch(livingSaveCatalogResolved({ catalog, operationId }));
-    return true;
   };
 
   const installEnvelope = async (params: {
@@ -208,6 +201,7 @@ export function createLivingSaveCoordinator(
     envelope: LivingSaveSessionEnvelope;
     saveHealth: 'saved' | 'volatile';
     navigate: boolean;
+    skipSceneEntryActions: boolean;
   }): Promise<LivingSaveCoordinatorOutcome> => {
     const validation = await dependencies.validateEnvelope(params.envelope);
     if (!isCurrent(params.operationId)) {
@@ -275,6 +269,7 @@ export function createLivingSaveCoordinator(
         activeScene,
         returnScene,
         saveHealth: params.saveHealth,
+        skipSceneEntryActions: params.skipSceneEntryActions,
       }),
     );
     currentOperationId = null;
@@ -289,25 +284,34 @@ export function createLivingSaveCoordinator(
 
   const readCatalogForOperation = async (
     operationId: string,
-  ): Promise<LivingSaveCatalog | LivingSaveCoordinatorOutcome> => {
+  ): Promise<
+    | { status: 'ready'; catalog: LivingSaveCatalog }
+    | { status: 'failed'; outcome: LivingSaveCoordinatorOutcome }
+  > => {
     const catalogResult = await dependencies.readCatalog();
     if (!isCurrent(operationId)) {
-      return { ok: false, reason: 'stale-operation' };
+      return {
+        status: 'failed',
+        outcome: { ok: false, reason: 'stale-operation' },
+      };
     }
     if (!catalogResult.ok) {
-      return fail(operationId, catalogResult.code);
+      return {
+        status: 'failed',
+        outcome: fail(operationId, catalogResult.code),
+      };
     }
     resolveCatalog(operationId, catalogResult.value);
-    return catalogResult.value;
+    return { status: 'ready', catalog: catalogResult.value };
   };
 
   const restoreSlot = async (
     slotId: LivingSaveSlotId,
   ): Promise<LivingSaveCoordinatorOutcome> => {
     const operationId = startOperation('restore');
-    const catalogOrOutcome = await readCatalogForOperation(operationId);
-    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
-    const catalog = catalogOrOutcome;
+    const catalogResult = await readCatalogForOperation(operationId);
+    if (catalogResult.status === 'failed') return catalogResult.outcome;
+    const catalog = catalogResult.catalog;
     const slot = catalog.slots[slotId];
     if (slot.kind !== 'occupied') {
       return fail(
@@ -375,6 +379,7 @@ export function createLivingSaveCoordinator(
         activeScene,
         returnScene,
         saveHealth: 'saved',
+        skipSceneEntryActions: true,
       }),
     );
     currentOperationId = null;
@@ -387,9 +392,20 @@ export function createLivingSaveCoordinator(
     mcpSessionName,
   }) => {
     const operationId = startOperation('bootstrap');
-    const catalogOrOutcome = await readCatalogForOperation(operationId);
-    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
-    const catalog = catalogOrOutcome;
+    const catalogResult = await readCatalogForOperation(operationId);
+    if (catalogResult.status === 'failed') return catalogResult.outcome;
+    const catalog = catalogResult.catalog;
+
+    if (routeSceneId === null) {
+      dependencies.dispatch(
+        livingSaveOperationCompleted({
+          operationId,
+          saveHealth: catalog.activeSlotId === null ? 'idle' : 'saved',
+        }),
+      );
+      currentOperationId = null;
+      return { ok: true, kind: 'title' };
+    }
 
     if (catalog.activeSlotId !== null) {
       const slot = catalog.slots[catalog.activeSlotId];
@@ -407,6 +423,7 @@ export function createLivingSaveCoordinator(
         envelope: slot.envelope,
         saveHealth: 'saved',
         navigate: routeSceneId !== slot.envelope.activeSceneId,
+        skipSceneEntryActions: true,
       });
     }
 
@@ -422,6 +439,7 @@ export function createLivingSaveCoordinator(
         envelope,
         saveHealth: 'volatile',
         navigate: false,
+        skipSceneEntryActions: false,
       });
     }
 
@@ -440,9 +458,9 @@ export function createLivingSaveCoordinator(
     slotId,
   ) => {
     const operationId = startOperation('restore');
-    const catalogOrOutcome = await readCatalogForOperation(operationId);
-    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
-    const catalog = catalogOrOutcome;
+    const catalogResult = await readCatalogForOperation(operationId);
+    if (catalogResult.status === 'failed') return catalogResult.outcome;
+    const catalog = catalogResult.catalog;
     if (catalog.slots[slotId].kind !== 'empty') {
       return fail(operationId, 'occupied-target');
     }
@@ -464,6 +482,7 @@ export function createLivingSaveCoordinator(
       envelope,
       saveHealth: 'saved',
       navigate: false,
+      skipSceneEntryActions: false,
     });
     return installed.ok ? { ok: true, kind: 'created' } : installed;
   };
@@ -475,13 +494,12 @@ export function createLivingSaveCoordinator(
       | NonNullable<LivingSaveCoordinatorDependencies['undoDeletion']>,
     saveHealthAfter: (
       catalogBefore: LivingSaveCatalog,
-      catalogAfter: LivingSaveCatalog,
     ) => 'saved' | 'saving' | 'volatile' | 'idle' | 'save-unavailable',
   ): Promise<LivingSaveCoordinatorOutcome> => {
     const operationId = startOperation('manage');
-    const catalogOrOutcome = await readCatalogForOperation(operationId);
-    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
-    const catalog = catalogOrOutcome;
+    const catalogResult = await readCatalogForOperation(operationId);
+    if (catalogResult.status === 'failed') return catalogResult.outcome;
+    const catalog = catalogResult.catalog;
     const slot = catalog.slots[slotId];
     const result = await mutation({
       slotId,
@@ -497,7 +515,7 @@ export function createLivingSaveCoordinator(
     dependencies.dispatch(
       livingSaveOperationCompleted({
         operationId,
-        saveHealth: saveHealthAfter(catalog, result.value),
+        saveHealth: saveHealthAfter(catalog),
       }),
     );
     currentOperationId = null;
@@ -537,52 +555,15 @@ export function createLivingSaveCoordinator(
       return { ok: false, reason: 'unavailable-storage' };
     }
     const operationId = startOperation('manage');
-    const catalogOrOutcome = await readCatalogForOperation(operationId);
-    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
-    const catalog = catalogOrOutcome;
+    const catalogResult = await readCatalogForOperation(operationId);
+    if (catalogResult.status === 'failed') return catalogResult.outcome;
+    const catalog = catalogResult.catalog;
     const slot = catalog.slots[slotId];
     if (slot.kind !== 'empty') {
       return fail(operationId, 'occupied-target');
     }
 
-    const fileResult = dependencies.parseFileText
-      ? await dependencies.parseFileText(text)
-      : await (async (): Promise<LivingSaveFileParseResult> => {
-          if (
-            new TextEncoder().encode(text).byteLength >
-            MAX_LIVING_SAVE_FILE_BYTES
-          ) {
-            return {
-              ok: false,
-              code: 'oversized',
-              reason: 'The save file is too large.',
-            };
-          }
-          let value: unknown;
-          try {
-            value = JSON.parse(text);
-          } catch {
-            return {
-              ok: false,
-              code: 'malformed',
-              reason: 'The save file is not valid JSON.',
-            };
-          }
-          const parsed = parseLivingSaveSessionEnvelope(value);
-          if (!parsed.success) {
-            return {
-              ok: false,
-              code: 'invalid-data',
-              reason: parsed.issues[0] ?? 'The save file is malformed.',
-            };
-          }
-          const validation = await dependencies.validateEnvelope(
-            parsed.data,
-          );
-          return validation.ok
-            ? { ok: true, envelope: validation.envelope }
-            : validation;
-        })();
+    const fileResult = await dependencies.parseFileText(text);
     if (!isCurrent(operationId)) {
       return { ok: false, reason: 'stale-operation' };
     }
@@ -638,7 +619,10 @@ export function createBrowserLivingSaveCoordinator(params: {
   const expectedGamestateBounds = Object.fromEntries(
     initialGamestates.map((gamestate) => [
       gamestate.stateId,
-      { minimum: gamestate.minValue, maximum: gamestate.maxValue },
+      {
+        minimum: Math.min(gamestate.minValue, gamestate.value),
+        maximum: Math.max(gamestate.maxValue, gamestate.value),
+      },
     ]),
   );
   const validationContext = {

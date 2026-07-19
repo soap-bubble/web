@@ -1,10 +1,11 @@
 import { ACTION_TYPES, GESTURES } from 'morpheus/constants';
 import { isActive } from 'morpheus/gamestate/isActive';
-import type { Cast, Hotspot, Scene } from 'morpheus/casts/types';
+import type { Hotspot, Scene } from 'morpheus/casts/types';
 
 import { handleHotspotAction, type HotspotActionResult } from './handleHotspotAction';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import type { ClickHotspotMatchedHotspot } from '@/lib/game-control-protocol';
+import { isHotspotCandidate } from './hotspotEligibility';
 
 type Position = { top: number; left: number };
 
@@ -28,10 +29,6 @@ export type HarnessClickRejectedResult = {
 export type HarnessClickResult =
   | HarnessClickAppliedResult
   | HarnessClickRejectedResult;
-
-function isHotspotCast(cast: Cast): cast is Hotspot {
-  return cast.__t === 'Hotspot';
-}
 
 function normalizeHorizontalPosition(left: number): number {
   let next = left;
@@ -120,7 +117,7 @@ export function executeHarnessHotspotClick(params: {
   } = params;
   const castId = requestHotspot.castId;
   const hotspot = scene.casts
-    .filter(isHotspotCast)
+    .filter(isHotspotCandidate)
     .find((cast) => matchesRequestedHotspot({ hotspot: cast, requestHotspot }));
 
   if (!hotspot) {

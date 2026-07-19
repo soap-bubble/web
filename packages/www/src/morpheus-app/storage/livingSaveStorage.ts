@@ -221,7 +221,9 @@ async function runCatalogTransaction(
         return;
       }
       result = { ok: true, value: classifyCatalog(mutation.catalog) };
-      store.put(mutation.catalog, LIVING_SAVE_CATALOG_KEY);
+      if (mutation.catalog !== raw || request.result === undefined) {
+        store.put(mutation.catalog, LIVING_SAVE_CATALOG_KEY);
+      }
     };
     request.onerror = () => {
       result = {

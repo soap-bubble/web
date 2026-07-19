@@ -46,7 +46,9 @@ describe('projectLivingSaveDiagnostics', () => {
         }
       ],
       tombstones: {},
-      runtimeGeneration: 3,
+    runtimeGeneration: 3,
+    runtimeSlotId: 'slot-2',
+    skipSceneEntryActions: false,
       operation: null,
       saveHealth: 'save-unavailable',
       failureReason: 'x'.repeat(MAX_SAVE_DIAGNOSTIC_FAILURE_LENGTH + 40)

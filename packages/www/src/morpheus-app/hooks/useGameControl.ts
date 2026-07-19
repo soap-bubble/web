@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useCallback, useState } from 'react'
+import { useEffect, useRef, useCallback, useMemo, useState } from 'react'
 import type {
   MCPToBrowserMessage,
   BrowserToMCPMessage,
@@ -136,13 +136,17 @@ export default function useGameControl(
 ): UseGameControlReturn {
   const { enabled = true, sessionName, callbacks, getState } = options
   const livingSaves = useAppSelector(selectLivingSaves)
+  const livingSaveDiagnostics = useMemo(
+    () => projectLivingSaveDiagnostics(livingSaves),
+    [livingSaves]
+  )
   const wsRef = useRef<WebSocket | null>(null)
   const callbacksRef = useRef(callbacks)
   const getStateRef = useRef(getState)
   const livingSaveDiagnosticsRef = useRef<LivingSaveDiagnostics>(
-    projectLivingSaveDiagnostics(livingSaves)
+    livingSaveDiagnostics
   )
-  livingSaveDiagnosticsRef.current = projectLivingSaveDiagnostics(livingSaves)
+  livingSaveDiagnosticsRef.current = livingSaveDiagnostics
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttemptsRef = useRef(0)
 
@@ -339,6 +343,9 @@ export default function useGameControl(
       ws.onmessage = handleMessage
 
       ws.onclose = (event) => {
+        if (wsRef.current !== ws) {
+          return
+        }
         console.log('[GameControl] Disconnected:', event.code, event.reason)
         setState({ isConnected: false, sessionId: null })
         wsRef.current = null
@@ -381,8 +388,9 @@ export default function useGameControl(
         clearTimeout(reconnectTimeoutRef.current)
       }
       if (wsRef.current) {
-        wsRef.current.close()
+        const ws = wsRef.current
         wsRef.current = null
+        ws.close()
       }
     }
   }, [enabled, connect])

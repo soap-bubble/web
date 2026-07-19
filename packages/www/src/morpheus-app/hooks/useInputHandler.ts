@@ -7,13 +7,10 @@ import {
   useState,
 } from 'react';
 import { Raycaster, Object3D, Camera, Vector2 } from 'three';
-import { isActive } from '@soapbubble/morpheus-client';
-import type { Hotspot, Scene, Cast } from 'morpheus/casts/types';
+import type { Hotspot, Scene } from 'morpheus/casts/types';
 import type { SceneTransitionRequest } from 'morpheus/scene/types';
-import { isHotspot } from 'morpheus/casts/matchers';
 import { DST_RATIO, DST_WIDTH, GESTURES } from 'morpheus/constants';
 
-import { and } from '@/utils/matchers';
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
 import { updateGamestate } from '@/morpheus-app/store/slices/gamestateSlice';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
@@ -23,6 +20,12 @@ import {
   handleHotspotAction,
   type HotspotActionResult,
 } from '@/morpheus-app/hotspot/handleHotspotAction';
+import { handleSliderDrag } from '@/morpheus-app/hotspot/handleSliderDrag';
+import {
+  getActiveHotspots,
+  getHotspotCandidates,
+  withGamestateUpdates,
+} from '@/morpheus-app/hotspot/hotspotEligibility';
 import {
   executeHarnessHotspotClick,
   type HarnessClickResult,
@@ -265,11 +268,10 @@ export function useInputHandler(params: {
     screenHeight,
   ]);
 
-  // Active hotspots for current scene
+  // Keep every hotspot as a candidate. Comparator state can change during a
+  // pointer event, so filtering here would freeze eligibility until scene exit.
   const hotspots = useMemo(() => {
-    const gs = gamestatesRef.current;
-    const filter = and<Cast>(isHotspot, (cast) => isActive({ cast, gamestates: gs }));
-    return scene.casts.filter(filter) as Hotspot[];
+    return getHotspotCandidates(scene);
   }, [scene]);
 
   // Cursor index based on position and hotspots
@@ -295,7 +297,7 @@ export function useInputHandler(params: {
     }
   }, [cursorIndex]);
 
-  // Track old values for slider hotspots (keyed by castId)
+  // Slider hotspots frequently share castId 0, so preserve drag origins by state ID.
   const sliderOldValuesRef = useRef<Map<number, number>>(new Map());
 
   // Process a hotspot action and dispatch results
@@ -407,11 +409,12 @@ export function useInputHandler(params: {
       hotspot: Hotspot,
       currentPosition: { top: number; left: number },
       startingPosition: { top: number; left: number },
+      eventGamestates: GamestatesAccessor = gamestatesRef.current,
     ) => {
-      const oldValue = sliderOldValuesRef.current.get(hotspot.castId);
+      const oldValue = sliderOldValuesRef.current.get(hotspot.param1);
       const result = handleHotspotAction({
         hotspot,
-        gamestates: gamestatesRef.current,
+        gamestates: eventGamestates,
         currentPosition,
         startingPosition,
         previousSceneId: previousSceneIdRef.current,
@@ -476,15 +479,10 @@ export function useInputHandler(params: {
     processedSceneIdRef.current = scene.sceneId;
 
     const gs = gamestatesRef.current;
-    const sceneEnterHotspots = (scene.casts as Hotspot[]).filter(
-      and<Cast>(
-        isHotspot,
-        (cast) => isActive({ cast, gamestates: gs }),
-        (({ gesture: g }: Hotspot) =>
-          GESTURES[g] === 'Always' || GESTURES[g] === 'SceneEnter') as (
-          cast: Cast,
-        ) => boolean,
-      ),
+    const sceneEnterHotspots = getActiveHotspots(hotspots, gs).filter(
+      ({ gesture: gestureId }) =>
+        GESTURES[gestureId] === 'Always' ||
+        GESTURES[gestureId] === 'SceneEnter',
     );
 
     for (const hotspot of sceneEnterHotspots) {
@@ -494,7 +492,7 @@ export function useInputHandler(params: {
         { top: 0, left: 0 },
       );
     }
-  }, [scene.sceneId, scene.casts, processHotspotAction]);
+  }, [scene.sceneId, hotspots, processHotspotAction]);
 
   // Track which hotspots the pointer was in (for enter/leave events)
   const wasInHotspotsRef = useRef<Set<number>>(new Set());
@@ -511,9 +509,8 @@ export function useInputHandler(params: {
     }) => {
       const { gamePos, startPos, isDown, wasDown, wasMoved, wasUpped } = opts;
       const gs = gamestatesRef.current;
-      const activeHotspots = hotspots.filter((h) =>
-        isActive({ cast: h, gamestates: gs }),
-      );
+      let eventGamestates = gs;
+      const activeHotspots = getActiveHotspots(hotspots, eventGamestates);
 
       // Determine which hotspots the pointer is currently in
       const nowInHotspotIds = new Set<number>();
@@ -577,21 +574,49 @@ export function useInputHandler(params: {
 
       // Process drag hotspots (mouse moved while down)
       if (wasMoved && isDown) {
+        const sliderHotspots: Hotspot[] = [];
+        const rotateHotspots: Hotspot[] = [];
         for (const hotspot of activeHotspots) {
           if (
-            hotspotRectMatchesPosition(startPos)(hotspot) &&
-            or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown)(hotspot) &&
+            !hotspotRectMatchesPosition(startPos)(hotspot) ||
+            !or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown)(
+              hotspot,
+            )
+          ) {
+            continue;
+          }
+
+          if (
             or(
-              actionType.isRotate,
               actionType.isHorizSlider,
               actionType.isVertSlider,
               actionType.isTwoAxisSlider,
             )(hotspot)
           ) {
-            if (processHotspotAction(hotspot, gamePos, startPos)) {
-              break;
-            }
+            sliderHotspots.push(hotspot);
+          } else if (actionType.isRotate(hotspot)) {
+            rotateHotspots.push(hotspot);
           }
+        }
+
+        if (sliderHotspots.length > 0) {
+          const gamestateUpdates = handleSliderDrag({
+            hotspots: sliderHotspots,
+            gamestates: eventGamestates,
+            currentPosition: gamePos,
+            startingPosition: startPos,
+            oldValues: sliderOldValuesRef.current,
+            isPanoScene,
+          });
+          eventGamestates = withGamestateUpdates(
+            eventGamestates,
+            gamestateUpdates,
+          );
+          applyHotspotActionResult({ gamestateUpdates, allDone: false });
+        }
+
+        for (const hotspot of rotateHotspots) {
+          processHotspotAction(hotspot, gamePos, startPos);
         }
       }
 
@@ -618,7 +643,7 @@ export function useInputHandler(params: {
           ) {
             const gsState = gs.byId(hotspot.param1);
             if (gsState) {
-              sliderOldValuesRef.current.set(hotspot.castId, gsState.value);
+              sliderOldValuesRef.current.set(hotspot.param1, gsState.value);
             }
           }
         }
@@ -626,13 +651,27 @@ export function useInputHandler(params: {
 
       // Process "Always" hotspots with castId === 0 on every event
       // This is how the original game triggers scene changes based on gamestate
-      for (const hotspot of activeHotspots) {
+      const activeAlwaysHotspots = getActiveHotspots(
+        hotspots,
+        eventGamestates,
+      );
+      for (const hotspot of activeAlwaysHotspots) {
         if (hotspot.castId === 0 && gesture.isAlways(hotspot)) {
-          processHotspotAction(hotspot, gamePos, startPos);
+          processHotspotAction(
+            hotspot,
+            gamePos,
+            startPos,
+            eventGamestates,
+          );
         }
       }
     },
-    [hotspots, processHotspotAction],
+    [
+      applyHotspotActionResult,
+      hotspots,
+      isPanoScene,
+      processHotspotAction,
+    ],
   );
 
   // Pointer handlers
@@ -681,6 +720,7 @@ export function useInputHandler(params: {
       // Update ref synchronously so subsequent events see correct state
       pointerRef.current = newPointerState;
       setPointer(newPointerState);
+      event.currentTarget.setPointerCapture(event.pointerId);
 
       processPointerEvent({
         gamePos: startGamePos,
@@ -816,9 +856,6 @@ export function useInputHandler(params: {
         distanceMoved < CLICK_DISTANCE_THRESHOLD;
       const startPos = { top: prev.startGameY, left: prev.startGameX };
 
-      // Clear slider old values when pointer is released
-      sliderOldValuesRef.current.clear();
-
       // Update ref synchronously and state - reset start positions so cursor doesn't match old drag start
       const newPointerState = {
         ...prev,
@@ -846,9 +883,7 @@ export function useInputHandler(params: {
       // Process click if applicable
       if (isClick) {
         const gs = gamestatesRef.current;
-        const activeHotspots = hotspots.filter((h) =>
-          isActive({ cast: h, gamestates: gs }),
-        );
+        const activeHotspots = getActiveHotspots(hotspots, gs);
 
         for (const hotspot of activeHotspots) {
           if (
@@ -861,6 +896,11 @@ export function useInputHandler(params: {
             }
           }
         }
+      }
+
+      sliderOldValuesRef.current.clear();
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        event.currentTarget.releasePointerCapture(event.pointerId);
       }
     },
     [
@@ -881,6 +921,9 @@ export function useInputHandler(params: {
 
   const onPointerLeave = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+        return;
+      }
       const { clientX, clientY } = event;
       const prev = pointerRef.current;
       const newPointerState = {

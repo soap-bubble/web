@@ -1,6 +1,8 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
+import { resetGame } from '@/morpheus-app/store/actions';
+
 export type Rotation = {
   yaw3600: number;
   pitch: number;
@@ -11,10 +13,12 @@ export type RotationState = {
   seededFromTransition: boolean;
 };
 
-const initialState: RotationState = {
+const createInitialState = (): RotationState => ({
   current: { yaw3600: 0, pitch: 0 },
   seededFromTransition: false,
-};
+});
+
+const initialState = createInitialState();
 
 const rotationSlice = createSlice({
   name: 'rotation',
@@ -30,6 +34,9 @@ const rotationSlice = createSlice({
     clearRotationSeed(state) {
       state.seededFromTransition = false;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(resetGame, createInitialState);
   },
 });
 

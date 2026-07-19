@@ -39,6 +39,25 @@ interface FrameSourceRect {
   height: number
 }
 
+interface FrameLayout {
+  frameWidth: number
+  frameHeight: number
+  cols: number
+  rows: number
+  frameCount: number
+}
+
+const frameLayoutCache = new WeakMap<DrawSource, FrameLayout>()
+
+// Composite states authored by TwoAxisSlider hotspots in morpheus.map.json.
+// Their least-significant axis has eight values, so the movie is sampled as
+// eight physical Y rows instead of as one linear animation.
+const TWO_AXIS_GRID_WIDTH_BY_GAMESTATE = new Map<number, number>([
+  [1020, 8],
+  [1021, 8],
+  [1034, 8],
+])
+
 // Known frame dimensions for different asset sources
 // New extracted assets use 352x288 (1.222 aspect ratio)
 // Original game uses 320x200 scaled dimensions (1.6 aspect ratio)
@@ -93,29 +112,161 @@ function detectFrameDimensions(
   }
 }
 
-function calculateFrameSourceRect(
-  frameIndex: number,
-  castFrameWidth: number,
-  castFrameHeight: number,
-  imgWidth: number,
+export function countOccupiedAtlasFrames(
+  pixels: Uint8ClampedArray,
+  totalFrames: number
+): number {
+  for (let frame = totalFrames - 1; frame >= 0; frame -= 1) {
+    if (pixels[frame * 4 + 3] !== 0) {
+      return frame + 1
+    }
+  }
+  return totalFrames
+}
+
+function detectAtlasFrameCount({
+  img,
+  imgWidth,
+  imgHeight,
+  cols,
+  rows,
+}: {
+  img: DrawSource
+  imgWidth: number
   imgHeight: number
-): FrameSourceRect {
-  const { frameWidth, frameHeight, cols } = detectFrameDimensions(
+  cols: number
+  rows: number
+}): number {
+  const totalFrames = cols * rows
+  if (typeof document === 'undefined') {
+    return totalFrames
+  }
+
+  try {
+    const canvas = document.createElement('canvas')
+    canvas.width = cols
+    canvas.height = rows
+    const context = canvas.getContext('2d', { willReadFrequently: true })
+    if (!context) {
+      return totalFrames
+    }
+
+    context.drawImage(
+      img,
+      0,
+      0,
+      imgWidth,
+      imgHeight,
+      0,
+      0,
+      cols,
+      rows
+    )
+    return countOccupiedAtlasFrames(
+      context.getImageData(0, 0, cols, rows).data,
+      totalFrames
+    )
+  } catch (error) {
+    console.warn('Unable to inspect controlled-movie atlas padding', error)
+    return totalFrames
+  }
+}
+
+function getFrameLayout(
+  img: DrawSource,
+  castFrameWidth: number,
+  castFrameHeight: number
+): FrameLayout {
+  const cached = frameLayoutCache.get(img)
+  if (cached) {
+    return cached
+  }
+
+  const { width: imgWidth, height: imgHeight } = getDrawSourceDimensions(img)
+  const dimensions = detectFrameDimensions(
     imgWidth,
     imgHeight,
     castFrameWidth,
     castFrameHeight
   )
-  
+  const layout = {
+    ...dimensions,
+    frameCount: detectAtlasFrameCount({
+      img,
+      imgWidth,
+      imgHeight,
+      cols: dimensions.cols,
+      rows: dimensions.rows,
+    }),
+  }
+  frameLayoutCache.set(img, layout)
+  return layout
+}
+
+export function calculateControlledFrameIndex({
+  value,
+  maxValue,
+  frames,
+  frameCount,
+  direction,
+  logicalGridWidth,
+}: {
+  value: number
+  maxValue: number
+  frames: number
+  frameCount: number
+  direction: number
+  logicalGridWidth?: number
+}): number {
+  const framesPerValue = Math.max(1, frames)
+  const logicalFrame = Math.max(0, Math.round(value)) * framesPerValue
+  const logicalMaxFrame = Math.max(0, maxValue) * framesPerValue
+
+  if (direction !== 0 || logicalMaxFrame === 0 || frameCount <= 1) {
+    return Math.min(Math.max(0, frameCount - 1), logicalFrame)
+  }
+
+  // TwoAxisSlider stores a square logical grid as row-major state. Converted
+  // movies contain many horizontal samples per Y row, so preserve the row
+  // boundary instead of interpolating through the end of the previous row.
+  if (
+    logicalGridWidth !== undefined &&
+    logicalGridWidth > 1 &&
+    framesPerValue === 1 &&
+    frameCount > maxValue + 1
+  ) {
+    const roundedValue = Math.min(maxValue, Math.max(0, Math.round(value)))
+    const column = roundedValue % logicalGridWidth
+    const row = Math.floor(roundedValue / logicalGridWidth)
+    const rowStart = Math.round((row * frameCount) / logicalGridWidth)
+    const rowEnd = Math.round(((row + 1) * frameCount) / logicalGridWidth)
+    const rowFrameCount = Math.max(1, rowEnd - rowStart)
+    const columnProgress =
+      logicalGridWidth <= 1 ? 0 : column / (logicalGridWidth - 1)
+
+    return Math.min(
+      frameCount - 1,
+      rowStart + Math.round(columnProgress * (rowFrameCount - 1))
+    )
+  }
+
+  const progress = Math.min(1, logicalFrame / logicalMaxFrame)
+  return Math.round(progress * (frameCount - 1))
+}
+
+function calculateFrameSourceRect(
+  frameIndex: number,
+  layout: FrameLayout
+): FrameSourceRect {
   // Find frame position in grid
-  const col = frameIndex % cols
-  const row = Math.floor(frameIndex / cols)
+  const col = frameIndex % layout.cols
+  const row = Math.floor(frameIndex / layout.cols)
   
   return {
-    x: col * frameWidth,
-    y: row * frameHeight,
-    width: frameWidth,
-    height: frameHeight,
+    x: col * layout.frameWidth,
+    y: row * layout.frameHeight,
+    width: layout.frameWidth,
+    height: layout.frameHeight,
   }
 }
 
@@ -133,26 +284,24 @@ export function calculateControlledFrameOperation({
   const { controlledMovieCallbacks, width, height } = cast
   const gameStateId = get(controlledMovieCallbacks, '[0].gameState', null)
   const frames = get(controlledMovieCallbacks, '[0].frames', 1)
+  const direction = get(controlledMovieCallbacks, '[0].direction', 0)
 
   const renderable: Renderable = (context: CanvasRenderingContext2D) => {
     // Read gamestate value at render time so it reflects current state
     const gs = gamestates.byId(gameStateId)
-    const value = Math.round(gs.value)
-    // Frame index = gamestate value * frames-per-value
-    const frameIdx = value * frames
-
-    // Fetch image dimensions at render time (image may not be loaded at creation time)
-    const imgDimensions = getDrawSourceDimensions(img)
+    const layout = getFrameLayout(img, width, height)
+    const frameIdx = calculateControlledFrameIndex({
+      value: gs.value,
+      maxValue: gs.maxValue,
+      frames,
+      frameCount: layout.frameCount,
+      direction,
+      logicalGridWidth: TWO_AXIS_GRID_WIDTH_BY_GAMESTATE.get(gameStateId),
+    })
 
     // Calculate source rectangle in sprite sheet grid (left-to-right, top-to-bottom)
     // This handles both single-row and grid layouts, including scaled sprite sheets
-    const srcRect = calculateFrameSourceRect(
-      frameIdx,
-      width,
-      height,
-      imgDimensions.width,
-      imgDimensions.height
-    )
+    const srcRect = calculateFrameSourceRect(frameIdx, layout)
 
     context.drawImage(
       img,

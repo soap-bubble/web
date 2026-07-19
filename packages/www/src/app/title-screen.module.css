@@ -1,0 +1,157 @@
+.screen {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  background: #000;
+  color: #fff;
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.title,
+.intro {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 400ms ease-in-out;
+}
+
+.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.titleArt {
+  position: relative;
+  width: min(100vw, calc(100vh * 1.6));
+  height: min(100vh, calc(100vw / 1.6));
+  overflow: visible;
+  background-image:
+    linear-gradient(
+      to bottom,
+      transparent 38%,
+      rgba(4, 8, 12, 0.8) 50%,
+      #020305 62%,
+      #000 100%
+    ),
+    var(--title-image);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  box-shadow: 0 0 80px rgba(111, 143, 166, 0.28);
+}
+
+.newGameButton {
+  position: absolute;
+  left: 50%;
+  bottom: clamp(18px, 5vh, 52px);
+  width: clamp(220px, 34%, 340px);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: transparent;
+  cursor: pointer;
+  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.72));
+  transform: translateX(-50%);
+  transition: filter 160ms ease, transform 160ms ease;
+}
+
+.newGameButton img {
+  display: block;
+  width: 100%;
+  height: clamp(92px, 13vh, 136px);
+}
+
+.newGameButton:hover {
+  filter: brightness(1.18) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.8));
+  transform: translateX(-50%) scale(1.025);
+}
+
+.newGameButton:focus-visible,
+.skipButton:focus-visible,
+.error button:focus-visible {
+  outline: 3px solid #eef8ff;
+  outline-offset: 4px;
+}
+
+.newGameButton:active {
+  transform: translateX(-50%) scale(0.985);
+}
+
+.intro {
+  background: #000;
+}
+
+.introMovie {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.skipButton {
+  position: absolute;
+  right: clamp(16px, 3vw, 36px);
+  bottom: clamp(16px, 3vw, 36px);
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.65);
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.62);
+  color: #fff;
+  font: inherit;
+  letter-spacing: 0.08em;
+  cursor: pointer;
+}
+
+.skipButton:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.error {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  background: #05080b;
+  text-align: center;
+}
+
+.error button {
+  padding: 12px 22px;
+  border: 1px solid #dce7ee;
+  background: #19252d;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .title,
+  .intro,
+  .newGameButton {
+    transition: none;
+  }
+}
+
+@media (hover: none) {
+  .newGameButton:hover {
+    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.72));
+    transform: translateX(-50%);
+  }
+}
+
+@media (max-aspect-ratio: 4 / 5) {
+  .newGameButton {
+    bottom: -108px;
+    width: min(64vw, 240px);
+  }
+
+  .newGameButton img {
+    height: 92px;
+  }
+}

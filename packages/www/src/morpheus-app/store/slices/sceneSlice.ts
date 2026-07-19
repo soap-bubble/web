@@ -4,6 +4,8 @@ import type { Scene } from 'morpheus/casts/types';
 import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import { createSelector } from 'reselect';
 
+import { resetGame } from '@/morpheus-app/store/actions';
+
 export type SceneStackEntry = {
   sceneId: number;
   status: 'active' | 'background';
@@ -18,13 +20,15 @@ export type SceneState = {
   maxStackSize: number;
 };
 
-const initialState: SceneState = {
+const createInitialState = (): SceneState => ({
   byId: {},
   stack: [],
   activeSceneId: null,
   requestedSceneId: null,
   maxStackSize: 5,
-};
+});
+
+const initialState = createInitialState();
 
 export const loadScene = createAsyncThunk(
   'scene/loadScene',
@@ -138,6 +142,7 @@ const sceneSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(resetGame, createInitialState);
     builder.addCase(loadScene.fulfilled, (state, action) => {
       state.byId[action.payload.sceneId] = action.payload;
     });

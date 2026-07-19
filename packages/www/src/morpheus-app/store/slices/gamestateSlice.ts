@@ -4,6 +4,7 @@ import { fetchInitial } from '@soapbubble/morpheus-client/service/gameState';
 import type { Gamestate } from 'morpheus/casts/types';
 import type { GamestateDelta } from '@/morpheus-app/storage/types';
 import type { GamestateValues } from '@/morpheus-app/storage/gamestateStorage';
+import { resetGame } from '@/morpheus-app/store/actions';
 import {
   createEntry,
   getEntry,
@@ -23,13 +24,15 @@ const initialGamestates = fetchInitial();
 const genesisValues = (): GamestateValues =>
   Object.fromEntries(initialGamestates.map((state) => [state.stateId, state.value]));
 
-const initialState: GamestateState = {
+const createInitialState = (): GamestateState => ({
   byId: Object.fromEntries(
-    initialGamestates.map((state) => [state.stateId, state]),
+    initialGamestates.map((state) => [state.stateId, { ...state }]),
   ),
   pendingUpdates: {},
   currentEntryId: null,
-};
+});
+
+const initialState = createInitialState();
 
 function hasPendingUpdates(delta: GamestateDelta): boolean {
   return Object.keys(delta).length > 0;
@@ -111,6 +114,7 @@ const gamestateSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
+    builder.addCase(resetGame, createInitialState);
     builder.addCase(commitSceneUpdates.fulfilled, (state, action) => {
       state.currentEntryId = action.payload.entryId;
       state.pendingUpdates = {};

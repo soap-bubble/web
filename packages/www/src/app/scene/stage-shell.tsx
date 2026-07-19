@@ -42,9 +42,65 @@ import '@/morpheus-app/runtime';
 type PendingTransition = {
   sceneId: number;
   scene: Scene;
+  dissolve: boolean;
   startAngle?: number;
   mode?: 'goBack';
 };
+
+const DISSOLVE_DURATION_MS = 600;
+
+function captureStageFrame(
+  source: HTMLDivElement,
+  target: HTMLCanvasElement,
+): boolean {
+  const sourceRect = source.getBoundingClientRect();
+  const canvases = source.querySelectorAll('canvas');
+  if (sourceRect.width <= 0 || sourceRect.height <= 0 || canvases.length === 0) {
+    return false;
+  }
+
+  const pixelRatio = window.devicePixelRatio || 1;
+  const pixelWidth = Math.max(1, Math.round(sourceRect.width * pixelRatio));
+  const pixelHeight = Math.max(1, Math.round(sourceRect.height * pixelRatio));
+  if (target.width !== pixelWidth) {
+    target.width = pixelWidth;
+  }
+  if (target.height !== pixelHeight) {
+    target.height = pixelHeight;
+  }
+  target.style.width = `${sourceRect.width}px`;
+  target.style.height = `${sourceRect.height}px`;
+
+  const context = target.getContext('2d');
+  if (!context) {
+    return false;
+  }
+  context.setTransform(pixelRatio, 0, 0, pixelRatio, 0, 0);
+  context.fillStyle = '#000';
+  context.fillRect(0, 0, sourceRect.width, sourceRect.height);
+
+  let capturedCanvas = false;
+  for (const canvas of canvases) {
+    const canvasRect = canvas.getBoundingClientRect();
+    if (canvasRect.width <= 0 || canvasRect.height <= 0) {
+      continue;
+    }
+    try {
+      context.drawImage(
+        canvas,
+        canvasRect.left - sourceRect.left,
+        canvasRect.top - sourceRect.top,
+        canvasRect.width,
+        canvasRect.height,
+      );
+      capturedCanvas = true;
+    } catch {
+      // A single unavailable WebGL frame should not block the scene change.
+    }
+  }
+
+  return capturedCanvas;
+}
 
 function isHotspot(cast: Cast): cast is Hotspot {
   return cast.__t === 'Hotspot';
@@ -147,6 +203,22 @@ export const SceneStageShell = () => {
   const transitionInProgressRef = useRef(false);
   const committedTransitionSceneIdRef = useRef<number | null>(null);
   const lastPushedSceneIdRef = useRef<number | null>(null);
+  const stageCaptureSourceRef = useRef<HTMLDivElement>(null);
+  const dissolveOverlayRef = useRef<HTMLCanvasElement>(null);
+  const dissolveFrameRef = useRef<number | null>(null);
+  const dissolveCleanupRef = useRef<number | null>(null);
+
+  useEffect(
+    () => () => {
+      if (dissolveFrameRef.current !== null) {
+        window.cancelAnimationFrame(dissolveFrameRef.current);
+      }
+      if (dissolveCleanupRef.current !== null) {
+        window.clearTimeout(dissolveCleanupRef.current);
+      }
+    },
+    [],
+  );
 
   const pendingScenes = useMemo(() => {
     return pendingTransition ? [pendingTransition.scene] : [];
@@ -190,6 +262,7 @@ export const SceneStageShell = () => {
   const handleSceneTransition = useCallback(
     async ({
       sceneId,
+      dissolve,
       startAngle,
       mode,
     }: {
@@ -214,7 +287,13 @@ export const SceneStageShell = () => {
           transitionInProgressRef.current = false;
           return;
         }
-        setPendingTransition({ sceneId, scene: targetScene, startAngle, mode });
+        setPendingTransition({
+          sceneId,
+          scene: targetScene,
+          dissolve,
+          startAngle,
+          mode,
+        });
       } catch {
         transitionInProgressRef.current = false;
       }
@@ -243,33 +322,97 @@ export const SceneStageShell = () => {
     [mcpSessionName, pathname, router, searchParams],
   );
 
+  const commitPendingTransition = useCallback(
+    (transition: PendingTransition) => {
+      if (committedTransitionSceneIdRef.current === transition.sceneId) {
+        return;
+      }
+      committedTransitionSceneIdRef.current = transition.sceneId;
+
+      const overlay = dissolveOverlayRef.current;
+      const source = stageCaptureSourceRef.current;
+      const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      const shouldDissolve =
+        transition.dissolve &&
+        !reduceMotion &&
+        overlay !== null &&
+        source !== null &&
+        captureStageFrame(source, overlay);
+
+      if (shouldDissolve && overlay) {
+        if (dissolveFrameRef.current !== null) {
+          window.cancelAnimationFrame(dissolveFrameRef.current);
+          dissolveFrameRef.current = null;
+        }
+        if (dissolveCleanupRef.current !== null) {
+          window.clearTimeout(dissolveCleanupRef.current);
+          dissolveCleanupRef.current = null;
+        }
+        overlay.dataset.transitionState = 'captured';
+        overlay.style.transition = 'none';
+        overlay.style.opacity = '1';
+        overlay.style.pointerEvents = 'auto';
+      } else if (overlay) {
+        if (dissolveFrameRef.current !== null) {
+          window.cancelAnimationFrame(dissolveFrameRef.current);
+          dissolveFrameRef.current = null;
+        }
+        if (dissolveCleanupRef.current !== null) {
+          window.clearTimeout(dissolveCleanupRef.current);
+          dissolveCleanupRef.current = null;
+        }
+        overlay.dataset.transitionState = 'idle';
+        overlay.style.transition = 'none';
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+      }
+
+      const previousSceneId = activeSceneIdRef.current ?? transition.sceneId;
+      dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
+      dispatch(scenePrefetched(transition.scene));
+      if (transition.mode === 'goBack') {
+        dispatch(activateScenePrune(transition.sceneId));
+      } else {
+        dispatch(activateScene(transition.sceneId));
+      }
+      setPendingTransition(null);
+      pushSceneRoute(transition.sceneId);
+      // The incoming scene may immediately author another transition. The fade
+      // is visual cleanup, not part of transition admission.
+      transitionInProgressRef.current = false;
+
+      if (!shouldDissolve || !overlay) {
+        return;
+      }
+
+      dissolveFrameRef.current = window.requestAnimationFrame(() => {
+        dissolveFrameRef.current = window.requestAnimationFrame(() => {
+          dissolveFrameRef.current = null;
+          overlay.dataset.transitionState = 'fading';
+          overlay.style.transition = `opacity ${DISSOLVE_DURATION_MS}ms ease-in-out`;
+          overlay.style.opacity = '0';
+          dissolveCleanupRef.current = window.setTimeout(() => {
+            overlay.dataset.transitionState = 'idle';
+            overlay.style.pointerEvents = 'none';
+            overlay.style.transition = 'none';
+            dissolveCleanupRef.current = null;
+          }, DISSOLVE_DURATION_MS);
+        });
+      });
+    },
+    [dispatch, pushSceneRoute],
+  );
+
   const handleSceneReady = useCallback(
     (readySceneId: number) => {
       if (!pendingTransition || pendingTransition.sceneId !== readySceneId) {
         return;
       }
-      // `onSceneReady` can fire more than once (WebGl + Special, or duplicated events).
-      // Ensure we only commit/push once per transition.
-      if (committedTransitionSceneIdRef.current === readySceneId) {
-        return;
-      }
-      committedTransitionSceneIdRef.current = readySceneId;
-
-      const previousSceneId = activeSceneIdRef.current ?? readySceneId;
-      dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
-      dispatch(scenePrefetched(pendingTransition.scene));
-      if (pendingTransition.mode === 'goBack') {
-        dispatch(activateScenePrune(readySceneId));
-      } else {
-        dispatch(activateScene(readySceneId));
-      }
-      setPendingTransition(null);
-      transitionInProgressRef.current = false;
-
-      // Now that the stage has already switched, update the URL/history "the Next way".
-      pushSceneRoute(readySceneId);
+      commitPendingTransition(pendingTransition);
     },
-    [dispatch, pendingTransition, pushSceneRoute],
+    [commitPendingTransition, pendingTransition],
   );
 
   // Fallback: don't block forever if a cast never reaches "ready"
@@ -277,25 +420,11 @@ export const SceneStageShell = () => {
     if (!pendingTransition) return;
 
     const timeoutId = setTimeout(() => {
-      if (committedTransitionSceneIdRef.current === pendingTransition.sceneId) {
-        return;
-      }
-      committedTransitionSceneIdRef.current = pendingTransition.sceneId;
-      const previousSceneId = activeSceneIdRef.current ?? pendingTransition.sceneId;
-      dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
-      dispatch(scenePrefetched(pendingTransition.scene));
-      if (pendingTransition.mode === 'goBack') {
-        dispatch(activateScenePrune(pendingTransition.sceneId));
-      } else {
-        dispatch(activateScene(pendingTransition.sceneId));
-      }
-      setPendingTransition(null);
-      transitionInProgressRef.current = false;
-      pushSceneRoute(pendingTransition.sceneId);
+      commitPendingTransition(pendingTransition);
     }, 5000);
 
     return () => clearTimeout(timeoutId);
-  }, [dispatch, pendingTransition, pushSceneRoute]);
+  }, [commitPendingTransition, pendingTransition]);
 
   const handleLoadScene = useCallback(
     async (sceneId: number) => {
@@ -453,20 +582,35 @@ export const SceneStageShell = () => {
       }}
     >
       <SettingsOverlay />
-      <InteractiveStage
-        stageScenes={stageScenes}
-        activeScene={activeScene}
-        pendingScenes={pendingScenes}
-        gamestates={gamestates}
-        width={width}
-        height={height}
-        left={left}
-        top={top}
-        onRotationChange={handleRotationChange}
-        rotation={rotation}
-        onTransition={handleSceneTransition}
-        onSceneReady={handleSceneReady}
-        onHarnessClickReady={handleHarnessClickReady}
+      <div ref={stageCaptureSourceRef} style={{ position: 'absolute', inset: 0 }}>
+        <InteractiveStage
+          stageScenes={stageScenes}
+          activeScene={activeScene}
+          pendingScenes={pendingScenes}
+          gamestates={gamestates}
+          width={width}
+          height={height}
+          left={left}
+          top={top}
+          onRotationChange={handleRotationChange}
+          rotation={rotation}
+          onTransition={handleSceneTransition}
+          onSceneReady={handleSceneReady}
+          onHarnessClickReady={handleHarnessClickReady}
+        />
+      </div>
+      <canvas
+        ref={dissolveOverlayRef}
+        data-testid="scene-dissolve-overlay"
+        data-transition-state="idle"
+        aria-hidden="true"
+        style={{
+          position: 'absolute',
+          inset: 0,
+          zIndex: 10,
+          opacity: 0,
+          pointerEvents: 'none',
+        }}
       />
       {process.env.NODE_ENV === 'development' && (
         <div

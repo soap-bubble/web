@@ -82,6 +82,7 @@ const Canvas = ({
         left: `${left}px`,
         top: `${top}px`,
         zIndex: 1,
+        touchAction: 'none',
       }}
     />
   )

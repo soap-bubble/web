@@ -7,6 +7,7 @@ import type {
   Scene,
 } from '@soapbubble/morpheus-client/morpheus/casts/types';
 import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
+import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget';
 
 import InteractiveStage, {
   ExternalRotation,
@@ -332,6 +333,9 @@ export const SceneStageShell = () => {
       checkpointOnReady?: boolean;
       detachRuntime?: boolean;
     }): Promise<boolean> => {
+      if (!isNavigableSceneTarget(sceneId)) {
+        return false;
+      }
       if (transitionInProgressRef.current) {
         return false;
       }

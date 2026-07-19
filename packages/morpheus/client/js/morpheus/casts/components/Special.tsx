@@ -21,10 +21,9 @@ import { Observable, Subscriber } from 'rxjs'
 import { share } from 'rxjs/operators'
 import { and } from 'utils/matchers'
 import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle'
+import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget'
 
 const logger = loggerFactory('Special')
-
-const TRANSITION_SCENE_SENTINEL = 0x3fffffff
 
 const isMovieSpecialCast = (cast: MovieCast): cast is MovieSpecialCast =>
   cast.__t === 'MovieSpecialCast'
@@ -141,11 +140,7 @@ const Special = ({
             continue
           }
           const nextSceneId = cast.nextSceneId
-          if (
-            !Number.isFinite(nextSceneId) ||
-            nextSceneId === TRANSITION_SCENE_SENTINEL ||
-            nextSceneId === currentSceneId
-          ) {
+          if (!isNavigableSceneTarget(nextSceneId, currentSceneId)) {
             continue
           }
           const startAngle = transitionAngleToPanoramaYaw(cast.angleAtEnd)

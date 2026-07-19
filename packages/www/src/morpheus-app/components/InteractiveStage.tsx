@@ -11,6 +11,7 @@ import Sounds, { AudioController } from 'morpheus/casts/components/Sounds';
 import useCastRefNoticer from 'morpheus/casts/hooks/useCastRefNoticer';
 import usePanoMomentum from 'morpheus/casts/hooks/panoMomentum';
 import { composePointer } from 'morpheus/hotspot/eventInterface';
+import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget';
 import {
   isPano,
   forMorpheusType,
@@ -70,8 +71,6 @@ interface InteractiveStageProps {
   onInputControllerReady?: (controller: StageInputController | null) => void;
   skipSceneEntryGeneration?: number | null;
 }
-
-const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
   return (cast: T) => isCastActive({ cast, gamestates });
@@ -538,8 +537,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         }
 
         if (
-          typeof targetSceneId !== 'number' ||
-          targetSceneId === TRANSITION_SCENE_SENTINEL
+          !isNavigableSceneTarget(targetSceneId, activeScene.sceneId)
         ) {
           continue;
         }

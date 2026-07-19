@@ -1,10 +1,9 @@
 import { ACTION_TYPES } from 'morpheus/constants';
 import type { Hotspot } from 'morpheus/casts/types';
 import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle';
+import { TRANSITION_SCENE_SENTINEL } from 'morpheus/scene/transitionTarget';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import { getScript } from '@/morpheus-app/hotspot/scripts';
-
-const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
 
 type Position = { top: number; left: number };
 

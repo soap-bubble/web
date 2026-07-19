@@ -1,3 +1,5 @@
+import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget';
+
 import { writeLivingSaveCheckpoint } from '@/morpheus-app/storage/livingSaveStorage';
 import { createLivingSaveResumePointId } from '@/morpheus-app/storage/livingSaveIdentity';
 import {
@@ -53,7 +55,7 @@ export function createLivingSaveCheckpointCoordinator(
       activeSlotId === null ||
       state.livingSaves.runtimeGeneration !== runtimeGeneration ||
       state.livingSaves.bootstrapPhase !== 'ready' ||
-      state.scene.activeSceneId === null
+      !isNavigableSceneTarget(state.scene.activeSceneId)
     ) {
       return;
     }

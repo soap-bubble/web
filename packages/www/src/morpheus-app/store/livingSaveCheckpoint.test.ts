@@ -124,6 +124,43 @@ describe('living-save checkpoints', () => {
     expect(writes).toBe(0);
   });
 
+  it('does not overwrite a durable save with background scene zero', async () => {
+    const store = createAppStore();
+    const original = createLivingSaveEnvelopeFixture();
+    const catalog = occupyLivingSaveSlot(
+      createEmptyLivingSaveCatalogFixture(),
+      'slot-1',
+      original,
+    );
+    store.dispatch(
+      installLivingSaveRuntime({
+        operationId: 'install',
+        catalog,
+        slotId: 'slot-1',
+        envelope: original,
+        activeScene: scene(0),
+        returnScene: null,
+        saveHealth: 'saved',
+        skipSceneEntryActions: false,
+      }),
+    );
+    let writes = 0;
+    const checkpoints = createLivingSaveCheckpointCoordinator({
+      dispatch: store.dispatch,
+      getState: store.getState,
+      writeCheckpoint: async () => {
+        writes += 1;
+        return { ok: false, code: 'conflict' };
+      },
+      now: Date.now,
+      createResumePointId: () => 'unused',
+    });
+
+    await checkpoints.requestCheckpoint(1);
+
+    expect(writes).toBe(0);
+  });
+
   it('recovers from a rejected storage write', async () => {
     const store = createAppStore();
     const original = createLivingSaveEnvelopeFixture();

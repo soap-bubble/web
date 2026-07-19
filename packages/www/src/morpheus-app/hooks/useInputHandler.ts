@@ -23,6 +23,7 @@ import {
   handleHotspotAction,
   type HotspotActionResult,
 } from '@/morpheus-app/hotspot/handleHotspotAction';
+import { resolveAlwaysHotspotActions } from '@/morpheus-app/hotspot/alwaysHotspots';
 import { handleSliderDrag } from '@/morpheus-app/hotspot/handleSliderDrag';
 import {
   getActiveHotspots,
@@ -505,7 +506,7 @@ export function useInputHandler(params: {
     }
   }, []);
 
-  const processHotspotAction = useCallback(
+  const resolveHotspotAction = useCallback(
     (
       hotspot: Hotspot,
       currentPosition: { top: number; left: number },
@@ -513,7 +514,7 @@ export function useInputHandler(params: {
       eventGamestates: GamestatesAccessor = gamestatesRef.current,
     ) => {
       const oldValue = sliderOldValuesRef.current.get(hotspot.param1);
-      const result = handleHotspotAction({
+      return handleHotspotAction({
         hotspot,
         gamestates: eventGamestates,
         currentPosition,
@@ -522,10 +523,26 @@ export function useInputHandler(params: {
         isPanoScene,
         oldValue,
       });
-
-      return applyHotspotActionResult(result);
     },
-    [applyHotspotActionResult, isPanoScene],
+    [isPanoScene],
+  );
+
+  const processHotspotAction = useCallback(
+    (
+      hotspot: Hotspot,
+      currentPosition: { top: number; left: number },
+      startingPosition: { top: number; left: number },
+      eventGamestates: GamestatesAccessor = gamestatesRef.current,
+    ) =>
+      applyHotspotActionResult(
+        resolveHotspotAction(
+          hotspot,
+          currentPosition,
+          startingPosition,
+          eventGamestates,
+        ),
+      ),
+    [applyHotspotActionResult, resolveHotspotAction],
   );
 
   const clickHotspot = useCallback(
@@ -779,14 +796,28 @@ export function useInputHandler(params: {
 
       // Process "Always" hotspots with castId === 0 on every event
       // This is how the original game triggers scene changes based on gamestate
-      const activeAlwaysHotspots = getActiveHotspots(hotspots, eventGamestates);
-      for (const hotspot of activeAlwaysHotspots) {
-        if (hotspot.castId === 0 && gesture.isAlways(hotspot)) {
-          processHotspotAction(hotspot, gamePos, startPos, eventGamestates);
-        }
+      const alwaysResults = resolveAlwaysHotspotActions({
+        hotspots,
+        gamestates: eventGamestates,
+        execute: (hotspot, currentGamestates) =>
+          resolveHotspotAction(
+            hotspot,
+            gamePos,
+            startPos,
+            currentGamestates,
+          ),
+      });
+      for (const result of alwaysResults) {
+        applyHotspotActionResult(result);
       }
     },
-    [applyHotspotActionResult, hotspots, isPanoScene, processHotspotAction],
+    [
+      applyHotspotActionResult,
+      hotspots,
+      isPanoScene,
+      processHotspotAction,
+      resolveHotspotAction,
+    ],
   );
 
   // Pointer handlers

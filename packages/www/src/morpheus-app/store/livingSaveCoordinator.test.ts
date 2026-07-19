@@ -10,6 +10,9 @@ import {
 } from './testFixtures';
 import type {
   LivingSaveCatalog,
+  LivingSaveResult,
+  LivingSaveSessionEnvelope,
+  LivingSaveSlotId,
   LivingSaveValidationResult,
 } from '@/morpheus-app/storage/livingSaveTypes';
 
@@ -27,7 +30,17 @@ const unconfiguredFileParser = async () => ({
   reason: 'File parsing is not used by this test.',
 });
 
-function createHarness(catalog: LivingSaveCatalog) {
+function createHarness(
+  catalog: LivingSaveCatalog,
+  storage: {
+    readEnvelope?: (
+      slotId: LivingSaveSlotId,
+    ) => Promise<LivingSaveResult<LivingSaveSessionEnvelope>>;
+    readRawPayload?: (
+      slotId: LivingSaveSlotId,
+    ) => Promise<LivingSaveResult<unknown>>;
+  } = {},
+) {
   const store = createAppStore();
   const replacedRoutes: number[] = [];
   let titleVisits = 0;
@@ -42,6 +55,7 @@ function createHarness(catalog: LivingSaveCatalog) {
     readCatalog: async () => ({ ok: true, value: catalog }),
     activateSlot: async () => ({ ok: true, value: catalog }),
     createSlot: async () => ({ ok: true, value: catalog }),
+    ...storage,
     parseFileText: unconfiguredFileParser,
     validateEnvelope: (envelope) => validateEnvelope(envelope),
     fetchScene: async (sceneId) => scene(sceneId),
@@ -62,6 +76,38 @@ function createHarness(catalog: LivingSaveCatalog) {
 }
 
 describe('livingSaveCoordinator', () => {
+  it('prepares occupied and unloadable slots for export behind one boundary', async () => {
+    const envelope = createLivingSaveEnvelopeFixture({
+      resumePointId: 'resume-test',
+    });
+    const readEnvelope = vi
+      .fn()
+      .mockResolvedValueOnce({ ok: true, value: envelope })
+      .mockResolvedValueOnce({ ok: false, code: 'invalid-data' });
+    const readRawPayload = vi
+      .fn()
+      .mockResolvedValue({ ok: true, value: { legacy: true } });
+    const harness = createHarness(createEmptyLivingSaveCatalogFixture(), {
+      readEnvelope,
+      readRawPayload,
+    });
+
+    await expect(harness.coordinator.readExportFile('slot-1')).resolves.toEqual({
+      ok: true,
+      value: {
+        contents: `${JSON.stringify(envelope, null, 2)}\n`,
+        suffix: 'resume-test',
+      },
+    });
+    await expect(harness.coordinator.readExportFile('slot-2')).resolves.toEqual({
+      ok: true,
+      value: {
+        contents: '{\n  "legacy": true\n}\n',
+        suffix: 'unavailable',
+      },
+    });
+  });
+
   it('lets a valid active slot outrank a conflicting route scene', async () => {
     const envelope = createLivingSaveEnvelopeFixture({ activeSceneId: 2000 });
     const catalog = occupyLivingSaveSlot(

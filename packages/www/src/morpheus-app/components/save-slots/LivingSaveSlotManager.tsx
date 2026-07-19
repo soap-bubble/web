@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState } from 'react';
 
 import {
   MAX_LIVING_SAVE_FILE_BYTES,
-  serializeLivingSaveFile,
 } from '@/morpheus-app/storage/livingSaveFiles';
 import { useAppSelector } from '@/morpheus-app/store/hooks';
 import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordinatorContext';
@@ -25,9 +24,9 @@ type LivingSaveSlotManagerProps = {
 
 const fileNameForSlot = (
   slot: LivingSaveSlotSummary,
-  resumePointId: string,
+  suffix: string,
 ): string =>
-  `morpheus-${slot.slotId}-${resumePointId.replace(/[^a-zA-Z0-9_-]/g, '-')}.json`;
+  `morpheus-${slot.slotId}-${suffix.replace(/[^a-zA-Z0-9_-]/g, '-')}.json`;
 
 export const LivingSaveSlotManager = ({
   title,
@@ -61,19 +60,22 @@ export const LivingSaveSlotManager = ({
   const exportSlot = useCallback(
     async (slot: LivingSaveSlotSummary) => {
       setLocalFailure(null);
-      const result = await coordinator.readEnvelope(slot.slotId);
+      if (slot.state === 'empty') {
+        return;
+      }
+      const result = await coordinator.readExportFile(slot.slotId);
       if (!result.ok) {
-        setLocalFailure(result.code);
+        setLocalFailure(result.reason ?? result.code);
         return;
       }
 
-      const blob = new Blob([serializeLivingSaveFile(result.value)], {
+      const blob = new Blob([result.value.contents], {
         type: 'application/json',
       });
       const url = URL.createObjectURL(blob);
       const anchor = document.createElement('a');
       anchor.href = url;
-      anchor.download = fileNameForSlot(slot, result.value.resumePointId);
+      anchor.download = fileNameForSlot(slot, result.value.suffix);
       document.body.append(anchor);
       anchor.click();
       anchor.remove();
@@ -148,7 +150,7 @@ export const LivingSaveSlotManager = ({
                 />
               </label>
             )}
-            {slot.state === 'occupied' && (
+            {slot.state !== 'empty' && (
               <button
                 type="button"
                 className={styles.slotAction}

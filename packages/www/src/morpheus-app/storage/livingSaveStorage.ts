@@ -177,11 +177,13 @@ function classifyCatalog(raw: RawLivingSaveCatalog): LivingSaveCatalog {
   };
 }
 
-async function runCatalogTransaction(
+async function runRawCatalogTransaction<T>(
+  mode: IDBTransactionMode,
   mutate: (
     catalog: RawLivingSaveCatalog,
   ) => CatalogMutation,
-): Promise<LivingSaveResult<LivingSaveCatalog>> {
+  select: (catalog: RawLivingSaveCatalog) => T,
+): Promise<LivingSaveResult<T>> {
   let database: IDBDatabase;
   try {
     database = await openDatabase();
@@ -194,13 +196,10 @@ async function runCatalogTransaction(
   }
 
   return new Promise((resolve) => {
-    const transaction = database.transaction(
-      LIVING_SAVE_STORE_NAME,
-      'readwrite',
-    );
+    const transaction = database.transaction(LIVING_SAVE_STORE_NAME, mode);
     const store = transaction.objectStore(LIVING_SAVE_STORE_NAME);
     const request = store.get(LIVING_SAVE_CATALOG_KEY);
-    let result: LivingSaveResult<LivingSaveCatalog> | null = null;
+    let result: LivingSaveResult<T> | null = null;
 
     request.onsuccess = () => {
       const raw =
@@ -220,8 +219,11 @@ async function runCatalogTransaction(
         result = mutation;
         return;
       }
-      result = { ok: true, value: classifyCatalog(mutation.catalog) };
-      if (mutation.catalog !== raw || request.result === undefined) {
+      result = { ok: true, value: select(mutation.catalog) };
+      if (
+        mode === 'readwrite' &&
+        (mutation.catalog !== raw || request.result === undefined)
+      ) {
         store.put(mutation.catalog, LIVING_SAVE_CATALOG_KEY);
       }
     };
@@ -264,6 +266,14 @@ async function runCatalogTransaction(
   });
 }
 
+function runCatalogTransaction(
+  mutate: (
+    catalog: RawLivingSaveCatalog,
+  ) => CatalogMutation,
+): Promise<LivingSaveResult<LivingSaveCatalog>> {
+  return runRawCatalogTransaction('readwrite', mutate, classifyCatalog);
+}
+
 function conflict(): CatalogMutation {
   return { ok: false, code: 'conflict' };
 }
@@ -286,6 +296,23 @@ export function readLivingSaveCatalog(): Promise<
   LivingSaveResult<LivingSaveCatalog>
 > {
   return runCatalogTransaction((catalog) => ({ ok: true, catalog }));
+}
+
+export async function readLivingSaveRawPayload(
+  slotId: LivingSaveSlotId,
+): Promise<LivingSaveResult<unknown>> {
+  const result = await runRawCatalogTransaction(
+    'readonly',
+    (catalog) => ({ ok: true, catalog }),
+    (catalog) => catalog.slots[slotId].payload,
+  );
+  if (!result.ok) {
+    return result;
+  }
+  if (result.value === null) {
+    return { ok: false, code: 'empty-target' };
+  }
+  return result;
 }
 
 export function createLivingSaveSlot(params: {

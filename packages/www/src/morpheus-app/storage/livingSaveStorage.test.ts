@@ -9,6 +9,7 @@ import {
   LIVING_SAVE_DATABASE_NAME,
   LIVING_SAVE_STORE_NAME,
   readLivingSaveCatalog,
+  readLivingSaveRawPayload,
   undoLivingSaveDeletion,
   writeLivingSaveCheckpoint,
 } from './livingSaveStorage';
@@ -152,13 +153,14 @@ describe('living-save storage', () => {
   });
 
   it('keeps an unloadable raw slot from hiding healthy siblings', async () => {
+    const rawPayload = { corrupted: true, sceneId: 0 };
     await writeRawCatalog({
       format: 'morpheus-living-save-catalog',
       schemaVersion: 1,
       revision: 4,
       activeSlotId: null,
       slots: {
-        'slot-1': { revision: 3, payload: { corrupted: true } },
+        'slot-1': { revision: 3, payload: rawPayload },
         'slot-2': { revision: 0, payload: null },
         'slot-3': { revision: 0, payload: null },
       },
@@ -169,6 +171,9 @@ describe('living-save storage', () => {
 
     expect(catalog.slots['slot-1']).toMatchObject({ kind: 'unloadable', revision: 3 });
     expect(catalog.slots['slot-2']).toMatchObject({ kind: 'empty', revision: 0 });
+    expect(expectSuccess(await readLivingSaveRawPayload('slot-1'))).toEqual(
+      rawPayload,
+    );
   });
 
   it('deletes and restores an unloadable slot without rewriting its raw payload', async () => {

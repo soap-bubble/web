@@ -8,10 +8,12 @@ import {
   importLivingSaveSlot,
   readLivingSaveEnvelope,
   readLivingSaveCatalog,
+  readLivingSaveRawPayload,
   undoLivingSaveDeletion,
 } from '@/morpheus-app/storage/livingSaveStorage';
 import {
   parseLivingSaveFileText,
+  serializeLivingSaveFile,
 } from '@/morpheus-app/storage/livingSaveFiles';
 import type { LivingSaveFileParseResult } from '@/morpheus-app/storage/livingSaveFiles';
 import { validateLivingSaveSessionEnvelope } from '@/morpheus-app/storage/livingSaveSchema';
@@ -85,6 +87,9 @@ export type LivingSaveCoordinatorDependencies = {
   readEnvelope?: (
     slotId: LivingSaveSlotId,
   ) => Promise<LivingSaveResult<LivingSaveSessionEnvelope>>;
+  readRawPayload?: (
+    slotId: LivingSaveSlotId,
+  ) => Promise<LivingSaveResult<unknown>>;
   parseFileText: (text: string) => Promise<LivingSaveFileParseResult>;
   validateEnvelope: (
     envelope: LivingSaveSessionEnvelope,
@@ -122,9 +127,9 @@ export type LivingSaveCoordinator = {
     slotId: LivingSaveSlotId,
     text: string,
   ) => Promise<LivingSaveCoordinatorOutcome>;
-  readEnvelope: (
+  readExportFile: (
     slotId: LivingSaveSlotId,
-  ) => Promise<LivingSaveResult<LivingSaveSessionEnvelope>>;
+  ) => Promise<LivingSaveResult<{ contents: string; suffix: string }>>;
 };
 
 function createOperationId(kind: string, sequence: number): string {
@@ -592,10 +597,56 @@ export function createLivingSaveCoordinator(
     return { ok: true, kind: 'title' };
   };
 
-  const readEnvelope: LivingSaveCoordinator['readEnvelope'] = (slotId) =>
-    dependencies.readEnvelope
-      ? dependencies.readEnvelope(slotId)
-      : Promise.resolve({ ok: false, code: 'unavailable-storage' });
+  const readExportFile: LivingSaveCoordinator['readExportFile'] = async (
+    slotId,
+  ) => {
+    if (!dependencies.readEnvelope || !dependencies.readRawPayload) {
+      return { ok: false, code: 'unavailable-storage' };
+    }
+
+    const envelopeResult = await dependencies.readEnvelope(slotId);
+    if (envelopeResult.ok) {
+      return {
+        ok: true,
+        value: {
+          contents: serializeLivingSaveFile(envelopeResult.value),
+          suffix: envelopeResult.value.resumePointId,
+        },
+      };
+    }
+    if (envelopeResult.code !== 'invalid-data') {
+      return envelopeResult;
+    }
+
+    const rawResult = await dependencies.readRawPayload(slotId);
+    if (!rawResult.ok) {
+      return rawResult;
+    }
+    let serialized: string | undefined;
+    try {
+      serialized = JSON.stringify(rawResult.value, null, 2);
+    } catch {
+      return {
+        ok: false,
+        code: 'invalid-data',
+        reason: 'The unavailable save could not be exported.',
+      };
+    }
+    if (serialized === undefined) {
+      return {
+        ok: false,
+        code: 'invalid-data',
+        reason: 'The unavailable save could not be serialized.',
+      };
+    }
+    return {
+      ok: true,
+      value: {
+        contents: `${serialized}\n`,
+        suffix: 'unavailable',
+      },
+    };
+  };
 
   return {
     bootstrap,
@@ -604,7 +655,7 @@ export function createLivingSaveCoordinator(
     deleteSlot,
     undoDelete,
     importFileText,
-    readEnvelope,
+    readExportFile,
   };
 }
 
@@ -640,6 +691,7 @@ export function createBrowserLivingSaveCoordinator(params: {
     undoDeletion: undoLivingSaveDeletion,
     importSlot: importLivingSaveSlot,
     readEnvelope: readLivingSaveEnvelope,
+    readRawPayload: readLivingSaveRawPayload,
     parseFileText: (text) =>
       parseLivingSaveFileText(text, validationContext),
     validateEnvelope: (envelope) =>

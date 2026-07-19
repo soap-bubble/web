@@ -1,4 +1,5 @@
-import React, {
+import {
+  Fragment,
   useMemo,
   useRef,
   useState,
@@ -21,12 +22,17 @@ import {
 import panoShader from '../shader/panoChunk'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
 import { getAssetUrl } from 'service/gamedb'
-import { Scene, PanoCast, Cast } from '../types'
-import usePanoChunk from '../hooks/panoChunk'
+import { Scene, PanoCast, PanoAnim, Cast } from '../types'
+import usePanoChunk, {
+  PanoAnimationMediaLayer,
+} from '../hooks/panoChunk'
+import { getActivePanoAnimations } from '../panoAnimation'
 import { Matcher, forMorpheusType } from '../matchers'
 import { and } from 'utils/matchers'
 import { PANO_OFFSET, PANO_CANVAS_WIDTH } from '../../constants'
 import loggerFactory from 'utils/logger'
+import type { SceneTransitionRequest } from '../../scene/types'
+import { isNavigableSceneTarget } from '../../scene/transitionTarget'
 
 const logger = loggerFactory('WebGl')
 
@@ -72,10 +78,23 @@ interface GlStageProps {
   rotation: { x: number; y: number; offsetX: number }
   volume: number
   onSceneReady?: (sceneId: number) => void
+  onTransition?: (transition: SceneTransitionRequest) => void
 }
 
 function matchActiveCast<T extends Cast>(gamestates: Gamestates): Matcher<T> {
   return (cast: T) => isCastActive({ cast, gamestates })
+}
+
+function findActivePanoScene(
+  stageScenes: readonly Scene[],
+  gamestates: Gamestates
+): Scene | undefined {
+  return stageScenes.find(scene =>
+    scene.casts.some(
+      cast =>
+        cast.__t === 'PanoCast' && isCastActive({ cast, gamestates })
+    )
+  )
 }
 
 const WebGlScene = ({
@@ -88,23 +107,16 @@ const WebGlScene = ({
   stageScenes,
   pendingScenes = [],
   onSceneReady,
-}: GlStageProps) => {
+  animationLayers,
+}: GlStageProps & {
+  animationLayers: readonly PanoAnimationMediaLayer[]
+}) => {
   const onStagePano: PanoCast | undefined = useMemo(() => {
-    const matchActive = matchActiveCast(gamestates)
-    const matchPanoCast = and<PanoCast>(
-      forMorpheusType('PanoCast'),
-      matchActive
+    const panoScene = findActivePanoScene(stageScenes, gamestates)
+    return panoScene?.casts.find(
+      (cast): cast is PanoCast =>
+        cast.__t === 'PanoCast' && isCastActive({ cast, gamestates })
     )
-
-    let stageActivePanoCasts: undefined | PanoCast
-    for (let scene of stageScenes) {
-      stageActivePanoCasts = scene.casts.find((cast: Cast) =>
-        matchPanoCast(cast as PanoCast)
-      ) as undefined | PanoCast
-      if (stageActivePanoCasts) break
-    }
-
-    return stageActivePanoCasts
   }, [stageScenes, gamestates])
 
   // Find pano casts in pending scenes for preloading
@@ -193,7 +205,11 @@ const WebGlScene = ({
       }
     }
   }, [panoUrl, textureLoader])
-  const texture = usePanoChunk(texImage, rotation.offsetX)
+  const { texture, updateAnimationFrames } = usePanoChunk(
+    texImage,
+    rotation.offsetX,
+    animationLayers
+  )
   const ref = useRef<ShaderMaterial>(null)
   const { camera } = useThree()
 
@@ -205,6 +221,7 @@ const WebGlScene = ({
   }, [camera])
 
   useFrame(() => {
+    updateAnimationFrames()
     if (ref.current) {
       const offset = rotation.x - rotation.offsetX
       ref.current.uniforms.offset.value = offset
@@ -233,7 +250,7 @@ const WebGlScene = ({
     [setPanoObject]
   )
   return (
-    <React.Fragment>
+    <Fragment>
       <mesh ref={handleMeshRef}>
         <cylinderGeometry
           attach="geometry"
@@ -256,31 +273,161 @@ const WebGlScene = ({
           uniforms-panoTexture-value={texture}
         />
       </mesh>
-    </React.Fragment>
+    </Fragment>
   )
 }
 
-const WebGl: FunctionComponent<GlStageProps & { width: number; height: number; left: number; top: number }> = (props) => (
-  <Canvas
-    camera={{
-      fov: 51.75,
-      aspect: 640 / 420,
-      near: 0.01,
-      far: 1000,
-      position: [0, 0, 0.09] as const,
-    }}
-    style={{
-      position: 'absolute',
-      cursor: 'none',
-      left: `${props.left}px`,
-      top: `${props.top}px`,
-      width: `${props.width}px`,
-      height: `${props.height}px`,
-      zIndex: 0,
-    }}
-  >
-    <WebGlScene {...props} />
-  </Canvas>
-)
+interface PanoAnimationVideoProps {
+  cast: PanoAnim
+  onEnded: (cast: PanoAnim) => void
+  onMediaRef: (castId: number, media: HTMLVideoElement | null) => void
+}
+
+const PanoAnimationVideo = ({
+  cast,
+  onEnded,
+  onMediaRef,
+}: PanoAnimationVideoProps) => {
+  const mediaRef = useRef<HTMLVideoElement | null>(null)
+  const handleMediaRef = useCallback(
+    (media: HTMLVideoElement | null) => {
+      mediaRef.current = media
+      onMediaRef(cast.castId, media)
+    },
+    [cast.castId, onMediaRef]
+  )
+
+  useEffect(() => {
+    const media = mediaRef.current
+    if (!media) {
+      return
+    }
+    if (cast.looping || cast.actionAtEnd !== 0) {
+      void media.play().catch(() => undefined)
+    } else {
+      media.pause()
+    }
+  }, [cast.actionAtEnd, cast.looping])
+
+  return (
+    <video
+      ref={handleMediaRef}
+      style={{ display: 'none' }}
+      autoPlay={cast.looping || cast.actionAtEnd !== 0}
+      crossOrigin="anonymous"
+      loop={cast.looping}
+      muted
+      playsInline
+      preload="auto"
+      onEnded={() => onEnded(cast)}
+    >
+      <source src={getAssetUrl(`${cast.fileName}.webm`)} type="video/webm" />
+      <source src={getAssetUrl(`${cast.fileName}.mp4`)} type="video/mp4" />
+    </video>
+  )
+}
+
+const WebGl: FunctionComponent<
+  GlStageProps & {
+    width: number
+    height: number
+    left: number
+    top: number
+  }
+> = props => {
+  const activePanoScene = useMemo(
+    () => findActivePanoScene(props.stageScenes, props.gamestates),
+    [props.gamestates, props.stageScenes]
+  )
+  const activePanoAnimations = useMemo(
+    () =>
+      activePanoScene
+        ? getActivePanoAnimations(activePanoScene.casts, props.gamestates)
+        : [],
+    [activePanoScene, props.gamestates]
+  )
+  const [animationMedia, setAnimationMedia] = useState<
+    ReadonlyMap<number, HTMLVideoElement>
+  >(new Map())
+  const handleMediaRef = useCallback(
+    (castId: number, media: HTMLVideoElement | null) => {
+      setAnimationMedia(previous => {
+        if (media && previous.get(castId) === media) {
+          return previous
+        }
+        if (!media && !previous.has(castId)) {
+          return previous
+        }
+        const next = new Map(previous)
+        if (media) {
+          next.set(castId, media)
+        } else {
+          next.delete(castId)
+        }
+        return next
+      })
+    },
+    []
+  )
+  const animationLayers = useMemo(
+    () =>
+      activePanoAnimations.flatMap(cast => {
+        const media = animationMedia.get(cast.castId)
+        return media ? [{ cast, media }] : []
+      }),
+    [activePanoAnimations, animationMedia]
+  )
+  const handleAnimationEnded = useCallback(
+    (cast: PanoAnim) => {
+      if (!activePanoScene || !props.onTransition) {
+        return
+      }
+      if (
+        !isNavigableSceneTarget(cast.nextSceneId, activePanoScene.sceneId)
+      ) {
+        return
+      }
+      props.onTransition({
+        sceneId: cast.nextSceneId,
+        dissolve: cast.dissolveToNextScene,
+        sourceCastId: cast.castId,
+      })
+    },
+    [activePanoScene, props.onTransition]
+  )
+
+  return (
+    <Fragment>
+      <Canvas
+        camera={{
+          fov: 51.75,
+          aspect: 640 / 420,
+          near: 0.01,
+          far: 1000,
+          position: [0, 0, 0.09] as const,
+        }}
+        style={{
+          position: 'absolute',
+          cursor: 'none',
+          left: `${props.left}px`,
+          top: `${props.top}px`,
+          width: `${props.width}px`,
+          height: `${props.height}px`,
+          zIndex: 0,
+        }}
+      >
+        <WebGlScene {...props} animationLayers={animationLayers} />
+      </Canvas>
+      {activePanoAnimations.map(cast => (
+        <PanoAnimationVideo
+          key={`${cast.castId}:${cast.fileName}:${cast.frame}`}
+          cast={cast}
+          onEnded={handleAnimationEnded}
+          onMediaRef={handleMediaRef}
+        />
+      ))}
+    </Fragment>
+  )
+}
 
 export default WebGl

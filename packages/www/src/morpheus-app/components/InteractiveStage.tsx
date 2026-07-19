@@ -636,6 +636,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
           width={width}
           height={height}
           onSceneReady={onSceneReady}
+          onTransition={onTransition}
         />
       )}
       <Special

@@ -64,6 +64,7 @@ interface PointerHandlers {
   onPointerUp: (e: PointerEvent<HTMLCanvasElement>) => void;
   onPointerDown: (e: PointerEvent<HTMLCanvasElement>) => void;
   onPointerMove: (e: PointerEvent<HTMLCanvasElement>) => void;
+  onPointerCancel: (e: PointerEvent<HTMLCanvasElement>) => void;
   onPointerLeave: (e: PointerEvent<HTMLCanvasElement>) => void;
 }
 
@@ -153,7 +154,7 @@ function screenToGameCoords(params: {
   };
 }
 
-interface PointerState {
+export interface PointerState {
   screenX: number;
   screenY: number;
   isDown: boolean;
@@ -162,6 +163,42 @@ interface PointerState {
   startScreenY: number;
   startGameX: number;
   startGameY: number;
+}
+
+export function finishPointerInteraction(pointer: PointerState): PointerState {
+  return {
+    ...pointer,
+    isDown: false,
+    startScreenX: 0,
+    startScreenY: 0,
+    startGameX: 0,
+    startGameY: 0,
+  };
+}
+
+export function resolvePointerSuppression(
+  suppressedPointerId: number | null,
+  pointerId: number,
+  event: 'down' | 'move' | 'up' | 'cancel',
+): { shouldIgnore: boolean; suppressedPointerId: number | null } {
+  if (suppressedPointerId === null) {
+    return { shouldIgnore: false, suppressedPointerId: null };
+  }
+
+  if (pointerId === suppressedPointerId && event === 'down') {
+    // A pointer cannot emit another down until its prior press has ended. This
+    // also recovers when the release happened outside the canvas.
+    return { shouldIgnore: false, suppressedPointerId: null };
+  }
+
+  if (
+    pointerId === suppressedPointerId &&
+    (event === 'up' || event === 'cancel')
+  ) {
+    return { shouldIgnore: true, suppressedPointerId: null };
+  }
+
+  return { shouldIgnore: true, suppressedPointerId };
 }
 
 export function useInputHandler(params: {
@@ -340,6 +377,7 @@ export function useInputHandler(params: {
   const stableActionChangedRef = useRef(false);
   const transitionPendingRef = useRef(false);
   const skippedSceneEntryGenerationRef = useRef<number | null>(null);
+  const suppressedPointerIdRef = useRef<number | null>(null);
   const capturedPointerRef = useRef<{
     target: HTMLCanvasElement;
     pointerId: number;
@@ -354,6 +392,28 @@ export function useInputHandler(params: {
     durationMs: number;
   } | null>(null);
   const sweepRafRef = useRef<number | null>(null);
+
+  const finishCurrentPointerInteraction = useCallback(
+    (suppressUntilRelease = true) => {
+      const captured = capturedPointerRef.current;
+      if (suppressUntilRelease && pointerRef.current.isDown && captured) {
+        suppressedPointerIdRef.current = captured.pointerId;
+      }
+      sliderOldValuesRef.current.clear();
+      gestureStartValuesRef.current.clear();
+      gestureStartRotationRef.current = null;
+
+      if (captured && captured.target.hasPointerCapture(captured.pointerId)) {
+        captured.target.releasePointerCapture(captured.pointerId);
+      }
+      capturedPointerRef.current = null;
+
+      const finishedPointer = finishPointerInteraction(pointerRef.current);
+      pointerRef.current = finishedPointer;
+      setPointer(finishedPointer);
+    },
+    [],
+  );
 
   const settleRejectedTransition = useCallback(() => {
     transitionPendingRef.current = false;
@@ -490,6 +550,13 @@ export function useInputHandler(params: {
         stableActionChangedRef.current = true;
       }
 
+      if (result.sceneTransition) {
+        // Scene changes must consume the gesture that triggered them. Otherwise
+        // a held pointer can arrive over an overlapping slider in the next
+        // scene and activate it without a new pointer-down event.
+        finishCurrentPointerInteraction();
+      }
+
       if (
         result.sceneTransition &&
         result.preTransitionRotation &&
@@ -507,7 +574,13 @@ export function useInputHandler(params: {
 
       return result.allDone;
     },
-    [dispatch, isPanoScene, requestTransition, startSweepTo],
+    [
+      dispatch,
+      finishCurrentPointerInteraction,
+      isPanoScene,
+      requestTransition,
+      startSweepTo,
+    ],
   );
 
   const settlePendingAction = useCallback(() => {
@@ -581,16 +654,15 @@ export function useInputHandler(params: {
   useEffect(() => {
     if (sceneIdRef.current !== scene.sceneId) {
       sceneIdRef.current = scene.sceneId;
+      finishCurrentPointerInteraction();
       pendingTransitionRef.current = null;
       transitionPendingRef.current = false;
       stableActionChangedRef.current = false;
-      sliderOldValuesRef.current.clear();
-      gestureStartValuesRef.current.clear();
       if (sweepRafRef.current !== null) {
         cancelAnimationFrame(sweepRafRef.current);
         sweepRafRef.current = null;
       }
-      setPointer({
+      const resetPointer = {
         screenX: screenLeft,
         screenY: screenTop,
         isDown: false,
@@ -599,9 +671,11 @@ export function useInputHandler(params: {
         startScreenY: 0,
         startGameX: 0,
         startGameY: 0,
-      });
+      };
+      pointerRef.current = resetPointer;
+      setPointer(resetPointer);
     }
-  }, [scene.sceneId, screenLeft, screenTop]);
+  }, [finishCurrentPointerInteraction, scene.sceneId, screenLeft, screenTop]);
 
   // Run entry rules for new scenes; replay Always settlement after a restore.
   const processedSceneIdRef = useRef<number | null>(null);
@@ -837,6 +911,13 @@ export function useInputHandler(params: {
   // Pointer handlers
   const onPointerDown = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      const suppression = resolvePointerSuppression(
+        suppressedPointerIdRef.current,
+        event.pointerId,
+        'down',
+      );
+      suppressedPointerIdRef.current = suppression.suppressedPointerId;
+      if (suppression.shouldIgnore) return;
       if (!inputEnabledRef.current) return;
       const { clientX, clientY } = event;
 
@@ -916,6 +997,13 @@ export function useInputHandler(params: {
 
   const onPointerMove = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      const suppression = resolvePointerSuppression(
+        suppressedPointerIdRef.current,
+        event.pointerId,
+        'move',
+      );
+      suppressedPointerIdRef.current = suppression.suppressedPointerId;
+      if (suppression.shouldIgnore) return;
       if (!inputEnabledRef.current) return;
       const { clientX, clientY } = event;
       const prev = pointerRef.current;
@@ -991,6 +1079,13 @@ export function useInputHandler(params: {
 
   const onPointerUp = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      const suppression = resolvePointerSuppression(
+        suppressedPointerIdRef.current,
+        event.pointerId,
+        'up',
+      );
+      suppressedPointerIdRef.current = suppression.suppressedPointerId;
+      if (suppression.shouldIgnore) return;
       if (!inputEnabledRef.current) return;
       const { clientX, clientY } = event;
       const prev = pointerRef.current;
@@ -1096,6 +1191,7 @@ export function useInputHandler(params: {
       hotspots,
       processHotspotAction,
       settlePendingAction,
+      finishCurrentPointerInteraction,
     ],
   );
 
@@ -1163,6 +1259,20 @@ export function useInputHandler(params: {
     return true;
   }, [dispatch]);
 
+  const onPointerCancel = useCallback(
+    (event: PointerEvent<HTMLCanvasElement>) => {
+      const suppression = resolvePointerSuppression(
+        suppressedPointerIdRef.current,
+        event.pointerId,
+        'cancel',
+      );
+      suppressedPointerIdRef.current = suppression.suppressedPointerId;
+      if (suppression.shouldIgnore) return;
+      cancelGesture();
+    },
+    [cancelGesture],
+  );
+
   const inputController = useMemo(() => ({ cancelGesture }), [cancelGesture]);
 
   return [
@@ -1175,6 +1285,7 @@ export function useInputHandler(params: {
       onPointerUp,
       onPointerMove,
       onPointerDown,
+      onPointerCancel,
       onPointerLeave,
     },
     clickHotspot,

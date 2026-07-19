@@ -32,6 +32,7 @@ interface SpecialProps {
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerDown?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerMove?: (e: PointerEvent<HTMLCanvasElement>) => void
+  onPointerCancel?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerLeave?: (e: PointerEvent<HTMLCanvasElement>) => void
   stageScenes: Scene[]
   pendingScenes?: Scene[]
@@ -53,6 +54,7 @@ const Special = ({
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onPointerCancel,
   onPointerLeave,
   setDoneObserver,
   cursor,
@@ -280,6 +282,7 @@ const Special = ({
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
         onPointerLeave={onPointerLeave}
       />
       {allVideoCasts.length > 0 && (

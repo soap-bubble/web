@@ -18,6 +18,7 @@ interface CanvasProps {
   onPointerDown?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerMove?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
+  onPointerCancel?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerLeave?: (e: PointerEvent<HTMLCanvasElement>) => void
 }
 
@@ -35,6 +36,7 @@ const Canvas = ({
   onPointerDown,
   onPointerMove,
   onPointerUp,
+  onPointerCancel,
   onPointerLeave,
 }: CanvasProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -73,6 +75,7 @@ const Canvas = ({
       onPointerUp={onPointerUp}
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
+      onPointerCancel={onPointerCancel}
       onPointerLeave={onPointerLeave}
       style={{
         position: 'absolute',

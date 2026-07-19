@@ -429,8 +429,13 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     ],
   );
 
-  const { onPointerUp, onPointerMove, onPointerDown, onPointerLeave } =
-    pointerHandler;
+  const {
+    onPointerUp,
+    onPointerMove,
+    onPointerDown,
+    onPointerCancel,
+    onPointerLeave,
+  } = pointerHandler;
 
   const isSoundCast = useCallback(
     (cast: Cast): cast is SoundCast => cast.__t === 'SoundCast',
@@ -646,6 +651,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
+        onPointerCancel={onPointerCancel}
         onPointerLeave={onPointerLeave}
         onTransition={onTransition}
         onSceneReady={onSceneReady}

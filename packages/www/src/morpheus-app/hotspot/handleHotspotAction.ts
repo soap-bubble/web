@@ -1,5 +1,6 @@
 import { ACTION_TYPES } from 'morpheus/constants';
 import type { Hotspot } from 'morpheus/casts/types';
+import { authoredPanoramaAngleToRendererYaw } from 'morpheus/scene/panoramaCoordinates';
 import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle';
 import { TRANSITION_SCENE_SENTINEL } from 'morpheus/scene/transitionTarget';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
@@ -49,12 +50,13 @@ function nextSceneStartAngle(hotspot: HotspotWithAngle): number | undefined {
 }
 
 function panoSweepYaw(hotspot: HotspotWithAngle): number {
-  // Calculate the center of the hotspot rect in Morpheus coordinates (0-3600)
-  // The new system uses yaw3600 directly without the radian conversion offset from legacy
   const left = hotspot.rectLeft;
-  const right = hotspot.rectRight > hotspot.rectLeft ? hotspot.rectRight : hotspot.rectRight + 3600;
+  const right =
+    hotspot.rectRight >= hotspot.rectLeft
+      ? hotspot.rectRight
+      : hotspot.rectRight + 3600;
   const center = left + (right - left) / 2;
-  return normalizeAngle(center);
+  return authoredPanoramaAngleToRendererYaw(normalizeAngle(center));
 }
 
 export function handleHotspotAction(params: {

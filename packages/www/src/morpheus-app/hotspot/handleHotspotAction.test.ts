@@ -119,3 +119,65 @@ describe('slider hotspot actions', () => {
     ]);
   });
 });
+
+describe('panorama scene transitions', () => {
+  it('centers the renderer on the authored hotspot before changing scenes', () => {
+    const result = handleHotspotAction({
+      hotspot: createHotspot({
+        type: 0,
+        param1: 203403,
+        rectLeft: 3339,
+        rectRight: 3517,
+      }),
+      gamestates: createGamestatesAccessor({}),
+      currentPosition: { top: 0, left: 3428 },
+      startingPosition: { top: 0, left: 3428 },
+      isPanoScene: true,
+    });
+
+    expect(result.preTransitionRotation).toEqual({
+      yaw3600: 3300,
+      pitch: 0,
+    });
+  });
+
+  it('centers wrapped hotspots without taking the long way around', () => {
+    const result = handleHotspotAction({
+      hotspot: createHotspot({
+        type: 0,
+        param1: 203403,
+        rectLeft: 3500,
+        rectRight: 100,
+      }),
+      gamestates: createGamestatesAccessor({}),
+      currentPosition: { top: 0, left: 0 },
+      startingPosition: { top: 0, left: 0 },
+      isPanoScene: true,
+    });
+
+    expect(result.preTransitionRotation).toEqual({
+      yaw3600: 3472,
+      pitch: 0,
+    });
+  });
+
+  it('does not treat equal bounds as a full panorama revolution', () => {
+    const result = handleHotspotAction({
+      hotspot: createHotspot({
+        type: 0,
+        param1: 807003,
+        rectLeft: 0,
+        rectRight: 0,
+      }),
+      gamestates: createGamestatesAccessor({}),
+      currentPosition: { top: 0, left: 0 },
+      startingPosition: { top: 0, left: 0 },
+      isPanoScene: true,
+    });
+
+    expect(result.preTransitionRotation).toEqual({
+      yaw3600: 3472,
+      pitch: 0,
+    });
+  });
+});

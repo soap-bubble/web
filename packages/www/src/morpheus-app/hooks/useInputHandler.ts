@@ -9,7 +9,7 @@ import {
 import { Raycaster, Object3D, Camera, Vector2 } from 'three';
 import type { Hotspot, Scene } from 'morpheus/casts/types';
 import type { SceneTransitionRequest } from 'morpheus/scene/types';
-import { DST_RATIO, DST_WIDTH } from 'morpheus/constants';
+import { panoramaUvToAuthoredPosition } from 'morpheus/scene/panoramaCoordinates';
 
 import {
   useAppDispatch,
@@ -249,7 +249,8 @@ export function useInputHandler(params: {
   isPanoScene: boolean;
   camera: Camera | undefined;
   panoObject: Object3D | undefined;
-  offsetX: number;
+  rendererYaw3600: number;
+  rendererPitch: number;
   screenLeft: number;
   screenTop: number;
   screenWidth: number;
@@ -266,7 +267,8 @@ export function useInputHandler(params: {
     isPanoScene,
     camera,
     panoObject,
-    offsetX,
+    rendererYaw3600,
+    rendererPitch,
     screenLeft,
     screenTop,
     screenWidth,
@@ -330,32 +332,49 @@ export function useInputHandler(params: {
   // Raycaster for pano coordinate conversion
   const raycaster = useMemo(() => new Raycaster(), []);
 
+  const panoPositionFromScreen = useCallback(
+    (cursorTop: number, cursorLeft: number) => {
+      if (!isPanoScene || !camera || !panoObject || document.hidden) {
+        return undefined;
+      }
+
+      const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
+      const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
+
+      raycaster.setFromCamera(new Vector2(x, y), camera);
+      const panoIntersect = raycaster
+        .intersectObject(panoObject)
+        .find((intersect) => intersect.uv !== undefined);
+
+      if (!panoIntersect?.uv) {
+        return undefined;
+      }
+
+      return panoramaUvToAuthoredPosition({
+        uvX: panoIntersect.uv.x,
+        uvY: panoIntersect.uv.y,
+        rendererYaw: rendererYaw3600,
+      });
+    },
+    [
+      camera,
+      isPanoScene,
+      panoObject,
+      raycaster,
+      rendererYaw3600,
+      screenHeight,
+      screenWidth,
+    ],
+  );
+
   // Convert screen coords to game coords
   const gamePosition = useMemo(() => {
     const cursorTop = pointer.screenY - screenTop;
     const cursorLeft = pointer.screenX - screenLeft;
 
-    if (isPanoScene && camera && panoObject && !document.hidden) {
-      const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
-      const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
-
-      raycaster.setFromCamera(new Vector2(x, y), camera);
-      const panoIntersects = raycaster.intersectObject(panoObject);
-      const panoIntersect = panoIntersects.find(
-        (intersect) => intersect.uv !== undefined,
-      );
-      if (panoIntersect?.uv) {
-        const { uv } = panoIntersect;
-        const top = uv.y * -512 + 256;
-        let left =
-          (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
-        if (left < 0) {
-          left += 3600;
-        } else if (left > 3600) {
-          left -= 3600;
-        }
-        return { top, left };
-      }
+    const panoPosition = panoPositionFromScreen(cursorTop, cursorLeft);
+    if (panoPosition) {
+      return panoPosition;
     }
 
     return screenToGameCoords({
@@ -369,11 +388,9 @@ export function useInputHandler(params: {
     pointer.screenY,
     screenTop,
     screenLeft,
-    isPanoScene,
-    camera,
-    panoObject,
-    offsetX,
-    raycaster,
+    panoPositionFromScreen,
+    rendererPitch,
+    rendererYaw3600,
     screenWidth,
     screenHeight,
   ]);
@@ -977,21 +994,9 @@ export function useInputHandler(params: {
         width: screenWidth,
       });
 
-      if (isPanoScene && camera && panoObject && !document.hidden) {
-        const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
-        const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
-        raycaster.setFromCamera(new Vector2(x, y), camera);
-        const panoIntersects = raycaster.intersectObject(panoObject);
-        const panoIntersect = panoIntersects.find((i) => i.uv !== undefined);
-        if (panoIntersect?.uv) {
-          const { uv } = panoIntersect;
-          const top = uv.y * -512 + 256;
-          let left =
-            (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
-          if (left < 0) left += 3600;
-          else if (left > 3600) left -= 3600;
-          startGamePos = { top, left };
-        }
+      const panoPosition = panoPositionFromScreen(cursorTop, cursorLeft);
+      if (panoPosition) {
+        startGamePos = panoPosition;
       }
 
       const now = Date.now();
@@ -1031,11 +1036,7 @@ export function useInputHandler(params: {
       screenLeft,
       screenHeight,
       screenWidth,
-      isPanoScene,
-      camera,
-      panoObject,
-      offsetX,
-      raycaster,
+      panoPositionFromScreen,
       processPointerEvent,
       settlePendingAction,
     ],
@@ -1078,21 +1079,9 @@ export function useInputHandler(params: {
         width: screenWidth,
       });
 
-      if (isPanoScene && camera && panoObject && !document.hidden) {
-        const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
-        const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
-        raycaster.setFromCamera(new Vector2(x, y), camera);
-        const panoIntersects = raycaster.intersectObject(panoObject);
-        const panoIntersect = panoIntersects.find((i) => i.uv !== undefined);
-        if (panoIntersect?.uv) {
-          const { uv } = panoIntersect;
-          const top = uv.y * -512 + 256;
-          let left =
-            (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
-          if (left < 0) left += 3600;
-          else if (left > 3600) left -= 3600;
-          currentGamePos = { top, left };
-        }
+      const panoPosition = panoPositionFromScreen(cursorTop, cursorLeft);
+      if (panoPosition) {
+        currentGamePos = panoPosition;
       }
 
       // Process event (side effect, outside state updater)
@@ -1113,11 +1102,7 @@ export function useInputHandler(params: {
       screenLeft,
       screenHeight,
       screenWidth,
-      isPanoScene,
-      camera,
-      panoObject,
-      offsetX,
-      raycaster,
+      panoPositionFromScreen,
       processPointerEvent,
       settlePendingAction,
     ],
@@ -1146,21 +1131,9 @@ export function useInputHandler(params: {
         width: screenWidth,
       });
 
-      if (isPanoScene && camera && panoObject && !document.hidden) {
-        const y = ((screenHeight - cursorTop) / screenHeight) * 2 - 1;
-        const x = ((cursorLeft - screenWidth) / screenWidth) * 2 + 1;
-        raycaster.setFromCamera(new Vector2(x, y), camera);
-        const panoIntersects = raycaster.intersectObject(panoObject);
-        const panoIntersect = panoIntersects.find((i) => i.uv !== undefined);
-        if (panoIntersect?.uv) {
-          const { uv } = panoIntersect;
-          const top = uv.y * -512 + 256;
-          let left =
-            (((8 / 7) * (1.0 - uv.x) - 0.5) * DST_WIDTH + offsetX) * DST_RATIO;
-          if (left < 0) left += 3600;
-          else if (left > 3600) left -= 3600;
-          currentGamePos = { top, left };
-        }
+      const panoPosition = panoPositionFromScreen(cursorTop, cursorLeft);
+      if (panoPosition) {
+        currentGamePos = panoPosition;
       }
 
       const timeSinceDown = Date.now() - prev.downTime;
@@ -1229,11 +1202,7 @@ export function useInputHandler(params: {
       screenLeft,
       screenHeight,
       screenWidth,
-      isPanoScene,
-      camera,
-      panoObject,
-      offsetX,
-      raycaster,
+      panoPositionFromScreen,
       processPointerEvent,
       hotspots,
       processHotspotAction,

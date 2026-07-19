@@ -25,7 +25,7 @@ const pano = {
   void main()
   {
       vec2 imgOffset = (1.0 - vUv);
-      imgOffset *= (7.0 / 8.0);
+      imgOffset.x *= (7.0 / 8.0);
       imgOffset.x += offset / 1024.0;
       gl_FragColor = texture2D(panoTexture, imgOffset);
   }

@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 
 import { resetGame } from '@/morpheus-app/store/actions';
+import { installLivingSaveRuntime } from '@/morpheus-app/store/actions';
 
 export type Rotation = {
   yaw3600: number;
@@ -37,6 +38,10 @@ const rotationSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(resetGame, createInitialState);
+    builder.addCase(installLivingSaveRuntime, (state, action) => {
+      state.current = action.payload.envelope.rotation;
+      state.seededFromTransition = false;
+    });
   },
 });
 

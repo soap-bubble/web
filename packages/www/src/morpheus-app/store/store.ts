@@ -4,14 +4,19 @@ import type { ThunkDispatch } from 'redux-thunk';
 import sceneReducer from './slices/sceneSlice';
 import rotationReducer from './slices/rotationSlice';
 import gamestateReducer from './slices/gamestateSlice';
+import livingSavesReducer from './slices/livingSavesSlice';
 
-export const store = configureStore({
-  reducer: {
-    scene: sceneReducer,
-    rotation: rotationReducer,
-    gamestate: gamestateReducer,
-  },
-});
+export const createAppStore = () =>
+  configureStore({
+    reducer: {
+      scene: sceneReducer,
+      rotation: rotationReducer,
+      gamestate: gamestateReducer,
+      livingSaves: livingSavesReducer,
+    },
+  });
+
+export const store = createAppStore();
 
 export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;

@@ -2,15 +2,20 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import type { Cast, Hotspot, Scene } from '@soapbubble/morpheus-client/morpheus/casts/types';
+import type {
+  Cast,
+  Hotspot,
+  Scene,
+} from '@soapbubble/morpheus-client/morpheus/casts/types';
 import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 
 import InteractiveStage, {
   ExternalRotation,
 } from '@/morpheus-app/components/InteractiveStage';
-import SettingsOverlay from '@/morpheus-app/components/SettingsOverlay';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
-import useGameControl, { HotspotState } from '@/morpheus-app/hooks/useGameControl';
+import useGameControl, {
+  HotspotState,
+} from '@/morpheus-app/hooks/useGameControl';
 import type { HarnessClickHandler } from '@/morpheus-app/hooks/useInputHandler';
 import type {
   ClickHotspotRequest,
@@ -34,8 +39,7 @@ import {
   selectRotationSeeded,
   setRotation,
 } from '@/morpheus-app/store/slices/rotationSlice';
-import { commitSceneUpdates } from '@/morpheus-app/store/slices/gamestateSlice';
-import { useGamestateHistory } from '@/morpheus-app/hooks/useGamestateHistory';
+import { selectLivingSaves } from '@/morpheus-app/store/slices/livingSavesSlice';
 
 import '@/morpheus-app/runtime';
 
@@ -55,7 +59,11 @@ function captureStageFrame(
 ): boolean {
   const sourceRect = source.getBoundingClientRect();
   const canvases = source.querySelectorAll('canvas');
-  if (sourceRect.width <= 0 || sourceRect.height <= 0 || canvases.length === 0) {
+  if (
+    sourceRect.width <= 0 ||
+    sourceRect.height <= 0 ||
+    canvases.length === 0
+  ) {
     return false;
   }
 
@@ -152,9 +160,9 @@ export const SceneStageShell = () => {
   const mcpSessionName = searchParams.get('mcp');
 
   const gamestates = useAppSelector(selectGamestatesAccessor);
+  const livingSaves = useAppSelector(selectLivingSaves);
   const { width, height, left, top } = useResponsiveSize();
   const dispatch: AppDispatch = useAppDispatch();
-  useGamestateHistory();
 
   const rotation = useAppSelector(selectRotation);
   const rotationSeeded = useAppSelector(selectRotationSeeded);
@@ -311,7 +319,9 @@ export const SceneStageShell = () => {
         : `/scene/${sceneId}`;
       // Avoid pushing the same URL we're already on (prevents duplicate history entries)
       const currentSearch = searchParams.toString();
-      const currentUrl = currentSearch ? `${pathname}?${currentSearch}` : pathname;
+      const currentUrl = currentSearch
+        ? `${pathname}?${currentSearch}`
+        : pathname;
       if (currentUrl === url) {
         lastPushedSceneIdRef.current = sceneId;
         return;
@@ -369,8 +379,6 @@ export const SceneStageShell = () => {
         overlay.style.pointerEvents = 'none';
       }
 
-      const previousSceneId = activeSceneIdRef.current ?? transition.sceneId;
-      dispatch(commitSceneUpdates({ sceneId: previousSceneId }));
       dispatch(scenePrefetched(transition.scene));
       if (transition.mode === 'goBack') {
         dispatch(activateScenePrune(transition.sceneId));
@@ -458,7 +466,8 @@ export const SceneStageShell = () => {
   const handleClickHotspot = useCallback(
     async (request: ClickHotspotRequest): Promise<ClickHotspotResult> => {
       const clickHotspot = harnessClickRef.current;
-      const currentSceneId = activeSceneIdRef.current ?? activeScene?.sceneId ?? 0;
+      const currentSceneId =
+        activeSceneIdRef.current ?? activeScene?.sceneId ?? 0;
 
       if (!clickHotspot) {
         return {
@@ -553,7 +562,12 @@ export const SceneStageShell = () => {
     getState,
   });
 
-  if (!gamestates || stageScenes.length === 0 || !activeScene) {
+  if (
+    livingSaves.bootstrapPhase !== 'ready' ||
+    !gamestates ||
+    stageScenes.length === 0 ||
+    !activeScene
+  ) {
     return (
       <div
         style={{
@@ -581,8 +595,10 @@ export const SceneStageShell = () => {
         position: 'relative',
       }}
     >
-      <SettingsOverlay />
-      <div ref={stageCaptureSourceRef} style={{ position: 'absolute', inset: 0 }}>
+      <div
+        ref={stageCaptureSourceRef}
+        style={{ position: 'absolute', inset: 0 }}
+      >
         <InteractiveStage
           stageScenes={stageScenes}
           activeScene={activeScene}

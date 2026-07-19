@@ -26,10 +26,9 @@ describe('resetGame', () => {
     expect(state.gamestate.byId[initialGamestate.stateId].value).toBe(
       initialGamestate.value,
     );
-    expect(state.gamestate.pendingUpdates).toEqual({});
-    expect(state.gamestate.currentEntryId).toBeNull();
     expect(state.scene).toMatchObject({
       activeSceneId: null,
+      returnSceneId: null,
       requestedSceneId: null,
       stack: [],
     });
@@ -37,5 +36,6 @@ describe('resetGame', () => {
       current: { yaw3600: 0, pitch: 0 },
       seededFromTransition: false,
     });
+    expect(state.livingSaves.bootstrapPhase).toBe('idle');
   });
 });

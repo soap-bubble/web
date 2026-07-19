@@ -5,6 +5,7 @@ import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import { createSelector } from 'reselect';
 
 import { resetGame } from '@/morpheus-app/store/actions';
+import { installLivingSaveRuntime } from '@/morpheus-app/store/actions';
 
 export type SceneStackEntry = {
   sceneId: number;
@@ -16,6 +17,7 @@ export type SceneState = {
   byId: Record<number, Scene>;
   stack: SceneStackEntry[];
   activeSceneId: number | null;
+  returnSceneId: number | null;
   requestedSceneId: number | null;
   maxStackSize: number;
 };
@@ -24,6 +26,7 @@ const createInitialState = (): SceneState => ({
   byId: {},
   stack: [],
   activeSceneId: null,
+  returnSceneId: null,
   requestedSceneId: null,
   maxStackSize: 5,
 });
@@ -38,7 +41,7 @@ export const loadScene = createAsyncThunk(
       throw new Error(`Scene ${sceneId} not found`);
     }
     return scene;
-  }
+  },
 );
 
 const sceneSlice = createSlice({
@@ -58,7 +61,7 @@ const sceneSlice = createSlice({
         return;
       }
       const existingIndex = state.stack.findIndex(
-        (entry) => entry.sceneId === sceneId
+        (entry) => entry.sceneId === sceneId,
       );
       if (existingIndex >= 0) {
         return;
@@ -80,7 +83,7 @@ const sceneSlice = createSlice({
       }
       state.activeSceneId = sceneId;
       const existingIndex = state.stack.findIndex(
-        (entry) => entry.sceneId === sceneId
+        (entry) => entry.sceneId === sceneId,
       );
       if (existingIndex >= 0) {
         state.stack.splice(existingIndex, 1);
@@ -106,7 +109,7 @@ const sceneSlice = createSlice({
         return;
       }
       const existingIndex = state.stack.findIndex(
-        (entry) => entry.sceneId === sceneId
+        (entry) => entry.sceneId === sceneId,
       );
       if (existingIndex >= 0) {
         state.stack = state.stack.slice(existingIndex);
@@ -143,6 +146,32 @@ const sceneSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder.addCase(resetGame, createInitialState);
+    builder.addCase(installLivingSaveRuntime, (state, action) => {
+      const { activeScene, returnScene } = action.payload;
+      state.byId[activeScene.sceneId] = activeScene;
+      if (returnScene) {
+        state.byId[returnScene.sceneId] = returnScene;
+      }
+      state.activeSceneId = activeScene.sceneId;
+      state.returnSceneId = returnScene?.sceneId ?? null;
+      state.requestedSceneId = null;
+      state.stack = [
+        {
+          sceneId: activeScene.sceneId,
+          status: 'active',
+          loadedAt: Date.now(),
+        },
+        ...(returnScene && returnScene.sceneId !== activeScene.sceneId
+          ? [
+              {
+                sceneId: returnScene.sceneId,
+                status: 'background' as const,
+                loadedAt: Date.now(),
+              },
+            ]
+          : []),
+      ];
+    });
     builder.addCase(loadScene.fulfilled, (state, action) => {
       state.byId[action.payload.sceneId] = action.payload;
     });
@@ -160,8 +189,10 @@ export const {
 
 export default sceneSlice.reducer;
 
-export const selectSceneById = (state: { scene: SceneState }, sceneId: number) =>
-  state.scene.byId[sceneId];
+export const selectSceneById = (
+  state: { scene: SceneState },
+  sceneId: number,
+) => state.scene.byId[sceneId];
 
 export const selectSceneStack = (state: { scene: SceneState }) =>
   state.scene.stack;
@@ -170,8 +201,12 @@ export const selectActiveSceneId = (state: { scene: SceneState }) =>
   state.scene.activeSceneId;
 
 export const selectStageScenes = createSelector(
-  [(state: { scene: SceneState }) => state.scene.stack,
-  (state: { scene: SceneState }) => state.scene.byId],
+  [
+    (state: { scene: SceneState }) => state.scene.stack,
+    (state: { scene: SceneState }) => state.scene.byId,
+  ],
   (stack, byId) =>
-    stack.map((entry) => byId[entry.sceneId]).filter((scene): scene is Scene => !!scene)
+    stack
+      .map((entry) => byId[entry.sceneId])
+      .filter((scene): scene is Scene => !!scene),
 );

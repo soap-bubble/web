@@ -4,9 +4,20 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import type {
   MCPToBrowserMessage,
   BrowserToMCPMessage,
+  BrowserGameState,
   ClickHotspotRequest,
   ClickHotspotResult,
+  LivingSaveDiagnosticSlot,
+  LivingSaveDiagnosticSlotId,
+  LivingSaveDiagnostics,
 } from '@/lib/game-control-protocol'
+import { MAX_SAVE_DIAGNOSTIC_FAILURE_LENGTH } from '@/lib/game-control-protocol'
+import { useAppSelector } from '@/morpheus-app/store/hooks'
+import {
+  selectLivingSaves,
+  type LivingSaveSlotSummary,
+  type LivingSavesState,
+} from '@/morpheus-app/store/slices/livingSavesSlice'
 
 export interface GameControlState {
   isConnected: boolean
@@ -36,11 +47,7 @@ export interface GameControlCallbacks {
 }
 
 export interface GameStateGetter {
-  (): {
-    sceneId: number
-    rotation: RotationState
-    hotspots: HotspotState[]
-  } | null
+  (): Omit<BrowserGameState, 'livingSaves'> | null
 }
 
 interface UseGameControlOptions {
@@ -76,13 +83,66 @@ function getWebSocketUrl(sessionName?: string | null): string {
 const RECONNECT_DELAY_MS = 500
 const MAX_RECONNECT_ATTEMPTS = 20
 
+function projectSlot(
+  state: LivingSavesState,
+  slotId: LivingSaveDiagnosticSlotId
+): LivingSaveDiagnosticSlot {
+  const slot: LivingSaveSlotSummary | undefined = state.slots.find(
+    (candidate) => candidate.slotId === slotId
+  )
+  if (!slot) {
+    return {
+      slotId,
+      state: 'empty',
+      revision: 0,
+      savedAt: null,
+      sceneId: null,
+      resumePointId: null,
+      unloadableReason: null,
+    }
+  }
+  return {
+    slotId,
+    state: slot.state,
+    revision: slot.revision,
+    savedAt: slot.savedAt,
+    sceneId: slot.sceneId,
+    resumePointId: slot.resumePointId,
+    unloadableReason: slot.unloadableReason,
+  }
+}
+
+export function projectLivingSaveDiagnostics(
+  state: LivingSavesState
+): LivingSaveDiagnostics {
+  return {
+    activeSlotId: state.activeSlotId,
+    catalogRevision: state.catalogRevision,
+    saveHealth: state.saveHealth,
+    failureReason:
+      state.failureReason === null
+        ? null
+        : state.failureReason.slice(0, MAX_SAVE_DIAGNOSTIC_FAILURE_LENGTH),
+    slots: [
+      projectSlot(state, 'slot-1'),
+      projectSlot(state, 'slot-2'),
+      projectSlot(state, 'slot-3'),
+    ],
+  }
+}
+
 export default function useGameControl(
   options: UseGameControlOptions = {}
 ): UseGameControlReturn {
   const { enabled = true, sessionName, callbacks, getState } = options
+  const livingSaves = useAppSelector(selectLivingSaves)
   const wsRef = useRef<WebSocket | null>(null)
   const callbacksRef = useRef(callbacks)
   const getStateRef = useRef(getState)
+  const livingSaveDiagnosticsRef = useRef<LivingSaveDiagnostics>(
+    projectLivingSaveDiagnostics(livingSaves)
+  )
+  livingSaveDiagnosticsRef.current = projectLivingSaveDiagnostics(livingSaves)
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const reconnectAttemptsRef = useRef(0)
 
@@ -110,7 +170,12 @@ export default function useGameControl(
     (sceneId: number, rotation: RotationState, hotspots: HotspotState[]) => {
       sendMessage({
         type: 'STATE_UPDATE',
-        payload: { sceneId, rotation, hotspots },
+        payload: {
+          sceneId,
+          rotation,
+          hotspots,
+          livingSaves: livingSaveDiagnosticsRef.current,
+        },
       })
     },
     [sendMessage]
@@ -217,7 +282,10 @@ export default function useGameControl(
           if (currentState) {
             sendMessage({
               type: 'STATE_UPDATE',
-              payload: currentState,
+              payload: {
+                ...currentState,
+                livingSaves: livingSaveDiagnosticsRef.current,
+              },
             })
           } else {
             sendMessage({

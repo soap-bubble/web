@@ -29,6 +29,12 @@ Hotspot click control is browser-authoritative:
 - `morpheus_rotate_to_hotspot` is a viewing helper, not evidence that a click occurred.
 - Direct `morpheus_load_scene` remains available for explicit scene loads, but hotspot click helpers should not use it as a shortcut.
 
+Living-save diagnostics are read-only and bounded:
+
+- `morpheus_get_current_state` includes the active slot, catalog revision, three fixed slot summaries, resume-point identity, save health, and bounded failure/unloadable reasons.
+- It must not expose complete gamestate maps, save envelopes, imported/exported file bytes, or add save-management tools.
+- Slot selection, load, delete, Undo, import, and export remain browser-UI behaviors so MCP acceptance checks exercise the same player path.
+
 ### App Router entry points
 
 - **Root layout**: `src/app/layout.tsx` wraps the app in `src/app/providers.tsx`

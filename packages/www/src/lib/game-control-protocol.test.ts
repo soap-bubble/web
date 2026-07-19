@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vitest'
 import type { BrowserToMCPMessage } from './game-control-protocol'
 import {
   getErrorMessagePayload,
+  isBrowserGameState,
   isClickHotspotResult,
+  isLivingSaveDiagnostics,
   parseMessage,
   serializeMessage,
 } from './game-control-protocol'
@@ -117,5 +119,125 @@ describe('game-control protocol', () => {
     )
     expect(getErrorMessagePayload({ message: 12 })).toBeNull()
     expect(getErrorMessagePayload(null)).toBeNull()
+  })
+
+  it('round-trips bounded read-only living-save diagnostics', () => {
+    const message: BrowserToMCPMessage = {
+      type: 'STATE_UPDATE',
+      payload: {
+        sceneId: 105049,
+        rotation: { x: 1800, y: 12, offsetX: 1536 },
+        hotspots: [],
+        livingSaves: {
+          activeSlotId: 'slot-2',
+          catalogRevision: 9,
+          saveHealth: 'saved',
+          failureReason: null,
+          slots: [
+            {
+              slotId: 'slot-1',
+              state: 'empty',
+              revision: 0,
+              savedAt: null,
+              sceneId: null,
+              resumePointId: null,
+              unloadableReason: null,
+            },
+            {
+              slotId: 'slot-2',
+              state: 'occupied',
+              revision: 4,
+              savedAt: 1_784_390_400_000,
+              sceneId: 105049,
+              resumePointId: 'resume-4',
+              unloadableReason: null,
+            },
+            {
+              slotId: 'slot-3',
+              state: 'unloadable',
+              revision: 2,
+              savedAt: null,
+              sceneId: null,
+              resumePointId: null,
+              unloadableReason: 'unsupported-version',
+            },
+          ],
+        },
+      },
+    }
+
+    const parsed = parseMessage(serializeMessage(message))
+    expect(parsed).toEqual(message)
+    if (!parsed || parsed.type !== 'STATE_UPDATE') {
+      throw new Error('Expected state update')
+    }
+    expect(isBrowserGameState(parsed.payload)).toBe(true)
+    expect(isLivingSaveDiagnostics(parsed.payload.livingSaves)).toBe(true)
+  })
+
+  it('accepts legacy state updates without save diagnostics', () => {
+    expect(
+      isBrowserGameState({
+        sceneId: 1050,
+        rotation: { x: 0, y: 0, offsetX: 0 },
+        hotspots: [],
+      })
+    ).toBe(true)
+  })
+
+  it('rejects diagnostics that could leak complete saves or file bytes', () => {
+    const slot = {
+      slotId: 'slot-1',
+      state: 'occupied',
+      revision: 1,
+      savedAt: 1,
+      sceneId: 1050,
+      resumePointId: 'resume-1',
+      unloadableReason: null,
+    }
+    const diagnostics = {
+      activeSlotId: 'slot-1',
+      catalogRevision: 1,
+      saveHealth: 'saved',
+      failureReason: null,
+      slots: [
+        slot,
+        {
+          ...slot,
+          slotId: 'slot-2',
+          state: 'empty',
+          savedAt: null,
+          sceneId: null,
+          resumePointId: null,
+        },
+        {
+          ...slot,
+          slotId: 'slot-3',
+          state: 'empty',
+          savedAt: null,
+          sceneId: null,
+          resumePointId: null,
+        },
+      ],
+    }
+
+    expect(
+      isLivingSaveDiagnostics({
+        ...diagnostics,
+        gamestateValues: { 7: 3 },
+      })
+    ).toBe(false)
+    expect(
+      isLivingSaveDiagnostics({
+        ...diagnostics,
+        fileBytes: 'serialized-save',
+      })
+    ).toBe(false)
+    expect(
+      isLivingSaveDiagnostics({
+        ...diagnostics,
+        failureReason: 'x'.repeat(161),
+      })
+    ).toBe(false)
   })
 })

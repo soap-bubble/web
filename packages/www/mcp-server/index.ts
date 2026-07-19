@@ -27,10 +27,12 @@ import {
   toClickHotspotSelector,
 } from './click-hotspot-tool.js'
 import type {
+  BrowserGameState,
   ClickHotspotRequest,
   ClickHotspotResult,
 } from '../src/lib/game-control-protocol.js'
 import {
+  isBrowserGameState,
   getErrorMessagePayload,
   isClickHotspotResult,
 } from '../src/lib/game-control-protocol.js'
@@ -45,7 +47,7 @@ let reconnectAttempts = 0
 const MAX_RECONNECT_ATTEMPTS = 10
 const RECONNECT_DELAY_MS = 1000
 let pendingStateRequest: {
-  resolve: (value: GameState) => void
+  resolve: (value: BrowserGameState) => void
   reject: (error: Error) => void
 } | null = null
 let pendingClickRequest: {
@@ -56,18 +58,6 @@ let pendingClickRequest: {
   reject: (error: Error) => void
 } | null = null
 let clickRequestCounter = 0
-
-interface GameState {
-  sceneId: number
-  rotation: { x: number; y: number; offsetX: number }
-  hotspots: Array<{
-    castId: number
-    bounds: { left: number; right: number; top: number; bottom: number }
-    actionType: string
-    gesture: string
-    targetSceneId: number | null
-  }>
-}
 
 const WS_URL = process.env.GAME_WS_URL ?? 'ws://localhost:3000/api/game-control'
 
@@ -169,7 +159,14 @@ function handleMessage(message: { type: string; payload?: unknown }): void {
 
     case 'STATE_UPDATE':
       if (pendingStateRequest) {
-        pendingStateRequest.resolve(message.payload as GameState)
+        if (!isBrowserGameState(message.payload)) {
+          pendingStateRequest.reject(
+            new Error('Malformed game state from browser')
+          )
+          pendingStateRequest = null
+          break
+        }
+        pendingStateRequest.resolve(message.payload)
         pendingStateRequest = null
       }
       break
@@ -245,7 +242,7 @@ async function ensureConnected(sessionName?: string): Promise<void> {
   }
 }
 
-async function requestGameState(): Promise<GameState> {
+async function requestGameState(): Promise<BrowserGameState> {
   await ensureConnected()
 
   return new Promise((resolve, reject) => {
@@ -562,7 +559,7 @@ server.registerTool(
   'morpheus_get_current_state',
   {
     description:
-      'Get the current game state from the browser, including the loaded scene, current rotation, and visible hotspots.',
+      'Get the current game state from the browser, including the loaded scene, current rotation, visible hotspots, and bounded read-only living-save diagnostics. Save data and save-management commands are not exposed.',
   },
   async () => {
     try {

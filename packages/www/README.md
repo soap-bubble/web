@@ -102,3 +102,19 @@ For production testing, consider:
                     │  Browser (Game Client) │
                     └────────────────────────┘
 ```
+
+## Living-save versioning
+
+Morpheus living saves use the independent `morpheus_living_saves` IndexedDB
+database. The older `morpheus_gamestate` database is intentionally not upgraded,
+cleared, or migrated by the player runtime.
+
+- Bump the catalog schema version only when the fixed three-slot record shape
+  changes and add an explicit catalog migration before reading the new version.
+- Bump the session schema version when the portable logical-session envelope
+  changes.
+- Bump the game-data version when authored gamestate IDs, bounds, or resumable
+  scene semantics become incompatible with existing sessions.
+
+Unknown or unsupported slot payloads must remain preserved as unloadable data.
+Do not silently coerce them into new games.

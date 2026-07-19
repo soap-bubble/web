@@ -4,11 +4,11 @@ import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle'
 
 describe('transitionAngleToPanoramaYaw', () => {
   it('converts a transition movie centerline to the panorama viewport origin', () => {
-    expect(transitionAngleToPanoramaYaw(2400)).toBe(2272)
+    expect(transitionAngleToPanoramaYaw(2400)).toBe(2250)
   })
 
   it('wraps the viewport offset around a full rotation', () => {
-    expect(transitionAngleToPanoramaYaw(100)).toBe(3572)
+    expect(transitionAngleToPanoramaYaw(100)).toBe(3550)
   })
 
   it('ignores transition angles without a destination heading', () => {

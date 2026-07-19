@@ -7,9 +7,14 @@ import {
 } from 'morpheus/scene/panoramaCoordinates';
 
 describe('panorama coordinate conversion', () => {
+  it('converts the renderer 128-pixel overflow into one 150-unit authored frame', () => {
+    expect(authoredPanoramaAngleToRendererYaw(150)).toBe(0);
+    expect(rendererYawToAuthoredPanoramaAngle(0)).toBe(150);
+  });
+
   it('round-trips authored angles through the renderer overflow', () => {
-    expect(authoredPanoramaAngleToRendererYaw(3428)).toBe(3300);
-    expect(rendererYawToAuthoredPanoramaAngle(3300)).toBe(3428);
+    expect(authoredPanoramaAngleToRendererYaw(3428)).toBe(3278);
+    expect(rendererYawToAuthoredPanoramaAngle(3278)).toBe(3428);
   });
 
   it('maps the viewport center to the authored centerline', () => {
@@ -17,7 +22,7 @@ describe('panorama coordinate conversion', () => {
       panoramaUvToAuthoredPosition({
         uvX: 0.5,
         uvY: 0.5,
-        rendererYaw: 3300,
+        rendererYaw: 3278,
       }),
     ).toEqual({ top: 0, left: 3428 });
   });
@@ -26,12 +31,12 @@ describe('panorama coordinate conversion', () => {
     const left = panoramaUvToAuthoredPosition({
       uvX: 0.6,
       uvY: 0.75,
-      rendererYaw: 3300,
+      rendererYaw: 3278,
     });
     const right = panoramaUvToAuthoredPosition({
       uvX: 0.4,
       uvY: 0.25,
-      rendererYaw: 3300,
+      rendererYaw: 3278,
     });
 
     expect(left.left).toBeCloseTo(3323);
@@ -45,7 +50,7 @@ describe('panorama coordinate conversion', () => {
       panoramaUvToAuthoredPosition({
         uvX: 0.4,
         uvY: 0.5,
-        rendererYaw: 3522,
+        rendererYaw: 3500,
       }).left,
     ).toBeCloseTo(155);
   });
@@ -54,7 +59,7 @@ describe('panorama coordinate conversion', () => {
     const valvePosition = panoramaUvToAuthoredPosition({
       uvX: 0.5187687364,
       uvY: 0.3581229279,
-      rendererYaw: 3300,
+      rendererYaw: 3278,
     });
 
     expect(valvePosition.left).toBeGreaterThanOrEqual(3339);

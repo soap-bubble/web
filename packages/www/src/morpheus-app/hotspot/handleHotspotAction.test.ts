@@ -136,7 +136,7 @@ describe('panorama scene transitions', () => {
     });
 
     expect(result.preTransitionRotation).toEqual({
-      yaw3600: 3300,
+      yaw3600: 3278,
       pitch: 0,
     });
   });
@@ -156,7 +156,7 @@ describe('panorama scene transitions', () => {
     });
 
     expect(result.preTransitionRotation).toEqual({
-      yaw3600: 3472,
+      yaw3600: 3450,
       pitch: 0,
     });
   });
@@ -176,7 +176,7 @@ describe('panorama scene transitions', () => {
     });
 
     expect(result.preTransitionRotation).toEqual({
-      yaw3600: 3472,
+      yaw3600: 3450,
       pitch: 0,
     });
   });

@@ -6,6 +6,8 @@ import {
 } from 'morpheus/constants'
 
 const FULL_ROTATION = 3600
+// Renderer overflow is measured in texture pixels; authored angles use 3600 units.
+const PANO_SCROLL_OVERFLOW_ANGLE = PANO_SCROLL_OVERFLOW * DST_RATIO
 
 function normalizeAngle(value: number): number {
   const normalized = value % FULL_ROTATION
@@ -13,11 +15,11 @@ function normalizeAngle(value: number): number {
 }
 
 export function authoredPanoramaAngleToRendererYaw(angle: number): number {
-  return normalizeAngle(angle - PANO_SCROLL_OVERFLOW)
+  return normalizeAngle(angle - PANO_SCROLL_OVERFLOW_ANGLE)
 }
 
 export function rendererYawToAuthoredPanoramaAngle(yaw: number): number {
-  return normalizeAngle(yaw + PANO_SCROLL_OVERFLOW)
+  return normalizeAngle(yaw + PANO_SCROLL_OVERFLOW_ANGLE)
 }
 
 export function panoramaUvToAuthoredPosition(params: {

@@ -5,7 +5,10 @@ import {
   createHotspot,
 } from './harnessClick.fixtures';
 import { handleHotspotAction } from './handleHotspotAction';
-import { resolveAlwaysHotspotActions } from './alwaysHotspots';
+import {
+  resolveAlwaysHotspotActions,
+  resolveSceneEntryHotspotActions,
+} from './alwaysHotspots';
 
 describe('Always hotspot sequencing', () => {
   it('re-evaluates each authored rule against preceding gamestate updates', () => {
@@ -73,6 +76,74 @@ describe('Always hotspot sequencing', () => {
     ]);
     expect(results.at(-1)?.sceneTransition).toEqual({
       sceneId: 201014,
+      dissolve: false,
+    });
+  });
+
+  it('settles Always rules while skipping restored SceneEnter actions', () => {
+    const gamestates = createGamestatesAccessor({
+      800: { value: 0, maxValue: 2 },
+      999: { value: 0, maxValue: 1 },
+      1013: { value: 5, maxValue: 5 },
+    });
+    const hotspots = [
+      createHotspot({
+        castId: 0,
+        gesture: 7,
+        type: 9,
+        param1: 999,
+        param2: 1,
+        defaultPass: true,
+      }),
+      createHotspot({
+        castId: 0,
+        gesture: 6,
+        type: 9,
+        param1: 800,
+        param2: 1,
+        defaultPass: true,
+        comparators: [{ gameStateId: 1013, testType: 2, value: 4 }],
+      }),
+      createHotspot({
+        castId: 0,
+        gesture: 6,
+        type: 9,
+        param1: 1013,
+        param2: 0,
+        defaultPass: true,
+        comparators: [{ gameStateId: 800, testType: 0, value: 1 }],
+      }),
+      createHotspot({
+        castId: 0,
+        gesture: 6,
+        type: 0,
+        param1: 203014,
+        param2: 203014,
+        defaultPass: false,
+        comparators: [{ gameStateId: 800, testType: 0, value: 1 }],
+      }),
+    ];
+
+    const results = resolveSceneEntryHotspotActions({
+      hotspots,
+      gamestates,
+      skipSceneEnter: true,
+      execute: (hotspot, currentGamestates) =>
+        handleHotspotAction({
+          hotspot,
+          gamestates: currentGamestates,
+          currentPosition: { top: 0, left: 0 },
+          startingPosition: { top: 0, left: 0 },
+          isPanoScene: false,
+        }),
+    });
+
+    expect(results.flatMap((result) => result.gamestateUpdates)).toEqual([
+      { stateId: 800, value: 1 },
+      { stateId: 1013, value: 0 },
+    ]);
+    expect(results.at(-1)?.sceneTransition).toEqual({
+      sceneId: 203014,
       dissolve: false,
     });
   });

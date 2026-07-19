@@ -9,7 +9,7 @@ import {
 import { Raycaster, Object3D, Camera, Vector2 } from 'three';
 import type { Hotspot, Scene } from 'morpheus/casts/types';
 import type { SceneTransitionRequest } from 'morpheus/scene/types';
-import { DST_RATIO, DST_WIDTH, GESTURES } from 'morpheus/constants';
+import { DST_RATIO, DST_WIDTH } from 'morpheus/constants';
 
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
 import {
@@ -23,7 +23,10 @@ import {
   handleHotspotAction,
   type HotspotActionResult,
 } from '@/morpheus-app/hotspot/handleHotspotAction';
-import { resolveAlwaysHotspotActions } from '@/morpheus-app/hotspot/alwaysHotspots';
+import {
+  resolveAlwaysHotspotActions,
+  resolveSceneEntryHotspotActions,
+} from '@/morpheus-app/hotspot/alwaysHotspots';
 import { handleSliderDrag } from '@/morpheus-app/hotspot/handleSliderDrag';
 import {
   getActiveHotspots,
@@ -592,41 +595,44 @@ export function useInputHandler(params: {
     }
   }, [scene.sceneId, screenLeft, screenTop]);
 
-  // Process scene-enter and always hotspots once per scene
+  // Run entry rules for new scenes; replay Always settlement after a restore.
   const processedSceneIdRef = useRef<number | null>(null);
   useEffect(() => {
     const shouldSkipSceneEntry =
       skipSceneEntryGeneration !== null &&
       skippedSceneEntryGenerationRef.current !== skipSceneEntryGeneration;
 
-    if (processedSceneIdRef.current === scene.sceneId) {
-      if (shouldSkipSceneEntry) {
-        skippedSceneEntryGenerationRef.current = skipSceneEntryGeneration;
-      }
+    const isNewScene = processedSceneIdRef.current !== scene.sceneId;
+    if (!isNewScene && !shouldSkipSceneEntry) {
       return;
     }
     processedSceneIdRef.current = scene.sceneId;
 
     if (shouldSkipSceneEntry) {
       skippedSceneEntryGenerationRef.current = skipSceneEntryGeneration;
-      return;
     }
 
-    const gs = gamestatesRef.current;
-    const sceneEnterHotspots = getActiveHotspots(hotspots, gs).filter(
-      ({ gesture: gestureId }) =>
-        GESTURES[gestureId] === 'Always' ||
-        GESTURES[gestureId] === 'SceneEnter',
-    );
-
-    for (const hotspot of sceneEnterHotspots) {
-      processHotspotAction(hotspot, { top: 0, left: 0 }, { top: 0, left: 0 });
+    const results = resolveSceneEntryHotspotActions({
+      hotspots,
+      gamestates: gamestatesRef.current,
+      skipSceneEnter: shouldSkipSceneEntry,
+      execute: (hotspot, currentGamestates) =>
+        resolveHotspotAction(
+          hotspot,
+          { top: 0, left: 0 },
+          { top: 0, left: 0 },
+          currentGamestates,
+        ),
+    });
+    for (const result of results) {
+      applyHotspotActionResult(result);
     }
     settlePendingAction();
   }, [
+    applyHotspotActionResult,
     scene.sceneId,
     hotspots,
-    processHotspotAction,
+    resolveHotspotAction,
     settlePendingAction,
     skipSceneEntryGeneration,
   ]);

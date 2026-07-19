@@ -1,0 +1,130 @@
+.wheelButton {
+  position: absolute;
+  top: max(10px, env(safe-area-inset-top));
+  left: max(10px, env(safe-area-inset-left));
+  z-index: 20;
+  display: grid;
+  width: 46px;
+  height: 46px;
+  padding: 5px;
+  place-items: center;
+  border: 1px solid rgba(219, 197, 151, 0.72);
+  border-radius: 50%;
+  background: rgba(8, 10, 12, 0.72);
+  box-shadow: 0 5px 18px rgba(0, 0, 0, 0.55);
+  cursor: pointer;
+}
+
+.wheelButton img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.wheelButton:hover {
+  background: rgba(33, 38, 42, 0.9);
+}
+
+.wheelButton:focus-visible,
+.panel button:focus-visible {
+  outline: 3px solid #eef8ff;
+  outline-offset: 3px;
+}
+
+.dialog {
+  width: 100vw;
+  max-width: none;
+  height: 100vh;
+  max-height: none;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: rgba(0, 0, 0, 0.52);
+  color: #fff;
+  overflow: auto;
+}
+
+.dialog::backdrop {
+  background: transparent;
+}
+
+.dialogWheel {
+  position: fixed;
+}
+
+.panel {
+  width: min(92vw, 680px);
+  margin: clamp(72px, 12vh, 120px) auto 40px;
+  padding: clamp(22px, 4vw, 42px);
+  border: 1px solid rgba(219, 197, 151, 0.62);
+  border-radius: 10px;
+  background:
+    linear-gradient(145deg, rgba(24, 29, 33, 0.98), rgba(5, 8, 10, 0.98));
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.75);
+  font-family: Georgia, 'Times New Roman', serif;
+}
+
+.mainActions {
+  display: grid;
+  gap: 14px;
+}
+
+.mainActions button,
+.backButton {
+  min-height: 52px;
+  padding: 12px 18px;
+  border: 1px solid rgba(238, 248, 255, 0.5);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  font: inherit;
+  font-size: 1.05rem;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+}
+
+.mainActions button:hover,
+.backButton:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.saveSlots {
+  display: grid;
+  gap: 18px;
+}
+
+.backButton {
+  min-height: 42px;
+  justify-self: start;
+}
+
+@media (hover: none) {
+  .wheelButton:hover {
+    background: rgba(8, 10, 12, 0.72);
+  }
+
+  .mainActions button:hover,
+  .backButton:hover {
+    background: rgba(255, 255, 255, 0.06);
+  }
+}
+
+@media (max-width: 520px) {
+  .wheelButton {
+    width: 44px;
+    height: 44px;
+  }
+
+  .panel {
+    width: calc(100vw - 24px);
+    margin-top: 68px;
+    padding: 18px 14px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wheelButton,
+  .panel {
+    transition: none;
+  }
+}

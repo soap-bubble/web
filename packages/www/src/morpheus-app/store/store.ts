@@ -5,6 +5,7 @@ import sceneReducer from './slices/sceneSlice';
 import rotationReducer from './slices/rotationSlice';
 import gamestateReducer from './slices/gamestateSlice';
 import livingSavesReducer from './slices/livingSavesSlice';
+import gameMenuReducer from './slices/gameMenuSlice';
 
 export const createAppStore = () =>
   configureStore({
@@ -13,6 +14,7 @@ export const createAppStore = () =>
       rotation: rotationReducer,
       gamestate: gamestateReducer,
       livingSaves: livingSavesReducer,
+      gameMenu: gameMenuReducer,
     },
   });
 

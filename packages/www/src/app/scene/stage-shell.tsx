@@ -11,7 +11,10 @@ import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 
 import InteractiveStage, {
   ExternalRotation,
+  type StageInputController,
 } from '@/morpheus-app/components/InteractiveStage';
+import { GameMenu } from '@/morpheus-app/components/GameMenu';
+import { SaveSlotHub } from '@/morpheus-app/components/save-slots/SaveSlotHub';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
 import useGameControl, {
   HotspotState,
@@ -22,6 +25,7 @@ import type {
   ClickHotspotResult,
 } from '@/lib/game-control-protocol';
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
+import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordinatorContext';
 import type { AppDispatch } from '@/morpheus-app/store/store';
 import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import {
@@ -41,6 +45,11 @@ import {
 } from '@/morpheus-app/store/slices/rotationSlice';
 import { selectLivingSaves } from '@/morpheus-app/store/slices/livingSavesSlice';
 import { requestLivingSaveCheckpoint } from '@/morpheus-app/store/livingSaveCheckpoint';
+import {
+  closeGameMenu,
+  selectGameMenu,
+} from '@/morpheus-app/store/slices/gameMenuSlice';
+import type { LivingSaveSlotSummary } from '@/morpheus-app/store/slices/livingSavesSlice';
 
 import '@/morpheus-app/runtime';
 
@@ -157,12 +166,15 @@ function getGestureName(gesture: number): string {
 
 export const SceneStageShell = () => {
   const router = useRouter();
+  const livingSaveCoordinator = useLivingSaveCoordinator();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const mcpSessionName = searchParams.get('mcp');
 
   const gamestates = useAppSelector(selectGamestatesAccessor);
   const livingSaves = useAppSelector(selectLivingSaves);
+  const gameMenu = useAppSelector(selectGameMenu);
+  const stageInputControllerRef = useRef<StageInputController | null>(null);
   const runtimeGenerationRef = useRef(livingSaves.runtimeGeneration);
   useEffect(() => {
     runtimeGenerationRef.current = livingSaves.runtimeGeneration;
@@ -262,6 +274,25 @@ export const SceneStageShell = () => {
   const handleStableAction = useCallback(() => {
     void requestLivingSaveCheckpoint(runtimeGenerationRef.current);
   }, []);
+
+  const handleSlotSelection = useCallback(
+    async (slot: LivingSaveSlotSummary) => {
+      if (slot.state === 'empty') {
+        dispatch(closeGameMenu());
+        router.push('/');
+        return;
+      }
+      if (slot.state === 'unloadable') {
+        return;
+      }
+
+      const outcome = await livingSaveCoordinator.restoreSlot(slot.slotId);
+      if (outcome.ok) {
+        dispatch(closeGameMenu());
+      }
+    },
+    [dispatch, livingSaveCoordinator, router],
+  );
 
   const getState = useCallback(() => {
     const internalX = (rotation.yaw3600 / 3600) * 3072;
@@ -637,9 +668,13 @@ export const SceneStageShell = () => {
           onHarnessClickReady={handleHarnessClickReady}
           inputEnabled={
             livingSaves.bootstrapPhase === 'ready' &&
-            livingSaves.operation === null
+            livingSaves.operation === null &&
+            !gameMenu.open
           }
           onStableAction={handleStableAction}
+          onInputControllerReady={(controller) => {
+            stageInputControllerRef.current = controller;
+          }}
         />
       </div>
       <canvas
@@ -653,6 +688,24 @@ export const SceneStageShell = () => {
           zIndex: 10,
           opacity: 0,
           pointerEvents: 'none',
+        }}
+      />
+      <GameMenu
+        saveSlots={
+          <SaveSlotHub
+            slots={livingSaves.slots}
+            saveHealth={livingSaves.saveHealth}
+            failureReason={livingSaves.failureReason}
+            isBusy={livingSaves.operation !== null}
+            title="Save Slots"
+            description="Switch journeys, or return to the title to begin an empty slot."
+            onSelect={(slot) => {
+              void handleSlotSelection(slot);
+            }}
+          />
+        }
+        onBeforeOpen={() => {
+          stageInputControllerRef.current?.cancelGesture();
         }}
       />
       {process.env.NODE_ENV === 'development' && (

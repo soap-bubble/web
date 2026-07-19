@@ -189,6 +189,57 @@ const livingSavesSlice = createSlice({
         state.bootstrapPhase = 'failed';
       }
     },
+    livingSaveCheckpointStarted(
+      state,
+      action: PayloadAction<{
+        runtimeGeneration: number;
+        slotId: LivingSaveSlotId;
+      }>,
+    ) {
+      if (
+        state.runtimeGeneration !== action.payload.runtimeGeneration ||
+        state.activeSlotId !== action.payload.slotId
+      ) {
+        return;
+      }
+      state.saveHealth = 'saving';
+      state.failureReason = null;
+    },
+    livingSaveCheckpointSucceeded(
+      state,
+      action: PayloadAction<{
+        runtimeGeneration: number;
+        slotId: LivingSaveSlotId;
+        catalog: LivingSaveCatalog;
+      }>,
+    ) {
+      if (
+        state.runtimeGeneration !== action.payload.runtimeGeneration ||
+        state.activeSlotId !== action.payload.slotId
+      ) {
+        return;
+      }
+      applyCatalog(state, action.payload.catalog);
+      state.saveHealth = 'saved';
+      state.failureReason = null;
+    },
+    livingSaveCheckpointFailed(
+      state,
+      action: PayloadAction<{
+        runtimeGeneration: number;
+        slotId: LivingSaveSlotId;
+        reason: string;
+      }>,
+    ) {
+      if (
+        state.runtimeGeneration !== action.payload.runtimeGeneration ||
+        state.activeSlotId !== action.payload.slotId
+      ) {
+        return;
+      }
+      state.saveHealth = 'save-unavailable';
+      state.failureReason = action.payload.reason;
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(resetGame, createInitialState);
@@ -214,6 +265,9 @@ const livingSavesSlice = createSlice({
 });
 
 export const {
+  livingSaveCheckpointFailed,
+  livingSaveCheckpointStarted,
+  livingSaveCheckpointSucceeded,
   livingSaveCatalogResolved,
   livingSaveOperationCompleted,
   livingSaveOperationFailed,

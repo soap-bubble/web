@@ -11,7 +11,12 @@ import Sounds, { AudioController } from 'morpheus/casts/components/Sounds';
 import useCastRefNoticer from 'morpheus/casts/hooks/useCastRefNoticer';
 import usePanoMomentum from 'morpheus/casts/hooks/panoMomentum';
 import { composePointer } from 'morpheus/hotspot/eventInterface';
-import { isPano, forMorpheusType, isAudio, isMovie } from 'morpheus/casts/matchers';
+import {
+  isPano,
+  forMorpheusType,
+  isAudio,
+  isMovie,
+} from 'morpheus/casts/matchers';
 import { isCastActive, Gamestates } from '@soapbubble/morpheus-client';
 import type {
   Scene,
@@ -41,6 +46,10 @@ export type ExternalRotation = {
   pitch: number;
 };
 
+export type StageInputController = {
+  cancelGesture: () => boolean;
+};
+
 interface InteractiveStageProps {
   stageScenes: Scene[];
   activeScene: Scene;
@@ -56,6 +65,9 @@ interface InteractiveStageProps {
   onTransition?: (transition: SceneTransitionRequest) => void;
   onSceneReady?: (sceneId: number) => void;
   onHarnessClickReady?: (handler: HarnessClickHandler | null) => void;
+  inputEnabled?: boolean;
+  onStableAction?: () => void;
+  onInputControllerReady?: (controller: StageInputController | null) => void;
 }
 
 const TRANSITION_SCENE_SENTINEL = 0x3fffffff;
@@ -91,7 +103,9 @@ function sceneHasNonAudioControlled(scene: Scene): boolean {
   return scene.casts.some((cast) => isNonAudioControlledCast(cast));
 }
 
-function isSpecialCast(cast: Cast): cast is MovieSpecialCast | ControlledMovieCast {
+function isSpecialCast(
+  cast: Cast,
+): cast is MovieSpecialCast | ControlledMovieCast {
   return cast.__t === 'MovieSpecialCast' || cast.__t === 'ControlledMovieCast';
 }
 
@@ -112,11 +126,17 @@ function isFullscreenCast(cast: Cast): boolean {
   return cast.width >= 320 && cast.height >= 200;
 }
 
-function sceneHasActiveSpecialCast(scene: Scene, gamestates: Gamestates): boolean {
+function sceneHasActiveSpecialCast(
+  scene: Scene,
+  gamestates: Gamestates,
+): boolean {
   return scene.casts.some((cast) => isActiveSpecialCast(cast, gamestates));
 }
 
-function sceneHasActiveFullscreenCast(scene: Scene, gamestates: Gamestates): boolean {
+function sceneHasActiveFullscreenCast(
+  scene: Scene,
+  gamestates: Gamestates,
+): boolean {
   return scene.casts.some(
     (cast) => isActiveSpecialCast(cast, gamestates) && isFullscreenCast(cast),
   );
@@ -165,6 +185,9 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   onTransition,
   onSceneReady,
   onHarnessClickReady,
+  inputEnabled = true,
+  onStableAction,
+  onInputControllerReady,
 }) => {
   const active = activeScene;
   const [availableSounds, onAudioCastRef] = useCastRefNoticer<
@@ -222,7 +245,11 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     );
     const showPano = !hasFullscreenSpecial || hasFullscreenMovieSpecial;
 
-    return { webGlScenes: showPano ? webGl : [], specialScenes: special, showPano };
+    return {
+      webGlScenes: showPano ? webGl : [],
+      specialScenes: special,
+      showPano,
+    };
   }, [gamestates, stageScenes]);
 
   // const debugStackSummary = useMemo(() => {
@@ -262,7 +289,12 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   // }, [active?.sceneId, debugStackSummary, showPano, specialScenes, webGlScenes]);
 
   const enablePanoInput = useMemo(() => {
-    return showPano && isPanoScene && specialScenes.length === 0 && !activeHasControlledOverlay;
+    return (
+      showPano &&
+      isPanoScene &&
+      specialScenes.length === 0 &&
+      !activeHasControlledOverlay
+    );
   }, [showPano, isPanoScene, specialScenes.length, activeHasControlledOverlay]);
 
   const [camera, setCamera] = useState<Camera | undefined>();
@@ -278,8 +310,12 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     };
   }, [rotation]);
 
-  const [internalRotation, momentumPointerHandler, setInternalRotation] =
-    usePanoMomentum(5, 100, targetInternal);
+  const [
+    internalRotation,
+    momentumPointerHandler,
+    setInternalRotation,
+    momentumController,
+  ] = usePanoMomentum(5, 100, targetInternal, onStableAction);
 
   // Track whether we're syncing from Redux to avoid dispatch loops
   const syncingFromReduxRef = useRef(false);
@@ -300,12 +336,18 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   }, [targetInternal, setInternalRotation]);
 
   // Notify parent of rotation changes (but skip when syncing from Redux)
-  const prevRotationRef = useRef({ x: internalRotation.x, y: internalRotation.y });
+  const prevRotationRef = useRef({
+    x: internalRotation.x,
+    y: internalRotation.y,
+  });
   useEffect(() => {
     // Skip if we just synced from Redux
     if (syncingFromReduxRef.current) {
       syncingFromReduxRef.current = false;
-      prevRotationRef.current = { x: internalRotation.x, y: internalRotation.y };
+      prevRotationRef.current = {
+        x: internalRotation.x,
+        y: internalRotation.y,
+      };
       return;
     }
     if (
@@ -313,7 +355,10 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
       (prevRotationRef.current.x !== internalRotation.x ||
         prevRotationRef.current.y !== internalRotation.y)
     ) {
-      prevRotationRef.current = { x: internalRotation.x, y: internalRotation.y };
+      prevRotationRef.current = {
+        x: internalRotation.x,
+        y: internalRotation.y,
+      };
       onRotationChange({
         yaw3600: internalToExternal(internalRotation.x),
         pitch: internalRotation.y,
@@ -326,37 +371,64 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     [stageScenes],
   );
 
-  const [cursor, hotspotPointerHandler, clickHotspot] = useInputHandler({
-    scene: active,
-    gamestates,
-    isPanoScene: enablePanoInput,
-    camera,
-    panoObject,
-    offsetX: internalRotation.offsetX,
-    screenLeft: left,
-    screenTop: top,
-    screenWidth: width,
-    screenHeight: height,
-    previousSceneId,
-    onTransition,
-  });
+  const [cursor, hotspotPointerHandler, clickHotspot, hotspotInputController] =
+    useInputHandler({
+      scene: active,
+      gamestates,
+      isPanoScene: enablePanoInput,
+      camera,
+      panoObject,
+      offsetX: internalRotation.offsetX,
+      screenLeft: left,
+      screenTop: top,
+      screenWidth: width,
+      screenHeight: height,
+      previousSceneId,
+      inputEnabled,
+      onTransition,
+      onActionSettled: onStableAction,
+    });
 
   useEffect(() => {
-    onHarnessClickReady?.(clickHotspot);
+    onHarnessClickReady?.(inputEnabled ? clickHotspot : null);
     return () => onHarnessClickReady?.(null);
-  }, [clickHotspot, onHarnessClickReady]);
+  }, [clickHotspot, inputEnabled, onHarnessClickReady]);
+
+  const inputController = useMemo<StageInputController>(
+    () => ({
+      cancelGesture() {
+        const hotspotCancelled = hotspotInputController.cancelGesture();
+        const panoramaCancelled = momentumController.cancelInteraction();
+        return hotspotCancelled || panoramaCancelled;
+      },
+    }),
+    [hotspotInputController, momentumController],
+  );
+
+  useEffect(() => {
+    onInputControllerReady?.(inputController);
+    return () => onInputControllerReady?.(null);
+  }, [inputController, onInputControllerReady]);
 
   // Only include momentum handler (pano rotation) when the active scene is a pano
   // This prevents pano rotation when interacting with special/controlled scenes
   const pointerHandler = useMemo(
     () =>
-      enablePanoInput
-        ? composePointer([momentumPointerHandler, hotspotPointerHandler])
-        : composePointer([hotspotPointerHandler]),
-    [enablePanoInput, momentumPointerHandler, hotspotPointerHandler],
+      !inputEnabled
+        ? {}
+        : enablePanoInput
+          ? composePointer([momentumPointerHandler, hotspotPointerHandler])
+          : composePointer([hotspotPointerHandler]),
+    [
+      enablePanoInput,
+      hotspotPointerHandler,
+      inputEnabled,
+      momentumPointerHandler,
+    ],
   );
 
-  const { onPointerUp, onPointerMove, onPointerDown, onPointerLeave } = pointerHandler;
+  const { onPointerUp, onPointerMove, onPointerDown, onPointerLeave } =
+    pointerHandler;
 
   const isSoundCast = useCallback(
     (cast: Cast): cast is SoundCast => cast.__t === 'SoundCast',
@@ -475,7 +547,13 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         });
       }
     },
-    [activeScene, gamestates, isSoundCast, isMovieSpecialCastType, onTransition],
+    [
+      activeScene,
+      gamestates,
+      isSoundCast,
+      isMovieSpecialCastType,
+      onTransition,
+    ],
   );
 
   const handleAudioCastCanPlayThrough = useCallback(() => {}, []);

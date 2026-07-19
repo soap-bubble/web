@@ -40,6 +40,7 @@ import {
   setRotation,
 } from '@/morpheus-app/store/slices/rotationSlice';
 import { selectLivingSaves } from '@/morpheus-app/store/slices/livingSavesSlice';
+import { requestLivingSaveCheckpoint } from '@/morpheus-app/store/livingSaveCheckpoint';
 
 import '@/morpheus-app/runtime';
 
@@ -49,6 +50,7 @@ type PendingTransition = {
   dissolve: boolean;
   startAngle?: number;
   mode?: 'goBack';
+  runtimeGeneration: number;
 };
 
 const DISSOLVE_DURATION_MS = 600;
@@ -161,6 +163,10 @@ export const SceneStageShell = () => {
 
   const gamestates = useAppSelector(selectGamestatesAccessor);
   const livingSaves = useAppSelector(selectLivingSaves);
+  const runtimeGenerationRef = useRef(livingSaves.runtimeGeneration);
+  useEffect(() => {
+    runtimeGenerationRef.current = livingSaves.runtimeGeneration;
+  }, [livingSaves.runtimeGeneration]);
   const { width, height, left, top } = useResponsiveSize();
   const dispatch: AppDispatch = useAppDispatch();
 
@@ -253,6 +259,10 @@ export const SceneStageShell = () => {
     [dispatch],
   );
 
+  const handleStableAction = useCallback(() => {
+    void requestLivingSaveCheckpoint(runtimeGenerationRef.current);
+  }, []);
+
   const getState = useCallback(() => {
     const internalX = (rotation.yaw3600 / 3600) * 3072;
     const offsetX = Math.floor((internalX % 3072) / 24) * 24;
@@ -284,6 +294,7 @@ export const SceneStageShell = () => {
       }
       transitionInProgressRef.current = true;
       committedTransitionSceneIdRef.current = null;
+      const transitionGeneration = runtimeGenerationRef.current;
 
       if (startAngle !== undefined) {
         dispatch(seedRotationFromTransition({ yaw3600: startAngle, pitch: 0 }));
@@ -291,6 +302,10 @@ export const SceneStageShell = () => {
 
       try {
         const targetScene = await fetchScene(sceneId);
+        if (runtimeGenerationRef.current !== transitionGeneration) {
+          transitionInProgressRef.current = false;
+          return;
+        }
         if (!targetScene) {
           transitionInProgressRef.current = false;
           return;
@@ -301,6 +316,7 @@ export const SceneStageShell = () => {
           dissolve,
           startAngle,
           mode,
+          runtimeGeneration: transitionGeneration,
         });
       } catch {
         transitionInProgressRef.current = false;
@@ -334,6 +350,11 @@ export const SceneStageShell = () => {
 
   const commitPendingTransition = useCallback(
     (transition: PendingTransition) => {
+      if (transition.runtimeGeneration !== runtimeGenerationRef.current) {
+        setPendingTransition(null);
+        transitionInProgressRef.current = false;
+        return;
+      }
       if (committedTransitionSceneIdRef.current === transition.sceneId) {
         return;
       }
@@ -387,6 +408,7 @@ export const SceneStageShell = () => {
       }
       setPendingTransition(null);
       pushSceneRoute(transition.sceneId);
+      void requestLivingSaveCheckpoint(transition.runtimeGeneration);
       // The incoming scene may immediately author another transition. The fade
       // is visual cleanup, not part of transition admission.
       transitionInProgressRef.current = false;
@@ -613,6 +635,11 @@ export const SceneStageShell = () => {
           onTransition={handleSceneTransition}
           onSceneReady={handleSceneReady}
           onHarnessClickReady={handleHarnessClickReady}
+          inputEnabled={
+            livingSaves.bootstrapPhase === 'ready' &&
+            livingSaves.operation === null
+          }
+          onStableAction={handleStableAction}
         />
       </div>
       <canvas

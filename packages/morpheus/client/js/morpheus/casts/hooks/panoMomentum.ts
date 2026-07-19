@@ -1,4 +1,11 @@
-import { PointerEvent, useMemo, useState, useCallback } from 'react'
+import {
+  PointerEvent,
+  useMemo,
+  useState,
+  useCallback,
+  useEffect,
+  useRef,
+} from 'react'
 import useRaf from '@rooks/use-raf'
 import { last } from 'lodash'
 import { PointerEvents } from 'morpheus/hotspot/eventInterface'
@@ -61,13 +68,17 @@ type RotationState = { x: number; y: number; offsetX: number }
 type PanoHandler = [
   RotationState,
   PointerEvents<HTMLCanvasElement>,
-  (nextRotation: RotationState) => void
+  (nextRotation: RotationState) => void,
+  {
+    cancelInteraction: () => boolean
+  }
 ]
 
 export default function(
   sensitivity: number,
   interactionDebounce: number,
-  initialRotation?: RotationState
+  initialRotation?: RotationState,
+  onSettled?: () => void
 ): PanoHandler {
   // Here an interaction is a user touch gesture or a pointer movement with mouse clicked
   const [rotation, setRotation] = useState<RotationState>(
@@ -90,6 +101,35 @@ export default function(
   const [momentumAbort, setMomentumAbort] = useState(false)
   const [momentumEnabled, setMomentumEnabled] = useState(false)
   const [momentumSpeed, setMomentumSpeed] = useState({ x: 0, y: 0 })
+  const onSettledRef = useRef(onSettled)
+  const interactionStartRotationRef = useRef<RotationState | null>(null)
+  const interactionMovedRef = useRef(false)
+  const settlementPendingRef = useRef(false)
+  const settlementFrameRef = useRef<number | null>(null)
+
+  const notifySettled = useCallback(() => {
+    if (typeof requestAnimationFrame === 'function') {
+      settlementFrameRef.current = requestAnimationFrame(() => {
+        settlementFrameRef.current = null
+        onSettledRef.current?.()
+      })
+      return
+    }
+    onSettledRef.current?.()
+  }, [])
+
+  useEffect(() => {
+    onSettledRef.current = onSettled
+  }, [onSettled])
+
+  useEffect(() => {
+    if (!momentumEnabled && settlementPendingRef.current) {
+      settlementPendingRef.current = false
+      notifySettled()
+      interactionStartRotationRef.current = null
+      interactionMovedRef.current = false
+    }
+  }, [momentumEnabled, notifySettled])
 
   useRaf(() => {
     if (!momentumAbort) {
@@ -134,8 +174,11 @@ export default function(
       setPositions([start])
       setStartPos(start)
       setMomentumAbort(true)
+      interactionStartRotationRef.current = rotation
+      interactionMovedRef.current = false
+      settlementPendingRef.current = false
     },
-    [setActive, setPositions, setStartPos, setMomentumAbort]
+    [rotation, setActive, setPositions, setStartPos, setMomentumAbort]
   )
 
   const onPointerMove = useCallback(
@@ -166,6 +209,7 @@ export default function(
           delta.y *= RAD_TO_MORPHEUS_TEXTURE
           setPositions(newPositions)
           setRotation(clampRotation(rotation, delta))
+          interactionMovedRef.current = true
         }
       }
     },
@@ -177,11 +221,15 @@ export default function(
       clientX: left,
       clientY: top,
     }: PointerEvent<HTMLCanvasElement>) {
+      if (!active) {
+        return
+      }
       if (startPos) {
         const interactionDistance = Math.sqrt(
           (startPos.left - left) ** 2 + (startPos.top - top) ** 2
         )
         if (interactionDistance > interactionDebounce) {
+          settlementPendingRef.current = true
           const lastPosition = last(positions)
           if (
             lastPosition &&
@@ -194,11 +242,23 @@ export default function(
             })
           }
           startMomentum()
+        } else if (interactionMovedRef.current) {
+          notifySettled()
+          interactionStartRotationRef.current = null
+          interactionMovedRef.current = false
         }
       }
       setActive(false)
+      setStartPos(undefined)
     },
-    [startPos, positions, setMomentumSpeed, startMomentum]
+    [
+      active,
+      startPos,
+      positions,
+      setMomentumSpeed,
+      startMomentum,
+      notifySettled,
+    ]
   )
 
   const pointerEvents = useMemo(
@@ -214,10 +274,47 @@ export default function(
 
   const setExternalRotation = useCallback(
     (nextRotation: RotationState) => {
+      settlementPendingRef.current = false
+      if (settlementFrameRef.current !== null) {
+        cancelAnimationFrame(settlementFrameRef.current)
+        settlementFrameRef.current = null
+      }
+      interactionStartRotationRef.current = null
+      interactionMovedRef.current = false
+      setMomentumEnabled(false)
+      setMomentumSpeed({ x: 0, y: 0 })
       setRotation(nextRotation)
     },
-    [setRotation]
+    [setRotation, setMomentumEnabled, setMomentumSpeed]
   )
 
-  return [rotation, pointerEvents, setExternalRotation]
+  const cancelInteraction = useCallback(() => {
+    const startRotation = interactionStartRotationRef.current
+    const hadInteraction =
+      active || momentumEnabled || interactionMovedRef.current
+    settlementPendingRef.current = false
+    if (settlementFrameRef.current !== null) {
+      cancelAnimationFrame(settlementFrameRef.current)
+      settlementFrameRef.current = null
+    }
+    interactionMovedRef.current = false
+    setActive(false)
+    setMomentumEnabled(false)
+    setMomentumAbort(true)
+    setMomentumSpeed({ x: 0, y: 0 })
+    setPositions([])
+    setStartPos(undefined)
+    if (startRotation) {
+      setRotation(startRotation)
+    }
+    interactionStartRotationRef.current = null
+    return hadInteraction
+  }, [active, momentumEnabled])
+
+  return [
+    rotation,
+    pointerEvents,
+    setExternalRotation,
+    { cancelInteraction },
+  ]
 }

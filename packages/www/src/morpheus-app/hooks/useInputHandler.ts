@@ -12,7 +12,10 @@ import type { SceneTransitionRequest } from 'morpheus/scene/types';
 import { DST_RATIO, DST_WIDTH, GESTURES } from 'morpheus/constants';
 
 import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
-import { updateGamestate } from '@/morpheus-app/store/slices/gamestateSlice';
+import {
+  replaceGamestateValues,
+  updateGamestate,
+} from '@/morpheus-app/store/slices/gamestateSlice';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
 import { setRotation } from '@/morpheus-app/store/slices/rotationSlice';
 import { selectRotation } from '@/morpheus-app/store/slices/rotationSlice';
@@ -64,7 +67,16 @@ export type HarnessClickHandler = (
   hotspot: ClickHotspotMatchedHotspot,
 ) => HarnessClickResult;
 
-type InputReturn = [CursorState, PointerHandlers, HarnessClickHandler];
+export type InputController = {
+  cancelGesture: () => boolean;
+};
+
+type InputReturn = [
+  CursorState,
+  PointerHandlers,
+  HarnessClickHandler,
+  InputController,
+];
 
 const cursorCache = new Map<number, Promise<HTMLImageElement | null>>();
 
@@ -160,7 +172,9 @@ export function useInputHandler(params: {
   screenWidth: number;
   screenHeight: number;
   previousSceneId?: number;
+  inputEnabled?: boolean;
   onTransition?: (transition: SceneTransitionRequest) => void;
+  onActionSettled?: () => void;
 }): InputReturn {
   const {
     scene,
@@ -174,7 +188,9 @@ export function useInputHandler(params: {
     screenWidth,
     screenHeight,
     previousSceneId,
+    inputEnabled = true,
     onTransition,
+    onActionSettled,
   } = params;
 
   const dispatch = useAppDispatch();
@@ -184,6 +200,8 @@ export function useInputHandler(params: {
   const gamestatesRef = useRef(gamestates);
   const previousSceneIdRef = useRef(previousSceneId);
   const onTransitionRef = useRef(onTransition);
+  const onActionSettledRef = useRef(onActionSettled);
+  const inputEnabledRef = useRef(inputEnabled);
   useEffect(() => {
     gamestatesRef.current = gamestates;
   }, [gamestates]);
@@ -193,6 +211,12 @@ export function useInputHandler(params: {
   useEffect(() => {
     onTransitionRef.current = onTransition;
   }, [onTransition]);
+  useEffect(() => {
+    onActionSettledRef.current = onActionSettled;
+  }, [onActionSettled]);
+  useEffect(() => {
+    inputEnabledRef.current = inputEnabled;
+  }, [inputEnabled]);
 
   const [cursor, setCursor] = useState<HTMLImageElement>();
   const [pointer, setPointer] = useState<PointerState>({
@@ -284,7 +308,13 @@ export function useInputHandler(params: {
       { top: pointer.startGameY, left: pointer.startGameX },
       pointer.isDown,
     );
-  }, [hotspots, gamePosition, pointer.startGameX, pointer.startGameY, pointer.isDown]);
+  }, [
+    hotspots,
+    gamePosition,
+    pointer.startGameX,
+    pointer.startGameY,
+    pointer.isDown,
+  ]);
 
   // Load cursor image when index changes
   useEffect(() => {
@@ -299,6 +329,14 @@ export function useInputHandler(params: {
 
   // Slider hotspots frequently share castId 0, so preserve drag origins by state ID.
   const sliderOldValuesRef = useRef<Map<number, number>>(new Map());
+  const gestureStartValuesRef = useRef<Map<number, number>>(new Map());
+  const gestureStartRotationRef = useRef<Rotation | null>(null);
+  const stableActionChangedRef = useRef(false);
+  const transitionPendingRef = useRef(false);
+  const capturedPointerRef = useRef<{
+    target: HTMLCanvasElement;
+    pointerId: number;
+  } | null>(null);
 
   // Process a hotspot action and dispatch results
   const pendingTransitionRef = useRef<{
@@ -327,11 +365,17 @@ export function useInputHandler(params: {
   }, []);
 
   const startSweepTo = useCallback(
-    (transition: { sceneId: number; dissolve: boolean; startAngle?: number }, target: Rotation) => {
+    (
+      transition: { sceneId: number; dissolve: boolean; startAngle?: number },
+      target: Rotation,
+    ) => {
       const startRotation = rotationRef.current;
       const deltaYaw = shortestYawDelta(startRotation.yaw3600, target.yaw3600);
-      const distanceRad = Math.abs(deltaYaw) * (Math.PI * 2 / 3600);
-      const durationMs = Math.max(SWEEP_MIN_DURATION_MS, Math.sqrt(distanceRad) * 1000);
+      const distanceRad = Math.abs(deltaYaw) * ((Math.PI * 2) / 3600);
+      const durationMs = Math.max(
+        SWEEP_MIN_DURATION_MS,
+        Math.sqrt(distanceRad) * 1000,
+      );
 
       pendingTransitionRef.current = {
         transition,
@@ -355,7 +399,11 @@ export function useInputHandler(params: {
         const eased = t * (2 - t);
         const nextYaw =
           sweep.startRotation.yaw3600 +
-          shortestYawDelta(sweep.startRotation.yaw3600, sweep.targetRotation.yaw3600) * eased;
+          shortestYawDelta(
+            sweep.startRotation.yaw3600,
+            sweep.targetRotation.yaw3600,
+          ) *
+            eased;
         const nextPitch =
           sweep.startRotation.pitch +
           (sweep.targetRotation.pitch - sweep.startRotation.pitch) * eased;
@@ -386,16 +434,33 @@ export function useInputHandler(params: {
   const applyHotspotActionResult = useCallback(
     (result: HotspotActionResult) => {
       for (const update of result.gamestateUpdates) {
-        console.log('[GamestateUpdate]', update.stateId, '->', update.value);
+        if (
+          pointerRef.current.isDown &&
+          !gestureStartValuesRef.current.has(update.stateId)
+        ) {
+          gestureStartValuesRef.current.set(
+            update.stateId,
+            gamestatesRef.current.byId(update.stateId).value,
+          );
+        }
         dispatch(updateGamestate(update));
       }
+      if (result.gamestateUpdates.length > 0) {
+        stableActionChangedRef.current = true;
+      }
 
-      if (result.sceneTransition && result.preTransitionRotation && isPanoScene) {
+      if (
+        result.sceneTransition &&
+        result.preTransitionRotation &&
+        isPanoScene
+      ) {
+        transitionPendingRef.current = true;
         startSweepTo(result.sceneTransition, result.preTransitionRotation);
         return result.allDone;
       }
 
       if (result.sceneTransition && onTransitionRef.current) {
+        transitionPendingRef.current = true;
         onTransitionRef.current(result.sceneTransition);
       }
 
@@ -403,6 +468,13 @@ export function useInputHandler(params: {
     },
     [dispatch, isPanoScene, startSweepTo],
   );
+
+  const settlePendingAction = useCallback(() => {
+    if (stableActionChangedRef.current && !transitionPendingRef.current) {
+      stableActionChangedRef.current = false;
+      onActionSettledRef.current?.();
+    }
+  }, []);
 
   const processHotspotAction = useCallback(
     (
@@ -439,11 +511,12 @@ export function useInputHandler(params: {
 
       if (result.outcome === 'applied') {
         applyHotspotActionResult(result.actionResult);
+        settlePendingAction();
       }
 
       return result;
     },
-    [applyHotspotActionResult, isPanoScene, scene],
+    [applyHotspotActionResult, isPanoScene, scene, settlePendingAction],
   );
 
   // Reset pointer state on scene change
@@ -452,7 +525,10 @@ export function useInputHandler(params: {
     if (sceneIdRef.current !== scene.sceneId) {
       sceneIdRef.current = scene.sceneId;
       pendingTransitionRef.current = null;
+      transitionPendingRef.current = false;
+      stableActionChangedRef.current = false;
       sliderOldValuesRef.current.clear();
+      gestureStartValuesRef.current.clear();
       if (sweepRafRef.current !== null) {
         cancelAnimationFrame(sweepRafRef.current);
         sweepRafRef.current = null;
@@ -486,13 +562,10 @@ export function useInputHandler(params: {
     );
 
     for (const hotspot of sceneEnterHotspots) {
-      processHotspotAction(
-        hotspot,
-        { top: 0, left: 0 },
-        { top: 0, left: 0 },
-      );
+      processHotspotAction(hotspot, { top: 0, left: 0 }, { top: 0, left: 0 });
     }
-  }, [scene.sceneId, hotspots, processHotspotAction]);
+    settlePendingAction();
+  }, [scene.sceneId, hotspots, processHotspotAction, settlePendingAction]);
 
   // Track which hotspots the pointer was in (for enter/leave events)
   const wasInHotspotsRef = useRef<Set<number>>(new Set());
@@ -550,7 +623,10 @@ export function useInputHandler(params: {
       // Process mouse enter hotspots
       if (wasMoved && enteringIds.size > 0) {
         for (const hotspot of activeHotspots) {
-          if (enteringIds.has(hotspot.castId) && gesture.isMouseEnter(hotspot)) {
+          if (
+            enteringIds.has(hotspot.castId) &&
+            gesture.isMouseEnter(hotspot)
+          ) {
             processHotspotAction(hotspot, gamePos, startPos);
           }
         }
@@ -579,9 +655,11 @@ export function useInputHandler(params: {
         for (const hotspot of activeHotspots) {
           if (
             !hotspotRectMatchesPosition(startPos)(hotspot) ||
-            !or(gesture.isMouseClick, gesture.isMouseUp, gesture.isMouseDown)(
-              hotspot,
-            )
+            !or(
+              gesture.isMouseClick,
+              gesture.isMouseUp,
+              gesture.isMouseDown,
+            )(hotspot)
           ) {
             continue;
           }
@@ -623,7 +701,10 @@ export function useInputHandler(params: {
       // Process mouse down hotspots
       if (wasDown) {
         for (const hotspot of activeHotspots) {
-          if (nowInHotspotIds.has(hotspot.castId) && gesture.isMouseDown(hotspot)) {
+          if (
+            nowInHotspotIds.has(hotspot.castId) &&
+            gesture.isMouseDown(hotspot)
+          ) {
             if (processHotspotAction(hotspot, gamePos, startPos)) {
               break;
             }
@@ -651,32 +732,20 @@ export function useInputHandler(params: {
 
       // Process "Always" hotspots with castId === 0 on every event
       // This is how the original game triggers scene changes based on gamestate
-      const activeAlwaysHotspots = getActiveHotspots(
-        hotspots,
-        eventGamestates,
-      );
+      const activeAlwaysHotspots = getActiveHotspots(hotspots, eventGamestates);
       for (const hotspot of activeAlwaysHotspots) {
         if (hotspot.castId === 0 && gesture.isAlways(hotspot)) {
-          processHotspotAction(
-            hotspot,
-            gamePos,
-            startPos,
-            eventGamestates,
-          );
+          processHotspotAction(hotspot, gamePos, startPos, eventGamestates);
         }
       }
     },
-    [
-      applyHotspotActionResult,
-      hotspots,
-      isPanoScene,
-      processHotspotAction,
-    ],
+    [applyHotspotActionResult, hotspots, isPanoScene, processHotspotAction],
   );
 
   // Pointer handlers
   const onPointerDown = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      if (!inputEnabledRef.current) return;
       const { clientX, clientY } = event;
 
       // Compute game position immediately for startPos
@@ -720,6 +789,12 @@ export function useInputHandler(params: {
       // Update ref synchronously so subsequent events see correct state
       pointerRef.current = newPointerState;
       setPointer(newPointerState);
+      gestureStartRotationRef.current = { ...rotationRef.current };
+      gestureStartValuesRef.current.clear();
+      capturedPointerRef.current = {
+        target: event.currentTarget,
+        pointerId: event.pointerId,
+      };
       event.currentTarget.setPointerCapture(event.pointerId);
 
       processPointerEvent({
@@ -730,6 +805,7 @@ export function useInputHandler(params: {
         wasMoved: false,
         wasUpped: false,
       });
+      settlePendingAction();
     },
     [
       screenTop,
@@ -742,11 +818,13 @@ export function useInputHandler(params: {
       offsetX,
       raycaster,
       processPointerEvent,
+      settlePendingAction,
     ],
   );
 
   const onPointerMove = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      if (!inputEnabledRef.current) return;
       const { clientX, clientY } = event;
       const prev = pointerRef.current;
 
@@ -800,6 +878,9 @@ export function useInputHandler(params: {
         wasMoved: true,
         wasUpped: false,
       });
+      if (!prev.isDown) {
+        settlePendingAction();
+      }
     },
     [
       screenTop,
@@ -812,11 +893,13 @@ export function useInputHandler(params: {
       offsetX,
       raycaster,
       processPointerEvent,
+      settlePendingAction,
     ],
   );
 
   const onPointerUp = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      if (!inputEnabledRef.current) return;
       const { clientX, clientY } = event;
       const prev = pointerRef.current;
 
@@ -898,10 +981,14 @@ export function useInputHandler(params: {
         }
       }
 
+      settlePendingAction();
       sliderOldValuesRef.current.clear();
+      gestureStartValuesRef.current.clear();
+      gestureStartRotationRef.current = null;
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         event.currentTarget.releasePointerCapture(event.pointerId);
       }
+      capturedPointerRef.current = null;
     },
     [
       screenTop,
@@ -916,11 +1003,13 @@ export function useInputHandler(params: {
       processPointerEvent,
       hotspots,
       processHotspotAction,
+      settlePendingAction,
     ],
   );
 
   const onPointerLeave = useCallback(
     (event: PointerEvent<HTMLCanvasElement>) => {
+      if (!inputEnabledRef.current) return;
       if (event.currentTarget.hasPointerCapture(event.pointerId)) {
         return;
       }
@@ -942,6 +1031,46 @@ export function useInputHandler(params: {
     [],
   );
 
+  const cancelGesture = useCallback(() => {
+    if (transitionPendingRef.current) {
+      return false;
+    }
+    const startValues = Object.fromEntries(
+      gestureStartValuesRef.current.entries(),
+    );
+    if (Object.keys(startValues).length > 0) {
+      dispatch(replaceGamestateValues(startValues));
+    }
+    if (gestureStartRotationRef.current) {
+      dispatch(setRotation(gestureStartRotationRef.current));
+    }
+    if (sweepRafRef.current !== null) {
+      cancelAnimationFrame(sweepRafRef.current);
+      sweepRafRef.current = null;
+    }
+    pendingTransitionRef.current = null;
+    stableActionChangedRef.current = false;
+    sliderOldValuesRef.current.clear();
+    gestureStartValuesRef.current.clear();
+    gestureStartRotationRef.current = null;
+    const captured = capturedPointerRef.current;
+    if (captured && captured.target.hasPointerCapture(captured.pointerId)) {
+      captured.target.releasePointerCapture(captured.pointerId);
+    }
+    capturedPointerRef.current = null;
+    const resetPointer = {
+      ...pointerRef.current,
+      isDown: false,
+      startScreenX: 0,
+      startScreenY: 0,
+      startGameX: 0,
+      startGameY: 0,
+    };
+    pointerRef.current = resetPointer;
+    setPointer(resetPointer);
+    return true;
+  }, [dispatch]);
+
   return [
     {
       image: cursor,
@@ -955,5 +1084,6 @@ export function useInputHandler(params: {
       onPointerLeave,
     },
     clickHotspot,
+    { cancelGesture },
   ];
 }

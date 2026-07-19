@@ -35,6 +35,15 @@ const gamestateSlice = createSlice({
         existing.value = value;
       }
     },
+    replaceGamestateValues(
+      state,
+      action: PayloadAction<Record<number, number>>,
+    ) {
+      for (const [key, value] of Object.entries(action.payload)) {
+        const existing = state.byId[Number(key)];
+        if (existing) existing.value = value;
+      }
+    },
   },
   extraReducers: (builder) => {
     builder.addCase(resetGame, createInitialState);
@@ -54,7 +63,8 @@ const gamestateSlice = createSlice({
   },
 });
 
-export const { updateGamestate } = gamestateSlice.actions;
+export const { replaceGamestateValues, updateGamestate } =
+  gamestateSlice.actions;
 
 export default gamestateSlice.reducer;
 

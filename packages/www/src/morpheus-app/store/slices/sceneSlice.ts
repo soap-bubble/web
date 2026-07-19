@@ -81,7 +81,6 @@ const sceneSlice = createSlice({
         state.requestedSceneId = sceneId;
         return;
       }
-      state.activeSceneId = sceneId;
       const existingIndex = state.stack.findIndex(
         (entry) => entry.sceneId === sceneId,
       );
@@ -100,6 +99,8 @@ const sceneSlice = createSlice({
       if (state.stack.length > state.maxStackSize) {
         state.stack = state.stack.slice(0, state.maxStackSize);
       }
+      state.activeSceneId = sceneId;
+      state.returnSceneId = state.stack[1]?.sceneId ?? null;
       state.requestedSceneId = null;
     },
     activateScenePrune(state, action: PayloadAction<number>) {
@@ -135,6 +136,7 @@ const sceneSlice = createSlice({
       if (state.stack.length > state.maxStackSize) {
         state.stack = state.stack.slice(0, state.maxStackSize);
       }
+      state.returnSceneId = state.stack[1]?.sceneId ?? null;
       state.requestedSceneId = null;
     },
     setMaxStackSize(state, action: PayloadAction<number>) {

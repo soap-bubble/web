@@ -44,7 +44,9 @@
 }
 
 .slotCard {
+  position: relative;
   min-width: 0;
+  overflow: hidden;
   border: 1px solid rgba(190, 214, 229, 0.55);
   border-radius: 8px;
   background: linear-gradient(
@@ -72,6 +74,8 @@
 }
 
 .slotSelection {
+  position: relative;
+  z-index: 1;
   display: flex;
   width: 100%;
   min-height: 142px;
@@ -88,6 +92,7 @@
   transition:
     background 160ms ease,
     transform 160ms ease;
+  touch-action: pan-y;
 }
 
 .slotSelection:not(:disabled):hover {
@@ -130,9 +135,53 @@
 
 .managementActions {
   display: flex;
+  flex-wrap: wrap;
   justify-content: center;
   gap: 8px;
   padding: 0 10px 10px;
+}
+
+.slotAction {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 10px;
+  border: 1px solid rgba(219, 232, 240, 0.55);
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.08);
+  color: #f5f8fa;
+  cursor: pointer;
+  font: 600 0.75rem/1 -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    sans-serif;
+}
+
+.slotAction:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.slotAction:focus-visible {
+  outline: 3px solid #eef8ff;
+  outline-offset: 2px;
+}
+
+.deleteAction {
+  border-color: rgba(241, 177, 160, 0.62);
+  color: #ffe4dc;
+}
+
+.fileInput {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
+.slotAction:focus-within {
+  outline: 3px solid #eef8ff;
+  outline-offset: 2px;
 }
 
 .srOnly {
@@ -154,6 +203,51 @@
   .slotSelection:not(:disabled):hover {
     background: transparent;
     transform: none;
+  }
+
+  .slotAction:hover {
+    background: rgba(255, 255, 255, 0.08);
+  }
+}
+
+@media (pointer: coarse) {
+  .slotCard {
+    min-height: 92px;
+  }
+
+  .slotSelection {
+    min-height: inherit;
+    background: linear-gradient(
+      145deg,
+      rgba(17, 28, 37, 0.98),
+      rgba(3, 7, 11, 0.99)
+    );
+    transition: transform 160ms ease;
+  }
+
+  .slotCard[data-actions-revealed='true'] .slotSelection {
+    transform: translateX(-150px);
+  }
+
+  .slotCard:has(.managementActions:focus-within) .slotSelection {
+    transform: translateX(-150px);
+  }
+
+  .managementActions {
+    position: absolute;
+    z-index: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    width: 150px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    background: rgba(24, 13, 10, 0.96);
+  }
+
+  .managementActions:empty {
+    display: none;
   }
 }
 

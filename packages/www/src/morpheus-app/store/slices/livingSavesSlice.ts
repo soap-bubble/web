@@ -11,7 +11,11 @@ import type {
 import { installLivingSaveRuntime, resetGame } from '../actions';
 
 export type LivingSaveBootstrapPhase = 'idle' | 'booting' | 'ready' | 'failed';
-export type LivingSaveOperationKind = 'bootstrap' | 'restore' | 'switch';
+export type LivingSaveOperationKind =
+  | 'bootstrap'
+  | 'restore'
+  | 'switch'
+  | 'manage';
 export type LivingSaveHealth =
   | 'idle'
   | 'saved'

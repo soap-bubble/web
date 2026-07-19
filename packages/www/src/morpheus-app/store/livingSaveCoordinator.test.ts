@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { Scene } from 'morpheus/casts/types';
 
 import { createLivingSaveCoordinator } from './livingSaveCoordinator';
@@ -244,5 +244,100 @@ describe('livingSaveCoordinator', () => {
 
     expect(store.getState().scene.activeSceneId).toBe(1050);
     expect(store.getState().livingSaves.activeSlotId).toBe('slot-2');
+  });
+
+  it('deletes only the selected active slot and leaves the running session volatile', async () => {
+    const envelope = createLivingSaveEnvelopeFixture();
+    const catalog = occupyLivingSaveSlot(
+      createEmptyLivingSaveCatalogFixture(),
+      'slot-1',
+      envelope,
+    );
+    const deletedCatalog: LivingSaveCatalog = {
+      ...catalog,
+      revision: catalog.revision + 1,
+      activeSlotId: null,
+      slots: {
+        ...catalog.slots,
+        'slot-1': {
+          kind: 'empty',
+          slotId: 'slot-1',
+          revision: catalog.slots['slot-1'].revision + 1,
+        },
+      },
+      tombstones: {
+        'slot-1': {
+          slotId: 'slot-1',
+          deletedAt: 100,
+          expiresAt: 10_100,
+          wasActive: true,
+        },
+      },
+    };
+    const store = createAppStore();
+    const deleteSlot = vi.fn(async () => ({
+      ok: true as const,
+      value: deletedCatalog,
+    }));
+    const coordinator = createLivingSaveCoordinator({
+      dispatch: store.dispatch,
+      getState: store.getState,
+      readCatalog: async () => ({ ok: true, value: catalog }),
+      activateSlot: async () => ({ ok: true, value: catalog }),
+      createSlot: async () => ({ ok: true, value: catalog }),
+      deleteSlot,
+      validateEnvelope: async (value) => ({ ok: true, envelope: value }),
+      fetchScene: async (sceneId) => scene(sceneId),
+      replaceRoute: () => undefined,
+      goToTitle: () => undefined,
+    });
+
+    await expect(coordinator.deleteSlot('slot-1')).resolves.toEqual({
+      ok: true,
+      kind: 'managed',
+    });
+
+    expect(deleteSlot).toHaveBeenCalledWith({
+      slotId: 'slot-1',
+      expectedCatalogRevision: catalog.revision,
+      expectedSlotRevision: catalog.slots['slot-1'].revision,
+    });
+    expect(store.getState().livingSaves).toMatchObject({
+      activeSlotId: null,
+      saveHealth: 'volatile',
+    });
+    expect(store.getState().livingSaves.slots[0].state).toBe('empty');
+  });
+
+  it('rejects an invalid imported file before mutating an empty slot', async () => {
+    const catalog = createEmptyLivingSaveCatalogFixture();
+    const store = createAppStore();
+    const importSlot = vi.fn();
+    const coordinator = createLivingSaveCoordinator({
+      dispatch: store.dispatch,
+      getState: store.getState,
+      readCatalog: async () => ({ ok: true, value: catalog }),
+      activateSlot: async () => ({ ok: true, value: catalog }),
+      createSlot: async () => ({ ok: true, value: catalog }),
+      importSlot,
+      parseFileText: async () => ({
+        ok: false,
+        code: 'unsupported-version',
+        reason: 'Unsupported version',
+      }),
+      validateEnvelope: async (value) => ({ ok: true, envelope: value }),
+      fetchScene: async (sceneId) => scene(sceneId),
+      replaceRoute: () => undefined,
+      goToTitle: () => undefined,
+    });
+
+    await expect(
+      coordinator.importFileText('slot-2', '{"gameDataVersion":99}'),
+    ).resolves.toEqual({
+      ok: false,
+      reason: 'unsupported-version',
+    });
+    expect(importSlot).not.toHaveBeenCalled();
+    expect(store.getState().livingSaves.slots[1].state).toBe('empty');
   });
 });

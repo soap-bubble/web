@@ -14,7 +14,7 @@ import InteractiveStage, {
   type StageInputController,
 } from '@/morpheus-app/components/InteractiveStage';
 import { GameMenu } from '@/morpheus-app/components/GameMenu';
-import { SaveSlotHub } from '@/morpheus-app/components/save-slots/SaveSlotHub';
+import { LivingSaveSlotManager } from '@/morpheus-app/components/save-slots/LivingSaveSlotManager';
 import useResponsiveSize from '@/morpheus-app/hooks/useResponsiveSize';
 import useGameControl, {
   HotspotState,
@@ -692,11 +692,7 @@ export const SceneStageShell = () => {
       />
       <GameMenu
         saveSlots={
-          <SaveSlotHub
-            slots={livingSaves.slots}
-            saveHealth={livingSaves.saveHealth}
-            failureReason={livingSaves.failureReason}
-            isBusy={livingSaves.operation !== null}
+          <LivingSaveSlotManager
             title="Save Slots"
             description="Switch journeys, or return to the title to begin an empty slot."
             onSelect={(slot) => {

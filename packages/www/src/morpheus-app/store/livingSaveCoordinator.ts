@@ -4,9 +4,19 @@ import type { Scene } from 'morpheus/casts/types';
 import {
   activateLivingSaveSlot,
   createLivingSaveSlot,
+  deleteLivingSaveSlot,
+  importLivingSaveSlot,
+  readLivingSaveEnvelope,
   readLivingSaveCatalog,
+  undoLivingSaveDeletion,
 } from '@/morpheus-app/storage/livingSaveStorage';
+import {
+  MAX_LIVING_SAVE_FILE_BYTES,
+  parseLivingSaveFileText,
+} from '@/morpheus-app/storage/livingSaveFiles';
+import type { LivingSaveFileParseResult } from '@/morpheus-app/storage/livingSaveFiles';
 import { validateLivingSaveSessionEnvelope } from '@/morpheus-app/storage/livingSaveSchema';
+import { parseLivingSaveSessionEnvelope } from '@/morpheus-app/storage/livingSaveSchema';
 import {
   LIVING_SAVE_GAME_DATA_VERSION,
   LIVING_SAVE_SESSION_FORMAT,
@@ -41,6 +51,16 @@ type CreateSlotParams = {
   activate: boolean;
 };
 
+type DeleteSlotParams = {
+  slotId: LivingSaveSlotId;
+  expectedCatalogRevision: number;
+  expectedSlotRevision: number;
+};
+
+type ImportSlotParams = DeleteSlotParams & {
+  envelope: LivingSaveSessionEnvelope;
+};
+
 export type LivingSaveCoordinatorDependencies = {
   dispatch: AppDispatch;
   getState: () => RootState;
@@ -51,6 +71,19 @@ export type LivingSaveCoordinatorDependencies = {
   createSlot: (
     params: CreateSlotParams,
   ) => Promise<LivingSaveResult<LivingSaveCatalog>>;
+  deleteSlot?: (
+    params: DeleteSlotParams,
+  ) => Promise<LivingSaveResult<LivingSaveCatalog>>;
+  undoDeletion?: (
+    params: DeleteSlotParams,
+  ) => Promise<LivingSaveResult<LivingSaveCatalog>>;
+  importSlot?: (
+    params: ImportSlotParams,
+  ) => Promise<LivingSaveResult<LivingSaveCatalog>>;
+  readEnvelope?: (
+    slotId: LivingSaveSlotId,
+  ) => Promise<LivingSaveResult<LivingSaveSessionEnvelope>>;
+  parseFileText?: (text: string) => Promise<LivingSaveFileParseResult>;
   validateEnvelope: (
     envelope: LivingSaveSessionEnvelope,
   ) => Promise<LivingSaveValidationResult>;
@@ -60,7 +93,10 @@ export type LivingSaveCoordinatorDependencies = {
 };
 
 export type LivingSaveCoordinatorOutcome =
-  | { ok: true; kind: 'restored' | 'volatile' | 'title' | 'created' }
+  | {
+      ok: true;
+      kind: 'restored' | 'volatile' | 'title' | 'created' | 'managed';
+    }
   | { ok: false; reason: string }
   | { ok: false; reason: 'stale-operation' };
 
@@ -75,6 +111,19 @@ export type LivingSaveCoordinator = {
   createNewSlot: (
     slotId: LivingSaveSlotId,
   ) => Promise<LivingSaveCoordinatorOutcome>;
+  deleteSlot: (
+    slotId: LivingSaveSlotId,
+  ) => Promise<LivingSaveCoordinatorOutcome>;
+  undoDelete: (
+    slotId: LivingSaveSlotId,
+  ) => Promise<LivingSaveCoordinatorOutcome>;
+  importFileText: (
+    slotId: LivingSaveSlotId,
+    text: string,
+  ) => Promise<LivingSaveCoordinatorOutcome>;
+  readEnvelope: (
+    slotId: LivingSaveSlotId,
+  ) => Promise<LivingSaveResult<LivingSaveSessionEnvelope>>;
 };
 
 function createOperationId(kind: string, sequence: number): string {
@@ -112,7 +161,9 @@ export function createLivingSaveCoordinator(
 
   const isCurrent = (operationId: string) => currentOperationId === operationId;
 
-  const startOperation = (kind: 'bootstrap' | 'restore' | 'switch'): string => {
+  const startOperation = (
+    kind: 'bootstrap' | 'restore' | 'switch' | 'manage',
+  ): string => {
     operationSequence += 1;
     const operationId = createOperationId(kind, operationSequence);
     currentOperationId = operationId;
@@ -382,7 +433,7 @@ export function createLivingSaveCoordinator(
     );
     currentOperationId = null;
     if (routeSceneId !== null) dependencies.goToTitle();
-    return { ok: true, kind: 'title' };
+    return { ok: true, kind: 'managed' };
   };
 
   const createNewSlot: LivingSaveCoordinator['createNewSlot'] = async (
@@ -417,7 +468,163 @@ export function createLivingSaveCoordinator(
     return installed.ok ? { ok: true, kind: 'created' } : installed;
   };
 
-  return { bootstrap, restoreSlot, createNewSlot };
+  const runCatalogManagement = async (
+    slotId: LivingSaveSlotId,
+    mutation:
+      | NonNullable<LivingSaveCoordinatorDependencies['deleteSlot']>
+      | NonNullable<LivingSaveCoordinatorDependencies['undoDeletion']>,
+    saveHealthAfter: (
+      catalogBefore: LivingSaveCatalog,
+      catalogAfter: LivingSaveCatalog,
+    ) => 'saved' | 'saving' | 'volatile' | 'idle' | 'save-unavailable',
+  ): Promise<LivingSaveCoordinatorOutcome> => {
+    const operationId = startOperation('manage');
+    const catalogOrOutcome = await readCatalogForOperation(operationId);
+    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
+    const catalog = catalogOrOutcome;
+    const slot = catalog.slots[slotId];
+    const result = await mutation({
+      slotId,
+      expectedCatalogRevision: catalog.revision,
+      expectedSlotRevision: slot.revision,
+    });
+    if (!isCurrent(operationId)) {
+      return { ok: false, reason: 'stale-operation' };
+    }
+    if (!result.ok) return fail(operationId, result.code);
+
+    resolveCatalog(operationId, result.value);
+    dependencies.dispatch(
+      livingSaveOperationCompleted({
+        operationId,
+        saveHealth: saveHealthAfter(catalog, result.value),
+      }),
+    );
+    currentOperationId = null;
+    return { ok: true, kind: 'managed' };
+  };
+
+  const deleteSlot: LivingSaveCoordinator['deleteSlot'] = async (slotId) => {
+    if (!dependencies.deleteSlot) {
+      return { ok: false, reason: 'unavailable-storage' };
+    }
+    return runCatalogManagement(
+      slotId,
+      dependencies.deleteSlot,
+      (before) =>
+        before.activeSlotId === slotId
+          ? 'volatile'
+          : dependencies.getState().livingSaves.saveHealth,
+    );
+  };
+
+  const undoDelete: LivingSaveCoordinator['undoDelete'] = async (slotId) => {
+    if (!dependencies.undoDeletion) {
+      return { ok: false, reason: 'unavailable-storage' };
+    }
+    return runCatalogManagement(
+      slotId,
+      dependencies.undoDeletion,
+      () => dependencies.getState().livingSaves.saveHealth,
+    );
+  };
+
+  const importFileText: LivingSaveCoordinator['importFileText'] = async (
+    slotId,
+    text,
+  ) => {
+    if (!dependencies.importSlot) {
+      return { ok: false, reason: 'unavailable-storage' };
+    }
+    const operationId = startOperation('manage');
+    const catalogOrOutcome = await readCatalogForOperation(operationId);
+    if ('ok' in catalogOrOutcome) return catalogOrOutcome;
+    const catalog = catalogOrOutcome;
+    const slot = catalog.slots[slotId];
+    if (slot.kind !== 'empty') {
+      return fail(operationId, 'occupied-target');
+    }
+
+    const fileResult = dependencies.parseFileText
+      ? await dependencies.parseFileText(text)
+      : await (async (): Promise<LivingSaveFileParseResult> => {
+          if (
+            new TextEncoder().encode(text).byteLength >
+            MAX_LIVING_SAVE_FILE_BYTES
+          ) {
+            return {
+              ok: false,
+              code: 'oversized',
+              reason: 'The save file is too large.',
+            };
+          }
+          let value: unknown;
+          try {
+            value = JSON.parse(text);
+          } catch {
+            return {
+              ok: false,
+              code: 'malformed',
+              reason: 'The save file is not valid JSON.',
+            };
+          }
+          const parsed = parseLivingSaveSessionEnvelope(value);
+          if (!parsed.success) {
+            return {
+              ok: false,
+              code: 'invalid-data',
+              reason: parsed.issues[0] ?? 'The save file is malformed.',
+            };
+          }
+          const validation = await dependencies.validateEnvelope(
+            parsed.data,
+          );
+          return validation.ok
+            ? { ok: true, envelope: validation.envelope }
+            : validation;
+        })();
+    if (!isCurrent(operationId)) {
+      return { ok: false, reason: 'stale-operation' };
+    }
+    if (!fileResult.ok) {
+      return fail(operationId, fileResult.code);
+    }
+
+    const result = await dependencies.importSlot({
+      slotId,
+      envelope: fileResult.envelope,
+      expectedCatalogRevision: catalog.revision,
+      expectedSlotRevision: slot.revision,
+    });
+    if (!isCurrent(operationId)) {
+      return { ok: false, reason: 'stale-operation' };
+    }
+    if (!result.ok) return fail(operationId, result.code);
+    resolveCatalog(operationId, result.value);
+    dependencies.dispatch(
+      livingSaveOperationCompleted({
+        operationId,
+        saveHealth: dependencies.getState().livingSaves.saveHealth,
+      }),
+    );
+    currentOperationId = null;
+    return { ok: true, kind: 'title' };
+  };
+
+  const readEnvelope: LivingSaveCoordinator['readEnvelope'] = (slotId) =>
+    dependencies.readEnvelope
+      ? dependencies.readEnvelope(slotId)
+      : Promise.resolve({ ok: false, code: 'unavailable-storage' });
+
+  return {
+    bootstrap,
+    restoreSlot,
+    createNewSlot,
+    deleteSlot,
+    undoDelete,
+    importFileText,
+    readEnvelope,
+  };
 }
 
 export function createBrowserLivingSaveCoordinator(params: {
@@ -434,17 +641,24 @@ export function createBrowserLivingSaveCoordinator(params: {
       { minimum: gamestate.minValue, maximum: gamestate.maxValue },
     ]),
   );
+  const validationContext = {
+    supportedGameDataVersions: [LIVING_SAVE_GAME_DATA_VERSION],
+    expectedGamestateBounds,
+    isSceneAvailable: async (sceneId: number) =>
+      (await params.fetchScene(sceneId)) !== null,
+  };
   return createLivingSaveCoordinator({
     ...params,
     readCatalog: readLivingSaveCatalog,
     activateSlot: activateLivingSaveSlot,
     createSlot: createLivingSaveSlot,
+    deleteSlot: deleteLivingSaveSlot,
+    undoDeletion: undoLivingSaveDeletion,
+    importSlot: importLivingSaveSlot,
+    readEnvelope: readLivingSaveEnvelope,
+    parseFileText: (text) =>
+      parseLivingSaveFileText(text, validationContext),
     validateEnvelope: (envelope) =>
-      validateLivingSaveSessionEnvelope(envelope, {
-        supportedGameDataVersions: [LIVING_SAVE_GAME_DATA_VERSION],
-        expectedGamestateBounds,
-        isSceneAvailable: async (sceneId) =>
-          (await params.fetchScene(sceneId)) !== null,
-      }),
+      validateLivingSaveSessionEnvelope(envelope, validationContext),
   });
 }

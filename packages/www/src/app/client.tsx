@@ -4,11 +4,9 @@ import type { CSSProperties } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { SaveSlotHub } from '@/morpheus-app/components/save-slots/SaveSlotHub';
-import { useAppSelector } from '@/morpheus-app/store/hooks';
+import { LivingSaveSlotManager } from '@/morpheus-app/components/save-slots/LivingSaveSlotManager';
 import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordinatorContext';
 import type { LivingSaveSlotSummary } from '@/morpheus-app/store/slices/livingSavesSlice';
-import { selectLivingSaves } from '@/morpheus-app/store/slices/livingSavesSlice';
 import { getAssetUrl } from '@/service/gamedb';
 import styles from './title-screen.module.css';
 
@@ -24,7 +22,6 @@ const TITLE_ART_STYLE: CSSProperties & { '--title-image': string } = {
 export const Client = () => {
   const router = useRouter();
   const coordinator = useLivingSaveCoordinator();
-  const livingSaves = useAppSelector(selectLivingSaves);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mountedRef = useRef(true);
   const selectingSlotRef = useRef(false);
@@ -89,11 +86,6 @@ export const Client = () => {
     [coordinator, phase, playIntro],
   );
 
-  const isHubBusy =
-    livingSaves.bootstrapPhase !== 'ready' ||
-    livingSaves.operation !== null ||
-    selectingSlotRef.current;
-
   return (
     <main className={styles.screen} data-title-phase={phase}>
       <section
@@ -102,16 +94,17 @@ export const Client = () => {
       >
         <div className={styles.titleArt} style={TITLE_ART_STYLE}>
           <div className={styles.slotHub}>
-            <SaveSlotHub
-              slots={livingSaves.slots}
-              saveHealth={livingSaves.saveHealth}
-              failureReason={selectionError ?? livingSaves.failureReason}
-              isBusy={isHubBusy}
+            <LivingSaveSlotManager
               title="Choose your journey"
               onSelect={(slot) => {
                 void selectSlot(slot);
               }}
             />
+            {selectionError && (
+              <p className={styles.selectionError} role="status">
+                The slot could not be opened: {selectionError.replace(/-/g, ' ')}.
+              </p>
+            )}
           </div>
         </div>
       </section>

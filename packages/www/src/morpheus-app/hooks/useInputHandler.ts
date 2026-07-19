@@ -11,12 +11,18 @@ import type { Hotspot, Scene } from 'morpheus/casts/types';
 import type { SceneTransitionRequest } from 'morpheus/scene/types';
 import { DST_RATIO, DST_WIDTH } from 'morpheus/constants';
 
-import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
+import {
+  useAppDispatch,
+  useAppSelector,
+  useAppStore,
+} from '@/morpheus-app/store/hooks';
 import {
   replaceGamestateValues,
+  selectGamestatesAccessor,
   updateGamestate,
 } from '@/morpheus-app/store/slices/gamestateSlice';
 import type { GamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
+import type { RootState } from '@/morpheus-app/store/store';
 import { setRotation } from '@/morpheus-app/store/slices/rotationSlice';
 import { selectRotation } from '@/morpheus-app/store/slices/rotationSlice';
 import {
@@ -201,6 +207,42 @@ export function resolvePointerSuppression(
   return { shouldIgnore: true, suppressedPointerId };
 }
 
+export function createLiveGamestatesReader(
+  getState: () => RootState,
+): () => GamestatesAccessor {
+  return () => selectGamestatesAccessor(getState());
+}
+
+export function isPointerDragHotspot(hotspot: Hotspot): boolean {
+  if (
+    or(
+      actionType.isHorizSlider,
+      actionType.isVertSlider,
+      actionType.isTwoAxisSlider,
+    )(hotspot)
+  ) {
+    return true;
+  }
+
+  return (
+    actionType.isRotate(hotspot) &&
+    or(
+      gesture.isMouseClick,
+      gesture.isMouseUp,
+      gesture.isMouseDown,
+    )(hotspot)
+  );
+}
+
+export function isDirectPointerActionHotspot(hotspot: Hotspot): boolean {
+  return !or(
+    actionType.isRotate,
+    actionType.isHorizSlider,
+    actionType.isVertSlider,
+    actionType.isTwoAxisSlider,
+  )(hotspot);
+}
+
 export function useInputHandler(params: {
   scene: Scene;
   gamestates: GamestatesAccessor;
@@ -237,17 +279,18 @@ export function useInputHandler(params: {
   } = params;
 
   const dispatch = useAppDispatch();
+  const appStore = useAppStore();
   const rotation = useAppSelector(selectRotation);
+  const readLiveGamestates = useMemo(
+    () => createLiveGamestatesReader(appStore.getState),
+    [appStore],
+  );
 
-  // Keep gamestates and previousSceneId in refs so callbacks stay stable
-  const gamestatesRef = useRef(gamestates);
+  // Keep callback inputs in refs so callbacks stay stable.
   const previousSceneIdRef = useRef(previousSceneId);
   const onTransitionRef = useRef(onTransition);
   const onActionSettledRef = useRef(onActionSettled);
   const inputEnabledRef = useRef(inputEnabled);
-  useEffect(() => {
-    gamestatesRef.current = gamestates;
-  }, [gamestates]);
   useEffect(() => {
     previousSceneIdRef.current = previousSceneId;
   }, [previousSceneId]);
@@ -343,10 +386,9 @@ export function useInputHandler(params: {
 
   // Cursor index based on position and hotspots
   const cursorIndex = useMemo(() => {
-    const gs = gamestatesRef.current;
     return resolveCursor(
       hotspots,
-      gs,
+      gamestates,
       gamePosition,
       { top: pointer.startGameY, left: pointer.startGameX },
       pointer.isDown,
@@ -357,6 +399,7 @@ export function useInputHandler(params: {
     pointer.startGameX,
     pointer.startGameY,
     pointer.isDown,
+    gamestates,
   ]);
 
   // Load cursor image when index changes
@@ -378,6 +421,7 @@ export function useInputHandler(params: {
   const transitionPendingRef = useRef(false);
   const skippedSceneEntryGenerationRef = useRef<number | null>(null);
   const suppressedPointerIdRef = useRef<number | null>(null);
+  const wasInHotspotsRef = useRef<Set<Hotspot>>(new Set());
   const capturedPointerRef = useRef<{
     target: HTMLCanvasElement;
     pointerId: number;
@@ -533,19 +577,11 @@ export function useInputHandler(params: {
         ) {
           gestureStartValuesRef.current.set(
             update.stateId,
-            gamestatesRef.current.byId(update.stateId).value,
+            readLiveGamestates().byId(update.stateId).value,
           );
         }
         dispatch(updateGamestate(update));
       }
-      // Redux updates synchronously, but React does not refresh this hook's
-      // selector/ref until the next render. A slider can trigger an authored
-      // scene transition before that render, so keep event-time state current
-      // for the incoming scene's Always rules.
-      gamestatesRef.current = withGamestateUpdates(
-        gamestatesRef.current,
-        result.gamestateUpdates,
-      );
       if (result.gamestateUpdates.length > 0) {
         stableActionChangedRef.current = true;
       }
@@ -578,6 +614,7 @@ export function useInputHandler(params: {
       dispatch,
       finishCurrentPointerInteraction,
       isPanoScene,
+      readLiveGamestates,
       requestTransition,
       startSweepTo,
     ],
@@ -595,7 +632,7 @@ export function useInputHandler(params: {
       hotspot: Hotspot,
       currentPosition: { top: number; left: number },
       startingPosition: { top: number; left: number },
-      eventGamestates: GamestatesAccessor = gamestatesRef.current,
+      eventGamestates: GamestatesAccessor = readLiveGamestates(),
     ) => {
       const oldValue = sliderOldValuesRef.current.get(hotspot.param1);
       return handleHotspotAction({
@@ -608,7 +645,7 @@ export function useInputHandler(params: {
         oldValue,
       });
     },
-    [isPanoScene],
+    [isPanoScene, readLiveGamestates],
   );
 
   const processHotspotAction = useCallback(
@@ -616,7 +653,7 @@ export function useInputHandler(params: {
       hotspot: Hotspot,
       currentPosition: { top: number; left: number },
       startingPosition: { top: number; left: number },
-      eventGamestates: GamestatesAccessor = gamestatesRef.current,
+      eventGamestates: GamestatesAccessor = readLiveGamestates(),
     ) =>
       applyHotspotActionResult(
         resolveHotspotAction(
@@ -633,7 +670,7 @@ export function useInputHandler(params: {
     (hotspot: ClickHotspotMatchedHotspot) => {
       const result = executeHarnessHotspotClick({
         scene,
-        gamestates: gamestatesRef.current,
+        gamestates: readLiveGamestates(),
         hotspot,
         previousSceneId: previousSceneIdRef.current,
         isPanoScene,
@@ -646,7 +683,13 @@ export function useInputHandler(params: {
 
       return result;
     },
-    [applyHotspotActionResult, isPanoScene, scene, settlePendingAction],
+    [
+      applyHotspotActionResult,
+      isPanoScene,
+      readLiveGamestates,
+      scene,
+      settlePendingAction,
+    ],
   );
 
   // Reset pointer state on scene change
@@ -658,6 +701,7 @@ export function useInputHandler(params: {
       pendingTransitionRef.current = null;
       transitionPendingRef.current = false;
       stableActionChangedRef.current = false;
+      wasInHotspotsRef.current.clear();
       if (sweepRafRef.current !== null) {
         cancelAnimationFrame(sweepRafRef.current);
         sweepRafRef.current = null;
@@ -696,7 +740,7 @@ export function useInputHandler(params: {
 
     const results = resolveSceneEntryHotspotActions({
       hotspots,
-      gamestates: gamestatesRef.current,
+      gamestates: readLiveGamestates(),
       skipSceneEnter: shouldSkipSceneEntry,
       execute: (hotspot, currentGamestates) =>
         resolveHotspotAction(
@@ -715,12 +759,10 @@ export function useInputHandler(params: {
     scene.sceneId,
     hotspots,
     resolveHotspotAction,
+    readLiveGamestates,
     settlePendingAction,
     skipSceneEntryGeneration,
   ]);
-
-  // Track which hotspots the pointer was in (for enter/leave events)
-  const wasInHotspotsRef = useRef<Set<number>>(new Set());
 
   // Process pointer events - called from handlers
   const processPointerEvent = useCallback(
@@ -733,51 +775,56 @@ export function useInputHandler(params: {
       wasUpped: boolean;
     }) => {
       const { gamePos, startPos, isDown, wasDown, wasMoved, wasUpped } = opts;
-      const gs = gamestatesRef.current;
+      const gs = readLiveGamestates();
       let eventGamestates = gs;
       const activeHotspots = getActiveHotspots(hotspots, eventGamestates);
 
       // Determine which hotspots the pointer is currently in
-      const nowInHotspotIds = new Set<number>();
+      const nowInHotspots = new Set<Hotspot>();
       for (const hotspot of activeHotspots) {
         if (hotspotRectMatchesPosition(gamePos)(hotspot)) {
-          nowInHotspotIds.add(hotspot.castId);
+          nowInHotspots.add(hotspot);
         }
       }
 
       // Compute entering/leaving
       const wasIn = wasInHotspotsRef.current;
-      const enteringIds = new Set<number>();
-      const leavingIds = new Set<number>();
+      const enteringHotspots = new Set<Hotspot>();
+      const leavingHotspots = new Set<Hotspot>();
 
-      for (const id of nowInHotspotIds) {
-        if (!wasIn.has(id)) {
-          enteringIds.add(id);
+      for (const hotspot of nowInHotspots) {
+        if (!wasIn.has(hotspot)) {
+          enteringHotspots.add(hotspot);
         }
       }
-      for (const id of wasIn) {
-        if (!nowInHotspotIds.has(id)) {
-          leavingIds.add(id);
+      for (const hotspot of wasIn) {
+        if (!nowInHotspots.has(hotspot)) {
+          leavingHotspots.add(hotspot);
         }
       }
 
-      wasInHotspotsRef.current = nowInHotspotIds;
+      wasInHotspotsRef.current = nowInHotspots;
 
       // Process mouse leave hotspots
-      if (wasMoved && leavingIds.size > 0) {
+      if (wasMoved && leavingHotspots.size > 0) {
         for (const hotspot of activeHotspots) {
-          if (leavingIds.has(hotspot.castId) && gesture.isMouseLeave(hotspot)) {
+          if (
+            leavingHotspots.has(hotspot) &&
+            gesture.isMouseLeave(hotspot) &&
+            isDirectPointerActionHotspot(hotspot)
+          ) {
             processHotspotAction(hotspot, gamePos, startPos);
           }
         }
       }
 
       // Process mouse enter hotspots
-      if (wasMoved && enteringIds.size > 0) {
+      if (wasMoved && enteringHotspots.size > 0) {
         for (const hotspot of activeHotspots) {
           if (
-            enteringIds.has(hotspot.castId) &&
-            gesture.isMouseEnter(hotspot)
+            enteringHotspots.has(hotspot) &&
+            gesture.isMouseEnter(hotspot) &&
+            isDirectPointerActionHotspot(hotspot)
           ) {
             processHotspotAction(hotspot, gamePos, startPos);
           }
@@ -789,9 +836,10 @@ export function useInputHandler(params: {
       if (wasUpped) {
         for (const hotspot of activeHotspots) {
           if (
-            nowInHotspotIds.has(hotspot.castId) &&
+            nowInHotspots.has(hotspot) &&
             hotspotRectMatchesPosition(startPos)(hotspot) &&
-            gesture.isMouseUp(hotspot)
+            gesture.isMouseUp(hotspot) &&
+            isDirectPointerActionHotspot(hotspot)
           ) {
             if (processHotspotAction(hotspot, gamePos, startPos)) {
               break;
@@ -807,11 +855,7 @@ export function useInputHandler(params: {
         for (const hotspot of activeHotspots) {
           if (
             !hotspotRectMatchesPosition(startPos)(hotspot) ||
-            !or(
-              gesture.isMouseClick,
-              gesture.isMouseUp,
-              gesture.isMouseDown,
-            )(hotspot)
+            !isPointerDragHotspot(hotspot)
           ) {
             continue;
           }
@@ -854,8 +898,9 @@ export function useInputHandler(params: {
       if (wasDown) {
         for (const hotspot of activeHotspots) {
           if (
-            nowInHotspotIds.has(hotspot.castId) &&
-            gesture.isMouseDown(hotspot)
+            nowInHotspots.has(hotspot) &&
+            gesture.isMouseDown(hotspot) &&
+            isDirectPointerActionHotspot(hotspot)
           ) {
             if (processHotspotAction(hotspot, gamePos, startPos)) {
               break;
@@ -866,7 +911,7 @@ export function useInputHandler(params: {
         // Store oldValue for slider hotspots in the ref (not on the frozen hotspot object)
         for (const hotspot of activeHotspots) {
           if (
-            nowInHotspotIds.has(hotspot.castId) &&
+            nowInHotspots.has(hotspot) &&
             or(
               actionType.isRotate,
               actionType.isHorizSlider,
@@ -904,6 +949,7 @@ export function useInputHandler(params: {
       hotspots,
       isPanoScene,
       processHotspotAction,
+      readLiveGamestates,
       resolveHotspotAction,
     ],
   );
@@ -1152,14 +1198,15 @@ export function useInputHandler(params: {
 
       // Process click if applicable
       if (isClick) {
-        const gs = gamestatesRef.current;
+        const gs = readLiveGamestates();
         const activeHotspots = getActiveHotspots(hotspots, gs);
 
         for (const hotspot of activeHotspots) {
           if (
             hotspotRectMatchesPosition(currentGamePos)(hotspot) &&
             hotspotRectMatchesPosition(startPos)(hotspot) &&
-            gesture.isMouseClick(hotspot)
+            gesture.isMouseClick(hotspot) &&
+            isDirectPointerActionHotspot(hotspot)
           ) {
             if (processHotspotAction(hotspot, currentGamePos, startPos)) {
               break;
@@ -1190,6 +1237,7 @@ export function useInputHandler(params: {
       processPointerEvent,
       hotspots,
       processHotspotAction,
+      readLiveGamestates,
       settlePendingAction,
       finishCurrentPointerInteraction,
     ],

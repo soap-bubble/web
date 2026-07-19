@@ -22,6 +22,7 @@ import { share } from 'rxjs/operators'
 import { and } from 'utils/matchers'
 import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle'
 import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget'
+import type { MediaPlaybackResult } from './mediaPlayback'
 
 const logger = loggerFactory('Special')
 
@@ -85,6 +86,16 @@ const Special = ({
     VideoController,
     MovieSpecialCast
   >()
+  const [blockedVideoControllers, setBlockedVideoControllers] = useState<
+    VideoController[]
+  >([])
+  const activeVideoControllersRef = useRef<Set<VideoController>>(new Set())
+  const videoPlaybackAttemptRef = useRef<WeakMap<VideoController, number>>(
+    new WeakMap()
+  )
+  const retryingVideoControllersRef = useRef<WeakSet<VideoController>>(
+    new WeakSet()
+  )
   const [imagesLoaded, onImageLoadBare] = useCastRefNoticer<
     HTMLImageElement,
     MovieCast
@@ -254,22 +265,94 @@ const Special = ({
    * end (pause and set currentTime to 0), unless they are also part of the
    * uppermost stage scene
    */
+  const updateVideoPlaybackState = useCallback(
+    (controller: VideoController, result: MediaPlaybackResult) => {
+      setBlockedVideoControllers((current) => {
+        const controllerIndex = current.indexOf(controller)
+        const shouldBlock =
+          result === 'blocked' &&
+          activeVideoControllersRef.current.has(controller)
+
+        if (shouldBlock) {
+          return controllerIndex === -1 ? [...current, controller] : current
+        }
+        return controllerIndex === -1
+          ? current
+          : current.filter(
+              (blockedController) => blockedController !== controller
+            )
+      })
+    },
+    []
+  )
+
+  const attemptVideoPlayback = useCallback(
+    async (controller: VideoController) => {
+      const attempt = (videoPlaybackAttemptRef.current.get(controller) ?? 0) + 1
+      videoPlaybackAttemptRef.current.set(controller, attempt)
+      const result = await controller.play()
+
+      if (videoPlaybackAttemptRef.current.get(controller) === attempt) {
+        updateVideoPlaybackState(controller, result)
+      }
+    },
+    [updateVideoPlaybackState]
+  )
+
   useEffect(() => {
     const topSceneCastIds = stageScenes.length > 0 
       ? new Set(stageScenes[0].casts.map(c => c.castId))
       : new Set<number>()
+    const activeVideoControllers = new Set<VideoController>()
 
     for (const [controller, casts] of availableVideos) {
       const isInTopScene = casts.some(cast => topSceneCastIds.has(cast.castId))
       const isActiveCast = casts.some(cast => isActive({ cast, gamestates }))
 
       if (isInTopScene && isActiveCast) {
-        controller.play()
+        activeVideoControllers.add(controller)
       } else {
         controller.end()
       }
     }
-  }, [availableVideos, stageScenes, gamestates])
+
+    activeVideoControllersRef.current = activeVideoControllers
+    setBlockedVideoControllers((current) => {
+      const activeBlockedControllers = current.filter((controller) =>
+        activeVideoControllers.has(controller)
+      )
+      return activeBlockedControllers.length === current.length
+        ? current
+        : activeBlockedControllers
+    })
+
+    for (const controller of activeVideoControllers) {
+      if (retryingVideoControllersRef.current.has(controller)) {
+        continue
+      }
+      void attemptVideoPlayback(controller)
+    }
+  }, [
+    availableVideos,
+    stageScenes,
+    gamestates,
+    attemptVideoPlayback,
+  ])
+
+  const retryBlockedVideoPlayback = useCallback(() => {
+    for (const controller of blockedVideoControllers) {
+      if (
+        !activeVideoControllersRef.current.has(controller) ||
+        retryingVideoControllersRef.current.has(controller)
+      ) {
+        continue
+      }
+      retryingVideoControllersRef.current.add(controller)
+      void attemptVideoPlayback(controller).finally(() => {
+        retryingVideoControllersRef.current.delete(controller)
+      })
+    }
+  }, [attemptVideoPlayback, blockedVideoControllers])
 
   return (
     <React.Fragment>
@@ -299,6 +382,44 @@ const Special = ({
         onImageCastLoad={onImageLoad}
         onImageCastError={onImageError}
       />
+      {blockedVideoControllers.length > 0 && (
+        <button
+          type="button"
+          aria-label="Begin movie playback"
+          onClick={retryBlockedVideoPlayback}
+          style={{
+            position: 'absolute',
+            top: `${top}px`,
+            left: `${left}px`,
+            zIndex: 2,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            width: `${width}px`,
+            height: `${height}px`,
+            padding: 0,
+            border: 0,
+            color: '#f5f0df',
+            background: 'rgba(0, 0, 0, 0.58)',
+            cursor: 'pointer',
+          }}
+        >
+          <span
+            style={{
+              padding: '18px 28px',
+              border: '1px solid rgba(245, 240, 223, 0.72)',
+              borderRadius: '999px',
+              background: 'rgba(10, 13, 16, 0.88)',
+              fontFamily: 'Georgia, serif',
+              fontSize: '24px',
+              letterSpacing: '0.03em',
+              boxShadow: '0 12px 36px rgba(0, 0, 0, 0.45)',
+            }}
+          >
+            Click to begin
+          </span>
+        </button>
+      )}
     </React.Fragment>
   )
 }

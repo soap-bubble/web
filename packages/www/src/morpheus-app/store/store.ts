@@ -18,7 +18,9 @@ export const createAppStore = () =>
     },
   });
 
+export type AppStore = ReturnType<typeof createAppStore>;
+
 export const store = createAppStore();
 
-export type RootState = ReturnType<typeof store.getState>;
+export type RootState = ReturnType<AppStore['getState']>;
 export type AppDispatch = ThunkDispatch<RootState, unknown, AnyAction>;

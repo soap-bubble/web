@@ -1,7 +1,16 @@
 import { describe, expect, it } from 'vitest';
 
+import { createAppStore } from '@/morpheus-app/store/store';
 import {
+  selectGamestatesAccessor,
+  updateGamestate,
+} from '@/morpheus-app/store/slices/gamestateSlice';
+import { createHotspot } from '@/morpheus-app/hotspot/harnessClick.fixtures';
+import {
+  createLiveGamestatesReader,
   finishPointerInteraction,
+  isDirectPointerActionHotspot,
+  isPointerDragHotspot,
   resolvePointerSuppression,
 } from './useInputHandler';
 
@@ -62,5 +71,42 @@ describe('input lifecycle across scene transitions', () => {
       shouldIgnore: true,
       suppressedPointerId: null,
     });
+  });
+
+  it('reads Redux writes synchronously across chained scene-entry rules', () => {
+    const store = createAppStore();
+    const renderedGamestates = selectGamestatesAccessor(store.getState());
+    const readLiveGamestates = createLiveGamestatesReader(store.getState);
+
+    store.dispatch(updateGamestate({ stateId: 1011, value: 5 }));
+
+    expect(renderedGamestates.byId(1011).value).toBe(0);
+    expect(readLiveGamestates().byId(1011).value).toBe(5);
+
+    store.dispatch(updateGamestate({ stateId: 1011, value: 0 }));
+
+    expect(readLiveGamestates().byId(1011).value).toBe(0);
+  });
+
+  it('lets sliders drag regardless of their authored gesture', () => {
+    for (const type of [6, 7, 8]) {
+      expect(
+        isPointerDragHotspot(createHotspot({ type, gesture: 3 })),
+      ).toBe(true);
+    }
+    expect(
+      isPointerDragHotspot(createHotspot({ type: 5, gesture: 3 })),
+    ).toBe(false);
+  });
+
+  it('does not execute continuous controls as direct hover actions', () => {
+    for (const type of [5, 6, 7, 8]) {
+      expect(
+        isDirectPointerActionHotspot(createHotspot({ type, gesture: 3 })),
+      ).toBe(false);
+    }
+    expect(
+      isDirectPointerActionHotspot(createHotspot({ type: 2, gesture: 3 })),
+    ).toBe(true);
   });
 });

@@ -1,13 +1,17 @@
 import React, { useRef, useEffect, useMemo, useCallback, SyntheticEvent } from 'react'
 import { getAssetUrl } from 'service/gamedb'
 import { MovieSpecialCast } from '../types'
+import {
+  MediaPlaybackResult,
+  startMediaPlayback,
+} from './mediaPlayback'
 
 type VideoEvent = (e: SyntheticEvent<HTMLVideoElement>) => void
 type VideoRef = (el: HTMLVideoElement | null) => void
 export interface VideoController {
   el: HTMLVideoElement | null
   castIds: number[]
-  play: () => void
+  play: () => Promise<MediaPlaybackResult>
   pause: () => void
   end: () => void
 }
@@ -54,15 +58,11 @@ const VideoEl = ({
       const controller = {
         el,
         castIds: currentCasts.map(c => c.castId),
-        play() {
-          if (videoRef.current) {
-            videoRef.current.play().catch((err: Error) => {
-              // Autoplay was blocked by browser policy - will retry on user interaction
-              if (err.name !== 'NotAllowedError') {
-                console.error('Video play failed:', err)
-              }
-            })
+        async play() {
+          if (!videoRef.current) {
+            return 'failed'
           }
+          return startMediaPlayback(videoRef.current)
         },
         pause() {
           if (videoRef.current) {

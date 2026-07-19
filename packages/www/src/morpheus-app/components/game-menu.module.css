@@ -54,6 +54,7 @@
 
 .panel {
   width: min(92vw, 680px);
+  box-sizing: border-box;
   margin: clamp(72px, 12vh, 120px) auto 40px;
   padding: clamp(22px, 4vw, 42px);
   border: 1px solid rgba(219, 197, 151, 0.62);
@@ -90,6 +91,8 @@
 
 .saveSlots {
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  min-width: 0;
   gap: 18px;
 }
 

@@ -1,5 +1,7 @@
 .hub {
   width: min(92vw, 780px);
+  max-width: 100%;
+  box-sizing: border-box;
   color: #f5f8fa;
   font-family: Georgia, 'Times New Roman', serif;
   text-align: center;

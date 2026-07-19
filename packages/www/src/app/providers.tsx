@@ -7,6 +7,10 @@ import { fetch as fetchScene } from '@soapbubble/morpheus-client/service/scene';
 import { store } from '@/morpheus-app/store/store';
 import { useAppSelector } from '@/morpheus-app/store/hooks';
 import { createBrowserLivingSaveCoordinator } from '@/morpheus-app/store/livingSaveCoordinator';
+import {
+  LivingSaveCoordinatorProvider,
+} from '@/morpheus-app/store/LivingSaveCoordinatorContext';
+import type { LivingSaveCoordinator } from '@/morpheus-app/store/livingSaveCoordinator';
 import { selectLivingSaves } from '@/morpheus-app/store/slices/livingSavesSlice';
 
 function routeSceneId(pathname: string): number | null {
@@ -16,10 +20,33 @@ function routeSceneId(pathname: string): number | null {
   return Number.isSafeInteger(value) && value > 0 ? value : null;
 }
 
-const LivingSaveBootstrap = () => {
+const LivingSaveBootstrap = ({
+  coordinator,
+  pathname,
+}: {
+  coordinator: LivingSaveCoordinator;
+  pathname: string;
+}) => {
+  const { bootstrapPhase } = useAppSelector(selectLivingSaves);
+
+  useEffect(() => {
+    if (bootstrapPhase !== 'idle') return;
+    const search =
+      typeof window === 'undefined'
+        ? null
+        : new URLSearchParams(window.location.search);
+    void coordinator.bootstrap({
+      routeSceneId: routeSceneId(pathname),
+      mcpSessionName: search?.get('mcp') ?? null,
+    });
+  }, [bootstrapPhase, coordinator, pathname]);
+
+  return null;
+};
+
+export const Providers: FC<PropsWithChildren> = ({ children }) => {
   const router = useRouter();
   const pathname = usePathname();
-  const { bootstrapPhase } = useAppSelector(selectLivingSaves);
   const coordinator = useMemo(
     () =>
       createBrowserLivingSaveCoordinator({
@@ -48,26 +75,12 @@ const LivingSaveBootstrap = () => {
     [router],
   );
 
-  useEffect(() => {
-    if (bootstrapPhase !== 'idle') return;
-    const search =
-      typeof window === 'undefined'
-        ? null
-        : new URLSearchParams(window.location.search);
-    void coordinator.bootstrap({
-      routeSceneId: routeSceneId(pathname),
-      mcpSessionName: search?.get('mcp') ?? null,
-    });
-  }, [bootstrapPhase, coordinator, pathname]);
-
-  return null;
-};
-
-export const Providers: FC<PropsWithChildren> = ({ children }) => {
   return (
     <Provider store={store}>
-      <LivingSaveBootstrap />
-      {children}
+      <LivingSaveCoordinatorProvider coordinator={coordinator}>
+        <LivingSaveBootstrap coordinator={coordinator} pathname={pathname} />
+        {children}
+      </LivingSaveCoordinatorProvider>
     </Provider>
   );
 };

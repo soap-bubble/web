@@ -44,41 +44,17 @@
   box-shadow: 0 0 80px rgba(111, 143, 166, 0.28);
 }
 
-.newGameButton {
+.slotHub {
   position: absolute;
   left: 50%;
-  bottom: clamp(18px, 5vh, 52px);
-  width: clamp(220px, 34%, 340px);
-  padding: 0;
-  border: 0;
-  border-radius: 16px;
-  background: transparent;
-  cursor: pointer;
-  filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.72));
+  bottom: clamp(18px, 4vh, 44px);
   transform: translateX(-50%);
-  transition: filter 160ms ease, transform 160ms ease;
 }
 
-.newGameButton img {
-  display: block;
-  width: 100%;
-  height: clamp(92px, 13vh, 136px);
-}
-
-.newGameButton:hover {
-  filter: brightness(1.18) drop-shadow(0 12px 20px rgba(0, 0, 0, 0.8));
-  transform: translateX(-50%) scale(1.025);
-}
-
-.newGameButton:focus-visible,
 .skipButton:focus-visible,
 .error button:focus-visible {
   outline: 3px solid #eef8ff;
   outline-offset: 4px;
-}
-
-.newGameButton:active {
-  transform: translateX(-50%) scale(0.985);
 }
 
 .intro {
@@ -132,26 +108,13 @@
 
 @media (prefers-reduced-motion: reduce) {
   .title,
-  .intro,
-  .newGameButton {
+  .intro {
     transition: none;
   }
 }
 
-@media (hover: none) {
-  .newGameButton:hover {
-    filter: drop-shadow(0 10px 16px rgba(0, 0, 0, 0.72));
-    transform: translateX(-50%);
-  }
-}
-
 @media (max-aspect-ratio: 4 / 5) {
-  .newGameButton {
-    bottom: -108px;
-    width: min(64vw, 240px);
-  }
-
-  .newGameButton img {
-    height: 92px;
+  .slotHub {
+    bottom: clamp(12px, 2vh, 24px);
   }
 }

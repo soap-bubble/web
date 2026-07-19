@@ -4,16 +4,17 @@ import type { CSSProperties } from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
-import { clearAll } from '@/morpheus-app/storage/gamestateStorage';
-import { resetGame as resetGameState } from '@/morpheus-app/store/actions';
-import { useAppDispatch } from '@/morpheus-app/store/hooks';
+import { SaveSlotHub } from '@/morpheus-app/components/save-slots/SaveSlotHub';
+import { useAppSelector } from '@/morpheus-app/store/hooks';
+import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordinatorContext';
+import type { LivingSaveSlotSummary } from '@/morpheus-app/store/slices/livingSavesSlice';
+import { selectLivingSaves } from '@/morpheus-app/store/slices/livingSavesSlice';
 import { getAssetUrl } from '@/service/gamedb';
 import styles from './title-screen.module.css';
 
 type TitlePhase = 'title' | 'intro' | 'error';
 
 const FIRST_GAME_SCENE = 2000;
-const NEW_GAME_IMAGE = getAssetUrl('image/texture/new.png');
 const INTRO_WEBM = getAssetUrl('GameDB/Deck1/introMOV.webm');
 const INTRO_MP4 = getAssetUrl('GameDB/Deck1/introMOV.mp4');
 const TITLE_ART_STYLE: CSSProperties & { '--title-image': string } = {
@@ -22,12 +23,13 @@ const TITLE_ART_STYLE: CSSProperties & { '--title-image': string } = {
 
 export const Client = () => {
   const router = useRouter();
-  const dispatch = useAppDispatch();
+  const coordinator = useLivingSaveCoordinator();
+  const livingSaves = useAppSelector(selectLivingSaves);
   const videoRef = useRef<HTMLVideoElement>(null);
   const mountedRef = useRef(true);
-  const resetGameRef = useRef<Promise<void> | null>(null);
-  const startingGameRef = useRef(false);
+  const selectingSlotRef = useRef(false);
   const [phase, setPhase] = useState<TitlePhase>('title');
+  const [selectionError, setSelectionError] = useState<string | null>(null);
 
   useEffect(() => {
     mountedRef.current = true;
@@ -37,31 +39,8 @@ export const Client = () => {
   }, []);
 
   const startGame = useCallback(() => {
-    if (startingGameRef.current) {
-      return;
-    }
-    startingGameRef.current = true;
-    const gameReset = resetGameRef.current ?? clearAll();
-    resetGameRef.current = gameReset;
-    void gameReset
-      .then(() => {
-        if (!mountedRef.current) {
-          return;
-        }
-        dispatch(resetGameState());
-        router.push(`/scene/${FIRST_GAME_SCENE}`);
-      })
-      .catch(() => {
-        if (!mountedRef.current) {
-          return;
-        }
-        if (resetGameRef.current === gameReset) {
-          resetGameRef.current = null;
-        }
-        startingGameRef.current = false;
-        setPhase('error');
-      });
-  }, [dispatch, router]);
+    router.push(`/scene/${FIRST_GAME_SCENE}`);
+  }, [router]);
 
   const playIntro = useCallback(() => {
     const video = videoRef.current;
@@ -71,18 +50,6 @@ export const Client = () => {
     }
 
     video.currentTime = 0;
-    const resetGame = clearAll();
-    resetGameRef.current = resetGame;
-    void resetGame.catch(() => {
-      if (!mountedRef.current) {
-        return;
-      }
-      if (resetGameRef.current === resetGame) {
-        resetGameRef.current = null;
-      }
-      video.pause();
-      setPhase('error');
-    });
     setPhase('intro');
     void video.play().catch(() => {
       if (mountedRef.current) {
@@ -91,6 +58,42 @@ export const Client = () => {
     });
   }, []);
 
+  const selectSlot = useCallback(
+    async (slot: LivingSaveSlotSummary) => {
+      if (selectingSlotRef.current || phase !== 'title') {
+        return;
+      }
+      if (slot.state === 'unloadable') {
+        return;
+      }
+
+      selectingSlotRef.current = true;
+      setSelectionError(null);
+      const outcome =
+        slot.state === 'empty'
+          ? await coordinator.createNewSlot(slot.slotId)
+          : await coordinator.restoreSlot(slot.slotId);
+
+      if (!mountedRef.current) {
+        return;
+      }
+      if (!outcome.ok) {
+        selectingSlotRef.current = false;
+        setSelectionError(outcome.reason);
+        return;
+      }
+      if (slot.state === 'empty') {
+        playIntro();
+      }
+    },
+    [coordinator, phase, playIntro],
+  );
+
+  const isHubBusy =
+    livingSaves.bootstrapPhase !== 'ready' ||
+    livingSaves.operation !== null ||
+    selectingSlotRef.current;
+
   return (
     <main className={styles.screen} data-title-phase={phase}>
       <section
@@ -98,14 +101,18 @@ export const Client = () => {
         aria-hidden={phase !== 'title'}
       >
         <div className={styles.titleArt} style={TITLE_ART_STYLE}>
-          <button
-            type="button"
-            className={styles.newGameButton}
-            onClick={playIntro}
-            tabIndex={phase === 'title' ? 0 : -1}
-          >
-            <img src={NEW_GAME_IMAGE} alt="Start a new game" />
-          </button>
+          <div className={styles.slotHub}>
+            <SaveSlotHub
+              slots={livingSaves.slots}
+              saveHealth={livingSaves.saveHealth}
+              failureReason={selectionError ?? livingSaves.failureReason}
+              isBusy={isHubBusy}
+              title="Choose your journey"
+              onSelect={(slot) => {
+                void selectSlot(slot);
+              }}
+            />
+          </div>
         </div>
       </section>
 

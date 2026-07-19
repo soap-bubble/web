@@ -131,6 +131,62 @@ describe('livingSaveCoordinator', () => {
     });
   });
 
+  it('installs an empty slot only after its durable genesis record is created', async () => {
+    const catalog = createEmptyLivingSaveCatalogFixture();
+    const createdCatalog = occupyLivingSaveSlot(
+      catalog,
+      'slot-2',
+      createLivingSaveEnvelopeFixture({ activeSceneId: 2000 }),
+    );
+    const store = createAppStore();
+    const creationControl: { resolve: (() => void) | null } = { resolve: null };
+    const creation = new Promise<void>((resolve) => {
+      creationControl.resolve = resolve;
+    });
+    const createStartControl: { resolve: (() => void) | null } = {
+      resolve: null,
+    };
+    const createStarted = new Promise<void>((resolve) => {
+      createStartControl.resolve = resolve;
+    });
+    const createSlotCalls: Array<{ slotId: string; activate: boolean }> = [];
+    const coordinator = createLivingSaveCoordinator({
+      dispatch: store.dispatch,
+      getState: store.getState,
+      readCatalog: async () => ({ ok: true, value: catalog }),
+      activateSlot: async () => ({ ok: true, value: catalog }),
+      createSlot: async ({ slotId, activate }) => {
+        createSlotCalls.push({ slotId, activate });
+        createStartControl.resolve?.();
+        await creation;
+        return { ok: true, value: createdCatalog };
+      },
+      validateEnvelope: async (envelope) => ({ ok: true, envelope }),
+      fetchScene: async (sceneId) => scene(sceneId),
+      replaceRoute: () => undefined,
+      goToTitle: () => undefined,
+    });
+
+    const created = coordinator.createNewSlot('slot-2');
+
+    await createStarted;
+    expect(createSlotCalls).toEqual([{ slotId: 'slot-2', activate: true }]);
+    expect(store.getState().livingSaves.activeSlotId).toBeNull();
+
+    const resolveCreate = creationControl.resolve;
+    if (resolveCreate === null) {
+      throw new Error('Expected the durable create operation to be pending');
+    }
+    resolveCreate();
+
+    await expect(created).resolves.toEqual({ ok: true, kind: 'created' });
+    expect(store.getState().livingSaves).toMatchObject({
+      activeSlotId: 'slot-2',
+      saveHealth: 'saved',
+    });
+    expect(store.getState().scene.activeSceneId).toBe(2000);
+  });
+
   it('ignores a stale restore completion after a newer operation succeeds', async () => {
     const firstEnvelope = createLivingSaveEnvelopeFixture({
       resumePointId: 'first',

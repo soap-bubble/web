@@ -56,11 +56,9 @@ export function resolveSceneEntryHotspotActions(params: {
   const results: HotspotActionResult[] = [];
 
   if (!params.skipSceneEnter) {
+    // CScene::EnterScene calls DoEnter before Enabled is consulted by DoEntering.
     for (const hotspot of hotspots) {
-      if (
-        !gesture.isSceneEnter(hotspot) ||
-        !isActive({ cast: hotspot, gamestates: currentGamestates })
-      ) {
+      if (!gesture.isSceneEnter(hotspot)) {
         continue;
       }
 

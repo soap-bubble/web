@@ -11,6 +11,37 @@ import {
 } from './alwaysHotspots';
 
 describe('Always hotspot sequencing', () => {
+  it('runs SceneEnter actions even when the cast is disabled', () => {
+    const gamestates = createGamestatesAccessor({
+      999: { value: 0, maxValue: 1 },
+    });
+    const results = resolveSceneEntryHotspotActions({
+      hotspots: [
+        createHotspot({
+          gesture: 7,
+          type: 9,
+          param1: 999,
+          param2: 1,
+          initiallyEnabled: false,
+        }),
+      ],
+      gamestates,
+      skipSceneEnter: false,
+      execute: (hotspot, currentGamestates) =>
+        handleHotspotAction({
+          hotspot,
+          gamestates: currentGamestates,
+          currentPosition: { top: 0, left: 0 },
+          startingPosition: { top: 0, left: 0 },
+          isPanoScene: false,
+        }),
+    });
+
+    expect(results.flatMap((result) => result.gamestateUpdates)).toEqual([
+      { stateId: 999, value: 1 },
+    ]);
+  });
+
   it('re-evaluates each authored rule against preceding gamestate updates', () => {
     const gamestates = createGamestatesAccessor({
       800: { value: 1, maxValue: 2 },

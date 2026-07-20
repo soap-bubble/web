@@ -1,7 +1,10 @@
 import { describe, expect, it, vi } from 'vitest';
 import type { Scene } from 'morpheus/casts/types';
 
-import { createLivingSaveCoordinator } from './livingSaveCoordinator';
+import {
+  createGenesisLivingSaveEnvelope,
+  createLivingSaveCoordinator,
+} from './livingSaveCoordinator';
 import { createAppStore } from './store';
 import {
   createEmptyLivingSaveCatalogFixture,
@@ -76,6 +79,13 @@ function createHarness(
 }
 
 describe('livingSaveCoordinator', () => {
+  it('seeds a new game at the cargo hatch heading', () => {
+    expect(createGenesisLivingSaveEnvelope().rotation).toEqual({
+      yaw3600: 1500,
+      pitch: 0,
+    });
+  });
+
   it('prepares occupied and unloadable slots for export behind one boundary', async () => {
     const envelope = createLivingSaveEnvelopeFixture({
       resumePointId: 'resume-test',

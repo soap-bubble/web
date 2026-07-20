@@ -148,7 +148,7 @@ export function createGenesisLivingSaveEnvelope(): LivingSaveSessionEnvelope {
     ),
     activeSceneId: MORPHEUS_INITIAL_SCENE_ID,
     returnSceneId: null,
-    rotation: { yaw3600: 0, pitch: 0 },
+    rotation: { yaw3600: 1500, pitch: 0 },
   };
 }
 

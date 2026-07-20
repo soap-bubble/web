@@ -7,23 +7,40 @@ import { fileURLToPath, pathToFileURL } from 'node:url';
 import { collectGameDbFiles, DEFAULT_GAMEDB_SOURCE } from './gamedb-paths.mjs';
 
 const CACHE_CONTROL_MAX_AGE = 86_400;
-const UPLOAD_CONCURRENCY = 3;
+const DEFAULT_UPLOAD_CONCURRENCY = 3;
+const MAX_UPLOAD_CONCURRENCY = 32;
 
 function usage() {
   return [
-    'Usage: yarn workspace morpheus-next upload:gamedb -- --report <report.json> [--source <GameDB>] [--dry-run]',
+    'Usage: yarn workspace morpheus-next upload:gamedb -- --report <report.json> [--source <GameDB>] [--concurrency <1-32>] [--dry-run]',
     '       yarn workspace morpheus-next upload:gamedb -- --update --expect <previous-report.json> --report <report.json> [--source <GameDB>]',
+    '       yarn workspace morpheus-next upload:gamedb -- --resume --expect <partial-report.json> --concurrency <1-32> --report <report.json> [--source <GameDB>]',
     '',
     'An update requires the prior report so an operator compares the recorded ETags before allowing stable-path overwrite.',
   ].join('\n');
 }
 
-function parseArguments(args) {
-  const options = { dryRun: false, source: DEFAULT_GAMEDB_SOURCE, update: false };
+export function parseArguments(args) {
+  const options = {
+    concurrency: DEFAULT_UPLOAD_CONCURRENCY,
+    dryRun: false,
+    resume: false,
+    source: DEFAULT_GAMEDB_SOURCE,
+    update: false,
+  };
   for (let index = 0; index < args.length; index += 1) {
     const argument = args[index];
     if (argument === '--dry-run') options.dryRun = true;
     else if (argument === '--update') options.update = true;
+    else if (argument === '--resume') options.resume = true;
+    else if (argument === '--concurrency') {
+      const value = Number(args[index + 1]);
+      if (!Number.isInteger(value) || value < 1 || value > MAX_UPLOAD_CONCURRENCY) {
+        throw new Error(`--concurrency must be an integer from 1 to ${MAX_UPLOAD_CONCURRENCY}.`);
+      }
+      options.concurrency = value;
+      index += 1;
+    }
     else if (argument === '--source' || argument === '--report' || argument === '--expect') {
       const value = args[index + 1];
       if (!value || value.startsWith('--')) throw new Error(`Missing value for ${argument}`);
@@ -40,7 +57,15 @@ function parseArguments(args) {
   if (options.update && !options.expect) {
     throw new Error('--update requires --expect <previous-report.json> with the prior ETag inventory.');
   }
-  if (!options.update && options.expect) throw new Error('--expect is only valid with --update.');
+  if (!options.update && !options.resume && options.expect) {
+    throw new Error('--expect is only valid with --update or --resume.');
+  }
+  if (options.resume && options.update) {
+    throw new Error('--resume is only for an interrupted initial import; use --update with --expect for changes.');
+  }
+  if (options.resume && !options.expect) {
+    throw new Error('--resume requires --expect <partial-report.json> to verify already uploaded Blobs.');
+  }
   return options;
 }
 
@@ -117,9 +142,10 @@ export async function importGameDb(options) {
   }
 
   const expectedEtags = options.update ? await readExpectedEtags(options.expect) : null;
+  const resumedEtags = options.resume ? await readExpectedEtags(options.expect) : null;
   if (expectedEtags) assertMatchingInventory(inventory.files, expectedEtags);
 
-  const uploadedFiles = [];
+  let uploaded = 0;
   const errors = [];
   if (options.dryRun) {
     const report = makeReport({
@@ -136,7 +162,7 @@ export async function importGameDb(options) {
   if (!process.env.BLOB_READ_WRITE_TOKEN) {
     throw new Error('BLOB_READ_WRITE_TOKEN is required for an upload.');
   }
-  const { head, put } = await import('@vercel/blob');
+  const { BlobNotFoundError, head, put } = await import('@vercel/blob');
   if (expectedEtags) {
     await verifyCurrentEtags(inventory.files, expectedEtags, head);
   }
@@ -149,6 +175,37 @@ export async function importGameDb(options) {
       nextFileIndex += 1;
       const file = inventory.files[fileIndex];
       try {
+        if (options.resume) {
+          try {
+            const existing = await head(file.key);
+            const expectedEtag = resumedEtags.get(file.key);
+            if (!expectedEtag) {
+              throw new Error(
+                `Existing Blob ${file.key} is not present in the partial import report. Refuse resume.`,
+              );
+            }
+            if (existing.etag !== expectedEtag || existing.size !== file.size) {
+              throw new Error(
+                `Existing Blob differs from the partial import report for ${file.key}. Refuse resume.`,
+              );
+            }
+            results[fileIndex] = {
+              contentType: file.contentType,
+              etag: existing.etag,
+              pathname: existing.pathname,
+              size: file.size,
+              url: existing.url,
+            };
+            continue;
+          } catch (error) {
+            if (!(error instanceof BlobNotFoundError)) throw error;
+            if (resumedEtags.has(file.key)) {
+              throw new Error(
+                `Blob ${file.key} is recorded in the partial import report but no longer exists. Refuse resume.`,
+              );
+            }
+          }
+        }
         const blob = await put(file.key, Readable.toWeb(createReadStream(file.absolutePath)), {
           access: 'public',
           addRandomSuffix: false,
@@ -163,6 +220,7 @@ export async function importGameDb(options) {
           size: file.size,
           url: blob.url,
         };
+        uploaded += 1;
       } catch (error) {
         errors.push({ pathname: file.key, message: error instanceof Error ? error.message : String(error) });
       }
@@ -171,13 +229,12 @@ export async function importGameDb(options) {
 
   await Promise.all(
     Array.from(
-      { length: Math.min(UPLOAD_CONCURRENCY, inventory.files.length) },
+      { length: Math.min(options.concurrency ?? DEFAULT_UPLOAD_CONCURRENCY, inventory.files.length) },
       uploadWorker,
     ),
   );
-  uploadedFiles.push(...results.filter(Boolean));
 
-  const report = makeReport({ inventory, options, uploaded: uploadedFiles.length, errors, files: uploadedFiles });
+  const report = makeReport({ inventory, options, uploaded, errors, files: results.filter(Boolean) });
   await writeReport(options.report, report);
   if (errors.length) {
     throw new Error(`${errors.length} GameDB files failed to upload. See ${options.report}.`);

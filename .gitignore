@@ -11,3 +11,5 @@ deployment/local
 .turbo
 .vscode
 packages/www/public/morpheus-assets
+.vercel
+.env*

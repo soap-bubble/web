@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { collectGameDbFiles, toGameDbKey } from './gamedb-paths.mjs';
-import { importGameDb, verifyCurrentEtags } from './upload-gamedb.mjs';
+import { importGameDb, parseArguments, verifyCurrentEtags } from './upload-gamedb.mjs';
 
 const temporaryDirectories = [];
 
@@ -117,5 +117,38 @@ describe('GameDB import path collection', () => {
         etag: key === inventory.files[0].key ? 'changed' : `expected-${key}`,
       })),
     ).rejects.toThrow(`Current Blob ETag differs for ${inventory.files[0].key}`);
+  });
+
+  it('accepts a bounded resumable import configuration', () => {
+    expect(() =>
+      parseArguments(['--resume', '--concurrency', '16', '--report', '/tmp/gamedb-report.json']),
+    ).toThrow('requires --expect');
+  });
+
+  it('accepts a resumable import with its partial report', () => {
+    expect(
+      parseArguments([
+        '--resume',
+        '--expect',
+        '/tmp/partial-report.json',
+        '--concurrency',
+        '16',
+        '--report',
+        '/tmp/gamedb-report.json',
+      ]),
+    ).toMatchObject({ concurrency: 16, resume: true, update: false });
+  });
+
+  it('rejects resume mode for a stable-path update', () => {
+    expect(() =>
+      parseArguments([
+        '--resume',
+        '--update',
+        '--expect',
+        '/tmp/previous-report.json',
+        '--report',
+        '/tmp/gamedb-report.json',
+      ]),
+    ).toThrow('only for an interrupted initial import');
   });
 });

@@ -9,11 +9,12 @@
   "module": "./dist/index.js",
   "types": "./types/index.d.ts",
   "scripts": {
-    "dev": "node ./scripts/clean-types.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.types.json --watch --preserveWatchOutput",
-    "build": "node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.declarations.json && node ./scripts/copy-static.mjs",
-    "typecheck": "node ./scripts/clean-types.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.types.json",
+    "prepare:map": "node ./scripts/prepare-morpheus-map.mjs",
+    "dev": "yarn run prepare:map && node ./scripts/clean-types.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.types.json --watch --preserveWatchOutput",
+    "build": "yarn run prepare:map && node ./scripts/clean-dist.mjs && node ./scripts/build-esm.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.declarations.json && node ./scripts/copy-static.mjs",
+    "typecheck": "yarn run prepare:map && node ./scripts/clean-types.mjs && node ../../node_modules/typescript/bin/tsc -b tsconfig.types.json",
     "lint": "eslint client config server",
-    "test": "jest client",
+    "test": "node --test scripts/prepare-morpheus-map.test.mjs && jest client",
     "test:watch": "cross-env NODE_ENV=development jest client --watch"
   },
   "license": "ISC",

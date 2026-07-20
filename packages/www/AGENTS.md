@@ -11,6 +11,12 @@ Next.js (App Router) frontend for Morpheus. This package also contains the local
 Notes:
 - Node is expected to be **>= 24** (see repo root `AGENTS.md`).
 - The MCP/WebSocket broker is **local-dev only** (production deploys won’t have the WS broker).
+- Public GameDB media uses `NEXT_PUBLIC_MORPHEUS_GAMEDB_ORIGIN`; copied UI
+  images remain under `MORPHEUS_ASSET_BASE` / `/morpheus-assets`. Do not merge
+  those two asset seams.
+- The authored map is restored by the engine preflight from a private Blob
+  build input when absent locally. The token must remain build-only; release
+  setup and verification live in `docs/release/morpheus-vercel.md`.
 
 ### WebSocket game-control broker (local dev)
 

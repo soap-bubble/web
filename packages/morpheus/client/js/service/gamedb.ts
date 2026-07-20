@@ -1,7 +1,8 @@
 import { endsWith } from 'lodash'
-import { isIOS } from '../utils/isSafari'
 
 let baseUrl = ''
+
+const normalizeBase = (value: string) => value.trim().replace(/\/+$/, '')
 
 enum VideoMedia {
   mp4,
@@ -14,19 +15,16 @@ enum VideoMedia {
 type VideoMediaStrings = keyof typeof VideoMedia
 
 export function setBaseUrl(url: string) {
-  baseUrl = url
+  baseUrl = normalizeBase(url)
 }
 
 export function getAssetUrl(assetPath: string, type?: VideoMediaStrings) {
   const path = assetPath.replace('deck', 'Deck')
   return `${baseUrl}/${path}${
     type && !endsWith(assetPath, type) ? `.${type}` : ''
-  }`.replace('#', '%23')
+  }`.replaceAll('#', '%23')
 }
 
 export function getPanoAnimUrl(assetPath: string) {
-  if (isIOS) {
-    return `/api/brokeniOSProxy/${assetPath}`
-  }
   return getAssetUrl(assetPath)
 }

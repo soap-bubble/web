@@ -9,18 +9,22 @@ const normalizeBasePath = (value) =>
   value ? value.trim().replace(/\/+$/, '') : value;
 
 const DEFAULT_ASSET_BASE = '/morpheus-assets';
+const configuredGameDbOrigin = normalizeBasePath(
+  process.env.NEXT_PUBLIC_MORPHEUS_GAMEDB_ORIGIN ||
+    process.env.MORPHEUS_GAMEDB_ORIGIN,
+);
 const configuredAssetBase =
   normalizeBasePath(
     process.env.NEXT_PUBLIC_MORPHEUS_ASSET_BASE ||
       process.env.MORPHEUS_ASSET_BASE,
   ) || DEFAULT_ASSET_BASE;
 
-const env = {
-  ASSET_HOST: '',
-}
+const env = {};
 
 env.MORPHEUS_ASSET_BASE = configuredAssetBase;
 env.NEXT_PUBLIC_MORPHEUS_ASSET_BASE = configuredAssetBase;
+env.MORPHEUS_GAMEDB_ORIGIN = configuredGameDbOrigin;
+env.NEXT_PUBLIC_MORPHEUS_GAMEDB_ORIGIN = configuredGameDbOrigin;
 
 const morpheusAssetSource = path.resolve(__dirname, '../morpheus/dist/image');
 const morpheusAssetDestination = path.resolve(

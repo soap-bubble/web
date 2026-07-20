@@ -68,6 +68,19 @@ interface UseGameControlReturn {
   sendError: (message: string) => void
 }
 
+const LOCAL_GAME_CONTROL_HOSTS = new Set(['localhost', '127.0.0.1', '::1'])
+
+export function isLocalGameControlEnabled(
+  environment = process.env.NODE_ENV,
+  hostname = typeof window === 'undefined' ? undefined : window.location.hostname
+): boolean {
+  return (
+    environment === 'development' &&
+    typeof hostname === 'string' &&
+    LOCAL_GAME_CONTROL_HOSTS.has(hostname)
+  )
+}
+
 function getWebSocketUrl(sessionName?: string | null): string {
   if (typeof window === 'undefined') {
     return 'ws://localhost:3000/api/game-control'
@@ -134,7 +147,9 @@ export function projectLivingSaveDiagnostics(
 export default function useGameControl(
   options: UseGameControlOptions = {}
 ): UseGameControlReturn {
-  const { enabled = true, sessionName, callbacks, getState } = options
+  const { enabled = isLocalGameControlEnabled(), sessionName, callbacks, getState } =
+    options
+  const gameControlEnabled = enabled && isLocalGameControlEnabled()
   const livingSaves = useAppSelector(selectLivingSaves)
   const livingSaveDiagnostics = useMemo(
     () => projectLivingSaveDiagnostics(livingSaves),
@@ -351,7 +366,10 @@ export default function useGameControl(
         wsRef.current = null
 
         // Attempt to reconnect with exponential backoff
-        if (enabled && reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS) {
+        if (
+          gameControlEnabled &&
+          reconnectAttemptsRef.current < MAX_RECONNECT_ATTEMPTS
+        ) {
           reconnectAttemptsRef.current++
           const delay = RECONNECT_DELAY_MS * Math.min(reconnectAttemptsRef.current, 5)
           console.log(
@@ -374,10 +392,10 @@ export default function useGameControl(
     } catch (error) {
       console.error('[GameControl] Failed to create WebSocket:', error)
     }
-  }, [enabled, sessionName, handleMessage])
+  }, [gameControlEnabled, sessionName, handleMessage])
 
   useEffect(() => {
-    if (!enabled) {
+    if (!gameControlEnabled) {
       return
     }
 
@@ -393,7 +411,7 @@ export default function useGameControl(
         ws.close()
       }
     }
-  }, [enabled, connect])
+  }, [gameControlEnabled, connect])
 
   return {
     state,

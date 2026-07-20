@@ -1,3 +1,5 @@
+import '../service/gamedb';
+
 const resolveAssetBase = () => {
   const raw =
     process.env.NEXT_PUBLIC_MORPHEUS_ASSET_BASE ||
@@ -12,6 +14,3 @@ if (typeof globalThis !== 'undefined') {
 }
 
 export const morpheusAssetBase = basePath;
-
-
-

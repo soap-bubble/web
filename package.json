@@ -46,6 +46,7 @@
     "tsc:build": "node ./node_modules/typescript/bin/tsc -b tsconfig.build.json",
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
+    "vercel-build": "yarn workspace @soapbubble/morpheus-client build && yarn workspace morpheus-next build",
     "lint": "turbo run lint",
     "typecheck": "turbo run typecheck"
   },

@@ -83,6 +83,14 @@ For production testing, consider:
 | `build` | Production build |
 | `start` | Production server |
 
+## Vercel release
+
+Production uses standard Next.js hosting, not the local custom server. Game
+media comes from `NEXT_PUBLIC_MORPHEUS_GAMEDB_ORIGIN`; the authored map is a
+private build input and never belongs in a public environment variable. See
+[`docs/release/morpheus-vercel.md`](../../docs/release/morpheus-vercel.md) for
+the store setup, import, deployment, and browser-proof gate.
+
 ## Architecture
 
 ```

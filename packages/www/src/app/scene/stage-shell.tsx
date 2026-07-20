@@ -643,7 +643,6 @@ export const SceneStageShell = () => {
   );
 
   const { state: gameControlState } = useGameControl({
-    enabled: true,
     sessionName: mcpSessionName,
     callbacks: useMemo(
       () => ({

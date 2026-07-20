@@ -6,6 +6,7 @@
     "dev:next": "next dev --webpack",
     "dev": "npx tsx server.ts",
     "mcp": "npx tsx mcp-server/index.ts",
+    "upload:gamedb": "node scripts/upload-gamedb.mjs",
     "build": "yarn run build:types && next build --webpack",
     "build:types": "node ../../node_modules/typescript/bin/tsc -b ../../tsconfig.build.json",
     "start": "next start",
@@ -15,6 +16,7 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.25.2",
+    "@vercel/blob": "^2.6.1",
     "@react-three/fiber": "^9.4.2",
     "@reduxjs/toolkit": "^2.11.2",
     "@rooks/use-raf": "^4.11.2",

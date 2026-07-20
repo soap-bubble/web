@@ -13,10 +13,13 @@ import styles from './title-screen.module.css';
 
 type TitlePhase = 'title' | 'intro' | 'error';
 
+const assetBase =
+  process.env.NEXT_PUBLIC_MORPHEUS_ASSET_BASE?.replace(/\/+$/, '') ||
+  '/morpheus-assets';
 const INTRO_WEBM = getAssetUrl('GameDB/Deck1/introMOV.webm');
 const INTRO_MP4 = getAssetUrl('GameDB/Deck1/introMOV.mp4');
 const TITLE_ART_STYLE: CSSProperties & { '--title-image': string } = {
-  '--title-image': `url("${getAssetUrl('image/texture/title.png')}")`,
+  '--title-image': `url("${assetBase}/texture/title.png")`,
 };
 
 export const Client = () => {

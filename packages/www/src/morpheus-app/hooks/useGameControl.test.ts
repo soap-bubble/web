@@ -5,7 +5,10 @@ import {
   MAX_SAVE_DIAGNOSTIC_FAILURE_LENGTH,
   isLivingSaveDiagnostics
 } from '@/lib/game-control-protocol'
-import { projectLivingSaveDiagnostics } from './useGameControl'
+import {
+  isLocalGameControlEnabled,
+  projectLivingSaveDiagnostics,
+} from './useGameControl'
 
 describe('projectLivingSaveDiagnostics', () => {
   it('projects only ordered bounded slot identity', () => {
@@ -76,5 +79,25 @@ describe('projectLivingSaveDiagnostics', () => {
     expect(isLivingSaveDiagnostics(diagnostics)).toBe(true)
     expect(JSON.stringify(diagnostics)).not.toContain('gamestate')
     expect(JSON.stringify(diagnostics)).not.toContain('fileBytes')
+  })
+})
+
+describe('isLocalGameControlEnabled', () => {
+  it('permits the localhost custom development server', () => {
+    expect(isLocalGameControlEnabled('development', 'localhost')).toBe(true)
+    expect(isLocalGameControlEnabled('development', '127.0.0.1')).toBe(true)
+  })
+
+  it('rejects deployed environments even when an MCP session is requested', () => {
+    expect(isLocalGameControlEnabled('production', 'morpheus.example.com')).toBe(
+      false
+    )
+    expect(isLocalGameControlEnabled('production', 'localhost')).toBe(false)
+  })
+
+  it('rejects development hosts that cannot be served by the local broker', () => {
+    expect(isLocalGameControlEnabled('development', 'preview.vercel.app')).toBe(
+      false
+    )
   })
 })

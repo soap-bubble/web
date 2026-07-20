@@ -1,27 +1,16 @@
-import { endsWith } from 'lodash';
-import { isIOS } from '../utils/isSafari';
-export const url = process.env.ASSET_HOST;
+import {
+  getAssetUrl,
+  getPanoAnimUrl,
+  setBaseUrl,
+} from '@soapbubble/morpheus-client/service/gamedb';
 
-enum VideoMedia {
-  mp4,
-  webm,
-  png,
-  mp3,
-  ogg,
-  aac,
-}
-type VideoMediaStrings = keyof typeof VideoMedia;
+const normalizeBase = (value: string) => value.trim().replace(/\/+$/, '');
+const configuredOrigin =
+  process.env.NEXT_PUBLIC_MORPHEUS_GAMEDB_ORIGIN ||
+  process.env.MORPHEUS_GAMEDB_ORIGIN ||
+  '';
+export const gameDbOrigin = normalizeBase(configuredOrigin);
 
-export function getAssetUrl(assetPath: string, type?: VideoMediaStrings) {
-  const path = assetPath.replace('deck', 'Deck');
-  return `${url}/${path}${
-    type && !endsWith(assetPath, type) ? `.${type}` : ''
-  }`.replace('#', '%23');
-}
+setBaseUrl(gameDbOrigin);
 
-export function getPanoAnimUrl(assetPath: string) {
-  if (isIOS) {
-    return `/api/brokeniOSProxy/${assetPath}`;
-  }
-  return getAssetUrl(assetPath);
-}
+export { getAssetUrl, getPanoAnimUrl };

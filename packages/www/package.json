@@ -7,6 +7,7 @@
     "dev": "npx tsx server.ts",
     "mcp": "npx tsx mcp-server/index.ts",
     "upload:gamedb": "node scripts/upload-gamedb.mjs",
+    "vercel-build": "cd ../.. && yarn vercel-build",
     "build": "yarn run build:types && next build --webpack",
     "build:types": "node ../../node_modules/typescript/bin/tsc -b ../../tsconfig.build.json",
     "start": "next start",

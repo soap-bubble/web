@@ -1,5 +1,5 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "yarn vercel-build",
-  "outputDirectory": "packages/www/.next"
+  "outputDirectory": ".next"
 }

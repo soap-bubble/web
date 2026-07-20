@@ -10,16 +10,17 @@ Configure the `morpheus-web-www` Vercel project as follows:
 
 | Setting | Value |
 | --- | --- |
-| Repository root | `.` |
+| Root Directory | `packages/www` |
 | Framework | Next.js |
 | Node.js | `24.x` |
 | Install command | Vercel default Yarn Classic install |
 | Build command | `yarn vercel-build` |
-| Build output | `packages/www/.next` |
+| Build output | `.next` |
 
-`vercel.json` and the root `vercel-build` script are the source-controlled
-part of this configuration. The build must run the engine first: it restores
-or validates the map and produces the engine UI images before Next evaluates
+`packages/www/vercel.json` and its `vercel-build` script are the
+source-controlled part of this configuration. That package script returns to
+the workspace root to run the engine first: it restores or validates the map
+and produces the engine UI images before Next evaluates
 `packages/www/next.config.js`.
 
 ## Blob stores and variables

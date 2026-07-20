@@ -90,6 +90,7 @@ export interface MovieSpecialCast extends MovieCast {
 export type PanoCast = MovieCast
 type PreloadCast = MovieCast
 export interface SoundCast extends MovieCast {
+  // Older serialized scenes may omit this field; SoundCast is always looping.
   looping?: boolean
   dissolveToNextScene?: boolean
   nextSceneId?: number

@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useMemo, SyntheticEvent } from 'react'
 import { getAssetUrl } from 'service/gamedb'
-import { MovieSpecialCast, SupportedSoundCasts } from '../types'
+import { SupportedSoundCasts } from '../types'
+import { isLoopingAudioCast } from '../soundPolicy'
 
 type AudioEvent = (e: SyntheticEvent<HTMLAudioElement>) => void
 export interface AudioController {
@@ -138,11 +139,7 @@ const Audio = ({
           url,
           casts: movieCasts,
           // autoplay: !!castRefs.find(({ autoplay }) => autoplay),
-          looping: !!movieCasts.find(
-            cast =>
-              cast.hasOwnProperty('looping') &&
-              (cast as MovieSpecialCast).looping
-          ),
+          looping: movieCasts.some(isLoopingAudioCast),
           onAudioRef(ref) {
             onAudioCastRef([ref, movieCasts])
           },

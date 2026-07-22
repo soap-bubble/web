@@ -16,11 +16,13 @@ import {
 import usePanoMomentum from 'morpheus/casts/hooks/panoMomentum';
 import { composePointer } from 'morpheus/hotspot/eventInterface';
 import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget';
+import { isPano, forMorpheusType, isMovie } from 'morpheus/casts/matchers';
 import {
-  isPano,
-  forMorpheusType,
-  isMovie,
-} from 'morpheus/casts/matchers';
+  areRequiredRenderersReady,
+  getScenePresentationRenderers,
+  type ScenePresentationRequest,
+  type SceneRenderer,
+} from 'morpheus/casts/presentation';
 import { isCastActive, Gamestates } from '@soapbubble/morpheus-client';
 import type {
   Scene,
@@ -67,7 +69,9 @@ interface InteractiveStageProps {
   onRotationChange?: (rotation: ExternalRotation) => void;
   rotation: ExternalRotation;
   onTransition?: (transition: SceneTransitionRequest) => Promise<boolean>;
-  onSceneReady?: (sceneId: number) => void;
+  onSceneAssetsReady?: (sceneId: number) => void;
+  presentation?: ScenePresentationRequest;
+  onScenePresented?: (presentation: ScenePresentationRequest) => void;
   onHarnessClickReady?: (handler: HarnessClickHandler | null) => void;
   inputEnabled?: boolean;
   onStableAction?: () => void;
@@ -186,7 +190,9 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
   onRotationChange,
   rotation,
   onTransition,
-  onSceneReady,
+  onSceneAssetsReady,
+  presentation,
+  onScenePresented,
   onHarnessClickReady,
   inputEnabled = true,
   onStableAction,
@@ -452,11 +458,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
 
   const aggregatedSoundCasts = useMemo(() => {
     return getStageSoundCasts({ stageScenes, activeScene, gamestates });
-  }, [
-    activeScene,
-    gamestates,
-    stageScenes,
-  ]);
+  }, [activeScene, gamestates, stageScenes]);
 
   const handleAudioCastEnded = useCallback(
     (ref: [HTMLAudioElement, SupportedSoundCasts[]]) => {
@@ -493,9 +495,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
           continue;
         }
 
-        if (
-          !isNavigableSceneTarget(targetSceneId, activeScene.sceneId)
-        ) {
+        if (!isNavigableSceneTarget(targetSceneId, activeScene.sceneId)) {
           continue;
         }
 
@@ -545,20 +545,148 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
     }
   }, [activeScene, availableSounds, gamestates, isSoundCast, stageScenes]);
 
-  // Split pending scenes into pano vs special for preloading
-  const [pendingPanoScenes, pendingSpecialScenes] = useMemo(() => {
-    return pendingScenes.reduce(
-      ([pano, special], s) => {
-        if (isPano(s)) {
-          pano.push(s);
-        } else {
-          special.push(s);
-        }
-        return [pano, special];
-      },
-      [[], []] as [Scene[], Scene[]],
-    );
-  }, [pendingScenes]);
+  const {
+    requirements: pendingRendererRequirements,
+    panoScenes: pendingPanoScenes,
+    specialScenes: pendingSpecialScenes,
+  } = useMemo(() => {
+    const requirements = new Map<number, ReadonlySet<SceneRenderer>>();
+    const panoScenes: Scene[] = [];
+    const specialScenes: Scene[] = [];
+    for (const scene of pendingScenes) {
+      const required = getScenePresentationRenderers(scene, gamestates);
+      requirements.set(scene.sceneId, required);
+      if (required.has('webgl')) panoScenes.push(scene);
+      if (required.has('special')) specialScenes.push(scene);
+    }
+    return { requirements, panoScenes, specialScenes };
+  }, [gamestates, pendingScenes]);
+  const readyRenderersBySceneRef = useRef(
+    new Map<number, Set<SceneRenderer>>(),
+  );
+  const assetsReadyNotifiedRef = useRef(new Set<number>());
+
+  const handleRendererAssetsReady = useCallback(
+    (renderer: SceneRenderer, sceneId: number) => {
+      const required = pendingRendererRequirements.get(sceneId);
+      if (!required?.has(renderer)) {
+        return;
+      }
+      const ready = readyRenderersBySceneRef.current.get(sceneId) ?? new Set();
+      ready.add(renderer);
+      readyRenderersBySceneRef.current.set(sceneId, ready);
+      if (
+        !assetsReadyNotifiedRef.current.has(sceneId) &&
+        areRequiredRenderersReady(required, ready)
+      ) {
+        assetsReadyNotifiedRef.current.add(sceneId);
+        onSceneAssetsReady?.(sceneId);
+      }
+    },
+    [onSceneAssetsReady, pendingRendererRequirements],
+  );
+
+  useEffect(() => {
+    const pendingIds = new Set(pendingScenes.map((scene) => scene.sceneId));
+    for (const sceneId of readyRenderersBySceneRef.current.keys()) {
+      if (!pendingIds.has(sceneId)) {
+        readyRenderersBySceneRef.current.delete(sceneId);
+      }
+    }
+    for (const sceneId of assetsReadyNotifiedRef.current) {
+      if (!pendingIds.has(sceneId)) {
+        assetsReadyNotifiedRef.current.delete(sceneId);
+      }
+    }
+    for (const scene of pendingScenes) {
+      const required = pendingRendererRequirements.get(scene.sceneId);
+      const ready =
+        readyRenderersBySceneRef.current.get(scene.sceneId) ?? new Set();
+      if (
+        required &&
+        areRequiredRenderersReady(required, ready) &&
+        !assetsReadyNotifiedRef.current.has(scene.sceneId)
+      ) {
+        assetsReadyNotifiedRef.current.add(scene.sceneId);
+        onSceneAssetsReady?.(scene.sceneId);
+      }
+    }
+  }, [onSceneAssetsReady, pendingRendererRequirements, pendingScenes]);
+
+  const presentationRequirements = useMemo(() => {
+    if (!presentation || presentation.sceneId !== activeScene.sceneId) {
+      return new Set<SceneRenderer>();
+    }
+    return getScenePresentationRenderers(activeScene, gamestates);
+  }, [activeScene, gamestates, presentation]);
+  const presentedRenderersRef = useRef(new Map<number, Set<SceneRenderer>>());
+  const presentationNotifiedRef = useRef(new Set<number>());
+  const handleRendererPresented = useCallback(
+    (renderer: SceneRenderer, request: ScenePresentationRequest) => {
+      if (
+        !presentation ||
+        request.token !== presentation.token ||
+        request.sceneId !== presentation.sceneId ||
+        !presentationRequirements.has(renderer)
+      ) {
+        return;
+      }
+      const presented =
+        presentedRenderersRef.current.get(request.token) ?? new Set();
+      presented.add(renderer);
+      presentedRenderersRef.current.set(request.token, presented);
+      if (
+        !presentationNotifiedRef.current.has(request.token) &&
+        areRequiredRenderersReady(presentationRequirements, presented)
+      ) {
+        presentationNotifiedRef.current.add(request.token);
+        onScenePresented?.(request);
+      }
+    },
+    [onScenePresented, presentation, presentationRequirements],
+  );
+
+  useEffect(() => {
+    if (!presentation) {
+      presentedRenderersRef.current.clear();
+      presentationNotifiedRef.current.clear();
+      return;
+    }
+    for (const token of presentedRenderersRef.current.keys()) {
+      if (token !== presentation.token) {
+        presentedRenderersRef.current.delete(token);
+        presentationNotifiedRef.current.delete(token);
+      }
+    }
+    const presented =
+      presentedRenderersRef.current.get(presentation.token) ?? new Set();
+    if (
+      !presentationNotifiedRef.current.has(presentation.token) &&
+      areRequiredRenderersReady(presentationRequirements, presented)
+    ) {
+      presentationNotifiedRef.current.add(presentation.token);
+      onScenePresented?.(presentation);
+    }
+  }, [onScenePresented, presentation, presentationRequirements]);
+
+  const handleWebGlAssetsReady = useCallback(
+    (sceneId: number) => handleRendererAssetsReady('webgl', sceneId),
+    [handleRendererAssetsReady],
+  );
+  const handleSpecialAssetsReady = useCallback(
+    (sceneId: number) => handleRendererAssetsReady('special', sceneId),
+    [handleRendererAssetsReady],
+  );
+  const handleWebGlPresented = useCallback(
+    (request: ScenePresentationRequest) =>
+      handleRendererPresented('webgl', request),
+    [handleRendererPresented],
+  );
+  const handleSpecialPresented = useCallback(
+    (request: ScenePresentationRequest) =>
+      handleRendererPresented('special', request),
+    [handleRendererPresented],
+  );
 
   return (
     <div
@@ -573,7 +701,7 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         top: `${top}px`,
       }}
     >
-      {showPano && (
+      {(showPano || pendingPanoScenes.length > 0) && (
         <WebGl
           stageScenes={webGlScenes}
           pendingScenes={pendingPanoScenes}
@@ -586,7 +714,11 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
           left={0}
           width={width}
           height={height}
-          onSceneReady={onSceneReady}
+          onSceneAssetsReady={handleWebGlAssetsReady}
+          presentation={
+            presentationRequirements.has('webgl') ? presentation : undefined
+          }
+          onScenePresented={handleWebGlPresented}
           onTransition={onTransition}
         />
       )}
@@ -607,7 +739,11 @@ const InteractiveStage: FC<InteractiveStageProps> = ({
         onPointerCancel={onPointerCancel}
         onPointerLeave={onPointerLeave}
         onTransition={onTransition}
-        onSceneReady={onSceneReady}
+        onSceneAssetsReady={handleSpecialAssetsReady}
+        presentation={
+          presentationRequirements.has('special') ? presentation : undefined
+        }
+        onScenePresented={handleSpecialPresented}
       />
       {aggregatedSoundCasts.length > 0 && (
         <Sounds

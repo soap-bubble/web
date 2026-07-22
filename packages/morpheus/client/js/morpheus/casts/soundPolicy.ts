@@ -1,4 +1,5 @@
 import { isCastActive, type Gamestates } from '../gamestate/isActive'
+import { isControlledMovieCast, isMovieSpecialCast } from './matchers'
 import type {
   Cast,
   ControlledMovieCast,
@@ -12,20 +13,11 @@ export function isSoundCast(cast: Cast): cast is SoundCast {
   return cast.__t === 'SoundCast'
 }
 
-function isMovieSpecialCast(cast: Cast): cast is MovieSpecialCast {
-  return cast.__t === 'MovieSpecialCast'
-}
-
-function isControlledMovieCast(cast: Cast): cast is ControlledMovieCast {
-  return cast.__t === 'ControlledMovieCast'
-}
-
 export function isAudioMovieCast(
   cast: Cast
 ): cast is MovieSpecialCast | ControlledMovieCast {
   return (
-    (isMovieSpecialCast(cast) || isControlledMovieCast(cast)) &&
-    cast.audioOnly
+    (isMovieSpecialCast(cast) || isControlledMovieCast(cast)) && cast.audioOnly
   )
 }
 

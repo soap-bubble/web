@@ -23,6 +23,18 @@ export const isHotspot = (c: Cast | Hotspot) => c.castId === 0
 
 export const isAudio = (cast: MovieCast) => cast.audioOnly
 
+export const isMovieSpecialCast = (cast: Cast): cast is MovieSpecialCast =>
+  cast.__t === 'MovieSpecialCast'
+
+export const isControlledMovieCast = (
+  cast: Cast
+): cast is ControlledMovieCast => cast.__t === 'ControlledMovieCast'
+
+export const isVisualSpecialCast = (
+  cast: Cast
+): cast is MovieSpecialCast | ControlledMovieCast =>
+  (isMovieSpecialCast(cast) || isControlledMovieCast(cast)) && !cast.audioOnly
+
 export const isControlledCast = and<ControlledMovieCast>(
   forMorpheusType('ControlledMovieCast'),
   not<ControlledMovieCast>(isAudio)
@@ -42,7 +54,7 @@ export function isActiveSound({
   casts: Cast[]
   gamestates: Gamestates
 }) {
-  return casts.filter(cast => {
+  return casts.filter((cast) => {
     if (forMorpheusType('SoundCast')(cast)) {
       if (cast.comparators.length) {
         return isActive({ cast, gamestates })
@@ -67,7 +79,7 @@ export function isEmptySoundCast({
   return (
     soundCastData.length &&
     !casts.some(
-      cast =>
+      (cast) =>
         ['PanoCast', 'ControlledMovieCast', 'MovieSpecialCast'].indexOf(
           cast.__t
         ) !== -1

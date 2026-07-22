@@ -13,21 +13,24 @@ import Images from './Images'
 import useComputedStageCast from '../hooks/useRenderables'
 import useCastRefNoticer, { CastRef } from '../hooks/useCastRefNoticer'
 import loggerFactory from 'utils/logger'
-import { Scene, MovieCast, MovieSpecialCast, Cast, SceneCasts } from '../types'
+import { Scene, MovieCast, MovieSpecialCast } from '../types'
 import type { SceneTransitionRequest } from 'morpheus/scene/types'
 import { flatten, uniqBy } from 'lodash'
-import { forMorpheusType, isImage, isMovie } from '../matchers'
+import {
+  isControlledMovieCast,
+  isImage,
+  isMovie,
+  isMovieSpecialCast,
+  isVisualSpecialCast,
+} from '../matchers'
 import { Observable, Subscriber } from 'rxjs'
 import { share } from 'rxjs/operators'
-import { and } from 'utils/matchers'
 import { transitionAngleToPanoramaYaw } from 'morpheus/scene/transitionAngle'
 import { isNavigableSceneTarget } from 'morpheus/scene/transitionTarget'
 import type { MediaPlaybackResult } from './mediaPlayback'
+import type { ScenePresentationRequest } from '../presentation'
 
 const logger = loggerFactory('Special')
-
-const isMovieSpecialCast = (cast: MovieCast): cast is MovieSpecialCast =>
-  cast.__t === 'MovieSpecialCast'
 
 interface SpecialProps {
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
@@ -48,7 +51,9 @@ interface SpecialProps {
   width: number
   height: number
   onTransition?: (transition: SceneTransitionRequest) => void
-  onSceneReady?: (sceneId: number) => void
+  onSceneAssetsReady?: (sceneId: number) => void
+  presentation?: ScenePresentationRequest
+  onScenePresented?: (presentation: ScenePresentationRequest) => void
 }
 
 const Special = ({
@@ -70,7 +75,9 @@ const Special = ({
   stageScenes,
   pendingScenes = [],
   onTransition,
-  onSceneReady,
+  onSceneAssetsReady,
+  presentation,
+  onScenePresented,
 }: SpecialProps) => {
   const [eventSubscriber, setEventSubscriber] =
     useState<null | Subscriber<MovieCast>>()
@@ -118,8 +125,8 @@ const Special = ({
     (ref: CastRef<HTMLImageElement, MovieCast>) => {
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
-      const casts = movieCasts.filter((cast) =>
-        stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
+      const casts = movieCasts.filter(
+        (cast) => stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
         for (const cast of casts) {
@@ -135,8 +142,8 @@ const Special = ({
     (ref: CastRef<HTMLVideoElement, MovieCast>) => {
       const [_, movieCasts] = ref
       // Find any movieCasts of the uppermost scene
-      const casts = movieCasts.filter((cast) =>
-        stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
+      const casts = movieCasts.filter(
+        (cast) => stageScenes.length > 0 && stageScenes[0].casts.includes(cast)
       )
       if (eventSubscriber) {
         for (const cast of casts) {
@@ -194,62 +201,89 @@ const Special = ({
     if (!pendingScenes.length) {
       return { images: [] as MovieCast[], videos: [] as MovieSpecialCast[] }
     }
-    const matchActive = (cast: Cast) => isActive({ cast, gamestates })
-    const matchSpecialMovies = and<MovieSpecialCast>(
-      forMorpheusType('MovieSpecialCast'),
-      matchActive
-    )
-    const movieSpecialCasts = flatten<MovieSpecialCast>(
+    const visualCasts = flatten<MovieCast>(
       pendingScenes.map(
-        scene => scene.casts.filter(matchSpecialMovies as (c: Cast) => boolean) as MovieSpecialCast[]
+        (scene) =>
+          scene.casts.filter(
+            (cast) =>
+              isActive({ cast, gamestates }) && isVisualSpecialCast(cast)
+          ) as MovieCast[]
       )
     )
-    const images = movieSpecialCasts.filter(isImage) as MovieCast[]
-    const videos = movieSpecialCasts.filter(isMovie)
+    const images = visualCasts.filter(
+      (cast) =>
+        isControlledMovieCast(cast) ||
+        (isMovieSpecialCast(cast) && isImage(cast))
+    )
+    const videos = visualCasts.filter(
+      (cast): cast is MovieSpecialCast =>
+        isMovieSpecialCast(cast) && isMovie(cast)
+    )
     return { images, videos }
   }, [pendingScenes, gamestates])
 
   // Merge stage casts with pending scene casts for loading
   const allImageCasts = useMemo(
-    () => uniqBy([...imageCasts, ...pendingSceneCasts.images], c => c.castId),
+    () => uniqBy([...imageCasts, ...pendingSceneCasts.images], (c) => c.castId),
     [imageCasts, pendingSceneCasts.images]
   )
   const allVideoCasts = useMemo(
-    () => uniqBy([...videoCasts, ...pendingSceneCasts.videos], c => c.castId),
+    () => uniqBy([...videoCasts, ...pendingSceneCasts.videos], (c) => c.castId),
     [videoCasts, pendingSceneCasts.videos]
   )
   // Track which pending scenes have all their assets ready
   const pendingSceneReadyRef = useRef<Set<number>>(new Set())
   useEffect(() => {
-    if (!pendingScenes.length || !onSceneReady) return
+    if (!pendingScenes.length || !onSceneAssetsReady) return
+
+    const loadedImageCastIds = new Set(
+      imagesLoaded.flatMap(([, casts]) => casts.map((cast) => cast.castId))
+    )
+    const loadedVideoCastIds = new Set(
+      canPlayThroughVideos.flatMap(([, casts]) =>
+        casts.map((cast) => cast.castId)
+      )
+    )
 
     for (const scene of pendingScenes) {
       if (pendingSceneReadyRef.current.has(scene.sceneId)) continue
 
       // Check if all assets for this scene are loaded
-      const sceneCastIds = new Set(scene.casts.map(c => c.castId))
-      
+      const sceneCastIds = new Set(scene.casts.map((c) => c.castId))
+
       // Check images
-      const sceneImageCasts = pendingSceneCasts.images.filter(c => sceneCastIds.has(c.castId))
-      const loadedImageCastIds = new Set(imagesLoaded.flatMap(([, casts]) => casts.map(c => c.castId)))
-      const allImagesReady = sceneImageCasts.every(c => loadedImageCastIds.has(c.castId))
+      const sceneImageCasts = pendingSceneCasts.images.filter((c) =>
+        sceneCastIds.has(c.castId)
+      )
+      const allImagesReady = sceneImageCasts.every((c) =>
+        loadedImageCastIds.has(c.castId)
+      )
 
       // Check videos (canPlayThrough)
-      const sceneVideoCasts = pendingSceneCasts.videos.filter(c => sceneCastIds.has(c.castId))
-      const loadedVideoCastIds = new Set(canPlayThroughVideos.flatMap(([, casts]) => casts.map(c => c.castId)))
-      const allVideosReady = sceneVideoCasts.every(c => loadedVideoCastIds.has(c.castId))
+      const sceneVideoCasts = pendingSceneCasts.videos.filter((c) =>
+        sceneCastIds.has(c.castId)
+      )
+      const allVideosReady = sceneVideoCasts.every((c) =>
+        loadedVideoCastIds.has(c.castId)
+      )
 
       if (allImagesReady && allVideosReady) {
         pendingSceneReadyRef.current.add(scene.sceneId)
         logger.info({ sceneId: scene.sceneId }, 'Pending scene assets ready')
-        onSceneReady(scene.sceneId)
+        onSceneAssetsReady(scene.sceneId)
       }
     }
-  }, [pendingScenes, pendingSceneCasts, imagesLoaded, canPlayThroughVideos, onSceneReady])
+  }, [
+    pendingScenes,
+    pendingSceneCasts,
+    imagesLoaded,
+    canPlayThroughVideos,
+    onSceneAssetsReady,
+  ])
 
   // Reset ready tracking when pending scenes change
   useEffect(() => {
-    const currentPendingIds = new Set(pendingScenes.map(s => s.sceneId))
+    const currentPendingIds = new Set(pendingScenes.map((s) => s.sceneId))
     for (const id of pendingSceneReadyRef.current) {
       if (!currentPendingIds.has(id)) {
         pendingSceneReadyRef.current.delete(id)
@@ -300,14 +334,17 @@ const Special = ({
   )
 
   useEffect(() => {
-    const topSceneCastIds = stageScenes.length > 0 
-      ? new Set(stageScenes[0].casts.map(c => c.castId))
-      : new Set<number>()
+    const topSceneCastIds =
+      stageScenes.length > 0
+        ? new Set(stageScenes[0].casts.map((c) => c.castId))
+        : new Set<number>()
     const activeVideoControllers = new Set<VideoController>()
 
     for (const [controller, casts] of availableVideos) {
-      const isInTopScene = casts.some(cast => topSceneCastIds.has(cast.castId))
-      const isActiveCast = casts.some(cast => isActive({ cast, gamestates }))
+      const isInTopScene = casts.some((cast) =>
+        topSceneCastIds.has(cast.castId)
+      )
+      const isActiveCast = casts.some((cast) => isActive({ cast, gamestates }))
 
       if (isInTopScene && isActiveCast) {
         activeVideoControllers.add(controller)
@@ -332,12 +369,7 @@ const Special = ({
       }
       void attemptVideoPlayback(controller)
     }
-  }, [
-    availableVideos,
-    stageScenes,
-    gamestates,
-    attemptVideoPlayback,
-  ])
+  }, [availableVideos, stageScenes, gamestates, attemptVideoPlayback])
 
   const retryBlockedVideoPlayback = useCallback(() => {
     for (const controller of blockedVideoControllers) {
@@ -354,6 +386,49 @@ const Special = ({
     }
   }, [attemptVideoPlayback, blockedVideoControllers])
 
+  const activeVisualCasts = useMemo(
+    () =>
+      stageScenes[0]?.casts
+        .filter((cast) => isActive({ cast, gamestates }))
+        .filter(isVisualSpecialCast) ?? [],
+    [gamestates, stageScenes]
+  )
+  const loadedImageCastIds = useMemo(
+    () =>
+      new Set(
+        imagesLoaded.flatMap(([, casts]) => casts.map((cast) => cast.castId))
+      ),
+    [imagesLoaded]
+  )
+  const loadedVideoCastIds = useMemo(
+    () =>
+      new Set(
+        canPlayThroughVideos.flatMap(([, casts]) =>
+          casts.map((cast) => cast.castId)
+        )
+      ),
+    [canPlayThroughVideos]
+  )
+  const activeVisualAssetsReady = activeVisualCasts.every((cast) =>
+    isControlledMovieCast(cast) || isImage(cast)
+      ? loadedImageCastIds.has(cast.castId)
+      : loadedVideoCastIds.has(cast.castId)
+  )
+  const activePresentation =
+    presentation &&
+    stageScenes[0]?.sceneId === presentation.sceneId &&
+    activeVisualAssetsReady
+      ? presentation
+      : undefined
+  const handleFramePresented = useCallback(
+    (token: number) => {
+      if (activePresentation?.token === token) {
+        onScenePresented?.(activePresentation)
+      }
+    },
+    [activePresentation, onScenePresented]
+  )
+
   return (
     <React.Fragment>
       <Canvas
@@ -362,6 +437,8 @@ const Special = ({
         top={top}
         left={left}
         renderables={renderables}
+        presentationKey={activePresentation?.token}
+        onPresented={handleFramePresented}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}

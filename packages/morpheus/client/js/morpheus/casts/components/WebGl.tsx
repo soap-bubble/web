@@ -23,9 +23,7 @@ import panoShader from '../shader/panoChunk'
 import { isCastActive, Gamestates } from 'morpheus/gamestate/isActive'
 import { getAssetUrl } from 'service/gamedb'
 import { Scene, PanoCast, PanoAnim, Cast } from '../types'
-import usePanoChunk, {
-  PanoAnimationMediaLayer,
-} from '../hooks/panoChunk'
+import usePanoChunk, { PanoAnimationMediaLayer } from '../hooks/panoChunk'
 import { getActivePanoAnimations } from '../panoAnimation'
 import { Matcher, forMorpheusType } from '../matchers'
 import { and } from 'utils/matchers'
@@ -33,6 +31,7 @@ import { PANO_OFFSET, PANO_CANVAS_WIDTH } from '../../constants'
 import loggerFactory from 'utils/logger'
 import type { SceneTransitionRequest } from '../../scene/types'
 import { isNavigableSceneTarget } from '../../scene/transitionTarget'
+import type { ScenePresentationRequest } from '../presentation'
 
 const logger = loggerFactory('WebGl')
 
@@ -77,7 +76,9 @@ interface GlStageProps {
   setPanoObject: (o: Object3D | undefined) => void
   rotation: { x: number; y: number; offsetX: number }
   volume: number
-  onSceneReady?: (sceneId: number) => void
+  onSceneAssetsReady?: (sceneId: number) => void
+  presentation?: ScenePresentationRequest
+  onScenePresented?: (presentation: ScenePresentationRequest) => void
   onTransition?: (transition: SceneTransitionRequest) => void
 }
 
@@ -89,10 +90,9 @@ function findActivePanoScene(
   stageScenes: readonly Scene[],
   gamestates: Gamestates
 ): Scene | undefined {
-  return stageScenes.find(scene =>
+  return stageScenes.find((scene) =>
     scene.casts.some(
-      cast =>
-        cast.__t === 'PanoCast' && isCastActive({ cast, gamestates })
+      (cast) => cast.__t === 'PanoCast' && isCastActive({ cast, gamestates })
     )
   )
 }
@@ -106,18 +106,27 @@ const WebGlScene = ({
   exitingScene,
   stageScenes,
   pendingScenes = [],
-  onSceneReady,
+  onSceneAssetsReady,
+  presentation,
+  onScenePresented,
   animationLayers,
+  readyAnimationCastIds,
+  requiredAnimationCastIds,
 }: GlStageProps & {
   animationLayers: readonly PanoAnimationMediaLayer[]
+  readyAnimationCastIds: ReadonlySet<number>
+  requiredAnimationCastIds: ReadonlySet<number>
 }) => {
+  const onStagePanoScene = useMemo(
+    () => findActivePanoScene(stageScenes, gamestates),
+    [stageScenes, gamestates]
+  )
   const onStagePano: PanoCast | undefined = useMemo(() => {
-    const panoScene = findActivePanoScene(stageScenes, gamestates)
-    return panoScene?.casts.find(
+    return onStagePanoScene?.casts.find(
       (cast): cast is PanoCast =>
         cast.__t === 'PanoCast' && isCastActive({ cast, gamestates })
     )
-  }, [stageScenes, gamestates])
+  }, [onStagePanoScene, gamestates])
 
   // Find pano casts in pending scenes for preloading
   const pendingPanoCasts = useMemo(() => {
@@ -126,85 +135,198 @@ const WebGlScene = ({
       forMorpheusType('PanoCast'),
       matchActive
     )
-    return pendingScenes.map(scene => {
-      const panoCast = scene.casts.find((cast: Cast) =>
-        matchPanoCast(cast as PanoCast)
-      ) as PanoCast | undefined
-      return { sceneId: scene.sceneId, panoCast }
-    }).filter(item => item.panoCast !== undefined) as { sceneId: number; panoCast: PanoCast }[]
+    return pendingScenes
+      .map((scene) => {
+        const panoCast = scene.casts.find((cast: Cast) =>
+          matchPanoCast(cast as PanoCast)
+        ) as PanoCast | undefined
+        const panoAnimationCastIds = getActivePanoAnimations(
+          scene.casts,
+          gamestates
+        ).map((cast) => cast.castId)
+        return { sceneId: scene.sceneId, panoCast, panoAnimationCastIds }
+      })
+      .filter((item) => item.panoCast !== undefined) as {
+      sceneId: number
+      panoCast: PanoCast
+      panoAnimationCastIds: number[]
+    }[]
   }, [pendingScenes, gamestates])
 
   const meshRef = useRef<Mesh | null>(null)
   const panoUrl = onStagePano && getAssetUrl(onStagePano.fileName, 'png')
   const textureLoader = useMemo(() => new TextureLoader(), [])
   const [texImage, setTexImage] = useState<HTMLImageElement>()
+  const [texSceneId, setTexSceneId] = useState<number>()
+  const [texUrl, setTexUrl] = useState<string>()
+  const loadingPanoRef = useRef<{ sceneId: number; url: string } | undefined>(
+    undefined
+  )
+  const activePanoSceneIdRef = useRef<number | undefined>(undefined)
+  const activePanoUrlRef = useRef<string | undefined>(undefined)
+  activePanoSceneIdRef.current = onStagePanoScene?.sceneId
+  activePanoUrlRef.current = panoUrl
 
   // Track which pending scenes have their textures ready
-  const pendingSceneReadyRef = useRef<Set<number>>(new Set())
-  const [preloadedTextures, setPreloadedTextures] = useState<Map<number, HTMLImageElement>>(new Map())
+  const pendingSceneReadyRef = useRef<Map<number, string>>(new Map())
+  const preloadingSceneUrlsRef = useRef<Map<number, string>>(new Map())
+  const [preloadedTextures, setPreloadedTextures] = useState<
+    Map<number, { image: HTMLImageElement; url: string }>
+  >(new Map())
 
   // Preload textures for pending scenes
   useEffect(() => {
     if (!pendingPanoCasts.length) return
 
     for (const { sceneId, panoCast } of pendingPanoCasts) {
-      if (pendingSceneReadyRef.current.has(sceneId)) continue
-      if (preloadedTextures.has(sceneId)) continue
-
       const url = getAssetUrl(panoCast.fileName, 'png')
+      if (pendingSceneReadyRef.current.get(sceneId) === url) continue
+      if (preloadedTextures.get(sceneId)?.url === url) continue
+      if (preloadingSceneUrlsRef.current.get(sceneId) === url) continue
       logger.info({ sceneId, url }, 'Preloading pano texture for pending scene')
-      
-      textureLoader.load(url, (tex) => {
-        tex.flipY = false
-        setPreloadedTextures(prev => new Map(prev).set(sceneId, tex.image))
-        logger.info({ sceneId }, 'Pending scene pano texture ready')
-      })
+      preloadingSceneUrlsRef.current.set(sceneId, url)
+
+      textureLoader.load(
+        url,
+        (tex) => {
+          tex.flipY = false
+          if (preloadingSceneUrlsRef.current.get(sceneId) !== url) {
+            tex.dispose()
+            return
+          }
+          preloadingSceneUrlsRef.current.delete(sceneId)
+          setPreloadedTextures((prev) =>
+            new Map(prev).set(sceneId, { image: tex.image, url })
+          )
+          logger.info({ sceneId }, 'Pending scene pano texture ready')
+        },
+        undefined,
+        (error) => {
+          if (preloadingSceneUrlsRef.current.get(sceneId) !== url) {
+            return
+          }
+          preloadingSceneUrlsRef.current.delete(sceneId)
+          logger.error({ sceneId, error }, 'Pending pano texture failed')
+        }
+      )
     }
   }, [pendingPanoCasts, textureLoader, preloadedTextures])
 
   // Notify when pending scene textures are ready
   useEffect(() => {
-    if (!onSceneReady) return
+    if (!onSceneAssetsReady) return
 
-    for (const { sceneId } of pendingPanoCasts) {
-      if (pendingSceneReadyRef.current.has(sceneId)) continue
-      if (preloadedTextures.has(sceneId)) {
-        pendingSceneReadyRef.current.add(sceneId)
-        onSceneReady(sceneId)
+    for (const {
+      sceneId,
+      panoCast,
+      panoAnimationCastIds,
+    } of pendingPanoCasts) {
+      const url = getAssetUrl(panoCast.fileName, 'png')
+      if (pendingSceneReadyRef.current.get(sceneId) === url) continue
+      const animationsReady = panoAnimationCastIds.every((castId) =>
+        readyAnimationCastIds.has(castId)
+      )
+      if (preloadedTextures.get(sceneId)?.url === url && animationsReady) {
+        pendingSceneReadyRef.current.set(sceneId, url)
+        onSceneAssetsReady(sceneId)
       }
     }
-  }, [pendingPanoCasts, preloadedTextures, onSceneReady])
+  }, [
+    pendingPanoCasts,
+    preloadedTextures,
+    onSceneAssetsReady,
+    readyAnimationCastIds,
+  ])
 
   // Reset ready tracking when pending scenes change
   useEffect(() => {
-    const currentPendingIds = new Set(pendingScenes.map(s => s.sceneId))
-    for (const id of pendingSceneReadyRef.current) {
-      if (!currentPendingIds.has(id)) {
+    const retainedSceneIds = new Set(pendingScenes.map((s) => s.sceneId))
+    if (onStagePanoScene) {
+      retainedSceneIds.add(onStagePanoScene.sceneId)
+    }
+    for (const id of pendingSceneReadyRef.current.keys()) {
+      if (!retainedSceneIds.has(id)) {
         pendingSceneReadyRef.current.delete(id)
       }
     }
-    // Clean up preloaded textures for scenes no longer pending
-    setPreloadedTextures(prev => {
-      const next = new Map(prev)
-      for (const id of next.keys()) {
-        if (!currentPendingIds.has(id)) {
-          next.delete(id)
-        }
-      }
-      return next
-    })
-  }, [pendingScenes])
-
-  useEffect(() => {
-    if (panoUrl) {
-      const tex = textureLoader.load(panoUrl, (t) => {
-        setTexImage(t.image)
-      })
-      if (tex) {
-        tex.flipY = false
+    for (const id of preloadingSceneUrlsRef.current.keys()) {
+      if (!retainedSceneIds.has(id)) {
+        preloadingSceneUrlsRef.current.delete(id)
       }
     }
-  }, [panoUrl, textureLoader])
+    // Clean up preloaded textures for scenes no longer pending
+    setPreloadedTextures((prev) => {
+      const next = new Map(prev)
+      let changed = false
+      for (const id of next.keys()) {
+        if (!retainedSceneIds.has(id)) {
+          next.delete(id)
+          changed = true
+        }
+      }
+      return changed ? next : prev
+    })
+  }, [onStagePanoScene, pendingScenes])
+
+  useEffect(() => {
+    if (!panoUrl || !onStagePanoScene) {
+      return
+    }
+    const preloadedTexture = preloadedTextures.get(onStagePanoScene.sceneId)
+    if (preloadedTexture?.url === panoUrl) {
+      loadingPanoRef.current = undefined
+      setTexImage(preloadedTexture.image)
+      setTexSceneId(onStagePanoScene.sceneId)
+      setTexUrl(panoUrl)
+      return
+    }
+    const loadingPano = loadingPanoRef.current
+    if (
+      (texSceneId === onStagePanoScene.sceneId && texUrl === panoUrl) ||
+      (loadingPano?.sceneId === onStagePanoScene.sceneId &&
+        loadingPano.url === panoUrl)
+    ) {
+      return
+    }
+    const loadingSceneId = onStagePanoScene.sceneId
+    const loadingRequest = { sceneId: loadingSceneId, url: panoUrl }
+    loadingPanoRef.current = loadingRequest
+    const tex = textureLoader.load(
+      panoUrl,
+      (t) => {
+        if (
+          activePanoSceneIdRef.current !== loadingSceneId ||
+          activePanoUrlRef.current !== panoUrl
+        ) {
+          if (loadingPanoRef.current === loadingRequest) {
+            loadingPanoRef.current = undefined
+          }
+          return
+        }
+        setTexImage(t.image)
+        setTexSceneId(loadingSceneId)
+        setTexUrl(panoUrl)
+        loadingPanoRef.current = undefined
+      },
+      undefined,
+      (error) => {
+        if (loadingPanoRef.current === loadingRequest) {
+          loadingPanoRef.current = undefined
+        }
+        logger.error({ sceneId: loadingSceneId, error }, 'Pano texture failed')
+      }
+    )
+    if (tex) {
+      tex.flipY = false
+    }
+  }, [
+    onStagePanoScene,
+    panoUrl,
+    preloadedTextures,
+    texSceneId,
+    textureLoader,
+    texUrl,
+  ])
   const { texture, updateAnimationFrames } = usePanoChunk(
     texImage,
     rotation.offsetX,
@@ -212,6 +334,16 @@ const WebGlScene = ({
   )
   const ref = useRef<ShaderMaterial>(null)
   const { camera } = useThree()
+  const presentedTokenRef = useRef<number | undefined>(undefined)
+  const requiredAnimationsPresented = useMemo(() => {
+    const layeredCastIds = new Set(
+      animationLayers.map((layer) => layer.cast.castId)
+    )
+    return [...requiredAnimationCastIds].every(
+      (castId) =>
+        readyAnimationCastIds.has(castId) && layeredCastIds.has(castId)
+    )
+  }, [animationLayers, readyAnimationCastIds, requiredAnimationCastIds])
 
   useEffect(() => {
     if (camera) {
@@ -228,6 +360,19 @@ const WebGlScene = ({
     }
     if (meshRef.current) {
       meshRef.current.rotation.x = rotation.y
+    }
+    if (
+      presentation &&
+      presentation.sceneId === onStagePanoScene?.sceneId &&
+      texSceneId === presentation.sceneId &&
+      texUrl === panoUrl &&
+      presentation.token !== presentedTokenRef.current &&
+      ref.current &&
+      meshRef.current &&
+      requiredAnimationsPresented
+    ) {
+      presentedTokenRef.current = presentation.token
+      onScenePresented?.(presentation)
     }
   })
 
@@ -254,7 +399,6 @@ const WebGlScene = ({
       <mesh ref={handleMeshRef}>
         <cylinderGeometry
           attach="geometry"
-         
           args={[
             1,
             1,
@@ -279,22 +423,29 @@ const WebGlScene = ({
 
 interface PanoAnimationVideoProps {
   cast: PanoAnim
+  active: boolean
   onEnded: (cast: PanoAnim) => void
   onMediaRef: (castId: number, media: HTMLVideoElement | null) => void
+  onReady: (castId: number) => void
 }
 
 const PanoAnimationVideo = ({
   cast,
+  active,
   onEnded,
   onMediaRef,
+  onReady,
 }: PanoAnimationVideoProps) => {
   const mediaRef = useRef<HTMLVideoElement | null>(null)
   const handleMediaRef = useCallback(
     (media: HTMLVideoElement | null) => {
       mediaRef.current = media
       onMediaRef(cast.castId, media)
+      if (media && media.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+        onReady(cast.castId)
+      }
     },
-    [cast.castId, onMediaRef]
+    [cast.castId, onMediaRef, onReady]
   )
 
   useEffect(() => {
@@ -302,23 +453,24 @@ const PanoAnimationVideo = ({
     if (!media) {
       return
     }
-    if (cast.looping || cast.actionAtEnd !== 0) {
+    if (active && (cast.looping || cast.actionAtEnd !== 0)) {
       void media.play().catch(() => undefined)
     } else {
       media.pause()
     }
-  }, [cast.actionAtEnd, cast.looping])
+  }, [active, cast.actionAtEnd, cast.looping])
 
   return (
     <video
       ref={handleMediaRef}
       style={{ display: 'none' }}
-      autoPlay={cast.looping || cast.actionAtEnd !== 0}
+      autoPlay={active && (cast.looping || cast.actionAtEnd !== 0)}
       crossOrigin="anonymous"
       loop={cast.looping}
       muted
       playsInline
       preload="auto"
+      onCanPlayThrough={() => onReady(cast.castId)}
       onEnded={() => onEnded(cast)}
     >
       <source src={getAssetUrl(`${cast.fileName}.webm`)} type="video/webm" />
@@ -334,7 +486,7 @@ const WebGl: FunctionComponent<
     left: number
     top: number
   }
-> = props => {
+> = (props) => {
   const activePanoScene = useMemo(
     () => findActivePanoScene(props.stageScenes, props.gamestates),
     [props.gamestates, props.stageScenes]
@@ -346,12 +498,52 @@ const WebGl: FunctionComponent<
         : [],
     [activePanoScene, props.gamestates]
   )
+  const pendingPanoAnimations = useMemo(
+    () =>
+      props.pendingScenes?.flatMap((scene) =>
+        getActivePanoAnimations(scene.casts, props.gamestates)
+      ) ?? [],
+    [props.gamestates, props.pendingScenes]
+  )
+  const panoAnimationsToLoad = useMemo(() => {
+    const castsById = new Map<number, PanoAnim>()
+    for (const cast of [...activePanoAnimations, ...pendingPanoAnimations]) {
+      castsById.set(cast.castId, cast)
+    }
+    return [...castsById.values()]
+  }, [activePanoAnimations, pendingPanoAnimations])
+  const activePanoAnimationCastIds = useMemo(
+    () => new Set(activePanoAnimations.map((cast) => cast.castId)),
+    [activePanoAnimations]
+  )
+  const [readyAnimationCastIds, setReadyAnimationCastIds] = useState<
+    ReadonlySet<number>
+  >(new Set())
+  useEffect(() => {
+    const retainedCastIds = new Set(
+      panoAnimationsToLoad.map((cast) => cast.castId)
+    )
+    setReadyAnimationCastIds((previous) => {
+      const next = new Set(
+        [...previous].filter((castId) => retainedCastIds.has(castId))
+      )
+      return next.size === previous.size ? previous : next
+    })
+  }, [panoAnimationsToLoad])
+  const handleAnimationReady = useCallback((castId: number) => {
+    setReadyAnimationCastIds((previous) => {
+      if (previous.has(castId)) {
+        return previous
+      }
+      return new Set(previous).add(castId)
+    })
+  }, [])
   const [animationMedia, setAnimationMedia] = useState<
     ReadonlyMap<number, HTMLVideoElement>
   >(new Map())
   const handleMediaRef = useCallback(
     (castId: number, media: HTMLVideoElement | null) => {
-      setAnimationMedia(previous => {
+      setAnimationMedia((previous) => {
         if (media && previous.get(castId) === media) {
           return previous
         }
@@ -371,7 +563,7 @@ const WebGl: FunctionComponent<
   )
   const animationLayers = useMemo(
     () =>
-      activePanoAnimations.flatMap(cast => {
+      activePanoAnimations.flatMap((cast) => {
         const media = animationMedia.get(cast.castId)
         return media ? [{ cast, media }] : []
       }),
@@ -382,9 +574,7 @@ const WebGl: FunctionComponent<
       if (!activePanoScene || !props.onTransition) {
         return
       }
-      if (
-        !isNavigableSceneTarget(cast.nextSceneId, activePanoScene.sceneId)
-      ) {
+      if (!isNavigableSceneTarget(cast.nextSceneId, activePanoScene.sceneId)) {
         return
       }
       props.onTransition({
@@ -416,14 +606,21 @@ const WebGl: FunctionComponent<
           zIndex: 0,
         }}
       >
-        <WebGlScene {...props} animationLayers={animationLayers} />
+        <WebGlScene
+          {...props}
+          animationLayers={animationLayers}
+          readyAnimationCastIds={readyAnimationCastIds}
+          requiredAnimationCastIds={activePanoAnimationCastIds}
+        />
       </Canvas>
-      {activePanoAnimations.map(cast => (
+      {panoAnimationsToLoad.map((cast) => (
         <PanoAnimationVideo
           key={`${cast.castId}:${cast.fileName}:${cast.frame}`}
           cast={cast}
+          active={activePanoAnimationCastIds.has(cast.castId)}
           onEnded={handleAnimationEnded}
           onMediaRef={handleMediaRef}
+          onReady={handleAnimationReady}
         />
       ))}
     </Fragment>

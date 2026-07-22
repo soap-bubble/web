@@ -1,12 +1,12 @@
-import React, { useRef, useEffect, PointerEvent } from 'react'
+import React, { useRef, useLayoutEffect, PointerEvent } from 'react'
 import { useSelector } from 'react-redux'
 import useRaf from '@rooks/use-raf'
 import { selectors as gameSelectors } from 'morpheus/game'
 import { selectors as inputSelectors } from 'morpheus/input'
 
-export interface Renderable { 
+export interface Renderable {
   (ctx: CanvasRenderingContext2D): void
-  description?(): string; 
+  description?(): string
 }
 
 interface CanvasProps {
@@ -15,6 +15,8 @@ interface CanvasProps {
   top: number
   left: number
   renderables: Renderable[]
+  presentationKey?: number
+  onPresented?: (presentationKey: number) => void
   onPointerDown?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerMove?: (e: PointerEvent<HTMLCanvasElement>) => void
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
@@ -33,6 +35,8 @@ const Canvas = ({
   top,
   left,
   renderables,
+  presentationKey,
+  onPresented,
   onPointerDown,
   onPointerMove,
   onPointerUp,
@@ -44,29 +48,50 @@ const Canvas = ({
   // Use ref to avoid stale closure in RAF callback
   const renderablesRef = useRef(renderables)
   const dimensionsRef = useRef({ width, height })
-  useEffect(() => {
+  const presentationRef = useRef({ presentationKey, onPresented })
+  const presentedKeyRef = useRef<number | undefined>(undefined)
+  useLayoutEffect(() => {
     renderablesRef.current = renderables
   }, [renderables])
-  useEffect(() => {
+  useLayoutEffect(() => {
     dimensionsRef.current = { width, height }
   }, [width, height])
-
-  useRaf(() => {
-    if (canvasRef.current) {
-      try {
-        const ctx = canvasRef.current.getContext('2d')
-        if (ctx) {
-          const { width: w, height: h } = dimensionsRef.current
-          ctx.clearRect(0, 0, w, h)
-          for (let render of renderablesRef.current) {
-            render(ctx)
-          }
-        }
-      } catch (e) {
-        console.error('While running render loop', e)
-      }
+  useLayoutEffect(() => {
+    presentationRef.current = { presentationKey, onPresented }
+    if (presentationKey !== presentedKeyRef.current) {
+      presentedKeyRef.current = undefined
     }
-  }, !!(canvasRef.current && renderables.length))
+  }, [onPresented, presentationKey])
+
+  useRaf(
+    () => {
+      if (canvasRef.current) {
+        try {
+          const ctx = canvasRef.current.getContext('2d')
+          if (ctx) {
+            const { width: w, height: h } = dimensionsRef.current
+            ctx.clearRect(0, 0, w, h)
+            for (let render of renderablesRef.current) {
+              render(ctx)
+            }
+            const pendingPresentation = presentationRef.current
+            if (
+              pendingPresentation.presentationKey !== undefined &&
+              pendingPresentation.presentationKey !== presentedKeyRef.current
+            ) {
+              presentedKeyRef.current = pendingPresentation.presentationKey
+              pendingPresentation.onPresented?.(
+                pendingPresentation.presentationKey
+              )
+            }
+          }
+        } catch (e) {
+          console.error('While running render loop', e)
+        }
+      }
+    },
+    !!(canvasRef.current && renderables.length)
+  )
   return (
     <canvas
       width={width}

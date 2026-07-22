@@ -28,9 +28,7 @@ import { useAppDispatch, useAppSelector } from '@/morpheus-app/store/hooks';
 import { useLivingSaveCoordinator } from '@/morpheus-app/store/LivingSaveCoordinatorContext';
 import type { AppDispatch } from '@/morpheus-app/store/store';
 import { selectGamestatesAccessor } from '@/morpheus-app/store/slices/gamestateSlice';
-import {
-  detachLivingSaveRuntime,
-} from '@/morpheus-app/store/actions';
+import { detachLivingSaveRuntime } from '@/morpheus-app/store/actions';
 import {
   activateScene,
   activateScenePrune,
@@ -54,10 +52,12 @@ import {
 } from '@/morpheus-app/store/slices/gameMenuSlice';
 import type { LivingSaveSlotSummary } from '@/morpheus-app/store/slices/livingSavesSlice';
 import { getHotspotCandidates } from '@/morpheus-app/hotspot/hotspotEligibility';
+import type { ScenePresentationRequest } from 'morpheus/casts/presentation';
 
 import '@/morpheus-app/runtime';
 
 type PendingTransition = {
+  token: number;
   sceneId: number;
   scene: Scene;
   dissolve: boolean;
@@ -67,7 +67,12 @@ type PendingTransition = {
   checkpointOnReady: boolean;
 };
 
+type PresentingTransition = ScenePresentationRequest & {
+  dissolve: boolean;
+};
+
 const DISSOLVE_DURATION_MS = 600;
+const PRESENTATION_TIMEOUT_MS = 5000;
 
 function captureStageFrame(
   source: HTMLDivElement,
@@ -75,11 +80,7 @@ function captureStageFrame(
 ): boolean {
   const sourceRect = source.getBoundingClientRect();
   const canvases = source.querySelectorAll('canvas');
-  if (
-    sourceRect.width <= 0 ||
-    sourceRect.height <= 0 ||
-    canvases.length === 0
-  ) {
+  if (sourceRect.width <= 0 || sourceRect.height <= 0) {
     return false;
   }
 
@@ -103,7 +104,6 @@ function captureStageFrame(
   context.fillStyle = '#000';
   context.fillRect(0, 0, sourceRect.width, sourceRect.height);
 
-  let capturedCanvas = false;
   for (const canvas of canvases) {
     const canvasRect = canvas.getBoundingClientRect();
     if (canvasRect.width <= 0 || canvasRect.height <= 0) {
@@ -117,13 +117,12 @@ function captureStageFrame(
         canvasRect.width,
         canvasRect.height,
       );
-      capturedCanvas = true;
     } catch {
-      // A single unavailable WebGL frame should not block the scene change.
+      // The black backing remains an opaque fail-closed transition cover.
     }
   }
 
-  return capturedCanvas;
+  return true;
 }
 
 function getActionTypeName(type: number): string {
@@ -227,8 +226,12 @@ export const SceneStageShell = () => {
 
   const [pendingTransition, setPendingTransition] =
     useState<PendingTransition | null>(null);
+  const [presentingTransition, setPresentingTransition] =
+    useState<PresentingTransition | null>(null);
+  const presentingTransitionRef = useRef<PresentingTransition | null>(null);
   const [transitionActive, setTransitionActive] = useState(false);
   const transitionInProgressRef = useRef(false);
+  const transitionTokenRef = useRef(0);
   const committedTransitionSceneIdRef = useRef<number | null>(null);
   const lastPushedSceneIdRef = useRef<number | null>(null);
   const stageCaptureSourceRef = useRef<HTMLDivElement>(null);
@@ -344,10 +347,6 @@ export const SceneStageShell = () => {
       committedTransitionSceneIdRef.current = null;
       let transitionGeneration = runtimeGenerationRef.current;
 
-      if (startAngle !== undefined) {
-        dispatch(seedRotationFromTransition({ yaw3600: startAngle, pitch: 0 }));
-      }
-
       try {
         const targetScene = await fetchScene(sceneId);
         if (runtimeGenerationRef.current !== transitionGeneration) {
@@ -370,6 +369,7 @@ export const SceneStageShell = () => {
           );
         }
         setPendingTransition({
+          token: ++transitionTokenRef.current,
           sceneId,
           scene: targetScene,
           dissolve,
@@ -426,17 +426,12 @@ export const SceneStageShell = () => {
 
       const overlay = dissolveOverlayRef.current;
       const source = stageCaptureSourceRef.current;
-      const reduceMotion = window.matchMedia(
-        '(prefers-reduced-motion: reduce)',
-      ).matches;
-      const shouldDissolve =
-        transition.dissolve &&
-        !reduceMotion &&
+      const hasTransitionCover =
         overlay !== null &&
         source !== null &&
         captureStageFrame(source, overlay);
 
-      if (shouldDissolve && overlay) {
+      if (hasTransitionCover && overlay) {
         if (dissolveFrameRef.current !== null) {
           window.cancelAnimationFrame(dissolveFrameRef.current);
           dissolveFrameRef.current = null;
@@ -445,7 +440,7 @@ export const SceneStageShell = () => {
           window.clearTimeout(dissolveCleanupRef.current);
           dissolveCleanupRef.current = null;
         }
-        overlay.dataset.transitionState = 'captured';
+        overlay.dataset.transitionState = 'covered';
         overlay.style.transition = 'none';
         overlay.style.opacity = '1';
         overlay.style.pointerEvents = 'auto';
@@ -464,6 +459,14 @@ export const SceneStageShell = () => {
         overlay.style.pointerEvents = 'none';
       }
 
+      if (transition.startAngle !== undefined) {
+        dispatch(
+          seedRotationFromTransition({
+            yaw3600: transition.startAngle,
+            pitch: 0,
+          }),
+        );
+      }
       dispatch(scenePrefetched(transition.scene));
       if (transition.mode === 'goBack') {
         dispatch(activateScenePrune(transition.sceneId));
@@ -471,22 +474,61 @@ export const SceneStageShell = () => {
         dispatch(activateScene(transition.sceneId));
       }
       setPendingTransition(null);
+      const presentation = {
+        sceneId: transition.sceneId,
+        token: transition.token,
+        dissolve: transition.dissolve,
+      };
+      presentingTransitionRef.current = presentation;
+      setPresentingTransition(presentation);
       pushSceneRoute(transition.sceneId);
       if (transition.checkpointOnReady) {
         void requestLivingSaveCheckpoint(transition.runtimeGeneration);
       }
-      // The incoming scene may immediately author another transition. The fade
-      // is visual cleanup, not part of transition admission.
-      transitionInProgressRef.current = false;
-      setTransitionActive(false);
+    },
+    [dispatch, pushSceneRoute],
+  );
 
-      if (!shouldDissolve || !overlay) {
+  const handleSceneAssetsReady = useCallback(
+    (readySceneId: number) => {
+      if (!pendingTransition || pendingTransition.sceneId !== readySceneId) {
+        return;
+      }
+      commitPendingTransition(pendingTransition);
+    },
+    [commitPendingTransition, pendingTransition],
+  );
+
+  const handleScenePresented = useCallback(
+    (presentation: ScenePresentationRequest) => {
+      if (
+        !presentingTransition ||
+        presentation.token !== presentingTransition.token ||
+        presentation.sceneId !== presentingTransition.sceneId
+      ) {
+        return;
+      }
+
+      presentingTransitionRef.current = null;
+      setPresentingTransition(null);
+      const overlay = dissolveOverlayRef.current;
+      const reduceMotion = window.matchMedia(
+        '(prefers-reduced-motion: reduce)',
+      ).matches;
+      const shouldDissolve = presentingTransition.dissolve && !reduceMotion;
+      const releaseTransition = () => {
+        transitionInProgressRef.current = false;
+        setTransitionActive(false);
+      };
+
+      if (!overlay || overlay.dataset.transitionState !== 'covered') {
+        releaseTransition();
         return;
       }
 
       dissolveFrameRef.current = window.requestAnimationFrame(() => {
-        dissolveFrameRef.current = window.requestAnimationFrame(() => {
-          dissolveFrameRef.current = null;
+        dissolveFrameRef.current = null;
+        if (shouldDissolve) {
           overlay.dataset.transitionState = 'fading';
           overlay.style.transition = `opacity ${DISSOLVE_DURATION_MS}ms ease-in-out`;
           overlay.style.opacity = '0';
@@ -496,20 +538,16 @@ export const SceneStageShell = () => {
             overlay.style.transition = 'none';
             dissolveCleanupRef.current = null;
           }, DISSOLVE_DURATION_MS);
-        });
+        } else {
+          overlay.dataset.transitionState = 'idle';
+          overlay.style.opacity = '0';
+          overlay.style.pointerEvents = 'none';
+          overlay.style.transition = 'none';
+        }
+        releaseTransition();
       });
     },
-    [dispatch, pushSceneRoute],
-  );
-
-  const handleSceneReady = useCallback(
-    (readySceneId: number) => {
-      if (!pendingTransition || pendingTransition.sceneId !== readySceneId) {
-        return;
-      }
-      commitPendingTransition(pendingTransition);
-    },
-    [commitPendingTransition, pendingTransition],
+    [presentingTransition],
   );
 
   // Fallback: don't block forever if a cast never reaches "ready"
@@ -522,6 +560,30 @@ export const SceneStageShell = () => {
 
     return () => clearTimeout(timeoutId);
   }, [commitPendingTransition, pendingTransition]);
+
+  useEffect(() => {
+    if (!presentingTransition) return;
+
+    const token = presentingTransition.token;
+    const timeoutId = window.setTimeout(() => {
+      if (presentingTransitionRef.current?.token !== token) {
+        return;
+      }
+      presentingTransitionRef.current = null;
+      setPresentingTransition(null);
+      const overlay = dissolveOverlayRef.current;
+      if (overlay) {
+        overlay.dataset.transitionState = 'idle';
+        overlay.style.opacity = '0';
+        overlay.style.pointerEvents = 'none';
+        overlay.style.transition = 'none';
+      }
+      transitionInProgressRef.current = false;
+      setTransitionActive(false);
+    }, PRESENTATION_TIMEOUT_MS);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [presentingTransition]);
 
   const handleLoadScene = useCallback(
     async (sceneId: number) => {
@@ -704,7 +766,9 @@ export const SceneStageShell = () => {
           onRotationChange={handleRotationChange}
           rotation={rotation}
           onTransition={handleSceneTransition}
-          onSceneReady={handleSceneReady}
+          onSceneAssetsReady={handleSceneAssetsReady}
+          presentation={presentingTransition ?? undefined}
+          onScenePresented={handleScenePresented}
           onHarnessClickReady={handleHarnessClickReady}
           inputEnabled={
             livingSaves.bootstrapPhase === 'ready' &&

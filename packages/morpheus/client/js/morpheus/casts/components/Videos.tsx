@@ -1,17 +1,28 @@
-import React, { useRef, useEffect, useMemo, useCallback, SyntheticEvent } from 'react'
+import React, {
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+  SyntheticEvent,
+} from 'react'
 import { getAssetUrl } from 'service/gamedb'
 import { MovieSpecialCast } from '../types'
+import { MediaPlaybackResult, startMediaPlayback } from './mediaPlayback'
 import {
-  MediaPlaybackResult,
-  startMediaPlayback,
-} from './mediaPlayback'
+  waitForVideoFrames,
+  type CancelVideoFrameWait,
+} from './videoPresentation'
+
+// The first compositor callback can still expose a decoder startup frame.
+// Waiting for the following frame removed the observed one-frame black seam.
+const MOVIE_PRESENTATION_FRAME_COUNT = 2
 
 type VideoEvent = (e: SyntheticEvent<HTMLVideoElement>) => void
 type VideoRef = (el: HTMLVideoElement | null) => void
 export interface VideoController {
   el: HTMLVideoElement | null
   castIds: number[]
-  play: () => Promise<MediaPlaybackResult>
+  play: (presentationKey: string) => Promise<MediaPlaybackResult>
   pause: () => void
   end: () => void
 }
@@ -22,6 +33,9 @@ export type VideoCastEventCallback = (
 export type VideoCastRefCallback = (
   ref: [VideoController, MovieSpecialCast[]]
 ) => void
+export type VideoCastFramePresentedCallback = (
+  ref: [HTMLVideoElement, MovieSpecialCast[], string]
+) => void
 
 interface VideoElProps {
   url: string
@@ -31,6 +45,10 @@ interface VideoElProps {
   onVideoRef: VideoControllerRef
   onVideoEnded: VideoEvent
   onVideoCanPlayThrough: VideoEvent
+  onVideoFramePresented: (
+    video: HTMLVideoElement,
+    presentationKey: string
+  ) => void
 }
 
 const VideoEl = ({
@@ -41,14 +59,18 @@ const VideoEl = ({
   onVideoRef,
   onVideoEnded,
   onVideoCanPlayThrough,
+  onVideoFramePresented,
 }: VideoElProps) => {
   const videoRef = useRef<HTMLVideoElement>(null)
   const hasRegistered = useRef(false)
+  const cancelFrameWaitRef = useRef<CancelVideoFrameWait | undefined>(undefined)
   // Store latest values in refs to avoid callback dependencies
   const castsRef = useRef(casts)
   const onVideoRefRef = useRef(onVideoRef)
+  const onVideoFramePresentedRef = useRef(onVideoFramePresented)
   castsRef.current = casts
   onVideoRefRef.current = onVideoRef
+  onVideoFramePresentedRef.current = onVideoFramePresented
 
   const handleVideoRef = useCallback((el: HTMLVideoElement | null) => {
     videoRef.current = el
@@ -57,12 +79,31 @@ const VideoEl = ({
       const currentCasts = castsRef.current
       const controller = {
         el,
-        castIds: currentCasts.map(c => c.castId),
-        async play() {
+        castIds: currentCasts.map((c) => c.castId),
+        async play(presentationKey: string) {
           if (!videoRef.current) {
             return 'failed'
           }
-          return startMediaPlayback(videoRef.current)
+          cancelFrameWaitRef.current?.()
+          cancelFrameWaitRef.current = waitForVideoFrames(
+            videoRef.current,
+            MOVIE_PRESENTATION_FRAME_COUNT,
+            () => {
+              cancelFrameWaitRef.current = undefined
+              if (videoRef.current) {
+                onVideoFramePresentedRef.current(
+                  videoRef.current,
+                  presentationKey
+                )
+              }
+            }
+          )
+          const result = await startMediaPlayback(videoRef.current)
+          if (result === 'failed') {
+            cancelFrameWaitRef.current?.()
+            cancelFrameWaitRef.current = undefined
+          }
+          return result
         },
         pause() {
           if (videoRef.current) {
@@ -70,6 +111,8 @@ const VideoEl = ({
           }
         },
         end() {
+          cancelFrameWaitRef.current?.()
+          cancelFrameWaitRef.current = undefined
           if (videoRef.current) {
             videoRef.current.pause()
           }
@@ -77,9 +120,19 @@ const VideoEl = ({
       }
       onVideoRefRef.current(controller)
     } else if (!el) {
+      cancelFrameWaitRef.current?.()
+      cancelFrameWaitRef.current = undefined
       hasRegistered.current = false
     }
   }, [])
+
+  useEffect(
+    () => () => {
+      cancelFrameWaitRef.current?.()
+      cancelFrameWaitRef.current = undefined
+    },
+    []
+  )
 
   useEffect(() => {
     if (videoRef.current) {
@@ -111,6 +164,7 @@ interface IVideoProps {
   volume: number
   onVideoCastEnded: VideoCastEventCallback
   onVideoCastCanPlaythrough: VideoCastEventCallback
+  onVideoCastFramePresented: VideoCastFramePresentedCallback
   onVideoCastRef: VideoCastRefCallback
 }
 
@@ -126,6 +180,10 @@ interface VideoMovieCastCollection {
   casts: MovieSpecialCast[]
   onVideoEnded: VideoEvent
   onVideoCanPlaythrough: VideoEvent
+  onVideoFramePresented: (
+    video: HTMLVideoElement,
+    presentationKey: string
+  ) => void
   onVideoRef: VideoControllerRef
 }
 
@@ -134,6 +192,7 @@ const Video = ({
   volume,
   onVideoCastRef,
   onVideoCastCanPlaythrough,
+  onVideoCastFramePresented,
   onVideoCastEnded,
 }: IVideoProps) => {
   const aggregatedCastRefs = useMemo(
@@ -160,6 +219,12 @@ const Video = ({
           onVideoCanPlaythrough(e: SyntheticEvent<HTMLVideoElement>) {
             onVideoCastCanPlaythrough([e.currentTarget, movieCasts])
           },
+          onVideoFramePresented(
+            video: HTMLVideoElement,
+            presentationKey: string
+          ) {
+            onVideoCastFramePresented([video, movieCasts, presentationKey])
+          },
           onVideoEnded(e: SyntheticEvent<HTMLVideoElement>) {
             onVideoCastEnded([e.currentTarget, movieCasts])
           },
@@ -168,6 +233,7 @@ const Video = ({
     [
       movieSpecialCasts,
       onVideoCastCanPlaythrough,
+      onVideoCastFramePresented,
       onVideoCastEnded,
       onVideoCastRef,
     ]
@@ -183,6 +249,7 @@ const Video = ({
           onVideoRef,
           onVideoCanPlaythrough,
           onVideoEnded,
+          onVideoFramePresented,
         }) => {
           return (
             <VideoEl
@@ -194,6 +261,7 @@ const Video = ({
               onVideoRef={onVideoRef}
               onVideoEnded={onVideoEnded}
               onVideoCanPlayThrough={onVideoCanPlaythrough}
+              onVideoFramePresented={onVideoFramePresented}
             />
           )
         }

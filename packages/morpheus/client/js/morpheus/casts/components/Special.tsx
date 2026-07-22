@@ -31,6 +31,7 @@ import type { MediaPlaybackResult } from './mediaPlayback'
 import type { ScenePresentationRequest } from '../presentation'
 
 const logger = loggerFactory('Special')
+const noPresentedVideoCastIds = new Set<number>()
 
 interface SpecialProps {
   onPointerUp?: (e: PointerEvent<HTMLCanvasElement>) => void
@@ -93,6 +94,10 @@ const Special = ({
     VideoController,
     MovieSpecialCast
   >()
+  const [presentedVideoFrames, setPresentedVideoFrames] = useState<{
+    key: string
+    castIds: Set<number>
+  }>({ key: '', castIds: new Set() })
   const [blockedVideoControllers, setBlockedVideoControllers] = useState<
     VideoController[]
   >([])
@@ -291,6 +296,61 @@ const Special = ({
     }
   }, [pendingScenes])
 
+  const activeVisualCasts = useMemo(
+    () =>
+      stageScenes[0]?.casts
+        .filter((cast) => isActive({ cast, gamestates }))
+        .filter(isVisualSpecialCast) ?? [],
+    [gamestates, stageScenes]
+  )
+  const activeVideoCasts = useMemo(
+    () =>
+      activeVisualCasts.filter(
+        (cast): cast is MovieSpecialCast =>
+          isMovieSpecialCast(cast) && isMovie(cast)
+      ),
+    [activeVisualCasts]
+  )
+  const activeVideoPresentationKey = `${presentation?.token ?? 'stable'}:${
+    stageScenes[0]?.sceneId ?? ''
+  }:${activeVideoCasts
+    .map((cast) => cast.castId)
+    .sort((a, b) => a - b)
+    .join(',')}`
+  const activeVideoPresentationRef = useRef({
+    key: activeVideoPresentationKey,
+    castIds: new Set(activeVideoCasts.map((cast) => cast.castId)),
+  })
+  activeVideoPresentationRef.current = {
+    key: activeVideoPresentationKey,
+    castIds: new Set(activeVideoCasts.map((cast) => cast.castId)),
+  }
+  const onVideoCastFramePresented = useCallback(
+    (ref: [HTMLVideoElement, MovieSpecialCast[], string]) => {
+      const [, movieCasts, presentationKey] = ref
+      const activePresentation = activeVideoPresentationRef.current
+      if (presentationKey !== activePresentation.key) return
+
+      const presentedCastIds = movieCasts
+        .map((cast) => cast.castId)
+        .filter((castId) => activePresentation.castIds.has(castId))
+
+      if (presentedCastIds.length === 0) return
+
+      setPresentedVideoFrames((current) => {
+        const castIds =
+          current.key === activePresentation.key
+            ? new Set(current.castIds)
+            : new Set<number>()
+        for (const castId of presentedCastIds) {
+          castIds.add(castId)
+        }
+        return { key: activePresentation.key, castIds }
+      })
+    },
+    []
+  )
+
   /**
    * Find all videos that need to be started and stopped
    *
@@ -321,10 +381,10 @@ const Special = ({
   )
 
   const attemptVideoPlayback = useCallback(
-    async (controller: VideoController) => {
+    async (controller: VideoController, presentationKey: string) => {
       const attempt = (videoPlaybackAttemptRef.current.get(controller) ?? 0) + 1
       videoPlaybackAttemptRef.current.set(controller, attempt)
-      const result = await controller.play()
+      const result = await controller.play(presentationKey)
 
       if (videoPlaybackAttemptRef.current.get(controller) === attempt) {
         updateVideoPlaybackState(controller, result)
@@ -367,9 +427,15 @@ const Special = ({
       if (retryingVideoControllersRef.current.has(controller)) {
         continue
       }
-      void attemptVideoPlayback(controller)
+      void attemptVideoPlayback(controller, activeVideoPresentationKey)
     }
-  }, [availableVideos, stageScenes, gamestates, attemptVideoPlayback])
+  }, [
+    activeVideoPresentationKey,
+    availableVideos,
+    stageScenes,
+    gamestates,
+    attemptVideoPlayback,
+  ])
 
   const retryBlockedVideoPlayback = useCallback(() => {
     for (const controller of blockedVideoControllers) {
@@ -380,19 +446,15 @@ const Special = ({
         continue
       }
       retryingVideoControllersRef.current.add(controller)
-      void attemptVideoPlayback(controller).finally(() => {
+      void attemptVideoPlayback(
+        controller,
+        activeVideoPresentationRef.current.key
+      ).finally(() => {
         retryingVideoControllersRef.current.delete(controller)
       })
     }
   }, [attemptVideoPlayback, blockedVideoControllers])
 
-  const activeVisualCasts = useMemo(
-    () =>
-      stageScenes[0]?.casts
-        .filter((cast) => isActive({ cast, gamestates }))
-        .filter(isVisualSpecialCast) ?? [],
-    [gamestates, stageScenes]
-  )
   const loadedImageCastIds = useMemo(
     () =>
       new Set(
@@ -409,10 +471,15 @@ const Special = ({
       ),
     [canPlayThroughVideos]
   )
+  const presentedVideoCastIds =
+    presentedVideoFrames.key === activeVideoPresentationKey
+      ? presentedVideoFrames.castIds
+      : noPresentedVideoCastIds
   const activeVisualAssetsReady = activeVisualCasts.every((cast) =>
     isControlledMovieCast(cast) || isImage(cast)
       ? loadedImageCastIds.has(cast.castId)
-      : loadedVideoCastIds.has(cast.castId)
+      : loadedVideoCastIds.has(cast.castId) &&
+        presentedVideoCastIds.has(cast.castId)
   )
   const activePresentation =
     presentation &&
@@ -451,6 +518,7 @@ const Special = ({
           volume={volume}
           onVideoCastEnded={onVideoCastEnded}
           onVideoCastCanPlaythrough={onVideoCastCanPlayThrough}
+          onVideoCastFramePresented={onVideoCastFramePresented}
           onVideoCastRef={onVideoCastRef}
         />
       )}

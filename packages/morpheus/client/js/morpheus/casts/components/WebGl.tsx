@@ -589,6 +589,9 @@ const WebGl: FunctionComponent<
   return (
     <Fragment>
       <Canvas
+        // Scene transitions copy the composed stage into a 2D cover canvas.
+        // Keep the last pano frame readable after WebGL presents it.
+        gl={{ preserveDrawingBuffer: true }}
         camera={{
           fov: 51.75,
           aspect: 640 / 420,
